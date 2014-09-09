@@ -4,12 +4,12 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <com.google.android.maps.MapView
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/mapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:apiKey="0V_8xWDab3kDEjVItW0rB4eTdyK0ph5V_qHWthg"
-        android:clickable="true" />
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
 
     <!--
 		SERIE:
@@ -50,6 +50,6 @@
         android:layout_marginLeft="10dp"
         android:layout_toLeftOf="@+id/carButton"
         android:background="@drawable/plain_button"
-        android:text="@string/menu_buscar_dispositivo" />
+        android:text="@string/menu_link_device" />
 
 </RelativeLayout>

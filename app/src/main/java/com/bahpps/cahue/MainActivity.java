@@ -23,12 +23,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
-import com.whereismycar.auxiliar.Util;
-import com.whereismycar.location.LocationPoller;
 
 import java.util.ArrayList;
 import java.util.List;
