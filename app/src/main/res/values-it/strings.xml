@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- DeviceListActivity -->
+    <string name="scanning">Cercando dispositivi</string>
+    <string name="select_device">Selezionare il dispositivo da collegare</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">Nessun dispositivo associato</string>
+    <string name="title_paired_devices">Dispositivo associati</string>
+    <string name="title_other_devices">Altri dispositivi</string>
+    <string name="button_scan">Cerca dispositivi</string>
+    <string name="button_remove_link">Rimuovi collegamento al dispositivo</string>
+    <string name="menu_link_device">Collega dispositivo</string>
+    <string name="menu_about">Aiuto</string>
+    <string name="position_waiting">Attesa di posizione</string>
+    <string name="car_not_found">La posizione della macchina non è stata stabilita</string>
+    <string name="bt_not_available">Bluetooth non è disponibile</string>
+    <string name="bt_linked_to">La posizione della macchina verrà registrata in disconnessione da %1$s</string>
+    <string name="car_was_here">La macchina era qui %1$s fa</string>
+    <string name="car_dialog_text">Ti piacerebbe impostare la posizione della macchina qui?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancella</string>
+    <string name="info">Benvenuto a %1$s !\n\nQuesta applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nTutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi fare doppio tap o premere a lungo nella mappa.</string>
+
+    <!-- Time -->
+    <string name="seconds">secondi</string>
+    <string name="minute">minuto</string>
+    <string name="minutes">minuti</string>
+    <string name="hour">ora</string>
+    <string name="hours">ore</string>
+    <string name="day">giorno</string>
+    <string name="days">giorni</string>
+
+</resources>
