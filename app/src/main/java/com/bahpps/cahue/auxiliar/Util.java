@@ -23,6 +23,8 @@ public class Util {
 	public static final String PREF_CAR_ACCURACY = "PREF_CAR_ACCURACY";
 	public static final String PREF_CAR_PROVIDER = "PREF_CAR_PROVIDER";
 	public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
+    public static final String PREF_BT_DEVICE_ADDRESS = "PREF_BT_DEVICE_ADDRESS";
+    public static final String PREF_BT_DISCONNECTION_TIME = "PREF_BT_DISCONNECTION_TIME";
 
 	public static final float WALKING_SPEED = 1.4F; // walking speed in m/s
 
@@ -61,49 +63,7 @@ public class Util {
 		toast.show();
 	}
 
-	/**
-	 * This method shows the Toast when the car icon is pressed, telling the user the parking time
-	 *
-	 * @param context
-	 */
-	public static void showCarTimeToast(Context context) {
-		String toastMsg = context.getString(R.string.car_was_here);
 
-		SharedPreferences prefs = Util.getSharedPreferences(context);
-		long timeDiff = Calendar.getInstance().getTimeInMillis() - prefs.getLong(Util.PREF_CAR_TIME, 0);
-
-		String time = "";
-
-		long seconds = timeDiff / 1000;
-		if (seconds < 60) {
-			time = seconds + " " + context.getString(R.string.seconds);
-		} else {
-			long minutos = timeDiff / (60 * 1000);
-			if (minutos < 60) {
-				time = minutos
-						+ (minutos > 1 ? " " + context.getString(R.string.minutes) : " "
-								+ context.getString(R.string.minute));
-			} else {
-				long hours = timeDiff / (60 * 60 * 1000);
-				if (hours < 24) {
-					time = hours
-							+ (hours > 1 ? " " + context.getString(R.string.hours) : " "
-									+ context.getString(R.string.hour));
-				} else {
-					long days = timeDiff / (24 * 60 * 60 * 1000);
-					time = days
-							+ (days > 1 ? " " + context.getString(R.string.days) : " "
-									+ context.getString(R.string.day));
-				}
-			}
-		}
-
-		toastMsg = String.format(toastMsg, time);
-
-		Util.createToast(context, toastMsg, Toast.LENGTH_SHORT);
-
-	}
-	
 	/**
 	 * Shows a toast in case no BT is detected
 	 */
@@ -124,6 +84,15 @@ public class Util {
 		return (a * aWeight + b * bWeight) / (aWeight + bWeight);
 	}
 
+	/**
+	 * It returns the only shared preferences file we will be using in the app.
+	 *
+	 * @param context
+	 * @return
+	 */
+	public static SharedPreferences getSharedPreferences(Context context) {
+		return context.getSharedPreferences("WIMC", Context.MODE_WORLD_READABLE);
+	}
 
 
 

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
@@ -14,7 +15,6 @@ import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -27,12 +27,16 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MapsActivity extends FragmentActivity
@@ -40,14 +44,14 @@ public class MapsActivity extends FragmentActivity
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationListener,
-        GoogleMap.OnMyLocationButtonClickListener {
+        GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMapLongClickListener {
 
     protected static final String TAG = "Maps";
     private static final int INFO_DIALOG = 0;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
-    private LocationClient mLocationClient;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -56,6 +60,7 @@ public class MapsActivity extends FragmentActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+    private LocationClient mLocationClient;
     private Marker carMarker;
 
 
@@ -69,7 +74,6 @@ public class MapsActivity extends FragmentActivity
     // TODO: remove static variable?
     private static boolean firstRun = true;
 
-    private GestureDetector mGestureDetector;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -106,98 +110,25 @@ public class MapsActivity extends FragmentActivity
         }
 
 
-        // button for moving to the cars position
+        // button for moving to the car's position
         ImageButton carButton = (ImageButton) findViewById(R.id.carButton);
         carButton.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View v) {
-//                zoomToCar();
+                zoomToCar();
             }
-
         });
 
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
         linkButton.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View v) {
                 startDeviceSelection();
             }
-
         });
 
-        mapView.setOnTouchListener(new View.OnTouchListener() {
-            // we bypass the touch event
-            public boolean onTouch(View v, MotionEvent event) {
-                return mGestureDetector.onTouchEvent(event);
-            }
-        });
-
-        mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-                setCarPosition(e);
-            }
-
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                setCarPosition(e);
-                return false;
-            }
-
-            /*
-             * On double or long tap, we set the car positions manually (asking first
-             */
-            private void setCarPosition(MotionEvent e) {
-                Location tappedCarLocation;
-
-                Log.d(TAG, "Double Tap event " + (int) e.getX() + " " + (int) e.getY());
-                GeoPoint gp = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-
-                Log.d(TAG, "Double Tap event " + gp.getLatitudeE6() + " " + gp.getLongitudeE6());
-                tappedCarLocation = new Location("Tapped");
-                tappedCarLocation.setLatitude(gp.getLatitudeE6() / 1E6);
-                tappedCarLocation.setLongitude(gp.getLongitudeE6() / 1E6);
-                tappedCarLocation.setAccuracy(Util.DEFAULT_ACCURACY);
-                Log.d(TAG,
-                        "Double Tap event " + tappedCarLocation.getLatitude() + " " + tappedCarLocation.getLongitude());
-
-                Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
-                intent.putExtra(Util.EXTRA_LOCATION, tappedCarLocation);
-
-                startActivityForResult(intent, 0);
-            }
-
-        });
-
-        listOfOverlays = mapView.getOverlays();
-
-        // create an overlay that shows our current location
-        myLocationOverlay = new FixedMyLocationOverlay(this, mapView);
-
-        // mapView.getOverlays().add(new MapGestureDetectorOverlay(this));
-
-        // add this overlay to the MapView and refresh it
-        carOverlay = new CarOverlay(this);
-
-        // call convenience method that zooms map on our location only on starting the app
-        if (firstRun) {
-            myLocationOverlay.runOnFirstFix(new Runnable() {
-
-                public void run() {
-                    if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0)
-                        zoomToMyLocation();
-                    else
-                        zoomToSeeBoth();
-                }
-
-            });
-            firstRun = false;
-        }
+        prefs = Util.getSharedPreferences(this);
 
         // we add the car
-        prefs = getSharedPreferences("MAPS", Context.MODE_WORLD_READABLE);
 
         // show help dialog only on first run of the app
         boolean dialogShown = prefs.getBoolean(Util.PREF_DIALOG_SHOWN, false);
@@ -207,10 +138,50 @@ public class MapsActivity extends FragmentActivity
 
     }
 
+    private void zoomToMyLocation() {
+
+        Location userLastLocation = mLocationClient.getLastLocation();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                .target(new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude()))
+                .zoom(15.5f)
+                .bearing(300)
+                .tilt(50)
+                .build()), null);
+
+    }
+
+
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+
+        // when our activity resumes, we want to register for location updates
+        registerReceiver(carPosReceiver, new IntentFilter(Util.INTENT_NEW_CAR_POS));
+
+        // bt adress on the linked device
+        String btAddress = prefs.getString(Util.PREF_BT_DEVICE_ADDRESS, "");
+
+        // we hide the linkbutton if the app is linked
+        if (!btAddress.equals("")) {
+            linkButton.setVisibility(View.GONE);
+        } else {
+            linkButton.setVisibility(View.VISIBLE);
+        }
+
+        double latitude = (prefs.getInt(Util.PREF_CAR_LATITUDE, 0)) / 1E6;
+        double longitude = (prefs.getInt(Util.PREF_CAR_LONGITUDE, 0)) / 1E6;
+        float accuracy = (float) ((prefs.getInt(Util.PREF_CAR_ACCURACY, 0)) / 1E6);
+
+        // we add the car on the stored position
+        addCar(latitude, longitude, accuracy);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(carPosReceiver);
     }
 
     /**
@@ -232,7 +203,7 @@ public class MapsActivity extends FragmentActivity
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapview))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -258,6 +229,8 @@ public class MapsActivity extends FragmentActivity
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
+        mMap.setOnMapLongClickListener(this);
+        mMap.getUiSettings().setCompassEnabled(false);
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
@@ -295,6 +268,7 @@ public class MapsActivity extends FragmentActivity
      * This method zooms to the car's location.
      */
     private void zoomToCar() {
+        if (carMarker == null) return;
         LatLng loc = carMarker.getPosition();
 
         if (loc != null) {
@@ -304,10 +278,8 @@ public class MapsActivity extends FragmentActivity
                     .tilt(50)
                     .build()), null);
 
-            Util.showCarTimeToast(this);
-        }
-
-        else {
+            showCarTimeToast();
+        } else {
             Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
         }
     }
@@ -368,6 +340,18 @@ public class MapsActivity extends FragmentActivity
         mLocationClient.requestLocationUpdates(
                 REQUEST,
                 this);  // LocationListener
+
+        // call convenience method that zooms map on our location only on starting the app
+        if (firstRun) {
+
+            if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0) {
+                zoomToMyLocation();
+            } else {
+                zoomToSeeBoth();
+            }
+
+            firstRun = false;
+        }
     }
 
     /**
@@ -396,7 +380,6 @@ public class MapsActivity extends FragmentActivity
 
     /**
      * This method shows the Toast when the car icon is pressed, telling the user the parking time
-     *
      */
     private void showCarTimeToast() {
         String toastMsg = getString(R.string.car_was_here);
@@ -436,6 +419,51 @@ public class MapsActivity extends FragmentActivity
     }
 
 
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
 
+        Location location = new Location("");
+        location.setLatitude(latLng.latitude);
+        location.setLongitude(latLng.longitude);
+        Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
+        intent.putExtra(Util.EXTRA_LOCATION, location);
 
+        startActivityForResult(intent, 0);
+    }
+
+    /**
+     * This method zooms to see both user and the car.
+     */
+    protected void zoomToSeeBoth() {
+
+        double minLat = Double.MAX_VALUE;
+        double maxLat = Double.MIN_VALUE;
+        double minLon = Double.MAX_VALUE;
+        double maxLon = Double.MIN_VALUE;
+
+        ArrayList<LatLng> items = new ArrayList<LatLng>();
+        LatLng carLoc = carMarker.getPosition();
+        if (carLoc != null) {
+            Location userLastLocation = mLocationClient.getLastLocation();
+            items.add(new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude()));
+            items.add(carLoc);
+        } else {
+            zoomToMyLocation();
+        }
+        for (LatLng item : items) {
+            double lat = item.latitude;
+            double lon = item.longitude;
+
+            maxLat = Math.max(lat, maxLat);
+            minLat = Math.min(lat, minLat);
+            maxLon = Math.max(lon, maxLon);
+            minLon = Math.min(lon, minLon);
+        }
+        double fitFactor = 1.5;
+//        mapView.getController().zoomToSpan((int) (Math.abs(maxLat - minLat) * fitFactor),
+//                (int) (Math.abs(maxLon - minLon) * fitFactor));
+//        mapView.getController().animateTo(new GeoPoint((maxLat + minLat) / 2,
+//                (maxLon + minLon) / 2));
+    }
 }

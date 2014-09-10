@@ -78,8 +78,8 @@ public class DeviceListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        prefs = getSharedPreferences(BluetoothDetector.BT_PREFS, Context.MODE_WORLD_READABLE);
-		selectedDeviceAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
+        prefs = Util.getSharedPreferences(this);
+		selectedDeviceAddress = prefs.getString(Util.PREF_BT_DEVICE_ADDRESS, "");
 
 		setContentView(R.layout.device_list);
 
@@ -103,7 +103,7 @@ public class DeviceListActivity extends Activity {
 		Button removeButton = (Button) findViewById(R.id.button_remove_link);
 		removeButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).commit();
+				prefs.edit().remove(Util.PREF_BT_DEVICE_ADDRESS).commit();
 				finish();
 			}
 		});
@@ -196,7 +196,7 @@ public class DeviceListActivity extends Activity {
 
 			Log.d("List", "Clicked: " + info + " " + address);
 
-			prefs.edit().putString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, address).commit();
+			prefs.edit().putString(Util.PREF_BT_DEVICE_ADDRESS, address).commit();
 
 			// Create the result Intent and include the MAC address
 			Intent intent = new Intent();

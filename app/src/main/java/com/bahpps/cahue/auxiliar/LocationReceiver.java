@@ -65,9 +65,9 @@ public class LocationReceiver extends BroadcastReceiver {
         Location loc = (Location) b.get(LocationPoller.EXTRA_LOCATION);
         if (loc != null) {
 
-            SharedPreferences prefs = context.getSharedPreferences(BluetoothDetector.BT_PREFS, Context.MODE_WORLD_READABLE);
+            SharedPreferences prefs = Util.getSharedPreferences(context);
 
-            long lastBTRequest = prefs.getLong(BluetoothDetector.PREF_BT_DISCONNECTION_TIME, 0);
+            long lastBTRequest = prefs.getLong(Util.PREF_BT_DISCONNECTION_TIME, 0);
             long lastPositionUpdate = prefs.getLong(Util.PREF_CAR_TIME, 0);
 
             long currentTime = (new GregorianCalendar().getTimeInMillis());

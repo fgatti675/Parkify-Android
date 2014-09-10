@@ -15,9 +15,6 @@ import java.util.GregorianCalendar;
 public class BluetoothDetector extends BroadcastReceiver {
 
 
-    public static final String PREF_BT_DEVICE_ADDRESS = "PREF_BT_DEVICE_ADDRESS";
-    public static final String PREF_BT_DISCONNECTION_TIME = "PREF_BT_DISCONNECTION_TIME";
-    public static final String BT_PREFS = "BT_PREFS";
 
     /**
 	 * This receiver is in charge of detecting BT disconnection, as declared on the manifest
@@ -37,14 +34,14 @@ public class BluetoothDetector extends BroadcastReceiver {
 			Log.d("Bluetooth", device.getName() + " " + device.getAddress());
 
 			// we need to get which BT device the user chose as the one of his car
-			prefs = context.getSharedPreferences(BT_PREFS, Context.MODE_WORLD_READABLE);
-			storedAddress = prefs.getString(PREF_BT_DEVICE_ADDRESS, "");
+            prefs = Util.getSharedPreferences(context);
+			storedAddress = prefs.getString(Util.PREF_BT_DEVICE_ADDRESS, "");
 
 			// If the device we just disconnected from is our chosen one
 			if (device.getAddress().equals(storedAddress)) {
 
 				// we store the time the bt device was disconnected
-				prefs.edit().putLong(PREF_BT_DISCONNECTION_TIME, (new GregorianCalendar().getTimeInMillis()))
+				prefs.edit().putLong(Util.PREF_BT_DISCONNECTION_TIME, (new GregorianCalendar().getTimeInMillis()))
 						.commit();
 
 				Log.d("Bluetooth", "storedAddress matched: " + storedAddress);

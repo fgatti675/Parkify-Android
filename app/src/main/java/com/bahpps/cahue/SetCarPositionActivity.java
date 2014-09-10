@@ -11,6 +11,7 @@ import android.view.Window;
 import android.widget.Button;
 import com.bahpps.cahue.auxiliar.Util;
 import com.bahpps.cahue.location.LocationPoller;
+import com.google.android.gms.maps.model.LatLng;
 
 
 /**
@@ -20,10 +21,11 @@ import com.bahpps.cahue.location.LocationPoller;
  *
  */
 public class SetCarPositionActivity extends Activity implements OnClickListener {
+
 	Button okClose;
 	Button cancelClose;
 
-	Location loc;
+    Location loc;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,25 +44,21 @@ public class SetCarPositionActivity extends Activity implements OnClickListener 
 		loc = (Location) getIntent().getExtras().get(Util.EXTRA_LOCATION);
 	}
 
-	public void onClick(View v) {
-		if (v == okClose) {
-			Log.w("CARDIALOG", loc.toString());
+	public void onClick(View button) {
+
+		if (button == okClose) {
+			Log.w("CAR_DIALOG", loc.toString());
 			// If ok, we just send and intent and leave the location receivers to do all the work
 			Intent intent = new Intent(Util.INTENT_NEW_CAR_POS);
-			intent.putExtra(LocationPoller.EXTRA_LOCATION, loc);
+			intent.putExtra(Util.EXTRA_LOCATION, loc);
 			sendBroadcast(intent);
 			finish();
-		} else if (v == cancelClose) {
+		}
+
+        else if (button == cancelClose) {
 			finish();
 		}
-	}
 
-	public Location getLoc() {
-		return loc;
-	}
-
-	public void setLoc(Location loc) {
-		this.loc = loc;
 	}
 
 }
