@@ -40,7 +40,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.whereismycar.auxiliar.Util;
+import com.bahpps.cahue.auxiliar.BluetoothDetector;
+import com.bahpps.cahue.auxiliar.Util;
+
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -53,6 +55,7 @@ import java.util.Set;
 public class DeviceListActivity extends Activity {
 	// Debugging
 	private static final String TAG = "DeviceListActivity";
+
 
 	// Return Intent extra
 	public static final String EXTRA_DEVICE_ADDRESS = "device_address";
@@ -68,14 +71,15 @@ public class DeviceListActivity extends Activity {
 	private TextView title;
 
 	private ProgressBar progressBar;
+    private SharedPreferences prefs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-		final SharedPreferences prefs = Util.getSharedPreferences(this);
-		selectedDeviceAddress = prefs.getString(Util.PREF_BT_DEVICE_ADDRESS, "");
+        prefs = getSharedPreferences(BluetoothDetector.BT_PREFS, Context.MODE_WORLD_READABLE);
+		selectedDeviceAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
 
 		setContentView(R.layout.device_list);
 
@@ -99,7 +103,7 @@ public class DeviceListActivity extends Activity {
 		Button removeButton = (Button) findViewById(R.id.button_remove_link);
 		removeButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				prefs.edit().remove(Util.PREF_BT_DEVICE_ADDRESS).commit();
+				prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).commit();
 				finish();
 			}
 		});
@@ -192,8 +196,7 @@ public class DeviceListActivity extends Activity {
 
 			Log.d("List", "Clicked: " + info + " " + address);
 
-			SharedPreferences prefs = Util.getSharedPreferences(DeviceListActivity.this);
-			prefs.edit().putString(Util.PREF_BT_DEVICE_ADDRESS, address).commit();
+			prefs.edit().putString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, address).commit();
 
 			// Create the result Intent and include the MAC address
 			Intent intent = new Intent();

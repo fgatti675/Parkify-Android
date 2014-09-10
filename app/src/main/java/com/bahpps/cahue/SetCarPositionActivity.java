@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
+import com.bahpps.cahue.auxiliar.Util;
+import com.bahpps.cahue.location.LocationPoller;
 
-import com.whereismycar.auxiliar.Util;
-import com.whereismycar.location.LocationPoller;
 
 /**
  * This class is used as a dialog to ask the user if he is sure to store the location in

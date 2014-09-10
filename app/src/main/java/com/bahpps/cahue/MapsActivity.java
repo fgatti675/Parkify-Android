@@ -1,13 +1,14 @@
 package com.bahpps.cahue;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -17,20 +18,43 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.bahpps.cahue.auxiliar.Util;
 import com.bahpps.cahue.location.LocationPoller;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity {
+import java.util.Calendar;
+
+public class MapsActivity extends FragmentActivity
+        implements
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener,
+        GoogleMap.OnMyLocationButtonClickListener {
 
     protected static final String TAG = "Maps";
+    private static final int INFO_DIALOG = 0;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
+    private LocationClient mLocationClient;
+
+    // These settings are the same as the settings for the map. They will in fact give you updates
+    // at the maximal rates currently possible.
+    private static final LocationRequest REQUEST = LocationRequest.create()
+            .setInterval(5000)         // 5 seconds
+            .setFastestInterval(16)    // 16ms = 60fps
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
     private Marker carMarker;
 
@@ -68,6 +92,8 @@ public class MapsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         setUpMapIfNeeded();
+        setUpLocationClientIfNeeded();
+        mLocationClient.connect();
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -79,22 +105,13 @@ public class MapsActivity extends FragmentActivity {
             Util.noBluetooth(this);
         }
 
-        // button for moving to the users position
-        ImageButton userButton = (ImageButton) findViewById(R.id.userButton);
-        userButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                zoomToMyLocation();
-            }
-
-        });
 
         // button for moving to the cars position
         ImageButton carButton = (ImageButton) findViewById(R.id.carButton);
         carButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                zoomToCar();
+//                zoomToCar();
             }
 
         });
@@ -109,80 +126,64 @@ public class MapsActivity extends FragmentActivity {
 
         });
 
-        mapView.setOnTouchListener(new View.OnTouchListener() {
-            // we bypass the touch event
-            public boolean onTouch(View v, MotionEvent event) {
-                return mGestureDetector.onTouchEvent(event);
-            }
-        });
 
-        mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
+//        mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
+//
+//            @Override
+//            public void onLongPress(MotionEvent e) {
+//                setCarPosition(e);
+//            }
+//
+//            @Override
+//            public boolean onDoubleTap(MotionEvent e) {
+//                setCarPosition(e);
+//                return false;
+//            }
+//
+//            /*
+//             * On double or long tap, we set the car positions manually (asking first
+//             */
+//            private void setCarPosition(MotionEvent e) {
+//                Location tappedCarLocation;
+//
+//                Log.d(TAG, "Double Tap event " + (int) e.getX() + " " + (int) e.getY());
+//                GeoPoint gp = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
+//
+//                Log.d(TAG, "Double Tap event " + gp.getLatitudeE6() + " " + gp.getLongitudeE6());
+//                tappedCarLocation = new Location("Tapped");
+//                tappedCarLocation.setLatitude(gp.getLatitudeE6() / 1E6);
+//                tappedCarLocation.setLongitude(gp.getLongitudeE6() / 1E6);
+//                tappedCarLocation.setAccuracy(Util.DEFAULT_ACCURACY);
+//                Log.d(TAG,
+//                        "Double Tap event " + tappedCarLocation.getLatitude() + " " + tappedCarLocation.getLongitude());
+//
+//                Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
+//                intent.putExtra(Util.EXTRA_LOCATION, tappedCarLocation);
+//
+//                startActivityForResult(intent, 0);
+//            }
+//
+//        });
 
-            @Override
-            public void onLongPress(MotionEvent e) {
-                setCarPosition(e);
-            }
-
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                setCarPosition(e);
-                return false;
-            }
-
-            /*
-             * On double or long tap, we set the car positions manually (asking first
-             */
-            private void setCarPosition(MotionEvent e) {
-                Location tappedCarLocation;
-
-                Log.d(TAG, "Double Tap event " + (int) e.getX() + " " + (int) e.getY());
-                GeoPoint gp = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-
-                Log.d(TAG, "Double Tap event " + gp.getLatitudeE6() + " " + gp.getLongitudeE6());
-                tappedCarLocation = new Location("Tapped");
-                tappedCarLocation.setLatitude(gp.getLatitudeE6() / 1E6);
-                tappedCarLocation.setLongitude(gp.getLongitudeE6() / 1E6);
-                tappedCarLocation.setAccuracy(Util.DEFAULT_ACCURACY);
-                Log.d(TAG,
-                        "Double Tap event " + tappedCarLocation.getLatitude() + " " + tappedCarLocation.getLongitude());
-
-                Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
-                intent.putExtra(Util.EXTRA_LOCATION, tappedCarLocation);
-
-                startActivityForResult(intent, 0);
-            }
-
-        });
-
-        listOfOverlays = mapView.getOverlays();
-
-        // create an overlay that shows our current location
-        myLocationOverlay = new FixedMyLocationOverlay(this, mapView);
-
-        // mapView.getOverlays().add(new MapGestureDetectorOverlay(this));
-
-        // add this overlay to the MapView and refresh it
-        carOverlay = new CarOverlay(this);
-
-        // call convenience method that zooms map on our location only on starting the app
-        if (firstRun) {
-            myLocationOverlay.runOnFirstFix(new Runnable() {
-
-                public void run() {
-                    if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0)
-                        zoomToMyLocation();
-                    else
-                        zoomToSeeBoth();
-                }
-
-            });
-            firstRun = false;
-        }
+//        // call convenience method that zooms map on our location only on starting the app
+//        if (firstRun) {
+//            myLocationOverlay.runOnFirstFix(new Runnable() {
+//
+//                public void run() {
+//                    if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0)
+//                        zoomToMyLocation();
+//                    else
+//                        zoomToSeeBoth();
+//                }
+//
+//            });
+//            firstRun = false;
+//        }
 
         // we add the car
-        prefs = Util.getSharedPreferences(this);
+        prefs = getSharedPreferences("MAPS", Context.MODE_WORLD_READABLE);
 
-        // show help dialong only on first run of the app
+        // show help dialog only on first run of the app
         boolean dialogShown = prefs.getBoolean(Util.PREF_DIALOG_SHOWN, false);
         if (!dialogShown) {
             showDialog(INFO_DIALOG);
@@ -225,6 +226,15 @@ public class MapsActivity extends FragmentActivity {
         }
     }
 
+    private void setUpLocationClientIfNeeded() {
+        if (mLocationClient == null) {
+            mLocationClient = new LocationClient(
+                    getApplicationContext(),
+                    this,  // ConnectionCallbacks
+                    this); // OnConnectionFailedListener
+        }
+    }
+
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
@@ -242,34 +252,34 @@ public class MapsActivity extends FragmentActivity {
      * @param longitude as an int in 1E6
      */
     private void addCar(double latitude, double longitude, float accuracy) {
-        if (latitude != 0 && longitude != 0) {
-
-            Log.i(TAG, "Car location: " + latitude + " " + longitude);
-
-            Location loc = new Location("");
-            loc.setLatitude(latitude);
-            loc.setLongitude(longitude);
-            loc.setAccuracy(accuracy);
-            // loc = new GeoPoint(40347990, -3821760);
-
-            if (listOfOverlays.contains(carOverlay)) {
-                listOfOverlays.remove(carOverlay);
-            }
-            LatLng g = new LatLng((int) (latitude * 1E6), (int) (longitude * 1E6));
-            this.myLocationOverlay.setCarPosition(g);
-            carOverlay.setLocation(loc);
-
-            listOfOverlays.add(carOverlay);
-
-        } else {
-            Log.i(TAG, "No car location available");
-        }
-
-        if (listOfOverlays.contains(myLocationOverlay))
-            listOfOverlays.remove(myLocationOverlay);
-
-        listOfOverlays.add(myLocationOverlay);
-        mapView.postInvalidate();
+//        if (latitude != 0 && longitude != 0) {
+//
+//            Log.i(TAG, "Car location: " + latitude + " " + longitude);
+//
+//            Location loc = new Location("");
+//            loc.setLatitude(latitude);
+//            loc.setLongitude(longitude);
+//            loc.setAccuracy(accuracy);
+//            // loc = new GeoPoint(40347990, -3821760);
+//
+//            if (listOfOverlays.contains(carOverlay)) {
+//                listOfOverlays.remove(carOverlay);
+//            }
+//            LatLng g = new LatLng((int) (latitude * 1E6), (int) (longitude * 1E6));
+//            this.myLocationOverlay.setCarPosition(g);
+//            carOverlay.setLocation(loc);
+//
+//            listOfOverlays.add(carOverlay);
+//
+//        } else {
+//            Log.i(TAG, "No car location available");
+//        }
+//
+//        if (listOfOverlays.contains(myLocationOverlay))
+//            listOfOverlays.remove(myLocationOverlay);
+//
+//        listOfOverlays.add(myLocationOverlay);
+//        mapView.postInvalidate();
     }
 
     /**
@@ -309,8 +319,90 @@ public class MapsActivity extends FragmentActivity {
         } else if (!mBluetoothAdapter.isEnabled()) {
             Util.noBluetooth(this);
         } else {
-            startActivityForResult(new Intent(MainActivity.this, DeviceListActivity.class), 0);
+            startActivityForResult(new Intent(MapsActivity.this, DeviceListActivity.class), 0);
         }
+    }
+
+    /**
+     * Implementation of {@link LocationListener}.
+     */
+    @Override
+    public void onLocationChanged(Location location) {
+    }
+
+    /**
+     * Callback called when connected to GCore. Implementation of {@link GooglePlayServicesClient.ConnectionCallbacks}.
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        mLocationClient.requestLocationUpdates(
+                REQUEST,
+                this);  // LocationListener
+    }
+
+    /**
+     * Callback called when disconnected from GCore. Implementation of {@link GooglePlayServicesClient.ConnectionCallbacks}.
+     */
+    @Override
+    public void onDisconnected() {
+        // Do nothing
+    }
+
+    /**
+     * Implementation of {@link GooglePlayServicesClient.OnConnectionFailedListener}.
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Do nothing
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
+        return false;
+    }
+
+    /**
+     * This method shows the Toast when the car icon is pressed, telling the user the parking time
+     *
+     */
+    private void showCarTimeToast() {
+        String toastMsg = getString(R.string.car_was_here);
+
+        long timeDiff = Calendar.getInstance().getTimeInMillis() - prefs.getLong(Util.PREF_CAR_TIME, 0);
+
+        String time = "";
+
+        long seconds = timeDiff / 1000;
+        if (seconds < 60) {
+            time = seconds + " " + getString(R.string.seconds);
+        } else {
+            long minutos = timeDiff / (60 * 1000);
+            if (minutos < 60) {
+                time = minutos
+                        + (minutos > 1 ? " " + getString(R.string.minutes) : " "
+                        + getString(R.string.minute));
+            } else {
+                long hours = timeDiff / (60 * 60 * 1000);
+                if (hours < 24) {
+                    time = hours
+                            + (hours > 1 ? " " + getString(R.string.hours) : " "
+                            + getString(R.string.hour));
+                } else {
+                    long days = timeDiff / (24 * 60 * 60 * 1000);
+                    time = days
+                            + (days > 1 ? " " + getString(R.string.days) : " "
+                            + getString(R.string.day));
+                }
+            }
+        }
+
+        toastMsg = String.format(toastMsg, time);
+
+        Util.createToast(this, toastMsg, Toast.LENGTH_SHORT);
+
     }
 
 

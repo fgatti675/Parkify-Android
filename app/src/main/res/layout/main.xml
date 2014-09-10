@@ -11,33 +11,14 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
 
-    <!--
-		SERIE:
-		
-        android:apiKey="0V_8xWDab3kDEjVItW0rB4eTdyK0ph5V_qHWthg"
-        
-        DEBUG:
-        
-        android:apiKey="0V_8xWDab3kCEJ5A-TBTSRyq8cpKXQtfq-vdOMQ"
-    -->
-
     <ImageButton
-        android:id="@+id/userButton"
+        android:id="@+id/carButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="10dp"
         android:layout_marginRight="10dp"
-        android:background="@drawable/plain_button"
-        android:src="@drawable/location_icon" />
-
-    <ImageButton
-        android:id="@+id/carButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignTop="@+id/userButton"
-        android:layout_toLeftOf="@+id/userButton"
         android:background="@drawable/plain_button"
         android:src="@drawable/car_icon" />
 
