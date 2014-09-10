@@ -126,59 +126,75 @@ public class MapsActivity extends FragmentActivity
 
         });
 
+        mapView.setOnTouchListener(new View.OnTouchListener() {
+            // we bypass the touch event
+            public boolean onTouch(View v, MotionEvent event) {
+                return mGestureDetector.onTouchEvent(event);
+            }
+        });
 
-//        mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
-//
-//            @Override
-//            public void onLongPress(MotionEvent e) {
-//                setCarPosition(e);
-//            }
-//
-//            @Override
-//            public boolean onDoubleTap(MotionEvent e) {
-//                setCarPosition(e);
-//                return false;
-//            }
-//
-//            /*
-//             * On double or long tap, we set the car positions manually (asking first
-//             */
-//            private void setCarPosition(MotionEvent e) {
-//                Location tappedCarLocation;
-//
-//                Log.d(TAG, "Double Tap event " + (int) e.getX() + " " + (int) e.getY());
-//                GeoPoint gp = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-//
-//                Log.d(TAG, "Double Tap event " + gp.getLatitudeE6() + " " + gp.getLongitudeE6());
-//                tappedCarLocation = new Location("Tapped");
-//                tappedCarLocation.setLatitude(gp.getLatitudeE6() / 1E6);
-//                tappedCarLocation.setLongitude(gp.getLongitudeE6() / 1E6);
-//                tappedCarLocation.setAccuracy(Util.DEFAULT_ACCURACY);
-//                Log.d(TAG,
-//                        "Double Tap event " + tappedCarLocation.getLatitude() + " " + tappedCarLocation.getLongitude());
-//
-//                Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
-//                intent.putExtra(Util.EXTRA_LOCATION, tappedCarLocation);
-//
-//                startActivityForResult(intent, 0);
-//            }
-//
-//        });
+        mGestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
 
-//        // call convenience method that zooms map on our location only on starting the app
-//        if (firstRun) {
-//            myLocationOverlay.runOnFirstFix(new Runnable() {
-//
-//                public void run() {
-//                    if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0)
-//                        zoomToMyLocation();
-//                    else
-//                        zoomToSeeBoth();
-//                }
-//
-//            });
-//            firstRun = false;
-//        }
+            @Override
+            public void onLongPress(MotionEvent e) {
+                setCarPosition(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                setCarPosition(e);
+                return false;
+            }
+
+            /*
+             * On double or long tap, we set the car positions manually (asking first
+             */
+            private void setCarPosition(MotionEvent e) {
+                Location tappedCarLocation;
+
+                Log.d(TAG, "Double Tap event " + (int) e.getX() + " " + (int) e.getY());
+                GeoPoint gp = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
+
+                Log.d(TAG, "Double Tap event " + gp.getLatitudeE6() + " " + gp.getLongitudeE6());
+                tappedCarLocation = new Location("Tapped");
+                tappedCarLocation.setLatitude(gp.getLatitudeE6() / 1E6);
+                tappedCarLocation.setLongitude(gp.getLongitudeE6() / 1E6);
+                tappedCarLocation.setAccuracy(Util.DEFAULT_ACCURACY);
+                Log.d(TAG,
+                        "Double Tap event " + tappedCarLocation.getLatitude() + " " + tappedCarLocation.getLongitude());
+
+                Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
+                intent.putExtra(Util.EXTRA_LOCATION, tappedCarLocation);
+
+                startActivityForResult(intent, 0);
+            }
+
+        });
+
+        listOfOverlays = mapView.getOverlays();
+
+        // create an overlay that shows our current location
+        myLocationOverlay = new FixedMyLocationOverlay(this, mapView);
+
+        // mapView.getOverlays().add(new MapGestureDetectorOverlay(this));
+
+        // add this overlay to the MapView and refresh it
+        carOverlay = new CarOverlay(this);
+
+        // call convenience method that zooms map on our location only on starting the app
+        if (firstRun) {
+            myLocationOverlay.runOnFirstFix(new Runnable() {
+
+                public void run() {
+                    if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0)
+                        zoomToMyLocation();
+                    else
+                        zoomToSeeBoth();
+                }
+
+            });
+            firstRun = false;
+        }
 
         // we add the car
         prefs = getSharedPreferences("MAPS", Context.MODE_WORLD_READABLE);
@@ -201,11 +217,11 @@ public class MapsActivity extends FragmentActivity
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
      * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p>
+     * <p/>
      * If it isn't installed {@link SupportMapFragment} (and
      * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
      * install/update the Google Play services APK on their device.
-     * <p>
+     * <p/>
      * A user can return to this FragmentActivity after following the prompt and correctly
      * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
      * have been completely destroyed during this process (it is likely that it would only be
@@ -238,7 +254,7 @@ public class MapsActivity extends FragmentActivity
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
-     * <p>
+     * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
@@ -248,38 +264,52 @@ public class MapsActivity extends FragmentActivity
     /**
      * Displays the car in the map
      *
-     * @param latitude as an int in 1E6
+     * @param latitude  as an int in 1E6
      * @param longitude as an int in 1E6
      */
     private void addCar(double latitude, double longitude, float accuracy) {
-//        if (latitude != 0 && longitude != 0) {
-//
-//            Log.i(TAG, "Car location: " + latitude + " " + longitude);
-//
-//            Location loc = new Location("");
-//            loc.setLatitude(latitude);
-//            loc.setLongitude(longitude);
-//            loc.setAccuracy(accuracy);
-//            // loc = new GeoPoint(40347990, -3821760);
-//
-//            if (listOfOverlays.contains(carOverlay)) {
-//                listOfOverlays.remove(carOverlay);
-//            }
-//            LatLng g = new LatLng((int) (latitude * 1E6), (int) (longitude * 1E6));
-//            this.myLocationOverlay.setCarPosition(g);
-//            carOverlay.setLocation(loc);
-//
-//            listOfOverlays.add(carOverlay);
-//
-//        } else {
-//            Log.i(TAG, "No car location available");
-//        }
-//
-//        if (listOfOverlays.contains(myLocationOverlay))
-//            listOfOverlays.remove(myLocationOverlay);
-//
-//        listOfOverlays.add(myLocationOverlay);
-//        mapView.postInvalidate();
+
+        // TODO accuracy
+
+        if (latitude != 0 && longitude != 0) {
+
+            Log.i(TAG, "Car location: " + latitude + " " + longitude);
+
+            // loc = new GeoPoint(40347990, -3821760);
+
+            // Uses a colored icon.
+            carMarker = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(latitude, longitude))
+                    .title("Brisbane")
+                    .snippet("Population: 2,074,200")
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_icon)));
+
+
+        } else {
+            Log.i(TAG, "No car location available");
+        }
+
+    }
+
+    /**
+     * This method zooms to the car's location.
+     */
+    private void zoomToCar() {
+        LatLng loc = carMarker.getPosition();
+
+        if (loc != null) {
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(loc)
+                    .zoom(15.5f)
+                    .bearing(300)
+                    .tilt(50)
+                    .build()), null);
+
+            Util.showCarTimeToast(this);
+        }
+
+        else {
+            Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
+        }
     }
 
     /**
@@ -404,6 +434,8 @@ public class MapsActivity extends FragmentActivity
         Util.createToast(this, toastMsg, Toast.LENGTH_SHORT);
 
     }
+
+
 
 
 }

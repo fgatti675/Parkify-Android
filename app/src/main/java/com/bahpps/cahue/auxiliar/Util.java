@@ -62,6 +62,49 @@ public class Util {
 	}
 
 	/**
+	 * This method shows the Toast when the car icon is pressed, telling the user the parking time
+	 *
+	 * @param context
+	 */
+	public static void showCarTimeToast(Context context) {
+		String toastMsg = context.getString(R.string.car_was_here);
+
+		SharedPreferences prefs = Util.getSharedPreferences(context);
+		long timeDiff = Calendar.getInstance().getTimeInMillis() - prefs.getLong(Util.PREF_CAR_TIME, 0);
+
+		String time = "";
+
+		long seconds = timeDiff / 1000;
+		if (seconds < 60) {
+			time = seconds + " " + context.getString(R.string.seconds);
+		} else {
+			long minutos = timeDiff / (60 * 1000);
+			if (minutos < 60) {
+				time = minutos
+						+ (minutos > 1 ? " " + context.getString(R.string.minutes) : " "
+								+ context.getString(R.string.minute));
+			} else {
+				long hours = timeDiff / (60 * 60 * 1000);
+				if (hours < 24) {
+					time = hours
+							+ (hours > 1 ? " " + context.getString(R.string.hours) : " "
+									+ context.getString(R.string.hour));
+				} else {
+					long days = timeDiff / (24 * 60 * 60 * 1000);
+					time = days
+							+ (days > 1 ? " " + context.getString(R.string.days) : " "
+									+ context.getString(R.string.day));
+				}
+			}
+		}
+
+		toastMsg = String.format(toastMsg, time);
+
+		Util.createToast(context, toastMsg, Toast.LENGTH_SHORT);
+
+	}
+	
+	/**
 	 * Shows a toast in case no BT is detected
 	 */
 	public static void noBluetooth(Context context) {
