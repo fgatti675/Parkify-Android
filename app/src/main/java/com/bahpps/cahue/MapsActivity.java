@@ -138,23 +138,13 @@ public class MapsActivity extends FragmentActivity
 
     }
 
-    private void zoomToMyLocation() {
-
-        Location userLastLocation = mLocationClient.getLastLocation();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .target(new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude()))
-                .zoom(15.5f)
-                .bearing(300)
-                .tilt(50)
-                .build()), null);
-
-    }
-
 
     @Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+        setUpLocationClientIfNeeded();
+        mLocationClient.connect();
 
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(Util.INTENT_NEW_CAR_POS));
@@ -182,6 +172,9 @@ public class MapsActivity extends FragmentActivity
     protected void onPause() {
         super.onPause();
         unregisterReceiver(carPosReceiver);
+        if (mLocationClient != null) {
+            mLocationClient.disconnect();
+        }
     }
 
     /**
@@ -207,7 +200,6 @@ public class MapsActivity extends FragmentActivity
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
-                mMap.getUiSettings().setZoomControlsEnabled(false);
                 setUpMap();
             }
         }
@@ -230,8 +222,10 @@ public class MapsActivity extends FragmentActivity
      */
     private void setUpMap() {
         mMap.setOnMapLongClickListener(this);
+        mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(this);
         mMap.getUiSettings().setCompassEnabled(false);
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        mMap.getUiSettings().setZoomControlsEnabled(false);
     }
 
     /**
@@ -241,6 +235,11 @@ public class MapsActivity extends FragmentActivity
      * @param longitude as an int in 1E6
      */
     private void addCar(double latitude, double longitude, float accuracy) {
+
+        // remove previous
+        if(carMarker != null){
+            carMarker.remove();
+        }
 
         // TODO accuracy
 
@@ -262,26 +261,6 @@ public class MapsActivity extends FragmentActivity
             Log.i(TAG, "No car location available");
         }
 
-    }
-
-    /**
-     * This method zooms to the car's location.
-     */
-    private void zoomToCar() {
-        if (carMarker == null) return;
-        LatLng loc = carMarker.getPosition();
-
-        if (loc != null) {
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(loc)
-                    .zoom(15.5f)
-                    .bearing(300)
-                    .tilt(50)
-                    .build()), null);
-
-            showCarTimeToast();
-        } else {
-            Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
-        }
     }
 
     /**
@@ -423,7 +402,7 @@ public class MapsActivity extends FragmentActivity
     public void onMapLongClick(LatLng latLng) {
         Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
 
-        Location location = new Location("");
+        Location location = new Location(Util.TAPPED_PROVIDER);
         location.setLatitude(latLng.latitude);
         location.setLongitude(latLng.longitude);
         Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
@@ -466,4 +445,32 @@ public class MapsActivity extends FragmentActivity
 //        mapView.getController().animateTo(new GeoPoint((maxLat + minLat) / 2,
 //                (maxLon + minLon) / 2));
     }
+
+    private void zoomToMyLocation() {
+        Location userLastLocation = mLocationClient.getLastLocation();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                .target(new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude()))
+                .zoom(15.5f)
+                .build()), null);
+    }
+
+
+    /**
+     * This method zooms to the car's location.
+     */
+    private void zoomToCar() {
+        if (carMarker == null) return;
+        LatLng loc = carMarker.getPosition();
+
+        if (loc != null) {
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(loc)
+                    .zoom(15.5f)
+                    .build()), null);
+
+            showCarTimeToast();
+        } else {
+            Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
+        }
+    }
+
 }

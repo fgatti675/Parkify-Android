@@ -40,8 +40,9 @@ public class Util {
 	public static final int PREF_POSITIONING_TIME_LIMIT = 30000;
 	public static final String EXTRA_LOCATION = "EXTRA_LOCATION";
 	public static final float DEFAULT_ACCURACY = 7; // in meters, used when the user taps the map
+    public static final String TAPPED_PROVIDER = "Tapped";
 
-	/**
+    /**
 	 * Method for printing our fancy custom Toast
 	 * 
 	 * @param context

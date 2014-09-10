@@ -53,7 +53,7 @@
         </activity>
 
         <receiver android:name=".location.LocationPoller" />
-        <receiver android:name=".auxiliar.LocationReceiver" >
+        <receiver android:name=".auxiliar.ParkedCarReceiver" >
             <intent-filter>
                 <action android:name="NEW_CAR_POSITION" />
             </intent-filter>

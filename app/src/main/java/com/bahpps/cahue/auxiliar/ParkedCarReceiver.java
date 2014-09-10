@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @author Francesco
  */
-public class LocationReceiver extends BroadcastReceiver {
+public class ParkedCarReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -62,7 +62,7 @@ public class LocationReceiver extends BroadcastReceiver {
 
         // We get the location from the intent
         Bundle b = intent.getExtras();
-        Location loc = (Location) b.get(LocationPoller.EXTRA_LOCATION);
+        Location loc = (Location) b.get(Util.EXTRA_LOCATION);
         if (loc != null) {
 
             SharedPreferences prefs = Util.getSharedPreferences(context);
@@ -90,10 +90,12 @@ public class LocationReceiver extends BroadcastReceiver {
             lastLocation.setLongitude(lastLongitude / 1E6);
 
             // If we have received another position fix recently, we evaluate which one is best
-            // We make a punded average taking into account: time passed from bt disconnection,
+            // We make a pounded average taking into account: time passed from bt disconnection,
             // accuracy and provider of each fix.
-            if (difference < Util.PREF_POSITIONING_TIME_LIMIT && loc.getProvider().equals("gps")
-                    && !lastProvider.equals("Tapped") && (loc.distanceTo(lastLocation) < Util.MAX_ALLOWED_DISTANCE)
+            if (difference < Util.PREF_POSITIONING_TIME_LIMIT
+                    && loc.getProvider().equals("gps")
+                    && !lastProvider.equals(Util.TAPPED_PROVIDER)
+                    && loc.distanceTo(lastLocation) < Util.MAX_ALLOWED_DISTANCE
                     && loc.getTime() > lastBTRequest) {
 
                 Log.i("LocationReceiver", "Doing average: " + loc.toString());
