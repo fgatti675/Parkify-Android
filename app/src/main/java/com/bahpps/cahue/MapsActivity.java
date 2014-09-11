@@ -11,7 +11,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,17 +28,19 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class MapsActivity extends FragmentActivity
+public class MapsActivity extends Activity
         implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
@@ -97,7 +98,6 @@ public class MapsActivity extends FragmentActivity
         setContentView(R.layout.main);
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
-        mLocationClient.connect();
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -109,12 +109,31 @@ public class MapsActivity extends FragmentActivity
             Util.noBluetooth(this);
         }
 
+        // try to reuse map
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapview);
+
+        if (savedInstanceState == null) {
+            // First incarnation of this activity.
+            mapFragment.setRetainInstance(true);
+        } else {
+            // Reincarnated activity. The obtained map is the same map instance in the previous
+            // activity life cycle. There is no need to reinitialize it.
+            mMap = mapFragment.getMap();
+        }
 
         // button for moving to the car's position
         ImageButton carButton = (ImageButton) findViewById(R.id.carButton);
         carButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 zoomToCar();
+            }
+        });
+
+        // button for moving to the car's position
+        ImageButton userButton = (ImageButton) findViewById(R.id.userButton);
+        userButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                zoomToMyLocation();
             }
         });
 
@@ -196,7 +215,7 @@ public class MapsActivity extends FragmentActivity
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapview))
+            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.mapview))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -224,6 +243,7 @@ public class MapsActivity extends FragmentActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
     }
@@ -237,7 +257,7 @@ public class MapsActivity extends FragmentActivity
     private void addCar(double latitude, double longitude, float accuracy) {
 
         // remove previous
-        if(carMarker != null){
+        if (carMarker != null) {
             carMarker.remove();
         }
 
@@ -351,7 +371,6 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
@@ -415,43 +434,30 @@ public class MapsActivity extends FragmentActivity
      * This method zooms to see both user and the car.
      */
     protected void zoomToSeeBoth() {
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(getCarPosition())
+                .include(getUserPosition())
+                .build();
 
-        double minLat = Double.MAX_VALUE;
-        double maxLat = Double.MIN_VALUE;
-        double minLon = Double.MAX_VALUE;
-        double maxLon = Double.MIN_VALUE;
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
 
-        ArrayList<LatLng> items = new ArrayList<LatLng>();
-        LatLng carLoc = carMarker.getPosition();
-        if (carLoc != null) {
-            Location userLastLocation = mLocationClient.getLastLocation();
-            items.add(new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude()));
-            items.add(carLoc);
-        } else {
-            zoomToMyLocation();
-        }
-        for (LatLng item : items) {
-            double lat = item.latitude;
-            double lon = item.longitude;
-
-            maxLat = Math.max(lat, maxLat);
-            minLat = Math.min(lat, minLat);
-            maxLon = Math.max(lon, maxLon);
-            minLon = Math.min(lon, minLon);
-        }
-        double fitFactor = 1.5;
-//        mapView.getController().zoomToSpan((int) (Math.abs(maxLat - minLat) * fitFactor),
-//                (int) (Math.abs(maxLon - minLon) * fitFactor));
-//        mapView.getController().animateTo(new GeoPoint((maxLat + minLat) / 2,
-//                (maxLon + minLon) / 2));
     }
 
+
     private void zoomToMyLocation() {
-        Location userLastLocation = mLocationClient.getLastLocation();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .target(new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude()))
+                .target(getUserPosition())
                 .zoom(15.5f)
                 .build()), null);
+    }
+
+    private LatLng getUserPosition() {
+        Location userLastLocation = mLocationClient.getLastLocation();
+        return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
+    }
+
+    private LatLng getCarPosition() {
+        return carMarker.getPosition();
     }
 
 
@@ -460,10 +466,11 @@ public class MapsActivity extends FragmentActivity
      */
     private void zoomToCar() {
         if (carMarker == null) return;
-        LatLng loc = carMarker.getPosition();
+        LatLng loc = getCarPosition();
 
         if (loc != null) {
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(loc)
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .target(loc)
                     .zoom(15.5f)
                     .build()), null);
 

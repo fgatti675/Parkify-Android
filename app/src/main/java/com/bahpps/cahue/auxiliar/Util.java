@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 import com.bahpps.cahue.R;
 
-import java.util.Calendar;
-
 public class Util {
 
 	/*

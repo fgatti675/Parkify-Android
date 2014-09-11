@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#D999"
     android:gravity="center" >
 
     <LinearLayout
@@ -17,18 +16,16 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#555"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp" >
+            android:padding="10dp" >
 
             <TextView
                 android:id="@+id/title_dialog"
+                android:padding="10dp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/progressBar"
-                android:paddingLeft="5dp"
                 android:text="@string/title_paired_devices"
                 android:textColor="#fff"
-                android:textSize="15dp"
                 android:textStyle="bold" />
 
             <ProgressBar
@@ -38,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:layout_margin="15dp" />
+                android:layout_margin="20dp" />
         </RelativeLayout>
 
         <TextView
@@ -46,7 +43,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#666"
-            android:paddingLeft="5dp"
+            android:padding="10dp"
             android:text="@string/title_paired_devices"
             android:textColor="#fff"
             android:visibility="gone" />
@@ -63,7 +60,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="#666"
-            android:paddingLeft="5dp"
+            android:padding="10dp"
             android:text="@string/title_other_devices"
             android:textColor="#fff"
             android:visibility="gone" />
@@ -72,7 +69,8 @@
             android:id="@+id/new_devices"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="2"
+            android:layout_weight="1"
+            android:visibility="gone"
             android:stackFromBottom="true" />
     </LinearLayout>
 
