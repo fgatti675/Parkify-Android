@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,7 +19,6 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.bahpps.cahue.auxiliar.Util;
-import com.bahpps.cahue.location.LocationPoller;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
@@ -37,7 +35,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MapsActivity extends Activity
@@ -83,10 +80,10 @@ public class MapsActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Location loc = (Location) intent.getExtras().get(LocationPoller.EXTRA_LOCATION);
-            if (loc != null) {
-                Log.i(TAG, "Location received: " + loc);
-                addCar(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy());
+            Location location = (Location) intent.getExtras().get(Util.EXTRA_LOCATION);
+            if (location != null) {
+                Log.i(TAG, "Location received: " + location);
+                setCar(location.getLatitude(), location.getLongitude(), location.getAccuracy());
             }
 
         }
@@ -183,7 +180,7 @@ public class MapsActivity extends Activity
         float accuracy = (float) ((prefs.getInt(Util.PREF_CAR_ACCURACY, 0)) / 1E6);
 
         // we add the car on the stored position
-        addCar(latitude, longitude, accuracy);
+        setCar(latitude, longitude, accuracy);
 
     }
 
@@ -254,7 +251,7 @@ public class MapsActivity extends Activity
      * @param latitude  as an int in 1E6
      * @param longitude as an int in 1E6
      */
-    private void addCar(double latitude, double longitude, float accuracy) {
+    private void setCar(double latitude, double longitude, float accuracy) {
 
         // remove previous
         if (carMarker != null) {
@@ -267,14 +264,14 @@ public class MapsActivity extends Activity
 
             Log.i(TAG, "Car location: " + latitude + " " + longitude);
 
-            // loc = new GeoPoint(40347990, -3821760);
+            // location = new GeoPoint(40347990, -3821760);
 
             // Uses a colored icon.
             carMarker = mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(latitude, longitude))
-                    .title("Brisbane")
+                    .title("My car")
                     .snippet("Population: 2,074,200")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_icon)));
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
 
 
         } else {
@@ -424,10 +421,11 @@ public class MapsActivity extends Activity
         Location location = new Location(Util.TAPPED_PROVIDER);
         location.setLatitude(latLng.latitude);
         location.setLongitude(latLng.longitude);
-        Intent intent = new Intent(MapsActivity.this, SetCarPositionActivity.class);
-        intent.putExtra(Util.EXTRA_LOCATION, location);
 
-        startActivityForResult(intent, 0);
+        SetCarPositionDialog dialog = new SetCarPositionDialog();
+        dialog.setLocation(location);
+        dialog.show(getFragmentManager(), "NoticeDialogFragment");
+
     }
 
     /**
