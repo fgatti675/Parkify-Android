@@ -134,7 +134,7 @@ public class DeviceListActivity extends Activity {
     }
 
     private void removeLink() {
-        prefs.edit().remove(Util.PREF_BT_DEVICE_ADDRESS).commit();
+        prefs.edit().remove(Util.PREF_BT_DEVICE_ADDRESS).apply();
         Util.createToast(this, getString(R.string.link_removed), Toast.LENGTH_SHORT);
         finish();
     }
@@ -183,7 +183,7 @@ public class DeviceListActivity extends Activity {
 
             Log.d("List", "Clicked: " + info + " " + address);
 
-            prefs.edit().putString(Util.PREF_BT_DEVICE_ADDRESS, address).commit();
+            prefs.edit().putString(Util.PREF_BT_DEVICE_ADDRESS, address).apply();
 
             // Create the result Intent and include the MAC address
             Intent intent = new Intent();

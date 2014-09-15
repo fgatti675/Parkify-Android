@@ -163,7 +163,7 @@ public class ParkedCarReceiver extends BroadcastReceiver {
             // We also store provider and time of the fix
             editor.putString(Util.PREF_CAR_PROVIDER, loc.getProvider());
             editor.putLong(Util.PREF_CAR_TIME, Calendar.getInstance().getTimeInMillis());
-            editor.commit();
+            editor.apply();
         }
 
         // Loggin, can be removed

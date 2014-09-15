@@ -1,6 +1,7 @@
 package com.bahpps.cahue;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -153,9 +154,15 @@ public class MapsActivity extends Activity
         // show help dialog only on first run of the app
         boolean dialogShown = prefs.getBoolean(Util.PREF_DIALOG_SHOWN, false);
         if (!dialogShown) {
-            showDialog(INFO_DIALOG);
+            showHelpDialog();
         }
 
+    }
+
+    private void showHelpDialog(){
+        InfoDialog dialog = new InfoDialog();
+        dialog.show(getFragmentManager(), "InfoDialogFragment");
+        prefs.edit().putBoolean(Util.PREF_DIALOG_SHOWN, true).apply();
     }
 
 
@@ -306,7 +313,7 @@ public class MapsActivity extends Activity
                 startDeviceSelection();
                 return true;
             case R.id.action_display_help:
-                showDialog(0);
+                showHelpDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -483,5 +490,6 @@ public class MapsActivity extends Activity
     private LatLng getCarPosition() {
         return carMarker.getPosition();
     }
+
 
 }

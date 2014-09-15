@@ -28,7 +28,7 @@ public class SetCarPositionDialog extends DialogFragment  {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder
-                .setIcon(R.drawable.common_signin_btn_icon_dark)
+                .setIcon(R.drawable.ic_action_help)
                 .setTitle(R.string.car_dialog_text)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
