@@ -3,13 +3,13 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light">
         <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:windowActionBarOverlay">true</item>
     </style>
 
     <style name="AppTheme.Transparent" parent="AppTheme">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowActionBarOverlay">true</item>
     </style>
 
     <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
