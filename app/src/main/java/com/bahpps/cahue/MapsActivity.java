@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.ui.IconGenerator;
 
 import java.util.Calendar;
 
@@ -69,6 +70,8 @@ public class MapsActivity extends Activity
 
     private Button linkButton;
 
+    private IconGenerator iconFactory;
+
     // TODO: remove static variable?
     private static boolean firstRun = true;
 
@@ -95,6 +98,8 @@ public class MapsActivity extends Activity
         setContentView(R.layout.main);
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
+
+        iconFactory = new IconGenerator(this);
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -144,7 +149,6 @@ public class MapsActivity extends Activity
 
         prefs = Util.getSharedPreferences(this);
 
-        // we add the car
 
         // show help dialog only on first run of the app
         boolean dialogShown = prefs.getBoolean(Util.PREF_DIALOG_SHOWN, false);
@@ -264,14 +268,15 @@ public class MapsActivity extends Activity
 
             Log.i(TAG, "Car location: " + latitude + " " + longitude);
 
-            // location = new GeoPoint(40347990, -3821760);
+            iconFactory.setContentRotation(-90);
+            iconFactory.setStyle(IconGenerator.STYLE_RED);
 
             // Uses a colored icon.
             carMarker = mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(latitude, longitude))
-                    .title("My car")
                     .snippet("Population: 2,074,200")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(getResources().getText(R.string.car).toString().toUpperCase())))
+                    .anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()));
 
 
         } else {
@@ -288,23 +293,24 @@ public class MapsActivity extends Activity
 
         // inflate from xml
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-
-        menu.getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                startDeviceSelection();
-                return false;
-            }
-        });
-
-        menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                showDialog(0);
-                return false;
-            }
-        });
+        inflater.inflate(R.menu.main_menu, menu);
 
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_link_device:
+                startDeviceSelection();
+                return true;
+            case R.id.action_display_help:
+                showDialog(0);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**
@@ -437,7 +443,7 @@ public class MapsActivity extends Activity
                 .include(getUserPosition())
                 .build();
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
 
     }
 
@@ -447,15 +453,6 @@ public class MapsActivity extends Activity
                 .target(getUserPosition())
                 .zoom(15.5f)
                 .build()), null);
-    }
-
-    private LatLng getUserPosition() {
-        Location userLastLocation = mLocationClient.getLastLocation();
-        return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
-    }
-
-    private LatLng getCarPosition() {
-        return carMarker.getPosition();
     }
 
 
@@ -476,6 +473,15 @@ public class MapsActivity extends Activity
         } else {
             Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
         }
+    }
+
+    private LatLng getUserPosition() {
+        Location userLastLocation = mLocationClient.getLastLocation();
+        return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
+    }
+
+    private LatLng getCarPosition() {
+        return carMarker.getPosition();
     }
 
 }

@@ -17,7 +17,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignTop="@+id/userButton"
         android:layout_marginLeft="10dp"
-        android:text="@string/menu_link_device"
+        android:text="@string/link_device"
         android:background="@drawable/plain_button"
         android:layout_toLeftOf="@+id/carButton" />
 

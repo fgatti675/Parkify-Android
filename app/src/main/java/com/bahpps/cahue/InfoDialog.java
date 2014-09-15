@@ -18,8 +18,8 @@ public class InfoDialog extends Dialog implements OnClickListener {
 
 	public InfoDialog(Context context) {
 		// we use our own style
-		super(context, R.style.DialogStyle);
-		
+		super(context);
+
 		// It will hide the title 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.info_dialog);
@@ -27,7 +27,7 @@ public class InfoDialog extends Dialog implements OnClickListener {
 		// getWindow().getAttributes().windowAnimations = R.style.DialogStyle;
 
 		TextView t = (TextView) findViewById(R.id.textView1);
-		String s = String.format(context.getString(R.string.info), context.getString(R.string.app_name));
+		String s = String.format(context.getString(R.string.info_text), context.getString(R.string.app_name));
 		t.setText(s);
 
 		close = (Button) findViewById(R.id.closeButton);

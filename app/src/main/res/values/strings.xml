@@ -4,26 +4,30 @@
     <string name="app_name">Cahue</string>
     <string name="title_activity_maps">Map</string>
 
-    <!-- DeviceListActivity -->
     <string name="scanning">Scanning for devices...</string>
     <string name="select_device">Select a device to link to the app</string>
+
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">No devices found</string>
-    <string name="title_paired_devices">Paired Devices</string>
-    <string name="title_other_devices">Other Available Devices</string>
     <string name="button_scan">Scan for devices</string>
-    <string name="button_remove_link">Remove link to device</string>
-    <string name="menu_link_device">Link device</string>
-    <string name="menu_about">Help</string>
+    <string name="remove_link">Remove link</string>
+    <string name="link_removed">Bluetooth device link removed</string>
+    <string name="link_device">Link device</string>
+    <string name="help">Help</string>
+
     <string name="position_waiting">Waiting for user position</string>
     <string name="car_not_found">Car\'s position has not been established</string>
+
     <string name="bt_not_available">Bluetooth is not available</string>
     <string name="bt_linked_to">Car location will be stored on disconnection from %1$s</string>
+
     <string name="car_was_here">Car was here %1$s ago</string>
     <string name="car_dialog_text">Would you like to set the car position here?</string>
+    <string name="car">car</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="info">Welcome to %1$s !\n\nThis app will automatically record your car\'s position when you walk away from it.\n\nAll you have to do is select which is the Bluetooth device installed in your car and forget about where you parked. You will need to keep your Bluetooth activated and at least one of GPS or WIFI.\n\nIf you want to set your car\'s position manually, you can double tap or long press in the map.</string>
+
+    <string name="info_text">Welcome to %1$s !\n\nThis app will automatically record your car\'s position when you walk away from it.\n\nAll you have to do is select which is the Bluetooth device installed in your car and forget about where you parked. You will need to keep your Bluetooth activated and at least one of GPS or WIFI.\n\nIf you want to set your car\'s position manually, you can double tap or long press in the map.</string>
 
     <!-- Time -->
     <string name="seconds">seconds</string>

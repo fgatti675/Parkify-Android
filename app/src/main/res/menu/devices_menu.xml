@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_remove_link"
+        android:title="@string/remove_link"
+        android:icon="@drawable/ic_action_remove"
+        android:showAsAction="withText" />
+</menu>

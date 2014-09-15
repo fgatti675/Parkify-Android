@@ -43,14 +43,11 @@
         <activity
             android:name=".DeviceListActivity"
             android:label="@string/app_name"
-            android:theme="@style/DialogStyle" >
+            android:parentActivityName=".MapsActivity"
+            android:theme="@style/AppTheme.Transparent" >
         </activity>
 
-        <activity
-            android:name=".SetCarPositionDialog"
-            android:label="@string/app_name"
-            android:theme="@style/DialogStyle" >
-        </activity>
+
 
         <receiver android:name=".location.LocationPoller" />
         <receiver android:name=".auxiliar.ParkedCarReceiver" >
