@@ -1,7 +1,6 @@
 package com.bahpps.cahue;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,7 +18,10 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.bahpps.cahue.auxiliar.BluetoothDetector;
+import com.bahpps.cahue.auxiliar.CarLocationManager;
 import com.bahpps.cahue.auxiliar.Util;
+import com.bahpps.cahue.location.LocationPoller;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
@@ -48,7 +50,8 @@ public class MapsActivity extends Activity
         GoogleMap.OnMapLongClickListener {
 
     protected static final String TAG = "Maps";
-    private static final int INFO_DIALOG = 0;
+
+    public static final String EXTRA_LOCATION = "EXTRA_LOCATION";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -84,10 +87,10 @@ public class MapsActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Location location = (Location) intent.getExtras().get(Util.EXTRA_LOCATION);
+            Location location = (Location) intent.getExtras().get(LocationPoller.EXTRA_LOCATION);
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
-                setCar(location.getLatitude(), location.getLongitude(), location.getAccuracy());
+                setCar(location);
             }
 
         }
@@ -174,10 +177,10 @@ public class MapsActivity extends Activity
         mLocationClient.connect();
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(Util.INTENT_NEW_CAR_POS));
+        registerReceiver(carPosReceiver, new IntentFilter(getString(R.string.intent_car_parked)));
 
         // bt adress on the linked device
-        String btAddress = prefs.getString(Util.PREF_BT_DEVICE_ADDRESS, "");
+        String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
 
         // we hide the linkbutton if the app is linked
         if (!btAddress.equals("")) {
@@ -186,12 +189,10 @@ public class MapsActivity extends Activity
             linkButton.setVisibility(View.VISIBLE);
         }
 
-        double latitude = (prefs.getInt(Util.PREF_CAR_LATITUDE, 0)) / 1E6;
-        double longitude = (prefs.getInt(Util.PREF_CAR_LONGITUDE, 0)) / 1E6;
-        float accuracy = (float) ((prefs.getInt(Util.PREF_CAR_ACCURACY, 0)) / 1E6);
+        Location carLocation  = CarLocationManager.getStoredLocation(this);
 
         // we add the car on the stored position
-        setCar(latitude, longitude, accuracy);
+        setCar(carLocation);
 
     }
 
@@ -259,10 +260,8 @@ public class MapsActivity extends Activity
     /**
      * Displays the car in the map
      *
-     * @param latitude  as an int in 1E6
-     * @param longitude as an int in 1E6
      */
-    private void setCar(double latitude, double longitude, float accuracy) {
+    private void setCar(Location carLocation) {
 
         // remove previous
         if (carMarker != null) {
@@ -270,6 +269,9 @@ public class MapsActivity extends Activity
         }
 
         // TODO accuracy
+
+        double latitude = carLocation.getLatitude();
+        double longitude = carLocation.getLongitude();
 
         if (latitude != 0 && longitude != 0) {
 
@@ -281,7 +283,7 @@ public class MapsActivity extends Activity
             // Uses a colored icon.
             carMarker = mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(latitude, longitude))
-                    .snippet("Population: 2,074,200")
+                    .snippet("")
                     .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(getResources().getText(R.string.car).toString().toUpperCase())))
                     .anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()));
 

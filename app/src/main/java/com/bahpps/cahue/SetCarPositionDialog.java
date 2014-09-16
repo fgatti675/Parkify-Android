@@ -8,9 +8,9 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
 
 import com.bahpps.cahue.auxiliar.Util;
+import com.bahpps.cahue.location.LocationPoller;
 
 
 /**
@@ -34,8 +34,8 @@ public class SetCarPositionDialog extends DialogFragment  {
                     public void onClick(DialogInterface dialog, int id) {
                         Log.w("CAR_DIALOG", location.toString());
                         // If ok, we just send and intent and leave the location receivers to do all the work
-                        Intent intent = new Intent(Util.INTENT_NEW_CAR_POS);
-                        intent.putExtra(Util.EXTRA_LOCATION, location);
+                        Intent intent = new Intent(getString(R.string.intent_car_parked));
+                        intent.putExtra(LocationPoller.EXTRA_LOCATION, location);
                         getActivity().sendBroadcast(intent);
                     }
                 })

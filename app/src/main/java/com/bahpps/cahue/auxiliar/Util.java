@@ -21,22 +21,15 @@ public class Util {
 	public static final String PREF_CAR_ACCURACY = "PREF_CAR_ACCURACY";
 	public static final String PREF_CAR_PROVIDER = "PREF_CAR_PROVIDER";
 	public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
-    public static final String PREF_BT_DEVICE_ADDRESS = "PREF_BT_DEVICE_ADDRESS";
-    public static final String PREF_BT_DISCONNECTION_TIME = "PREF_BT_DISCONNECTION_TIME";
 
 	public static final float WALKING_SPEED = 1.4F; // walking speed in m/s
 
 	/*
 	 * Maximum distance we consider normal between 2 positions received on the same parking
 	 */
-	public static final int MAX_ALLOWED_DISTANCE = 100; //
+	public static final int MAX_ALLOWED_DISTANCE = 100; // meters
 
-	/*
-	 * Intent for detecting BT disconnection
-	 */
-	public static final String INTENT_NEW_CAR_POS = "NEW_CAR_POSITION";
-	public static final int PREF_POSITIONING_TIME_LIMIT = 30000;
-	public static final String EXTRA_LOCATION = "EXTRA_LOCATION";
+	public static final int PREF_POSITIONING_TIME_LIMIT = 30000; // 30 secs
 	public static final float DEFAULT_ACCURACY = 7; // in meters, used when the user taps the map
     public static final String TAPPED_PROVIDER = "Tapped";
 
@@ -62,7 +55,6 @@ public class Util {
 		toast.show();
 	}
 
-
 	/**
 	 * Shows a toast in case no BT is detected
 	 */
@@ -70,18 +62,6 @@ public class Util {
 		Util.createToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_SHORT);
 	}
 
-	/**
-	 * Method that returns the average of 2 double values, giving a different weight to each one
-	 * 
-	 * @param a
-	 * @param aWeight
-	 * @param b
-	 * @param bWeight
-	 * @return
-	 */
-	public static double poundedAverage(double a, double aWeight, double b, double bWeight) {
-		return (a * aWeight + b * bWeight) / (aWeight + bWeight);
-	}
 
 	/**
 	 * It returns the only shared preferences file we will be using in the app.

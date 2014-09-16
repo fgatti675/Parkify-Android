@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bahpps.cahue.auxiliar.BluetoothDetector;
 import com.bahpps.cahue.auxiliar.Util;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class DeviceListActivity extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         prefs = Util.getSharedPreferences(this);
-        selectedDeviceAddress = prefs.getString(Util.PREF_BT_DEVICE_ADDRESS, "");
+        selectedDeviceAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
 
         setContentView(R.layout.device_list);
 
@@ -134,7 +135,7 @@ public class DeviceListActivity extends Activity {
     }
 
     private void removeLink() {
-        prefs.edit().remove(Util.PREF_BT_DEVICE_ADDRESS).apply();
+        prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).apply();
         Util.createToast(this, getString(R.string.link_removed), Toast.LENGTH_SHORT);
         finish();
     }
@@ -183,7 +184,7 @@ public class DeviceListActivity extends Activity {
 
             Log.d("List", "Clicked: " + info + " " + address);
 
-            prefs.edit().putString(Util.PREF_BT_DEVICE_ADDRESS, address).apply();
+            prefs.edit().putString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, address).apply();
 
             // Create the result Intent and include the MAC address
             Intent intent = new Intent();

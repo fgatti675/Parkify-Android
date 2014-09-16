@@ -15,189 +15,184 @@ import android.util.Log;
 /**
  * Service providing the guts of the location polling engine. Uses a WakeLock to ensure the CPU stays on while the
  * location lookup is going on. Handles both successful and timeout conditions.
- * 
+ * <p/>
  * Those wishing to leverage this service should do so via the LocationPoller class.
  */
 public class LocationPollerService extends Service {
-	private static final String LOCK_NAME_STATIC = "com.bahpps.cahue.LocationPoller";
-	private static final int TIMEOUT = 30000; // 30s
-	private static volatile PowerManager.WakeLock lockStatic = null;
-	private LocationManager locMgr = null;
+    private static final String LOCK_NAME_STATIC = "com.bahpps.cahue.LocationPoller";
+    private static final int TIMEOUT = 30000; // 30s
+    private static volatile PowerManager.WakeLock lockStatic = null;
+    private LocationManager locMgr = null;
 
-	/**
-	 * Lazy-initializes the WakeLock when we first use it. We use a partial WakeLock since we only need the CPU on, not
-	 * the screen.
-	 */
-	synchronized private static PowerManager.WakeLock getLock(Context context) {
-		if (lockStatic == null) {
-			PowerManager mgr = (PowerManager) context.getApplicationContext()
-					.getSystemService(Context.POWER_SERVICE);
+    /**
+     * Lazy-initializes the WakeLock when we first use it. We use a partial WakeLock since we only need the CPU on, not
+     * the screen.
+     */
+    synchronized private static PowerManager.WakeLock getLock(Context context) {
+        if (lockStatic == null) {
+            PowerManager mgr = (PowerManager) context.getApplicationContext()
+                    .getSystemService(Context.POWER_SERVICE);
 
-			lockStatic = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-					LOCK_NAME_STATIC);
-			lockStatic.setReferenceCounted(true);
-		}
+            lockStatic = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    LOCK_NAME_STATIC);
+            lockStatic.setReferenceCounted(true);
+        }
 
-		return (lockStatic);
-	}
+        return (lockStatic);
+    }
 
-	/**
-	 * Called by LocationPoller to trigger a poll for the location. Acquires the WakeLock, then starts the service using
-	 * the supplied Intent (setting the component so routing always goes to the service).
-	 */
-	public static void requestLocation(Context ctxt, Intent i) {
-		String provider = i.getStringExtra(LocationPoller.EXTRA_PROVIDER);
-		Intent toBroadcast = (Intent) i.getExtras().get(
-				LocationPoller.EXTRA_INTENT);
+    /**
+     * Called by LocationPoller to trigger a poll for the location. Acquires the WakeLock, then starts the service using
+     * the supplied Intent (setting the component so routing always goes to the service).
+     */
+    public static void requestLocation(Context ctxt, Intent i) {
+        String provider = i.getStringExtra(LocationPoller.EXTRA_PROVIDER);
+        Intent toBroadcast = (Intent) i.getExtras().get(LocationPoller.EXTRA_INTENT);
 
-		if (provider == null) {
-			Log.e("LocationPoller", "Invalid Intent -- has no provider");
-		} else if (toBroadcast == null) {
-			Log.e("LocationPoller",
-					"Invalid Intent -- has no Intent to broadcast");
-		} else {
-			getLock(ctxt).acquire();
+        if (provider == null) {
+            Log.e("LocationPoller", "Invalid Intent -- has no provider");
+        } else if (toBroadcast == null) {
+            Log.e("LocationPoller", "Invalid Intent -- has no Intent to broadcast");
+        } else {
 
-			i.setClass(ctxt, LocationPollerService.class);
+            getLock(ctxt).acquire();
 
-			ctxt.startService(i);
-		}
-	}
+            i.setClass(ctxt, LocationPollerService.class);
 
-	/**
-	 * Obtain the LocationManager on startup
-	 */
-	@Override
-	public void onCreate() {
-		locMgr = (LocationManager) getSystemService(LOCATION_SERVICE);
-	}
+            ctxt.startService(i);
 
-	/**
-	 * No-op implementation as required by superclass
-	 */
-	@Override
-	public IBinder onBind(Intent i) {
-		return (null);
-	}
+        }
+    }
 
-	/**
-	 * Validates the required extras (EXTRA_PROVIDER and EXTRA_INTENT). If valid, updates the Intent to be broadcast
-	 * with the application's own package (required to keep the broadcast within this application, so we do not leak
-	 * security information). Then, forks a PollerThread to do the actual location lookup.
-	 * 
-	 * @return START_REDELIVER_INTENT to ensure we get the last request again
-	 */
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		String provider = intent.getStringExtra(LocationPoller.EXTRA_PROVIDER);
-		Intent toBroadcast = (Intent) intent.getExtras().get(
-				LocationPoller.EXTRA_INTENT);
+    /**
+     * Obtain the LocationManager on startup
+     */
+    @Override
+    public void onCreate() {
+        locMgr = (LocationManager) getSystemService(LOCATION_SERVICE);
+    }
 
-		toBroadcast.setPackage(getPackageName());
+    /**
+     * No-op implementation as required by superclass
+     */
+    @Override
+    public IBinder onBind(Intent i) {
+        return (null);
+    }
 
-		new PollerThread(getLock(this), locMgr, provider, toBroadcast).start();
+    /**
+     * Validates the required extras (EXTRA_PROVIDER and EXTRA_INTENT). If valid, updates the Intent to be broadcast
+     * with the application's own package (required to keep the broadcast within this application, so we do not leak
+     * security information). Then, forks a PollerThread to do the actual location lookup.
+     *
+     * @return START_REDELIVER_INTENT to ensure we get the last request again
+     */
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        String provider = intent.getStringExtra(LocationPoller.EXTRA_PROVIDER);
+        Intent toBroadcast = (Intent) intent.getExtras().get(LocationPoller.EXTRA_INTENT);
 
-		return (START_REDELIVER_INTENT);
-	}
+        toBroadcast.setPackage(getPackageName());
 
-	/**
-	 * A WakefulThread subclass that knows how to look up the current location, plus handle the timeout scenario.
-	 */
-	private class PollerThread extends WakefulThread {
-		private LocationManager locMgr = null;
-		private String provider = null;
-		private Intent intentTemplate = null;
-		private Runnable onTimeout = null;
-		private LocationListener listener = new LocationListener() {
-			/**
-			 * If we get a fix, get rid of the timeout condition, then attach the location as an extra (EXTRA_LOCATION)
-			 * on the Intent, broadcast it, then exit the polling loop so the thread terminates.
-			 */
-			public void onLocationChanged(Location location) {
-				handler.removeCallbacks(onTimeout);
-				Intent toBroadcast = new Intent(intentTemplate);
+        new PollerThread(getLock(this), locMgr, provider, toBroadcast).start();
 
-				toBroadcast.putExtra(LocationPoller.EXTRA_LOCATION, location);
-				sendBroadcast(toBroadcast);
-				quit();
-			}
+        return (START_REDELIVER_INTENT);
+    }
 
-			public void onProviderDisabled(String provider) {
-				// required for interface, not used
-			}
+    /**
+     * A WakefulThread subclass that knows how to look up the current location, plus handle the timeout scenario.
+     */
+    private class PollerThread extends WakefulThread {
+        private LocationManager locMgr = null;
+        private String provider = null;
+        private Intent intentTemplate = null;
+        private Runnable onTimeout = null;
+        private LocationListener listener = new LocationListener() {
+            /**
+             * If we get a fix, get rid of the timeout condition, then attach the location as an extra (EXTRA_LOCATION)
+             * on the Intent, broadcast it, then exit the polling loop so the thread terminates.
+             */
+            public void onLocationChanged(Location location) {
+                handler.removeCallbacks(onTimeout);
+                Intent toBroadcast = new Intent(intentTemplate);
 
-			public void onProviderEnabled(String provider) {
-				// required for interface, not used
-			}
+                toBroadcast.putExtra(LocationPoller.EXTRA_LOCATION, location);
+                sendBroadcast(toBroadcast);
+                quit();
+            }
 
-			public void onStatusChanged(String provider, int status,
-										Bundle extras) {
-				// required for interface, not used
-			}
-		};
-		private Handler handler = new Handler();
+            public void onProviderDisabled(String provider) {
+                // required for interface, not used
+            }
 
-		/**
-		 * Constructor.
-		 * 
-		 * @param lock
-		 *            Already-locked WakeLock
-		 * @param locMgr
-		 *            LocationManager for doing the location lookup
-		 * @param provider
-		 *            name of the location provider to use
-		 * @param intentTemplate
-		 *            Intent to be broadcast when location found or timeout occurs
-		 */
-		PollerThread(PowerManager.WakeLock lock, LocationManager locMgr,
-				String provider, Intent intentTemplate) {
-			super(lock, "LocationPoller-PollerThread");
+            public void onProviderEnabled(String provider) {
+                // required for interface, not used
+            }
 
-			this.locMgr = locMgr;
-			this.provider = provider;
-			this.intentTemplate = intentTemplate;
-		}
+            public void onStatusChanged(String provider, int status,
+                                        Bundle extras) {
+                // required for interface, not used
+            }
+        };
+        private Handler handler = new Handler();
 
-		/**
-		 * Called before the Handler loop begins. Registers a timeout, so we do not wait forever for a location. When a
-		 * timeout occurs, broadcast an Intent containing an error extra, then terminate the thread. Also, requests a
-		 * location update from the LocationManager.
-		 */
-		@Override
-		protected void onPreExecute() {
-			onTimeout = new Runnable() {
-				public void run() {
-					Intent toBroadcast = new Intent(intentTemplate);
+        /**
+         * Constructor.
+         *
+         * @param lock           Already-locked WakeLock
+         * @param locMgr         LocationManager for doing the location lookup
+         * @param provider       name of the location provider to use
+         * @param intentTemplate Intent to be broadcast when location found or timeout occurs
+         */
+        PollerThread(PowerManager.WakeLock lock, LocationManager locMgr,
+                     String provider, Intent intentTemplate) {
+            super(lock, "LocationPoller-PollerThread");
 
-					toBroadcast
-							.putExtra(LocationPoller.EXTRA_ERROR, "Timeout!");
-					toBroadcast.putExtra(LocationPoller.EXTRA_LASTKNOWN,
-							locMgr.getLastKnownLocation(provider));
-					sendBroadcast(toBroadcast);
-					quit();
-				}
-			};
+            this.locMgr = locMgr;
+            this.provider = provider;
+            this.intentTemplate = intentTemplate;
+        }
 
-			handler.postDelayed(onTimeout, TIMEOUT);
-			locMgr.requestLocationUpdates(provider, 0, 0, listener);
-		}
+        /**
+         * Called before the Handler loop begins. Registers a timeout, so we do not wait forever for a location. When a
+         * timeout occurs, broadcast an Intent containing an error extra, then terminate the thread. Also, requests a
+         * location update from the LocationManager.
+         */
+        @Override
+        protected void onPreExecute() {
+            onTimeout = new Runnable() {
+                public void run() {
+                    Intent toBroadcast = new Intent(intentTemplate);
 
-		/**
-		 * Called when the Handler loop ends. Removes the location listener.
-		 */
-		@Override
-		protected void onPostExecute() {
-			locMgr.removeUpdates(listener);
+                    toBroadcast
+                            .putExtra(LocationPoller.EXTRA_ERROR, "Timeout!");
+                    toBroadcast.putExtra(LocationPoller.EXTRA_LASTKNOWN,
+                            locMgr.getLastKnownLocation(provider));
+                    sendBroadcast(toBroadcast);
+                    quit();
+                }
+            };
 
-			super.onPostExecute();
-		}
+            handler.postDelayed(onTimeout, TIMEOUT);
+            locMgr.requestLocationUpdates(provider, 0, 0, listener);
+        }
 
-		/**
-		 * Called when the WakeLock is completely unlocked. Stops the service, so everything shuts down.
-		 */
-		@Override
-		protected void onUnlocked() {
-			stopSelf();
-		}
-	}
+        /**
+         * Called when the Handler loop ends. Removes the location listener.
+         */
+        @Override
+        protected void onPostExecute() {
+            locMgr.removeUpdates(listener);
+
+            super.onPostExecute();
+        }
+
+        /**
+         * Called when the WakeLock is completely unlocked. Stops the service, so everything shuts down.
+         */
+        @Override
+        protected void onUnlocked() {
+            stopSelf();
+        }
+    }
 }
