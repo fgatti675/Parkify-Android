@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @author Francesco
  */
-public class ParkedCarReceiver extends BroadcastReceiver {
+public class ParkedCarPositionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 

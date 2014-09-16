@@ -26,8 +26,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
 
-            device = (BluetoothDevice) intent
-                    .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
             Log.d("Bluetooth", "Bluetooth: " + intent.getAction());
             Log.d("Bluetooth", device.getName() + " " + device.getAddress());
@@ -47,13 +46,11 @@ public class BluetoothDetector extends BroadcastReceiver {
                 // we create an intent to start the location poller service, as declared in manifest
                 Intent i = new Intent(context, LocationPoller.class);
                 i.putExtra(LocationPoller.EXTRA_INTENT, new Intent(Util.INTENT_NEW_CAR_POS));
-                i.putExtra(LocationPoller.EXTRA_PROVIDER,
-                        LocationManager.GPS_PROVIDER);
+                i.putExtra(LocationPoller.EXTRA_PROVIDER, LocationManager.GPS_PROVIDER);
                 context.sendBroadcast(i);
 
                 // we send it twice, for gps and network provider
-                i.putExtra(LocationPoller.EXTRA_PROVIDER,
-                        LocationManager.NETWORK_PROVIDER);
+                i.putExtra(LocationPoller.EXTRA_PROVIDER, LocationManager.NETWORK_PROVIDER);
                 context.sendBroadcast(i);
             }
         }

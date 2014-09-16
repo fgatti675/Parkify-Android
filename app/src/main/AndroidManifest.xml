@@ -49,11 +49,13 @@
 
 
         <receiver android:name=".location.LocationPoller" />
-        <receiver android:name=".auxiliar.ParkedCarReceiver" >
+
+        <receiver android:name=".auxiliar.ParkedCarPositionReceiver" >
             <intent-filter>
                 <action android:name="NEW_CAR_POSITION" />
             </intent-filter>
         </receiver>
+
         <receiver android:name=".auxiliar.BluetoothDetector" >
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
