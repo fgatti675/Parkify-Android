@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    tools:context=".MapsActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -13,10 +15,11 @@
     <Button
         android:id="@+id/linkButton"
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignTop="@+id/userButton"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="5dp"
         android:text="@string/link_device"
         android:background="@drawable/plain_button"
         android:layout_toLeftOf="@+id/carButton" />
@@ -27,15 +30,19 @@
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:padding="8dp"
+        android:adjustViewBounds="true"
         android:src="@drawable/ic_action_location_found"
+        android:scaleType="fitXY"
         android:background="@drawable/plain_button" />
 
     <ImageButton
         android:id="@+id/carButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:layout_marginRight="5dp"
         android:layout_alignTop="@+id/userButton"
         android:layout_toLeftOf="@+id/userButton"
         android:background="@drawable/plain_button"
