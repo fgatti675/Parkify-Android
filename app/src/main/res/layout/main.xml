@@ -41,5 +41,13 @@
         android:background="@drawable/plain_button"
         android:src="@drawable/car_icon" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="POST"
+        android:id="@+id/postButton"
+        android:layout_centerVertical="true"
+        android:layout_alignRight="@+id/userButton" />
+
 
 </RelativeLayout>

@@ -16,20 +16,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bahpps.cahue.auxiliar.BluetoothDetector;
-import com.bahpps.cahue.auxiliar.Util;
+import com.bahpps.cahue.util.BluetoothDetector;
+import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
 import java.util.Set;

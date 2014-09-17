@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,10 +19,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.bahpps.cahue.auxiliar.BluetoothDetector;
-import com.bahpps.cahue.auxiliar.CarLocationManager;
-import com.bahpps.cahue.auxiliar.Util;
-import com.bahpps.cahue.location.LocationPoller;
+import com.bahpps.cahue.util.BluetoothDetector;
+import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
@@ -51,7 +51,6 @@ public class MapsActivity extends Activity
 
     protected static final String TAG = "Maps";
 
-    public static final String EXTRA_LOCATION = "EXTRA_LOCATION";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -87,7 +86,7 @@ public class MapsActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Location location = (Location) intent.getExtras().get(LocationPoller.EXTRA_LOCATION);
+            Location location = (Location) intent.getExtras().get(getString(R.string.intent_extra_car_location));
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
                 setCar(location);
@@ -143,6 +142,19 @@ public class MapsActivity extends Activity
             }
         });
 
+        Button button = (Button) findViewById(R.id.postButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new AsyncTask() {
+                    @Override
+                    protected Object doInBackground(Object[] objects) {
+                        CarLocationManager.postLocation(MapsActivity.this);
+                        return null;
+                    }
+                }.execute();
+            }
+        });
+
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
         linkButton.setOnClickListener(new View.OnClickListener() {
@@ -159,6 +171,11 @@ public class MapsActivity extends Activity
         if (!dialogShown) {
             showHelpDialog();
         }
+
+
+        // we add the car on the stored position
+        Location carLocation  = CarLocationManager.getStoredLocation(this);
+        setCar(carLocation);
 
     }
 
@@ -189,10 +206,6 @@ public class MapsActivity extends Activity
             linkButton.setVisibility(View.VISIBLE);
         }
 
-        Location carLocation  = CarLocationManager.getStoredLocation(this);
-
-        // we add the car on the stored position
-        setCar(carLocation);
 
     }
 
@@ -275,7 +288,7 @@ public class MapsActivity extends Activity
 
         if (latitude != 0 && longitude != 0) {
 
-            Log.i(TAG, "Car location: " + latitude + " " + longitude);
+            Log.i(TAG, "Setting car in map: " + latitude + " " + longitude);
 
             iconFactory.setContentRotation(-90);
             iconFactory.setStyle(IconGenerator.STYLE_RED);

@@ -49,19 +49,19 @@
 
         <receiver android:name=".location.LocationPoller" />
 
-        <receiver android:name=".auxiliar.ParkedCarPositionReceiver">
+        <receiver android:name=".util.ParkedCarLocationReceiver">
             <intent-filter>
-                <action android:name="@string/intent_car_parked" />
+                <action android:name="INTENT_CAR_PARKED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".auxiliar.CarMovedPositionReceiver">
+        <receiver android:name=".util.CarMovedPositionReceiver">
             <intent-filter>
-                <action android:name="@string/intent_car_moved" />
+                <action android:name="INTENT_CAR_MOVED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".auxiliar.BluetoothDetector">
+        <receiver android:name=".util.BluetoothDetector">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />

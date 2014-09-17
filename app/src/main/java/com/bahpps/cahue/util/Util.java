@@ -1,4 +1,4 @@
-package com.bahpps.cahue.auxiliar;
+package com.bahpps.cahue.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

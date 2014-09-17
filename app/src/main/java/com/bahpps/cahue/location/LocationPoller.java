@@ -10,9 +10,9 @@ import android.util.Log;
  * to make sure the WakeLock stuff is done properly.
  */
 public class LocationPoller extends BroadcastReceiver {
+
 	public static final String EXTRA_ERROR = "com.bahpps.cahue.EXTRA_ERROR";
 	public static final String EXTRA_INTENT = "com.bahpps.cahue.EXTRA_INTENT";
-	public static final String EXTRA_LOCATION = "com.bahpps.cahue.EXTRA_LOCATION";
 	public static final String EXTRA_PROVIDER = "com.bahpps.cahue.EXTRA_PROVIDER";
 	public static final String EXTRA_LASTKNOWN = "com.bahpps.cahue.EXTRA_LASTKNOWN";
 

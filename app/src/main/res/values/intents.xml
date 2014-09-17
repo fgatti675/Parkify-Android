@@ -3,5 +3,6 @@
 
     <string name="intent_car_parked">INTENT_CAR_PARKED</string>
     <string name="intent_car_moved">INTENT_CAR_MOVED</string>
+    <string name="intent_extra_car_location">INTENT_EXTRA_CAR_LOCATION</string>
 
 </resources>

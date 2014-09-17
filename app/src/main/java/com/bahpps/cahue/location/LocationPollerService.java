@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.bahpps.cahue.R;
+
 /**
  * Service providing the guts of the location polling engine. Uses a WakeLock to ensure the CPU stays on while the
  * location lookup is going on. Handles both successful and timeout conditions.
@@ -116,7 +118,7 @@ public class LocationPollerService extends Service {
                 handler.removeCallbacks(onTimeout);
                 Intent toBroadcast = new Intent(intentTemplate);
 
-                toBroadcast.putExtra(LocationPoller.EXTRA_LOCATION, location);
+                toBroadcast.putExtra(getString(R.string.intent_extra_car_location), location);
                 sendBroadcast(toBroadcast);
                 quit();
             }

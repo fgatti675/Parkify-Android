@@ -1,4 +1,4 @@
-package com.bahpps.cahue.auxiliar;
+package com.bahpps.cahue.util;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -56,7 +56,14 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we store the time the bt device was disconnected
         prefs.edit().putLong(PREF_BT_CONNECTION_TIME, (new GregorianCalendar().getTimeInMillis())).apply();
 
-        Intent i = new Intent(context, CarLocationManager.class);
+        // we create an intent to start the location poller service, as declared in manifest
+        Intent i = new Intent(context, LocationPoller.class);
+        i.putExtra(LocationPoller.EXTRA_INTENT, new Intent(context.getString(R.string.intent_car_moved)));
+        i.putExtra(LocationPoller.EXTRA_PROVIDER, LocationManager.GPS_PROVIDER);
+        context.sendBroadcast(i);
+
+        // we send it twice, for gps and network provider
+        i.putExtra(LocationPoller.EXTRA_PROVIDER, LocationManager.NETWORK_PROVIDER);
         context.sendBroadcast(i);
 
     }
