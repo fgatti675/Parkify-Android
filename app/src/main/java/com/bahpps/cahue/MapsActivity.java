@@ -24,9 +24,10 @@ import com.bahpps.cahue.util.CarLocationManager;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -43,17 +44,15 @@ import java.util.Calendar;
 
 public class MapsActivity extends Activity
         implements
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapLongClickListener {
 
     protected static final String TAG = "Maps";
 
-
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -62,7 +61,7 @@ public class MapsActivity extends Activity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-    private LocationClient mLocationClient;
+    private GoogleApiClient googleApiClient;
     private Marker carMarker;
 
 
@@ -86,7 +85,7 @@ public class MapsActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Location location = (Location) intent.getExtras().get(getString(R.string.intent_extra_car_location));
+            Location location = (Location) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
                 setCar(location);
@@ -142,13 +141,28 @@ public class MapsActivity extends Activity
             }
         });
 
-        Button button = (Button) findViewById(R.id.postButton);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button btDisconnect = (Button) findViewById(R.id.btDisconnectButton);
+        btDisconnect.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 new AsyncTask() {
                     @Override
                     protected Object doInBackground(Object[] objects) {
-                        CarLocationManager.postLocation(MapsActivity.this);
+                        BluetoothDetector bt = new BluetoothDetector();
+                        bt.onBtDisconnected(getApplicationContext());
+                        return null;
+                    }
+                }.execute();
+            }
+        });
+
+        Button btConnect = (Button) findViewById(R.id.btConnectButton);
+        btConnect.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new AsyncTask() {
+                    @Override
+                    protected Object doInBackground(Object[] objects) {
+                        BluetoothDetector bt = new BluetoothDetector();
+                        bt.onBtConnected(getApplicationContext());
                         return null;
                     }
                 }.execute();
@@ -191,10 +205,10 @@ public class MapsActivity extends Activity
         super.onResume();
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
-        mLocationClient.connect();
+        googleApiClient.connect();
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(getString(R.string.intent_car_parked)));
+        registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
 
         // bt adress on the linked device
         String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
@@ -213,8 +227,8 @@ public class MapsActivity extends Activity
     protected void onPause() {
         super.onPause();
         unregisterReceiver(carPosReceiver);
-        if (mLocationClient != null) {
-            mLocationClient.disconnect();
+        if (googleApiClient != null) {
+            googleApiClient.disconnect();
         }
     }
 
@@ -247,11 +261,12 @@ public class MapsActivity extends Activity
     }
 
     private void setUpLocationClientIfNeeded() {
-        if (mLocationClient == null) {
-            mLocationClient = new LocationClient(
-                    getApplicationContext(),
-                    this,  // ConnectionCallbacks
-                    this); // OnConnectionFailedListener
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
         }
     }
 
@@ -361,9 +376,10 @@ public class MapsActivity extends Activity
      */
     @Override
     public void onConnected(Bundle connectionHint) {
-        mLocationClient.requestLocationUpdates(
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
                 REQUEST,
-                this);  // LocationListener
+                this);
 
         // call convenience method that zooms map on our location only on starting the app
         if (firstRun) {
@@ -378,21 +394,11 @@ public class MapsActivity extends Activity
         }
     }
 
-    /**
-     * Callback called when disconnected from GCore. Implementation of {@link GooglePlayServicesClient.ConnectionCallbacks}.
-     */
     @Override
-    public void onDisconnected() {
-        // Do nothing
+    public void onConnectionSuspended(int i) {
+
     }
 
-    /**
-     * Implementation of {@link GooglePlayServicesClient.OnConnectionFailedListener}.
-     */
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        // Do nothing
-    }
 
     @Override
     public boolean onMyLocationButtonClick() {
@@ -498,7 +504,7 @@ public class MapsActivity extends Activity
     }
 
     private LatLng getUserPosition() {
-        Location userLastLocation = mLocationClient.getLastLocation();
+        Location userLastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
     }
 
@@ -507,4 +513,8 @@ public class MapsActivity extends Activity
     }
 
 
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
 }

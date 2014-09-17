@@ -1,6 +1,7 @@
 package com.bahpps.cahue.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
@@ -25,8 +26,10 @@ import java.util.Locale;
  */
 public class CarLocationManager {
 
+    public final static String INTENT = "CAR_MOVED_INTENT";
+    public final static String INTENT_POSITION = "CAR_MOVED_INTENT_POSITION";
+
     private final static String TAG = "CarLocationManager";
-    private final static String URL = "http://glossy-radio.appspot.com/spots";
 
 
     /**
@@ -48,6 +51,10 @@ public class CarLocationManager {
         editor.apply();
 
         Log.i(TAG, "Stored new location: " + loc);
+
+        Intent intent = new Intent(INTENT);
+        intent.putExtra(INTENT_POSITION, loc);
+        context.sendBroadcast(intent);
     }
 
     public static Location getStoredLocation(Context context){
@@ -72,49 +79,4 @@ public class CarLocationManager {
 
     }
 
-    public static void postLocation(Context context){
-        try {
-
-            Log.i(TAG, "Posting users location");
-            Location lastCarLocation = getStoredLocation(context);
-
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(URL);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json");
-
-            String json = getJSON(lastCarLocation);
-            Log.i(TAG, "Posting\n" + json);
-            httpPost.setEntity(new StringEntity(json));
-
-            HttpResponse response = httpclient.execute(httpPost);
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.i(TAG, "Post result: " + statusLine.getStatusCode());
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
-            } else {
-                //Closes the connection.
-                response.getEntity().getContent().close();
-                throw new IOException(statusLine.getReasonPhrase());
-            }
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static String getJSON(Location location) {
-        return String.format(Locale.ENGLISH,
-                "{\n" +
-                        "    \"latitude\" : \"%f\",\n" +
-                        "    \"longitude\": \"%f\"\n" +
-                        "}",
-                location.getLatitude(),
-                location.getLongitude());
-    }
 }

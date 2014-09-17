@@ -44,10 +44,18 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="POST"
-        android:id="@+id/postButton"
+        android:text="BT Connect"
+        android:id="@+id/btConnectButton"
         android:layout_centerVertical="true"
         android:layout_alignRight="@+id/userButton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BT Disconnect"
+        android:id="@+id/btDisconnectButton"
+        android:layout_above="@+id/btConnectButton"
+        android:layout_alignRight="@+id/btConnectButton" />
 
 
 </RelativeLayout>

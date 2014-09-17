@@ -9,6 +9,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.util.CarMovedPositionReceiver;
+
 
 /**
  * This class is used as a dialog to ask the user if he is sure to store the location in
@@ -30,10 +33,9 @@ public class SetCarPositionDialog extends DialogFragment  {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Log.w("CAR_DIALOG", location.toString());
+
                         // If ok, we just send and intent and leave the location receivers to do all the work
-                        Intent intent = new Intent(getString(R.string.intent_car_parked));
-                        intent.putExtra(getString(R.string.intent_extra_car_location), location);
-                        getActivity().sendBroadcast(intent);
+                        CarLocationManager.saveLocation(getActivity(), location);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
