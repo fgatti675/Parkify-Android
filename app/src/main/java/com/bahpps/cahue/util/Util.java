@@ -49,7 +49,7 @@ public class Util {
 		text.setText(string);
 
 		Toast toast = new Toast(context.getApplicationContext());
-		toast.setGravity(Gravity.FILL_HORIZONTAL, 0, 0);
+		toast.setGravity(Gravity.FILL_HORIZONTAL, 0, 150);
 		toast.setDuration(length);
 		toast.setView(layout);
 		toast.show();
