@@ -16,14 +16,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 /**
- * This class is in charge of receiving location updates, and store it as the cars position. It is in charge of deciding
- * the most accurate position (where we think the car is), based on wifi and gps position providers.
+ * This class is in charge of uploading the location of the car to the server when BT connects
+ * and the car starts moving.
  *
  * @author Francesco
  */
@@ -81,13 +83,16 @@ public class CarMovedPositionReceiver extends LocationPoller {
 
 
     private static String getJSON(Location location) {
-        return String.format(Locale.ENGLISH,
-                "{\n" +
-                        "    \"latitude\" : \"%f\",\n" +
-                        "    \"longitude\": \"%f\"\n" +
-                        "}",
-                location.getLatitude(),
-                location.getLongitude());
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("latitude", location.getLatitude());
+            obj.put("longitude", location.getLongitude());
+            obj.put("accuracy", location.getAccuracy());
+            return obj.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

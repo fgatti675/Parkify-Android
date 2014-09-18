@@ -57,13 +57,13 @@ public class MapsActivity extends Activity
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(5000)         // 5 seconds
+            .setInterval(2000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
     private GoogleApiClient googleApiClient;
-    private Marker carMarker;
 
+    private Marker carMarker;
 
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
@@ -74,7 +74,6 @@ public class MapsActivity extends Activity
 
     private IconGenerator iconFactory;
 
-    // TODO: remove static variable?
     private static boolean firstRun = true;
 
 
@@ -138,34 +137,6 @@ public class MapsActivity extends Activity
         userButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 zoomToMyLocation();
-            }
-        });
-
-        Button btDisconnect = (Button) findViewById(R.id.btDisconnectButton);
-        btDisconnect.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                new AsyncTask() {
-                    @Override
-                    protected Object doInBackground(Object[] objects) {
-                        BluetoothDetector bt = new BluetoothDetector();
-                        bt.onBtDisconnected(getApplicationContext());
-                        return null;
-                    }
-                }.execute();
-            }
-        });
-
-        Button btConnect = (Button) findViewById(R.id.btConnectButton);
-        btConnect.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                new AsyncTask() {
-                    @Override
-                    protected Object doInBackground(Object[] objects) {
-                        BluetoothDetector bt = new BluetoothDetector();
-                        bt.onBtConnected(getApplicationContext());
-                        return null;
-                    }
-                }.execute();
             }
         });
 
@@ -473,8 +444,8 @@ public class MapsActivity extends Activity
                 .build();
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
-        if (mMap.getMaxZoomLevel() > 15.5f)
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15.5f));
+        if (mMap.getCameraPosition().zoom > 15.5f)
+            zoomToCar();
 
     }
 
