@@ -45,8 +45,11 @@
         android:layout_marginRight="5dp"
         android:layout_alignTop="@+id/userButton"
         android:layout_toLeftOf="@+id/userButton"
+        android:padding="8dp"
+        android:adjustViewBounds="true"
         android:background="@drawable/plain_button"
-        android:src="@drawable/car_icon" />
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_icon_car" />
 
     <Button
         android:layout_width="wrap_content"

@@ -188,12 +188,12 @@ public class MapsActivity extends Activity
 
 
         // we add the car on the stored position
-        Location carLocation  = CarLocationManager.getStoredLocation(this);
+        Location carLocation = CarLocationManager.getStoredLocation(this);
         setCar(carLocation);
 
     }
 
-    private void showHelpDialog(){
+    private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
         dialog.show(getFragmentManager(), "InfoDialogFragment");
         prefs.edit().putBoolean(Util.PREF_DIALOG_SHOWN, true).apply();
@@ -287,7 +287,6 @@ public class MapsActivity extends Activity
 
     /**
      * Displays the car in the map
-     *
      */
     private void setCar(Location carLocation) {
 
@@ -295,6 +294,8 @@ public class MapsActivity extends Activity
         if (carMarker != null) {
             carMarker.remove();
         }
+
+        if (carLocation == null) return;
 
         // TODO accuracy
 
@@ -471,7 +472,9 @@ public class MapsActivity extends Activity
                 .include(getUserPosition())
                 .build();
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
+        if (mMap.getMaxZoomLevel() > 15.5f)
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(15.5f));
 
     }
 
@@ -488,7 +491,9 @@ public class MapsActivity extends Activity
      * This method zooms to the car's location.
      */
     private void zoomToCar() {
+
         if (carMarker == null) return;
+
         LatLng loc = getCarPosition();
 
         if (loc != null) {
