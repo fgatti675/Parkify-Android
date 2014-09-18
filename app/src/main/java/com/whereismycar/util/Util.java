@@ -1,4 +1,4 @@
-package com.bahpps.cahue.util;
+package com.whereismycar.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bahpps.cahue.R;
+import com.whereismycar.R;
 
 public class Util {
 

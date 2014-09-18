@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.whereismycar;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -19,9 +18,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.bahpps.cahue.util.BluetoothDetector;
-import com.bahpps.cahue.util.CarLocationManager;
-import com.bahpps.cahue.util.Util;
+import com.whereismycar.util.BluetoothDetector;
+import com.whereismycar.util.CarLocationManager;
+import com.whereismycar.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.api.GoogleApiClient;

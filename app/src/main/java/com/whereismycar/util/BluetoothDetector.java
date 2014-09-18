@@ -1,14 +1,11 @@
-package com.bahpps.cahue.util;
+package com.whereismycar.util;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.LocationManager;
 import android.util.Log;
-
-import com.bahpps.cahue.R;
 
 import java.util.GregorianCalendar;
 

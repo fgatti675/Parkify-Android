@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="app_name">Where is my Car?</string>
+
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
     <string name="select_device">Selezionare il dispositivo da collegare</string>
