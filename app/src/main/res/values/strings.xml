@@ -27,7 +27,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
-    <string name="info_text">Welcome to %1$s !\n\nThis app will automatically record your car\'s position when you walk away from it.\n\nAll you have to do is select which is the Bluetooth device installed in your car and forget about where you parked. You will need to keep your Bluetooth activated and at least one of GPS or WIFI.\n\nIf you want to set your car\'s position manually, you can double tap or long press in the map.</string>
+    <string name="info_text">Welcome to %1$s !\n\nThis app will automatically record your car\'s position when you walk away from it.\n\nAll you have to do is select which is the Bluetooth device installed in your car and forget about where you parked. You will need to keep your Bluetooth activated and at least one of GPS or WIFI.\n\nIf you want to set your car\'s position manually, you can long press in the map.</string>
 
     <!-- Time -->
     <string name="seconds">seconds</string>

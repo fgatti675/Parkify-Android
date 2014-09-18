@@ -105,6 +105,9 @@ public class DeviceListActivity extends Activity {
         }
 
         doDiscovery();
+
+        // animation
+        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
     }
 
     /**
@@ -136,6 +139,13 @@ public class DeviceListActivity extends Activity {
         prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).apply();
         Util.createToast(this, getString(R.string.link_removed), Toast.LENGTH_SHORT);
         finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //closing transition animations
+        overridePendingTransition(R.anim.activity_open_scale, R.anim.activity_close_translate);
     }
 
     @Override

@@ -19,7 +19,7 @@
     <string name="car_dialog_text">Ti piacerebbe impostare la posizione della macchina qui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancella</string>
-    <string name="info_text">Benvenuto a %1$s !\n\nQuesta applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nTutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi fare doppio tap o premere a lungo nella mappa.</string>
+    <string name="info_text">Benvenuto a %1$s !\n\nQuesta applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nTutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.</string>
 
     <!-- Time -->
     <string name="seconds">secondi</string>

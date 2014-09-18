@@ -20,9 +20,7 @@
     <string name="car_dialog_text">¿Quieres establecer la posicion del coche aqui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
-    <string name="info_text">¡ Bienvenido a %1$s !\n\nEsta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\n
-        Todo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte. Necesitarás tener el Bluetooth disponible y al menos uno entre GPS y WIFI\n\n
-        Si quieres establecer la posicion de tu coche manualmente, puedes hacer doble click o hacer click largo en cualquier punto del mapa.</string>
+    <string name="info_text">¡ Bienvenido a %1$s !\n\nEsta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\nTodo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte. Necesitarás tener el Bluetooth disponible y los servicios de localizacion activados\n\nSi quieres establecer la posicion de tu coche manualmente, puedes hacer click largo en cualquier punto del mapa.</string>
 
     <!-- Time -->
     <string name="seconds">segundos</string>
