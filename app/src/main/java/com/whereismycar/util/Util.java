@@ -2,6 +2,8 @@ package com.whereismycar.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +51,13 @@ public class Util {
 		text.setText(string);
 
 		Toast toast = new Toast(context.getApplicationContext());
-		toast.setGravity(Gravity.FILL_HORIZONTAL, 0, 150);
+
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+                new int[] { android.R.attr.actionBarSize });
+        int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+
+        toast.setGravity(Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, actionBarSize);
 		toast.setDuration(length);
 		toast.setView(layout);
 		toast.show();

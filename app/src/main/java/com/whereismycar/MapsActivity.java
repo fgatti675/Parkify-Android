@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,8 +20,11 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.whereismycar.util.BluetoothDetector;
 import com.whereismycar.util.CarLocationManager;
+import com.whereismycar.util.GMapV2Direction;
 import com.whereismycar.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -39,6 +44,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 
+import org.w3c.dom.Document;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MapsActivity extends Activity
@@ -46,7 +54,6 @@ public class MapsActivity extends Activity
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMapLongClickListener {
 
     protected static final String TAG = "Maps";
@@ -75,7 +82,15 @@ public class MapsActivity extends Activity
 
     private static boolean firstRun = true;
 
+    /**
+     * Directions delegate
+     */
+    private GMapV2Direction md;
 
+    /**
+     * Actual lines representing the directions
+     */
+    private Polyline directions;
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -87,6 +102,7 @@ public class MapsActivity extends Activity
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
                 setCar(location);
+                addDirections();
             }
 
         }
@@ -94,7 +110,9 @@ public class MapsActivity extends Activity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.main);
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
@@ -110,6 +128,9 @@ public class MapsActivity extends Activity
         } else if (!mBluetoothAdapter.isEnabled()) {
             Util.noBluetooth(this);
         }
+
+        if (md == null)
+            md = new GMapV2Direction();
 
         // try to reuse map
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapview);
@@ -160,6 +181,39 @@ public class MapsActivity extends Activity
         // we add the car on the stored position
         Location carLocation = CarLocationManager.getStoredLocation(this);
         setCar(carLocation);
+
+
+    }
+
+    private void addDirections() {
+        final LatLng carPosition = getCarPosition();
+
+        if (carPosition == null) {
+            return;
+        }
+
+        Log.i(TAG, "addDirections");
+
+        new AsyncTask<Object, Object, Document>() {
+            @Override
+            protected Document doInBackground(Object[] objects) {
+
+                Document doc = md.getDocument(getUserPosition(), carPosition, GMapV2Direction.MODE_WALKING);
+
+                return doc;
+            }
+
+            @Override
+            protected void onPostExecute(Document doc) {
+                ArrayList<LatLng> directionPoint = md.getDirection(doc);
+                PolylineOptions rectLine = new PolylineOptions().width(3).color(Color.rgb(242, 69, 54));
+
+                for (int i = 0; i < directionPoint.size(); i++) {
+                    rectLine.add(directionPoint.get(i));
+                }
+                directions = mMap.addPolyline(rectLine);
+            }
+        }.execute();
 
     }
 
@@ -249,7 +303,6 @@ public class MapsActivity extends Activity
     private void setUpMap() {
         mMap.setOnMapLongClickListener(this);
         mMap.setMyLocationEnabled(true);
-        mMap.setOnMyLocationButtonClickListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
@@ -262,7 +315,7 @@ public class MapsActivity extends Activity
 
         // remove previous
         if (carMarker != null) {
-            carMarker.remove();
+            mMap.clear();
         }
 
         if (carLocation == null) return;
@@ -353,16 +406,16 @@ public class MapsActivity extends Activity
                 this);
 
         // call convenience method that zooms map on our location only on starting the app
-        if (firstRun) {
 
-            if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0) {
-                zoomToMyLocation();
-            } else {
-                zoomToSeeBoth();
-            }
-
-            firstRun = false;
+        if (prefs.getLong(Util.PREF_CAR_TIME, 0) == 0) {
+            zoomToMyLocation();
+        } else {
+            zoomToSeeBoth();
         }
+
+        addDirections();
+
+        firstRun = false;
     }
 
     @Override
@@ -370,13 +423,6 @@ public class MapsActivity extends Activity
 
     }
 
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
-        return false;
-    }
 
     /**
      * This method shows the Toast when the car icon is pressed, telling the user the parking time
@@ -442,7 +488,7 @@ public class MapsActivity extends Activity
                 .include(getUserPosition())
                 .build();
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 250));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));
         if (mMap.getCameraPosition().zoom > 15.5f)
             zoomToCar();
 
@@ -484,6 +530,7 @@ public class MapsActivity extends Activity
     }
 
     private LatLng getCarPosition() {
+        if (carMarker == null) return null;
         return carMarker.getPosition();
     }
 
