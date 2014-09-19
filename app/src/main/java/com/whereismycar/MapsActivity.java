@@ -142,6 +142,7 @@ public class MapsActivity extends Activity
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
             mMap = mapFragment.getMap();
+            mMap.clear();
         }
 
         // button for moving to the car's position

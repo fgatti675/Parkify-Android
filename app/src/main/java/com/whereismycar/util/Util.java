@@ -67,7 +67,7 @@ public class Util {
 	 * Shows a toast in case no BT is detected
 	 */
 	public static void noBluetooth(Context context) {
-		Util.createToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_SHORT);
+		Util.createToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_LONG);
 	}
 
 
