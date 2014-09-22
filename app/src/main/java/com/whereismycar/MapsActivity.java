@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -93,6 +92,9 @@ public class MapsActivity extends Activity
 
     private ImageButton carButton;
 
+    private boolean justFinishedAnimating = false;
+
+
     /**
      * Directions delegate
      */
@@ -123,6 +125,7 @@ public class MapsActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
 
         setContentView(R.layout.main);
         setUpMapIfNeeded();
@@ -247,14 +250,9 @@ public class MapsActivity extends Activity
         Log.d(TAG, "Setting mode to " + mode);
 
         if (mode == Mode.FOLLOWING) {
-            if (getCarPosition() == null) {
-                zoomToMyLocation();
-            } else {
-                zoomToSeeBoth();
-                carButton.setImageResource(R.drawable.ic_icon_car_red);
-            }
+            carButton.setImageResource(R.drawable.ic_icon_car_red);
+            setFollowingCamera();
         } else if (mode == Mode.FREE) {
-            mMap.setOnCameraChangeListener(null);
             carButton.setImageResource(R.drawable.ic_icon_car);
         }
 
@@ -364,7 +362,10 @@ public class MapsActivity extends Activity
             mMap.clear();
         }
 
-        if (carLocation == null) return;
+        if (carLocation == null) {
+            carMarker = null;
+            return;
+        }
 
         // TODO accuracy
 
@@ -415,9 +416,17 @@ public class MapsActivity extends Activity
             case R.id.action_display_help:
                 showHelpDialog();
                 return true;
+            case R.id.action_remove_car:
+                removeCar();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void removeCar() {
+        CarLocationManager.removeStoredLocation(this);
+        setCar(null);
     }
 
     /**
@@ -440,7 +449,14 @@ public class MapsActivity extends Activity
     @Override
     public void onLocationChanged(Location location) {
         if (mode == Mode.FOLLOWING)
+            setFollowingCamera();
+    }
+
+    private void setFollowingCamera() {
+        if (getCarPosition() != null)
             zoomToSeeBoth();
+        else
+            zoomToMyLocation();
     }
 
 
@@ -531,20 +547,21 @@ public class MapsActivity extends Activity
      * This method zooms to see both user and the car.
      */
     protected void zoomToSeeBoth() {
+
         LatLngBounds bounds = new LatLngBounds.Builder()
                 .include(getCarPosition())
                 .include(getUserPosition())
                 .build();
-        mMap.setOnCameraChangeListener(null);
+
+
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150), new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
-                setMode(Mode.FOLLOWING);
+                justFinishedAnimating = true;
             }
 
             @Override
             public void onCancel() {
-                setMode(Mode.FREE);
             }
         });
 
@@ -553,9 +570,19 @@ public class MapsActivity extends Activity
 
     private void zoomToMyLocation() {
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .target(getUserPosition())
-                .zoom(15.5f)
-                .build()), null);
+                        .target(getUserPosition())
+                        .zoom(15.5f)
+                        .build()),
+                new GoogleMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
+                        justFinishedAnimating = true;
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+                });
     }
 
 
@@ -586,14 +613,15 @@ public class MapsActivity extends Activity
     }
 
     private LatLng getCarPosition() {
-        if (carMarker == null) return null;
+        if (carMarker == null ) return null;
         return carMarker.getPosition();
     }
 
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        setMode(Mode.FREE);
+        if (!justFinishedAnimating) setMode(Mode.FREE);
+        justFinishedAnimating = false;
     }
 
     @Override

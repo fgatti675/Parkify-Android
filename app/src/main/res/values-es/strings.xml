@@ -13,6 +13,8 @@
     <string name="link_device">Vincula dispositivo</string>
     <string name="link_removed">Vinculo con dispositivo eliminado</string>
     <string name="help">Ayuda</string>
+    <string name="remove_car">Elimina posición del coche</string>
+
     <string name="position_waiting">Esperando la posicion del usuario.</string>
     <string name="car_not_found">La posicion del coche no ha sido establecida.</string>
     <string name="bt_not_available">El bluetooth esta desactivado.</string>

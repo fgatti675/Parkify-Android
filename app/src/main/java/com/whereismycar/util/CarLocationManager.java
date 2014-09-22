@@ -66,4 +66,21 @@ public class CarLocationManager {
 
     }
 
+    public static void removeStoredLocation(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // We store the result
+        editor.remove(Util.PREF_CAR_LATITUDE);
+        editor.remove(Util.PREF_CAR_LONGITUDE);
+        editor.remove(Util.PREF_CAR_ACCURACY);
+        editor.remove(Util.PREF_CAR_PROVIDER);
+        editor.remove(Util.PREF_CAR_TIME);
+
+        editor.apply();
+
+        Log.i(TAG, "Removed location");
+    }
+
 }

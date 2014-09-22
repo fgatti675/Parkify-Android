@@ -13,6 +13,7 @@
     <string name="link_removed">Bluetooth device link removed</string>
     <string name="link_device">Link device</string>
     <string name="help">Help</string>
+    <string name="remove_car">Remove car location</string>
 
     <string name="position_waiting">Waiting for user position</string>
     <string name="car_not_found">Car\'s position has not been established</string>
