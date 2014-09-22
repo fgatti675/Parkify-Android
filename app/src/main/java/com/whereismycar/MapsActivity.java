@@ -216,31 +216,34 @@ public class MapsActivity extends Activity
     private void addDirections() {
         final LatLng carPosition = getCarPosition();
 
-        if (carPosition == null) {
+        if(directions != null)
+            directions.remove();
+
+        if (carPosition == null && getUserPosition() != null) {
             return;
         }
 
         Log.i(TAG, "addDirections");
 
         new AsyncTask<Object, Object, Document>() {
+
             @Override
             protected Document doInBackground(Object[] objects) {
-
                 Document doc = md.getDocument(getUserPosition(), carPosition, GMapV2Direction.MODE_WALKING);
-
                 return doc;
             }
 
             @Override
             protected void onPostExecute(Document doc) {
                 ArrayList<LatLng> directionPoint = md.getDirection(doc);
-                PolylineOptions rectLine = new PolylineOptions().width(3).color(Color.rgb(242, 69, 54));
+                PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.argb(85, 242, 69, 54));
 
                 for (int i = 0; i < directionPoint.size(); i++) {
                     rectLine.add(directionPoint.get(i));
                 }
                 directions = mMap.addPolyline(rectLine);
             }
+
         }.execute();
 
     }
@@ -356,10 +359,9 @@ public class MapsActivity extends Activity
      * Displays the car in the map
      */
     private void setCar(Location carLocation) {
-
         // remove previous
         if (carMarker != null) {
-            mMap.clear();
+            carMarker.remove();
         }
 
         if (carLocation == null) {
@@ -553,7 +555,6 @@ public class MapsActivity extends Activity
                 .include(getUserPosition())
                 .build();
 
-
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150), new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
@@ -613,7 +614,7 @@ public class MapsActivity extends Activity
     }
 
     private LatLng getCarPosition() {
-        if (carMarker == null ) return null;
+        if (carMarker == null) return null;
         return carMarker.getPosition();
     }
 
