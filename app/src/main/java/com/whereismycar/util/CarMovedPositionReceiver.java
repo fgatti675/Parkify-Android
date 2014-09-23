@@ -1,8 +1,6 @@
-package com.bahpps.cahue.util;
+package com.whereismycar.util;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -21,7 +19,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Locale;
 
 /**
  * This class is in charge of uploading the location of the car to the server when BT connects

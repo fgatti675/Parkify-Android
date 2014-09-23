@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.whereismycar;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

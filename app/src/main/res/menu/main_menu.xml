@@ -10,4 +10,8 @@
         android:title="@string/help"
         android:icon="@drawable/ic_action_help"
         android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_remove_car"
+        android:title="@string/remove_car"
+        android:icon="@drawable/ic_action_help" />
 </menu>

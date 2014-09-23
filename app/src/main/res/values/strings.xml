@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Cahue</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="app_name">Where is my Car?</string>
 
     <string name="scanning">Scanning for devices...</string>
     <string name="select_device">Select a device to link to the app</string>
@@ -14,6 +13,7 @@
     <string name="link_removed">Bluetooth device link removed</string>
     <string name="link_device">Link device</string>
     <string name="help">Help</string>
+    <string name="remove_car">Remove car location</string>
 
     <string name="position_waiting">Waiting for user position</string>
     <string name="car_not_found">Car\'s position has not been established</string>

@@ -1,4 +1,4 @@
-package com.bahpps.cahue.util;
+package com.whereismycar.util;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,20 +6,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
-import java.util.Locale;
 
 /**
  * Created by francesco on 16.09.2014.
@@ -77,6 +64,23 @@ public class CarLocationManager {
 
         return lastLocation;
 
+    }
+
+    public static void removeStoredLocation(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // We store the result
+        editor.remove(Util.PREF_CAR_LATITUDE);
+        editor.remove(Util.PREF_CAR_LONGITUDE);
+        editor.remove(Util.PREF_CAR_ACCURACY);
+        editor.remove(Util.PREF_CAR_PROVIDER);
+        editor.remove(Util.PREF_CAR_TIME);
+
+        editor.apply();
+
+        Log.i(TAG, "Removed location");
     }
 
 }

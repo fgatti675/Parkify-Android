@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="app_name">Where is my Car?</string>
+
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
     <string name="select_device">Selezionare il dispositivo da collegare</string>
@@ -11,6 +13,8 @@
     <string name="link_device">Collega dispositivo</string>
     <string name="link_removed">Collegamento con dispositivo eliminato</string>
     <string name="help">Aiuto</string>
+    <string name="remove_car">Elimina posizione della macchina</string>
+
     <string name="position_waiting">Attesa di posizione</string>
     <string name="car_not_found">La posizione della macchina non è stata stabilita</string>
     <string name="bt_not_available">Bluetooth non è disponibile</string>

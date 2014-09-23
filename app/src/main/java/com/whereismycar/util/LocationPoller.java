@@ -1,7 +1,6 @@
-package com.bahpps.cahue.util;
+package com.whereismycar.util;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
