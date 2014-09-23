@@ -368,6 +368,11 @@ public class MapsActivity extends Activity
         }
 
         if (carLocation == null) {
+            // remove directions if there too
+            if(directions != null ) {
+                directions.remove();
+                directions = null;
+            }
             carMarker = null;
             return;
         }
