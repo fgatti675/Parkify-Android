@@ -1,16 +1,15 @@
-package com.whereismycar.util;
+package com.bahpps.cahue.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.whereismycar.R;
+import com.bahpps.cahue.R;
 
 public class Util {
 
@@ -52,16 +51,19 @@ public class Util {
 
 		Toast toast = new Toast(context.getApplicationContext());
 
-        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
-                new int[] { android.R.attr.actionBarSize });
-        int actionBarSize = (int) styledAttributes.getDimension(0, 0);
-        styledAttributes.recycle();
-
-        toast.setGravity(Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, actionBarSize);
+        toast.setGravity(Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, getActionBarSize(context));
 		toast.setDuration(length);
 		toast.setView(layout);
 		toast.show();
 	}
+
+    public static int getActionBarSize(Context context){
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+                new int[] { android.R.attr.actionBarSize });
+        int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+        return actionBarSize;
+    }
 
 	/**
 	 * Shows a toast in case no BT is detected

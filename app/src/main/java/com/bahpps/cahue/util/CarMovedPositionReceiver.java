@@ -1,4 +1,4 @@
-package com.whereismycar.util;
+package com.bahpps.cahue.util;
 
 import android.content.Context;
 import android.location.Location;

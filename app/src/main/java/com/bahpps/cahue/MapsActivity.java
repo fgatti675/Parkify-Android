@@ -1,4 +1,4 @@
-package com.whereismycar;
+package com.bahpps.cahue;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -22,10 +22,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.whereismycar.util.BluetoothDetector;
-import com.whereismycar.util.CarLocationManager;
-import com.whereismycar.util.GMapV2Direction;
-import com.whereismycar.util.Util;
+import com.bahpps.cahue.util.BluetoothDetector;
+import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.util.GMapV2Direction;
+import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -128,8 +128,10 @@ public class MapsActivity extends Activity
 
 
         setContentView(R.layout.main);
-        setUpMapIfNeeded();
+
         setUpLocationClientIfNeeded();
+        setUpMapIfNeeded();
+
 
         iconFactory = new IconGenerator(this);
 
@@ -353,6 +355,7 @@ public class MapsActivity extends Activity
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
     }
 
     /**
@@ -472,6 +475,11 @@ public class MapsActivity extends Activity
                 REQUEST,
                 this);
         // call convenience method that zooms map on our location only on starting the app
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                .target(getUserPosition())
+                .zoom(15.5f)
+                .build()));
+
         if (getCarPosition() != null) {
             addDirections();
         }

@@ -1,4 +1,4 @@
-package com.whereismycar.util;
+package com.bahpps.cahue.util;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;

@@ -1,4 +1,4 @@
-package com.whereismycar;
+package com.bahpps.cahue;
 
 
 import android.app.Activity;
@@ -26,8 +26,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.whereismycar.util.BluetoothDetector;
-import com.whereismycar.util.Util;
+import com.bahpps.cahue.util.BluetoothDetector;
+import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
 import java.util.Set;

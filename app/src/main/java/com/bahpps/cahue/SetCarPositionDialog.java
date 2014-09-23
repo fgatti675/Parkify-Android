@@ -1,4 +1,4 @@
-package com.whereismycar;
+package com.bahpps.cahue;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,7 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.whereismycar.util.CarLocationManager;
+import com.bahpps.cahue.util.CarLocationManager;
 
 
 /**
