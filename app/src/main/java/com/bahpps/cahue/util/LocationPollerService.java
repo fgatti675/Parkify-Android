@@ -14,19 +14,35 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.Date;
+
 /**
  * Created by francesco on 17.09.2014.
  */
-public abstract class LocationPoller extends Service implements
+public abstract class LocationPollerService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
+
+    /**
+     * Timeout after we consider the location may have changed too much
+     */
+    private final static int TIMEOUT_MS = 8000;
+
+    /**
+     * Minimum desired accuracy
+     */
+    private final static int ACCURACY_THRESHOLD_M = 20;
 
     private final static String TAG = "LocationPoller";
 
     private GoogleApiClient mGoogleApiClient;
 
     private LocationRequest mLocationRequest;
+
+    private Date startTime;
+
+    private Location lastLocation;
 
 
     @Override
@@ -40,6 +56,7 @@ public abstract class LocationPoller extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        startTime = new Date();
         mGoogleApiClient.connect();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -53,7 +70,7 @@ public abstract class LocationPoller extends Service implements
     public void onConnected(Bundle bundle) {
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(2000);
+        mLocationRequest.setInterval(1000);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
@@ -66,10 +83,30 @@ public abstract class LocationPoller extends Service implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.i(TAG, "GoogleApiClient connection has failed");
+        stopSelf();
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        Date now = new Date();
+
+        if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
+            notifyLocation(location);
+        }
+
+        else if(now.getTime() - startTime.getTime() > TIMEOUT_MS) {
+            Location bestAccuracyLocation = location;
+            if(lastLocation != null && lastLocation.getAccuracy() > bestAccuracyLocation.getAccuracy()){
+                bestAccuracyLocation = lastLocation;
+            }
+            notifyLocation(bestAccuracyLocation);
+        }
+
+        lastLocation = location;
+    }
+
+    private void notifyLocation(Location location) {
+        Log.i(TAG, "Notifying location polled: " + location);
         onLocationPolled(this, location);
         mGoogleApiClient.disconnect();
         stopSelf();

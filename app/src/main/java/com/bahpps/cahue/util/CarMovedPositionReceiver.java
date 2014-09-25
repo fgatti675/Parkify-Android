@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException;
  *
  * @author Francesco
  */
-public class CarMovedPositionReceiver extends LocationPoller {
+public class CarMovedPositionReceiver extends LocationPollerService {
 
 
     private final static String TAG = "CarMovedPositionReceiver";

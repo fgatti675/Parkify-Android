@@ -9,7 +9,7 @@ import android.util.Log;
  *
  * @author Francesco
  */
-public class ParkedCarLocationReceiver extends LocationPoller {
+public class ParkedCarLocationReceiver extends LocationPollerService {
 
     private final static String TAG = "ParkedCarPositionReceiver";
 
