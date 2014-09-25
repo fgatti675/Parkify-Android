@@ -3,14 +3,18 @@ package com.bahpps.cahue;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +24,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.bahpps.cahue.util.BluetoothDetector;
@@ -94,7 +99,6 @@ public class MapsActivity extends Activity
 
     private boolean justFinishedAnimating = false;
 
-
     /**
      * Directions delegate
      */
@@ -118,6 +122,21 @@ public class MapsActivity extends Activity
                 addDirections();
             }
 
+        }
+    };
+
+    private IInAppBillingService mService;
+
+    private ServiceConnection mServiceConn = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name,
+                                       IBinder service) {
+            mService = IInAppBillingService.Stub.asInterface(service);
         }
     };
 
@@ -204,6 +223,35 @@ public class MapsActivity extends Activity
         Location carLocation = CarLocationManager.getStoredLocation(this);
         setCar(carLocation);
 
+        bindBillingService();
+
+    }
+
+    private void bindBillingService() {
+        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+    }
+
+    private void queryPurchaseItems() {
+        try {
+            ArrayList<String> skuList = new ArrayList<String>();
+            skuList.add("premiumUpgrade");
+            skuList.add("gas");
+            Bundle querySkus = new Bundle();
+            querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
+            Bundle skuDetails = mService.getSkuDetails(3, getPackageName(), "inapp", querySkus);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mService != null) {
+            unbindService(mServiceConn);
+        }
     }
 
     @Override
@@ -218,7 +266,7 @@ public class MapsActivity extends Activity
     private void addDirections() {
         final LatLng carPosition = getCarPosition();
 
-        if(directions != null)
+        if (directions != null)
             directions.remove();
 
         if (carPosition == null && getUserPosition() != null) {
@@ -369,7 +417,7 @@ public class MapsActivity extends Activity
 
         if (carLocation == null) {
             // remove directions if there too
-            if(directions != null ) {
+            if (directions != null) {
                 directions.remove();
                 directions = null;
             }
