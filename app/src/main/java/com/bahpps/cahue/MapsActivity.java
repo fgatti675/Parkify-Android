@@ -54,6 +54,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -254,7 +256,7 @@ public class MapsActivity extends Activity
             } catch (ActivityNotFoundException e) {
                 // TODO
             }
-        } else{
+        } else {
             requestOauthToken();
         }
     }
@@ -291,6 +293,25 @@ public class MapsActivity extends Activity
             Log.i(TAG, "Users email:" + accountName);
 
             requestOauthToken();
+        }
+
+        // element purchse
+        else if (requestCode == 1001) {
+
+            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
+            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+
+            if (resultCode == RESULT_OK) {
+                try {
+                    JSONObject jo = new JSONObject(purchaseData);
+                    String sku = jo.getString("productId");
+                    Util.createToast(this, "Thanks for purchasing!", Toast.LENGTH_LONG); // do string
+                } catch (JSONException e) {
+                    Util.createToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

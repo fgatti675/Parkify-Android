@@ -147,17 +147,8 @@ public class DonateDialog extends DialogFragment {
                                     e.printStackTrace();
                                 }
                                 View selectedRadioButton = radioGroup.findViewById(checkedRadioButton);
-                                String selectedTag = (String) selectedRadioButton.getTag();
-                                int i = 0;
-//                                switch (checkedRadioButton) {
-//                                    case R.id.a2s:
-//                                        datasource.updateIcon(i, itemid);
-//                                        break;
-//                                    case R.id.android:
-//                                        i = 1;
-//                                        datasource.updateIcon(i, itemid);
-//                                        break;
-//                                }
+                                String sku = (String) selectedRadioButton.getTag();
+                                doPurchase(sku);
                             }
                         })
                 .setNegativeButton("Cancel",
