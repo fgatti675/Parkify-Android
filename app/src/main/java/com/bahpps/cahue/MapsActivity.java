@@ -14,7 +14,6 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -125,18 +124,18 @@ public class MapsActivity extends Activity
         }
     };
 
-    private IInAppBillingService mService;
+    private IInAppBillingService iInAppBillingService;
 
     private ServiceConnection mServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mService = null;
+            iInAppBillingService = null;
         }
 
         @Override
         public void onServiceConnected(ComponentName name,
                                        IBinder service) {
-            mService = IInAppBillingService.Stub.asInterface(service);
+            iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
 
@@ -233,23 +232,12 @@ public class MapsActivity extends Activity
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     }
 
-    private void queryPurchaseItems() {
-        try {
-            ArrayList<String> skuList = new ArrayList<String>();
-            skuList.add("premiumUpgrade");
-            skuList.add("gas");
-            Bundle querySkus = new Bundle();
-            querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
-            Bundle skuDetails = mService.getSkuDetails(3, getPackageName(), "inapp", querySkus);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mService != null) {
+        if (iInAppBillingService != null) {
             unbindService(mServiceConn);
         }
     }
@@ -477,9 +465,18 @@ public class MapsActivity extends Activity
             case R.id.action_remove_car:
                 removeCar();
                 return true;
+            case R.id.action_donate:
+                openDonationDialog();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void openDonationDialog() {
+        DonateDialog dialog = new DonateDialog();
+        dialog.setIInAppBillingService(iInAppBillingService);
+        dialog.show(getFragmentManager(), "DonateDialog");
     }
 
     private void removeCar() {
@@ -602,7 +599,7 @@ public class MapsActivity extends Activity
 
         SetCarPositionDialog dialog = new SetCarPositionDialog();
         dialog.setLocation(location);
-        dialog.show(getFragmentManager(), "NoticeDialogFragment");
+        dialog.show(getFragmentManager(), "SetCarPositionDialog");
 
     }
 

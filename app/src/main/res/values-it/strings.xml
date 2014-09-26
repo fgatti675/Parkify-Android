@@ -13,6 +13,7 @@
     <string name="link_device">Collega dispositivo</string>
     <string name="link_removed">Collegamento con dispositivo eliminato</string>
     <string name="help">Aiuto</string>
+    <string name="donate">Donazione</string>
     <string name="remove_car">Elimina posizione della macchina</string>
 
     <string name="position_waiting">Attesa di posizione</string>
