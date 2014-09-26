@@ -6,7 +6,7 @@
               android:padding="5dp"
               android:background="#ddf24536"
               >
-    <TextView android:id="@+id/text"
+    <TextView android:id="@+id/error_text"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:textColor="#FFF"

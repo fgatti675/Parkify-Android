@@ -1,7 +1,9 @@
 package com.bahpps.cahue;
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +26,10 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.bahpps.cahue.util.BluetoothDetector;
@@ -50,6 +56,7 @@ import com.google.maps.android.ui.IconGenerator;
 
 import org.w3c.dom.Document;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -72,6 +79,12 @@ public class MapsActivity extends Activity
 
     protected static final String TAG = "Maps";
 
+    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+
+    private static final int REQUEST_CODE_EMAIL = 1;
+
+    private static final String PREF_USER_EMAIL = "pref_user_email";
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     // These settings are the same as the settings for the map. They will in fact give you updates
@@ -80,6 +93,9 @@ public class MapsActivity extends Activity
             .setInterval(5000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+    private String accountName;
+    private String authToken;
 
     private GoogleApiClient googleApiClient;
 
@@ -224,6 +240,41 @@ public class MapsActivity extends Activity
 
         bindBillingService();
 
+        setUserAccount();
+
+    }
+
+    private void setUserAccount() {
+        accountName = prefs.getString(PREF_USER_EMAIL, null);
+        if (accountName == null) {
+            try {
+                Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+                        new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
+                startActivityForResult(intent, REQUEST_CODE_EMAIL);
+            } catch (ActivityNotFoundException e) {
+                // TODO
+            }
+        } else{
+            requestOauthToken();
+        }
+    }
+
+    private void requestOauthToken() {
+        new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                try {
+                    authToken = GoogleAuthUtil.getToken(MapsActivity.this, accountName, SCOPE);
+                    Log.d(TAG, authToken);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
+
     }
 
     private void bindBillingService() {
@@ -232,6 +283,16 @@ public class MapsActivity extends Activity
         bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_EMAIL && resultCode == RESULT_OK) {
+            accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+            prefs.edit().putString(PREF_USER_EMAIL, accountName).apply();
+            Log.i(TAG, "Users email:" + accountName);
+
+            requestOauthToken();
+        }
+    }
 
 
     @Override

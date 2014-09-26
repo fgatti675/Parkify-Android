@@ -46,7 +46,7 @@ public class Util {
 	public static void createToast(Context context, String string, int length) {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View layout = inflater.inflate(R.layout.custom_toast, null);
-		TextView text = (TextView) layout.findViewById(R.id.text);
+		TextView text = (TextView) layout.findViewById(R.id.error_text);
 		text.setText(string);
 
 		Toast toast = new Toast(context.getApplicationContext());

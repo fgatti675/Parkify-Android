@@ -1,10 +1,13 @@
 package com.bahpps.cahue;
 
+import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
-import android.location.Location;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -18,7 +21,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.bahpps.cahue.util.CarLocationManager;
+import com.google.android.gms.auth.GoogleAuthUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +38,8 @@ import java.util.ArrayList;
 public class DonateDialog extends DialogFragment {
 
     private static String PRODUCT_DONATION_1 = "donation_1";
+    private static String PRODUCT_DONATION_2 = "donation_2";
+    private static String PRODUCT_DONATION_5 = "donation_5";
 
     private final static String TAG = "DonateDialog";
 
@@ -69,7 +74,7 @@ public class DonateDialog extends DialogFragment {
 
         final RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup);
         final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        final TextView textView = (TextView) view.findViewById(R.id.text);
+        final TextView errorTextView = (TextView) view.findViewById(R.id.error_text);
 
         new AsyncTask<Void, Void, Bundle>() {
             @Override
@@ -86,26 +91,40 @@ public class DonateDialog extends DialogFragment {
 
                 if (response == 0) {
                     radioGroup.setVisibility(View.VISIBLE);
-                    textView.setVisibility(View.GONE);
+                    errorTextView.setVisibility(View.GONE);
                     try {
                         ArrayList<String> responseList = skuDetails.getStringArrayList("DETAILS_LIST");
 
                         for (String thisResponse : responseList) {
+
                             JSONObject object = null;
                             object = new JSONObject(thisResponse);
                             String sku = object.getString("productId");
                             String price = object.getString("price");
+
                             RadioButton radioButton = new RadioButton(getActivity());
-                            radioButton.setText(sku);
+                            if ("donation_1".equals(sku))
+                                radioButton.setText(R.string.donation_1);
+                            else if ("donation_2".equals(sku))
+                                radioButton.setText(R.string.donation_2);
+                            else if ("donation_5".equals(sku))
+                                radioButton.setText(R.string.donation_5);
+                            else
+                                radioButton.setText(sku);
+
+                            radioButton.setTag(sku);
+
                             radioGroup.addView(radioButton);
                         }
                     } catch (JSONException e) {
+                        errorTextView.setVisibility(View.VISIBLE);
+                        errorTextView.setText("ERROR. Json Exception...");
                         e.printStackTrace();
                     }
                 } else {
                     radioGroup.setVisibility(View.GONE);
-                    textView.setVisibility(View.VISIBLE);
-                    textView.setText("ERROR");
+                    errorTextView.setVisibility(View.VISIBLE);
+                    errorTextView.setText("ERROR. Response: " + response);
                 }
 
             }
@@ -127,6 +146,8 @@ public class DonateDialog extends DialogFragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
+                                View selectedRadioButton = radioGroup.findViewById(checkedRadioButton);
+                                String selectedTag = (String) selectedRadioButton.getTag();
                                 int i = 0;
 //                                switch (checkedRadioButton) {
 //                                    case R.id.a2s:
@@ -148,6 +169,28 @@ public class DonateDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+    private void doPurchase(String sku){
+        try {
+
+            Bundle buyIntentBundle = mService.getBuyIntent(3,
+                    getActivity().getPackageName(),
+                    sku,
+                    "inapp",
+                    "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+
+
+            PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+            getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
+                    1001, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
+                    Integer.valueOf(0));
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (IntentSender.SendIntentException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -24,7 +24,7 @@
     <string name="car_dialog_text">¿Quieres establecer la posicion del coche aqui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
-    <string name="info_text">¡ Bienvenido a %1$s !\n\nEsta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\nTodo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte. Necesitarás tener el Bluetooth disponible y los servicios de localizacion activados\n\nSi quieres establecer la posicion de tu coche manualmente, puedes hacer click largo en cualquier punto del mapa.</string>
+    <string name="info_text">¡Bienvenido a %1$s!\n\nEsta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\nTodo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte. Necesitarás tener el Bluetooth disponible y los servicios de localizacion activados\n\nSi quieres establecer la posicion de tu coche manualmente, puedes hacer click largo en cualquier punto del mapa.\n\n La aplicación no tiene publicidad por lo que cualquier donación será muy agradecida!</string>
 
     <!-- Time -->
     <string name="seconds">segundos</string>
@@ -36,4 +36,9 @@
     <string name="days">dias</string>
     <string name="car">coche</string>
 
+    <!-- Donations -->
+    <string name="donation_intro">Esta aplicación se financia solo a través de donaciones.</string>
+    <string name="donation_1">1 euro</string>
+    <string name="donation_2">2 euros</string>
+    <string name="donation_5">5 euros</string>
 </resources>
