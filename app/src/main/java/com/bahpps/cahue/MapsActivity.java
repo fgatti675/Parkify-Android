@@ -257,7 +257,7 @@ public class MapsActivity extends Activity
                 // TODO
             }
         } else {
-            requestOauthToken();
+//            requestOauthToken();
         }
     }
 
@@ -292,7 +292,7 @@ public class MapsActivity extends Activity
             prefs.edit().putString(PREF_USER_EMAIL, accountName).apply();
             Log.i(TAG, "Users email:" + accountName);
 
-            requestOauthToken();
+//            requestOauthToken();
         }
 
         // element purchse
