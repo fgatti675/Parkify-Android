@@ -306,7 +306,7 @@ public class MapsActivity extends Activity
                 try {
                     JSONObject jo = new JSONObject(purchaseData);
                     String sku = jo.getString("productId");
-                    Util.createToast(this, "Thanks for purchasing!", Toast.LENGTH_LONG); // do string
+                    Util.createToast(this, getString(R.string.thanks), Toast.LENGTH_LONG); // do string
                 } catch (JSONException e) {
                     Util.createToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
                     e.printStackTrace();
