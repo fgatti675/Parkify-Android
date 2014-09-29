@@ -105,11 +105,11 @@ public class DonateDialog extends DialogFragment {
                             String price = object.getString("price");
 
                             RadioButton radioButton = new RadioButton(getActivity());
-                            if ("donation_1".equals(sku))
+                            if (PRODUCT_DONATION_1.equals(sku))
                                 radioButton.setText(R.string.donation_1);
-                            else if ("donation_2".equals(sku))
+                            else if (PRODUCT_DONATION_2.equals(sku))
                                 radioButton.setText(R.string.donation_2);
-                            else if ("donation_5".equals(sku))
+                            else if (PRODUCT_DONATION_5.equals(sku))
                                 radioButton.setText(R.string.donation_5);
                             else
                                 radioButton.setText(sku);
