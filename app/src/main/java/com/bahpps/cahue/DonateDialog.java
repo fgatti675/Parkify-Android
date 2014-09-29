@@ -37,9 +37,9 @@ import java.util.ArrayList;
  */
 public class DonateDialog extends DialogFragment {
 
-    private static String PRODUCT_DONATION_1 = "donation_1";
-    private static String PRODUCT_DONATION_2 = "donation_2";
-    private static String PRODUCT_DONATION_5 = "donation_5";
+    private static String PRODUCT_DONATION_1 = "donate_1";
+    private static String PRODUCT_DONATION_2 = "donate_2";
+    private static String PRODUCT_DONATION_5 = "donate_5";
 
     private final static String TAG = "DonateDialog";
 
@@ -52,6 +52,8 @@ public class DonateDialog extends DialogFragment {
         try {
             ArrayList<String> skuList = new ArrayList<String>();
             skuList.add(PRODUCT_DONATION_1);
+            skuList.add(PRODUCT_DONATION_2);
+            skuList.add(PRODUCT_DONATION_5);
             Bundle querySkus = new Bundle();
             querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
             return mService.getSkuDetails(3, getActivity().getPackageName(), "inapp", querySkus);
