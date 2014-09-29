@@ -587,6 +587,9 @@ public class MapsActivity extends Activity
     public void onLocationChanged(Location location) {
         if (mode == Mode.FOLLOWING)
             setFollowingCamera();
+
+        if (getCarPosition() != null && directions != null)
+            addDirections();
     }
 
     private void setFollowingCamera() {
@@ -607,14 +610,12 @@ public class MapsActivity extends Activity
                 REQUEST,
                 this);
         // call convenience method that zooms map on our location only on starting the app
-        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .target(getUserPosition())
-                .zoom(15.5f)
-                .build()));
-
-        if (getCarPosition() != null) {
-            addDirections();
-        }
+        LatLng userPosition = getUserPosition();
+        if (userPosition != null)
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .target(userPosition)
+                    .zoom(15.5f)
+                    .build()));
 
         if (mode == null)
             setMode(Mode.FOLLOWING);
@@ -750,6 +751,7 @@ public class MapsActivity extends Activity
 
     private LatLng getUserPosition() {
         Location userLastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if (userLastLocation == null) return null;
         return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
     }
 
