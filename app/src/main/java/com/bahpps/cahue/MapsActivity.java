@@ -28,7 +28,6 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -136,7 +135,7 @@ public class MapsActivity extends Activity
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
                 setCar(location);
-                addDirections();
+                drawDirections();
             }
 
         }
@@ -333,7 +332,7 @@ public class MapsActivity extends Activity
         savedInstanceState.putSerializable("mode", mode);
     }
 
-    private void addDirections() {
+    private void drawDirections() {
         final LatLng carPosition = getCarPosition();
 
         if (directions != null)
@@ -343,7 +342,7 @@ public class MapsActivity extends Activity
             return;
         }
 
-        Log.i(TAG, "addDirections");
+        Log.i(TAG, "drawDirections");
 
         new AsyncTask<Object, Object, Document>() {
 
@@ -588,8 +587,10 @@ public class MapsActivity extends Activity
         if (mode == Mode.FOLLOWING)
             setFollowingCamera();
 
-        if (getCarPosition() != null && directions != null)
-            addDirections();
+        if (getCarPosition() != null && directions == null) {
+            drawDirections();
+        }
+
     }
 
     private void setFollowingCamera() {
