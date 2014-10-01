@@ -121,9 +121,11 @@ public class MapsActivity extends Activity
     private GMapV2Direction md;
 
     /**
-     * Actual lines representing the directions
+     * Actual lines representing the directionsPolyLine
      */
-    private Polyline directions;
+    private Polyline directionsPolyLine;
+    private ArrayList<LatLng> directionPoint;
+
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -134,6 +136,7 @@ public class MapsActivity extends Activity
             Location location = (Location) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
+                mMap.clear();
                 setCar(location);
                 drawDirections();
             }
@@ -202,6 +205,7 @@ public class MapsActivity extends Activity
          */
         if (savedInstanceState != null) {
             mode = (Mode) savedInstanceState.getSerializable("mode");
+            directionPoint = (ArrayList) savedInstanceState.getSerializable("directionPoint");
         }
 
         /**
@@ -323,24 +327,28 @@ public class MapsActivity extends Activity
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
+
         super.onSaveInstanceState(savedInstanceState);
+
         // Save UI state changes to the savedInstanceState.
         // This bundle will be passed to onCreate if the process is
         // killed and restarted.
         savedInstanceState.putSerializable("mode", mode);
+        savedInstanceState.putSerializable("directionPoint", directionPoint);
     }
 
     private void drawDirections() {
+
+        Log.i(TAG, "drawDirections");
+
         final LatLng carPosition = getCarPosition();
 
-        if (directions != null)
-            directions.remove();
+        if (directionsPolyLine != null)
+            directionsPolyLine.remove();
 
         if (carPosition == null && getUserPosition() != null) {
             return;
         }
-
-        Log.i(TAG, "drawDirections");
 
         new AsyncTask<Object, Object, Document>() {
 
@@ -352,13 +360,13 @@ public class MapsActivity extends Activity
 
             @Override
             protected void onPostExecute(Document doc) {
-                ArrayList<LatLng> directionPoint = md.getDirection(doc);
+                directionPoint = md.getDirection(doc);
                 PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.argb(85, 242, 69, 54));
 
                 for (int i = 0; i < directionPoint.size(); i++) {
                     rectLine.add(directionPoint.get(i));
                 }
-                directions = mMap.addPolyline(rectLine);
+                directionsPolyLine = mMap.addPolyline(rectLine);
 
                 updateCameraIfFollowing();
             }
@@ -369,16 +377,18 @@ public class MapsActivity extends Activity
 
     private void setMode(Mode mode) {
 
-        Log.d(TAG, "Setting mode to " + mode);
+        Log.i(TAG, "Setting mode to " + mode);
+
+        this.mode = mode;
+
+        updateCameraIfFollowing();
 
         if (mode == Mode.FOLLOWING) {
             carButton.setImageResource(R.drawable.ic_icon_car_red);
-            updateCameraIfFollowing();
         } else if (mode == Mode.FREE) {
             carButton.setImageResource(R.drawable.ic_icon_car);
         }
 
-        this.mode = mode;
     }
 
     private void showHelpDialog() {
@@ -487,10 +497,10 @@ public class MapsActivity extends Activity
         }
 
         if (carLocation == null) {
-            // remove directions if there too
-            if (directions != null) {
-                directions.remove();
-                directions = null;
+            // remove directionsPolyLine if there too
+            if (directionsPolyLine != null) {
+                directionsPolyLine.remove();
+                directionsPolyLine = null;
             }
             carMarker = null;
             return;
@@ -589,7 +599,7 @@ public class MapsActivity extends Activity
 
         updateCameraIfFollowing();
 
-        if (getCarPosition() != null && directions == null) {
+        if (getCarPosition() != null && directionsPolyLine == null) {
             drawDirections();
         }
 
@@ -701,8 +711,8 @@ public class MapsActivity extends Activity
                 .include(getCarPosition())
                 .include(getUserPosition());
 
-        if (directions != null) {
-            for (LatLng latLng : directions.getPoints())
+        if (directionsPolyLine != null) {
+            for (LatLng latLng : directionsPolyLine.getPoints())
                 builder.include(latLng);
         }
 

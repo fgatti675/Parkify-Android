@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -27,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 
 /**
@@ -51,6 +53,7 @@ public class DonateDialog extends DialogFragment {
 
         try {
             ArrayList<String> skuList = new ArrayList<String>();
+//            skuList.add("android.test.purchased");
             skuList.add(PRODUCT_DONATION_1);
             skuList.add(PRODUCT_DONATION_2);
             skuList.add(PRODUCT_DONATION_5);
@@ -74,10 +77,59 @@ public class DonateDialog extends DialogFragment {
 
         final LinearLayout view = (LinearLayout) inflater.inflate(R.layout.donate_dialog, null);
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        // Use the Builder class for convenient dialog construction new AlertDialog.Builder()
+        builder
+                .setTitle(R.string.donate)
+                .setView(view)
+                .setPositiveButton("Ok",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup);
+                                int checkedRadioButton = 0;
+                                try {
+                                    checkedRadioButton = radioGroup.getCheckedRadioButtonId();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                View selectedRadioButton = radioGroup.findViewById(checkedRadioButton);
+                                String sku = (String) selectedRadioButton.getTag();
+                                doPurchase(sku);
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // Canceled.
+                            }
+                        });
+
+
+        // Create the AlertDialog object and return it
+        final AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            }
+        });
+
+
         final RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+            }
+        });
+
         final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         final TextView errorTextView = (TextView) view.findViewById(R.id.error_text);
 
+        /**
+         * AsyncTask population the donation options
+         */
         new AsyncTask<Void, Void, Bundle>() {
             @Override
             protected Bundle doInBackground(Void... voids) {
@@ -133,35 +185,7 @@ public class DonateDialog extends DialogFragment {
         }.execute();
 
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // Use the Builder class for convenient dialog construction new AlertDialog.Builder()
-        builder
-                .setTitle(R.string.donate)
-                .setView(view)
-                .setPositiveButton("Ok",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup);
-                                int checkedRadioButton = 0;
-                                try {
-                                    checkedRadioButton = radioGroup.getCheckedRadioButtonId();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                View selectedRadioButton = radioGroup.findViewById(checkedRadioButton);
-                                String sku = (String) selectedRadioButton.getTag();
-                                doPurchase(sku);
-                            }
-                        })
-                .setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // Canceled.
-                            }
-                        });
-
-        // Create the AlertDialog object and return it
-        return builder.create();
+        return dialog;
     }
 
     private void doPurchase(String sku){
@@ -171,7 +195,7 @@ public class DonateDialog extends DialogFragment {
                     getActivity().getPackageName(),
                     sku,
                     "inapp",
-                    "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+                    UUID.randomUUID().toString());
 
 
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
