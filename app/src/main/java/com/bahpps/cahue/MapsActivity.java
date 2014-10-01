@@ -68,7 +68,7 @@ public class MapsActivity extends Activity
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMapClickListener {
+        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
     /**
      * Camera mode
      */
@@ -161,7 +161,6 @@ public class MapsActivity extends Activity
 
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.main);
 
         setUpLocationClientIfNeeded();
@@ -235,7 +234,6 @@ public class MapsActivity extends Activity
             showHelpDialog();
         }
 
-        // we add the car on the stored position
         Location carLocation = CarLocationManager.getStoredLocation(this);
         setCar(carLocation);
 
@@ -361,6 +359,8 @@ public class MapsActivity extends Activity
                     rectLine.add(directionPoint.get(i));
                 }
                 directions = mMap.addPolyline(rectLine);
+
+                updateCameraIfFollowing();
             }
 
         }.execute();
@@ -373,7 +373,7 @@ public class MapsActivity extends Activity
 
         if (mode == Mode.FOLLOWING) {
             carButton.setImageResource(R.drawable.ic_icon_car_red);
-            setFollowingCamera();
+            updateCameraIfFollowing();
         } else if (mode == Mode.FREE) {
             carButton.setImageResource(R.drawable.ic_icon_car);
         }
@@ -473,12 +473,14 @@ public class MapsActivity extends Activity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
+        mMap.setOnMarkerClickListener(this);
     }
 
     /**
      * Displays the car in the map
      */
     private void setCar(Location carLocation) {
+
         // remove previous
         if (carMarker != null) {
             carMarker.remove();
@@ -584,8 +586,8 @@ public class MapsActivity extends Activity
      */
     @Override
     public void onLocationChanged(Location location) {
-        if (mode == Mode.FOLLOWING)
-            setFollowingCamera();
+
+        updateCameraIfFollowing();
 
         if (getCarPosition() != null && directions == null) {
             drawDirections();
@@ -593,11 +595,14 @@ public class MapsActivity extends Activity
 
     }
 
-    private void setFollowingCamera() {
-        if (getCarPosition() != null)
-            zoomToSeeBoth();
-        else
-            zoomToMyLocation();
+    private void updateCameraIfFollowing() {
+
+        if (mode == Mode.FOLLOWING) {
+            if (getCarPosition() != null)
+                zoomToSeeBoth();
+            else
+                zoomToMyLocation();
+        }
     }
 
 
@@ -692,12 +697,17 @@ public class MapsActivity extends Activity
      */
     protected void zoomToSeeBoth() {
 
-        LatLngBounds bounds = new LatLngBounds.Builder()
+        LatLngBounds.Builder builder = new LatLngBounds.Builder()
                 .include(getCarPosition())
-                .include(getUserPosition())
-                .build();
+                .include(getUserPosition());
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150), new GoogleMap.CancelableCallback() {
+        if (directions != null) {
+            for (LatLng latLng : directions.getPoints())
+                builder.include(latLng);
+        }
+
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150), new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
                 justFinishedAnimating = true;
@@ -767,6 +777,16 @@ public class MapsActivity extends Activity
         if (!justFinishedAnimating) setMode(Mode.FREE);
         justFinishedAnimating = false;
     }
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (marker.equals(carMarker)) {
+            showCarTimeToast();
+        }
+        return false;
+    }
+
 
     @Override
     public void onMapClick(LatLng point) {
