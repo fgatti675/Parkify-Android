@@ -27,22 +27,20 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Timeout after we consider the location may have changed too much
      */
-    private final static int TIMEOUT_MS = 8000;
+    private final static int TIMEOUT_MS = 12000;
 
     /**
      * Minimum desired accuracy
      */
-    private final static int ACCURACY_THRESHOLD_M = 20;
+    private final static int ACCURACY_THRESHOLD_M = 10;
 
     private final static String TAG = "LocationPoller";
 
     private GoogleApiClient mGoogleApiClient;
 
-    private LocationRequest mLocationRequest;
-
     private Date startTime;
 
-    private Location lastLocation;
+    private Location bestAccuracyLocation;
 
 
     @Override
@@ -68,7 +66,8 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        mLocationRequest = LocationRequest.create();
+
+        LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(1000);
 
@@ -88,21 +87,22 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public void onLocationChanged(Location location) {
+
         Date now = new Date();
 
         if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
             notifyLocation(location);
+            return;
         }
 
-        else if(now.getTime() - startTime.getTime() > TIMEOUT_MS) {
-            Location bestAccuracyLocation = location;
-            if(lastLocation != null && lastLocation.getAccuracy() > bestAccuracyLocation.getAccuracy()){
-                bestAccuracyLocation = lastLocation;
-            }
+        if (bestAccuracyLocation == null || location.getAccuracy() < bestAccuracyLocation.getAccuracy()) {
+            bestAccuracyLocation = location;
+        }
+
+        if (now.getTime() - startTime.getTime() > TIMEOUT_MS) {
             notifyLocation(bestAccuracyLocation);
         }
 
-        lastLocation = location;
     }
 
     private void notifyLocation(Location location) {
