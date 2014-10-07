@@ -346,7 +346,7 @@ public class MapsActivity extends Activity
         if (directionsPolyLine != null)
             directionsPolyLine.remove();
 
-        if (carPosition == null && getUserPosition() != null) {
+        if (carPosition == null || getUserPosition() == null) {
             return;
         }
 
