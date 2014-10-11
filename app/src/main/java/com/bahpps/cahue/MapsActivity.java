@@ -66,6 +66,7 @@ import org.w3c.dom.Document;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class MapsActivity extends Activity
         implements
@@ -74,8 +75,7 @@ public class MapsActivity extends Activity
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
-
+        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener, ParkingSpotsService.ParkingSpotsUpdateListener {
 
     /**
      * Camera mode
@@ -715,6 +715,8 @@ public class MapsActivity extends Activity
         else
             setMode(mode);
 
+        queryParkingLocations();
+
 
     }
 
@@ -864,6 +866,18 @@ public class MapsActivity extends Activity
         if (!justFinishedAnimating) setMode(Mode.FREE);
         justFinishedAnimating = false;
     }
+
+    private void queryParkingLocations() {
+
+        new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, this).execute();
+    }
+
+
+    @Override
+    public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
+        Log.d(TAG, parkingSpots.toString());
+    }
+
 
 
     @Override
