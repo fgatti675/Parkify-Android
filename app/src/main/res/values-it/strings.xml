@@ -41,6 +41,8 @@
     <string name="donation_1">1 euro</string>
     <string name="donation_2">2 euro</string>
     <string name="donation_5">5 euro</string>
-    <string name="thanks">Grazie per l\'aiuto!</string>
+    <string name="thanks">Grazie per l\'aiuto! :)</string>
+
+    <string name="pick_account">Devi selezionare una account</string>
 
 </resources>

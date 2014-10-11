@@ -2,6 +2,7 @@ package com.bahpps.cahue;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -13,6 +14,8 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -28,7 +31,10 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.bahpps.cahue.util.BluetoothDetector;
@@ -69,11 +75,13 @@ public class MapsActivity extends Activity
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
+
+
     /**
      * Camera mode
      */
     private enum Mode {
-        FREE, FOLLOWING
+        FREE, FOLLOWING;
     }
 
     private Mode mode;
@@ -82,7 +90,10 @@ public class MapsActivity extends Activity
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
-    private static final int REQUEST_CODE_EMAIL = 1;
+    static final int REQUEST_CODE_PICK_ACCOUNT = 0;
+    static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
+    static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 2;
+    static final int REQUEST_ON_PURCHASE = 1001;
 
     private static final String PREF_USER_EMAIL = "pref_user_email";
 
@@ -144,6 +155,7 @@ public class MapsActivity extends Activity
         }
     };
 
+
     private IInAppBillingService iInAppBillingService;
 
     private ServiceConnection mServiceConn = new ServiceConnection() {
@@ -153,8 +165,7 @@ public class MapsActivity extends Activity
         }
 
         @Override
-        public void onServiceConnected(ComponentName name,
-                                       IBinder service) {
+        public void onServiceConnected(ComponentName name, IBinder service) {
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
@@ -253,22 +264,30 @@ public class MapsActivity extends Activity
             try {
                 Intent intent = AccountPicker.newChooseAccountIntent(null, null,
                         new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
-                startActivityForResult(intent, REQUEST_CODE_EMAIL);
+                startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
             } catch (ActivityNotFoundException e) {
                 // TODO
             }
         } else {
-//            requestOauthToken();
+            requestOauthToken();
         }
     }
 
     private void requestOauthToken() {
+
+
+        Log.i(TAG, "requestOauthToken");
+
         new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
                 try {
                     authToken = GoogleAuthUtil.getToken(MapsActivity.this, accountName, SCOPE);
                     Log.d(TAG, authToken);
+                } catch (UserRecoverableAuthException userRecoverableException) {
+                    // GooglePlayServices.apk is either old, disabled, or not present
+                    // so we need to show the user some UI in the activity to recover.
+                    handleException(userRecoverableException);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (GoogleAuthException e) {
@@ -288,16 +307,32 @@ public class MapsActivity extends Activity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_EMAIL && resultCode == RESULT_OK) {
-            accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-            prefs.edit().putString(PREF_USER_EMAIL, accountName).apply();
-            Log.i(TAG, "Users email:" + accountName);
 
-//            requestOauthToken();
+        // Receiving a result from the AccountPicker
+        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+            if (resultCode == RESULT_OK) {
+                accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                prefs.edit().putString(PREF_USER_EMAIL, accountName).apply();
+                Log.i(TAG, "Users email:" + accountName);
+
+                requestOauthToken();
+            } else if (resultCode == RESULT_CANCELED) {
+                // The account picker dialog closed without selecting an account.
+                // Notify users that they must pick an account to proceed.
+                Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
+            }
         }
 
+        else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+                requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
+                && resultCode == RESULT_OK) {
+            // Receiving a result that follows a GoogleAuthException, try auth again
+            setUserAccount();
+        }
+
+
         // element purchse
-        else if (requestCode == 1001) {
+        else if (requestCode == REQUEST_ON_PURCHASE) {
 
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
@@ -307,9 +342,9 @@ public class MapsActivity extends Activity
                 try {
                     JSONObject jo = new JSONObject(purchaseData);
                     String sku = jo.getString("productId");
-                    Util.createToast(this, getString(R.string.thanks), Toast.LENGTH_LONG); // do string
+                    Util.createUpperToast(this, getString(R.string.thanks), Toast.LENGTH_LONG); // do string
                 } catch (JSONException e) {
-                    Util.createToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
+                    Util.createUpperToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
                     e.printStackTrace();
                 }
             }
@@ -335,6 +370,48 @@ public class MapsActivity extends Activity
         // killed and restarted.
         savedInstanceState.putSerializable("mode", mode);
         savedInstanceState.putSerializable("directionPoint", directionPoint);
+    }
+
+    /**
+     * Checks whether the device currently has a network connection
+     */
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * This method is a hook for background threads and async tasks that need to provide the
+     * user a response UI when an exception occurs.
+     */
+    public void handleException(final Exception e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (e instanceof GooglePlayServicesAvailabilityException) {
+                    // The Google Play services APK is old, disabled, or not present.
+                    // Show a dialog created by Google Play services that allows
+                    // the user to update the APK
+                    int statusCode = ((GooglePlayServicesAvailabilityException) e)
+                            .getConnectionStatusCode();
+                    Dialog dialog = GooglePlayServicesUtil.getErrorDialog(statusCode,
+                            MapsActivity.this,
+                            REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+                    dialog.show();
+                } else if (e instanceof UserRecoverableAuthException) {
+                    // Unable to authenticate, such as when the user has not yet granted
+                    // the app access to the account, but the user can fix this.
+                    // Forward the user to an activity in Google Play services.
+                    Intent intent = ((UserRecoverableAuthException) e).getIntent();
+                    startActivityForResult(intent,
+                            REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+                }
+            }
+        });
     }
 
     private void drawDirections() {
@@ -683,7 +760,7 @@ public class MapsActivity extends Activity
 
         toastMsg = String.format(toastMsg, time);
 
-        Util.createToast(this, toastMsg, Toast.LENGTH_SHORT);
+        Util.createUpperToast(this, toastMsg, Toast.LENGTH_SHORT);
 
     }
 
@@ -766,7 +843,7 @@ public class MapsActivity extends Activity
 
             showCarTimeToast();
         } else {
-            Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
+            Util.createUpperToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
         }
     }
 

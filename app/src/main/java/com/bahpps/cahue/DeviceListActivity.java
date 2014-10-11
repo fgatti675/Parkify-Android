@@ -137,7 +137,7 @@ public class DeviceListActivity extends Activity {
 
     private void removeLink() {
         prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).apply();
-        Util.createToast(this, getString(R.string.link_removed), Toast.LENGTH_SHORT);
+        Util.createUpperToast(this, getString(R.string.link_removed), Toast.LENGTH_SHORT);
         finish();
     }
 

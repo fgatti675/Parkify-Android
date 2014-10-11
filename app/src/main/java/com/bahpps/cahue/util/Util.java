@@ -43,7 +43,7 @@ public class Util {
 	 * @param length
 	 *            One from Toast.LENGTH_LONG or Toast.LENGTH_SHORT
 	 */
-	public static void createToast(Context context, String string, int length) {
+	public static void createUpperToast(Context context, String string, int length) {
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View layout = inflater.inflate(R.layout.custom_toast, null);
 		TextView text = (TextView) layout.findViewById(R.id.error_text);
@@ -69,7 +69,7 @@ public class Util {
 	 * Shows a toast in case no BT is detected
 	 */
 	public static void noBluetooth(Context context) {
-		Util.createToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_LONG);
+		Util.createUpperToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_LONG);
 	}
 
 

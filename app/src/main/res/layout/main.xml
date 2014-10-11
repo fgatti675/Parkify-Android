@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mapview"
-        android:name="com.google.android.gms.maps.MapFragment"/>
+        android:name="com.google.android.gms.maps.MapFragment"
+        tools:layout="@layout/abc_search_view" />
 
     <Button
         android:id="@+id/linkButton"
