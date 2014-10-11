@@ -608,9 +608,7 @@ public class MapsActivity extends Activity
     private void updateCameraIfFollowing() {
 
         if (mode == Mode.FOLLOWING) {
-            if (getCarPosition() != null)
-                zoomToSeeBoth();
-            else
+            if (!zoomToSeeBoth())
                 zoomToMyLocation();
         }
     }
@@ -705,11 +703,16 @@ public class MapsActivity extends Activity
     /**
      * This method zooms to see both user and the car.
      */
-    protected void zoomToSeeBoth() {
+    protected boolean zoomToSeeBoth() {
+
+        LatLng carPosition = getCarPosition();
+        LatLng userPosition = getUserPosition();
+
+        if (carPosition == null || userPosition == null) return false;
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder()
-                .include(getCarPosition())
-                .include(getUserPosition());
+                .include(carPosition)
+                .include(userPosition);
 
         if (directionsPolyLine != null) {
             for (LatLng latLng : directionsPolyLine.getPoints())
@@ -727,13 +730,15 @@ public class MapsActivity extends Activity
             public void onCancel() {
             }
         });
-
+        return true;
     }
 
 
     private void zoomToMyLocation() {
+        LatLng userPosition = getUserPosition();
+        if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .target(getUserPosition())
+                        .target(userPosition)
                         .zoom(15.5f)
                         .build()),
                 new GoogleMap.CancelableCallback() {
