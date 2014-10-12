@@ -880,7 +880,7 @@ public class MapsActivity extends Activity
 
     @Override
     public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
-        Log.d(TAG, parkingSpots.toString());
+        Log.d(TAG, "onLocationsUpdate");
     }
 
 
