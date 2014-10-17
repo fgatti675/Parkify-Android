@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bahpps.cahue.debug.DebugActivity" >
+    <item android:id="@+id/action_poll_location"
+        android:title="@string/poll_location_debug"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+</menu>
