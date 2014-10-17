@@ -284,6 +284,7 @@ public class MapsActivity extends Activity
                 try {
                     authToken = GoogleAuthUtil.getToken(MapsActivity.this, accountName, SCOPE);
                     Log.d(TAG, authToken);
+                    onAuthCompleted(authToken);
                 } catch (UserRecoverableAuthException userRecoverableException) {
                     // GooglePlayServices.apk is either old, disabled, or not present
                     // so we need to show the user some UI in the activity to recover.
@@ -296,6 +297,10 @@ public class MapsActivity extends Activity
                 return null;
             }
         }.execute();
+
+    }
+
+    private void onAuthCompleted(String authToken) {
 
     }
 
@@ -713,8 +718,8 @@ public class MapsActivity extends Activity
         else
             setMode(mode);
 
-        queryParkingLocations();
 
+        queryParkingLocations();
 
     }
 
@@ -873,8 +878,7 @@ public class MapsActivity extends Activity
     }
 
     private void queryParkingLocations() {
-
-        new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, this).execute();
+                new ParkingSpotsService( mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
     }
 
 

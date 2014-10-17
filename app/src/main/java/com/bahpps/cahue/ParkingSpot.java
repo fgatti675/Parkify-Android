@@ -9,6 +9,8 @@ import java.util.Date;
  */
 public class ParkingSpot {
 
+    String id;
+
     LatLng location;
 
     Date time;
