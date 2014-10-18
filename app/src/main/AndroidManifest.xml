@@ -29,6 +29,11 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".MapsActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".DeviceListActivity"
@@ -49,11 +54,6 @@
         <!-- DEBUG  -->
         <activity
             android:name=".debug.DebugActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <service android:name=".debug.DebugService" />
 

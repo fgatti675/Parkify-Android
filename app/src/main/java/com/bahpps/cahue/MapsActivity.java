@@ -82,6 +82,8 @@ public class MapsActivity extends Activity
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
+    private static final int MAX_DIRECTIONS_DISTANCE = 5000;
+
     private static final int REQUEST_CODE_EMAIL = 1;
 
     private static final String PREF_USER_EMAIL = "pref_user_email";
@@ -342,11 +344,25 @@ public class MapsActivity extends Activity
         Log.i(TAG, "drawDirections");
 
         final LatLng carPosition = getCarPosition();
+        final LatLng userPosition = getUserPosition();
 
-        if (directionsPolyLine != null)
+        if (directionsPolyLine != null) {
             directionsPolyLine.remove();
+        }
 
-        if (carPosition == null || getUserPosition() == null) {
+        if (carPosition == null || userPosition == null) {
+            return;
+        }
+
+        // don't set if they are too far
+        float distances[] = new float[3];
+        Location.distanceBetween(
+                carPosition.latitude,
+                carPosition.longitude,
+                userPosition.latitude,
+                userPosition.longitude,
+                distances);
+        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
             return;
         }
 
@@ -354,7 +370,7 @@ public class MapsActivity extends Activity
 
             @Override
             protected Document doInBackground(Object[] objects) {
-                Document doc = md.getDocument(getUserPosition(), carPosition, GMapV2Direction.MODE_WALKING);
+                Document doc = md.getDocument(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
                 return doc;
             }
 

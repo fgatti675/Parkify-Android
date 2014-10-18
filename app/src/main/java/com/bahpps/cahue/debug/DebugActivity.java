@@ -11,9 +11,15 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.util.LocationPollerService;
+
+import java.io.Serializable;
+import java.util.Date;
 
 
 public class DebugActivity extends Activity implements DebugService.ServiceListener {
@@ -21,37 +27,30 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
 
     DebugService mService;
     boolean mBound = false;
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
+
+        ImageButton button = (ImageButton) findViewById(R.id.imageButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pollLocation();
+            }
+        });
+
+        textView = (TextView) findViewById(R.id.text);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.debug, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_poll_location) {
-            pollLocation();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     private void pollLocation(){
         Log.d("debug", "Debug poll location ");
         Intent intent = new Intent(this, DebugService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        textView.setText("Polling...");
     }
 
     @Override
@@ -87,8 +86,10 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
 
     @Override
     public void onNewLocation(Location location) {
-        Log.d("debug", "Debug new location " + location.toString());
-        TextView textView = (TextView) findViewById(R.id.text);
-        textView.setText(location.toString());
+        String string = location.toString();
+        Date startTime = (Date) location.getExtras().getSerializable(LocationPollerService.EXTRA_START_TIME);
+        string += "\n" + (System.currentTimeMillis() - startTime.getTime()) + "ms";
+        Log.d("debug", "Debug new location " + string);
+        textView.setText(string);
     }
 }

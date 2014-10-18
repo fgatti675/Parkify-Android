@@ -24,7 +24,7 @@ public abstract class LocationPollerService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private static final String EXTRA_START_TIME = "extra_time";
+    public static final String EXTRA_START_TIME = "extra_time";
 
     /**
      * Timeout after we consider the location may have changed too much
@@ -114,7 +114,9 @@ public abstract class LocationPollerService extends Service implements
     }
 
     private void notifyLocation(Location location) {
-//        location.getExtras().putSerializable(EXTRA_START_TIME, startTime);
+        Bundle extras = new Bundle();
+        extras.putSerializable(EXTRA_START_TIME, startTime);
+        location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
         onLocationPolled(this, location);
         mGoogleApiClient.disconnect();
