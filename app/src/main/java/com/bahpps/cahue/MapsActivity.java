@@ -29,6 +29,8 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.bahpps.cahue.spots.ParkingSpot;
+import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;

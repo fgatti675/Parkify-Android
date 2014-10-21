@@ -3,6 +3,8 @@ package com.bahpps.cahue;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
+import com.bahpps.cahue.spots.ParkingSpot;
+import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -30,9 +32,14 @@ public class ApplicationTest extends ActivityTestCase {
 
         Log.i("Test", "Testing fusion tables query");
 
-        LatLngBounds latLngBounds = LatLngBounds.builder() // Alcorcon
-                .include(new LatLng(40.350358, -3.821536))
-                .include(new LatLng(40.346335, -3.817309))
+//        LatLngBounds latLngBounds = LatLngBounds.builder() // Alcorcon
+//                .include(new LatLng(40.350358, -3.821536))
+//                .include(new LatLng(40.346335, -3.817309))
+//                .build();
+
+        LatLngBounds latLngBounds = LatLngBounds.builder() // Munich
+                .include(new LatLng(48.132219,11.561716))
+                .include(new LatLng(48.123913,11.553905))
                 .build();
 
         final ParkingSpotsService parkingSpotsService = new ParkingSpotsService(latLngBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
@@ -54,7 +61,7 @@ public class ApplicationTest extends ActivityTestCase {
     /* The testing thread will wait here until the UI thread releases it
      * above with the countDown() or 30 seconds passes and it times out.
      */
-        signal.await(30, TimeUnit.SECONDS);
+        signal.await(60, TimeUnit.SECONDS);
 
         // The task is done, and now you can assert some things!
         assertTrue("Happiness", true);

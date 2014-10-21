@@ -1,39 +1,31 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.spots;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.DateTime;
 import com.google.api.services.fusiontables.Fusiontables;
-import com.google.api.services.fusiontables.FusiontablesScopes;
 import com.google.api.services.fusiontables.model.Sqlresponse;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * Created by Francesco on 11/10/2014.
  */
 public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>> {
+
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private static final String TAG = "ParkingSpotsService";
     private static final String BROWSER_KEY = "AIzaSyB5ukn97hu5159E3cBuUvLvXKV7IsgQG38"; // Using a browser key instead of an Android key for some stupid reason
@@ -76,20 +68,25 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
 
             Fusiontables.Query.Sql sql = fusiontables.query().sql(sqlString).setKey(BROWSER_KEY);
             Sqlresponse spotsResponse = sql.execute();
+            Log.d(TAG, spotsResponse.toPrettyString());
 
             List<ArrayList> rows = (List<ArrayList>) spotsResponse.get("rows");
             if (rows != null) {
                 for (ArrayList<String> element : rows) {
-                    ParkingSpot spot = new ParkingSpot();
-                    spot.id = element.get(0);
-                    spot.time = new Date(element.get(1));
-                    String[] tokens =  element.get(2).split(",");
-                    spot.location = new LatLng(Double.parseDouble(tokens[0]), Double.parseDouble(tokens[1]));
-                    spots.add(spot);
+
+                    try {
+                        ParkingSpot spot = new ParkingSpot();
+                        spot.id = element.get(0);
+                        spot.time = dateFormat.parse(element.get(1));
+                        String[] tokens = element.get(2).split(", ");
+                        spot.location = new LatLng(Double.parseDouble(tokens[0]), Double.parseDouble(tokens[1]));
+                        spots.add(spot);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
-            Log.i(TAG, spotsResponse.toPrettyString());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -100,6 +97,8 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
 
     @Override
     protected void onPostExecute(List<ParkingSpot> parkingSpots) {
+
+        Log.d(TAG, parkingSpots.toString());
         super.onPostExecute(parkingSpots);
         listener.onLocationsUpdate(parkingSpots);
     }
