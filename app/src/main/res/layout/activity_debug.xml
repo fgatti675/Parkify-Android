@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/text"
-        android:text="@string/hello_world"
+        android:text="Hello World!"
         android:paddingTop="?android:attr/actionBarSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
