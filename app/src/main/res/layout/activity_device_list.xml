@@ -12,7 +12,6 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
-
         <TextView
             android:id="@+id/title_dialog"
             android:padding="10dp"

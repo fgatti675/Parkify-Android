@@ -89,6 +89,8 @@ public class MapsActivity extends Activity
     protected static final String TAG = "Maps";
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+    
+    private static final int MAX_DIRECTIONS_DISTANCE = 5000;
 
     static final int REQUEST_CODE_PICK_ACCOUNT = 0;
     static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
@@ -155,7 +157,6 @@ public class MapsActivity extends Activity
         }
     };
 
-
     private IInAppBillingService iInAppBillingService;
 
     private ServiceConnection mServiceConn = new ServiceConnection() {
@@ -175,7 +176,7 @@ public class MapsActivity extends Activity
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
 
         setUpLocationClientIfNeeded();
         setUpMapIfNeeded();
@@ -424,11 +425,25 @@ public class MapsActivity extends Activity
         Log.i(TAG, "drawDirections");
 
         final LatLng carPosition = getCarPosition();
+        final LatLng userPosition = getUserPosition();
 
-        if (directionsPolyLine != null)
+        if (directionsPolyLine != null) {
             directionsPolyLine.remove();
+        }
 
-        if (carPosition == null || getUserPosition() == null) {
+        if (carPosition == null || userPosition == null) {
+            return;
+        }
+
+        // don't set if they are too far
+        float distances[] = new float[3];
+        Location.distanceBetween(
+                carPosition.latitude,
+                carPosition.longitude,
+                userPosition.latitude,
+                userPosition.longitude,
+                distances);
+        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
             return;
         }
 
@@ -436,7 +451,7 @@ public class MapsActivity extends Activity
 
             @Override
             protected Document doInBackground(Object[] objects) {
-                Document doc = md.getDocument(getUserPosition(), carPosition, GMapV2Direction.MODE_WALKING);
+                Document doc = md.getDocument(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
                 return doc;
             }
 

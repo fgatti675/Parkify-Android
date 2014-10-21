@@ -24,15 +24,17 @@ public abstract class LocationPollerService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    public static final String EXTRA_START_TIME = "extra_time";
+
     /**
      * Timeout after we consider the location may have changed too much
      */
-    private final static int TIMEOUT_MS = 12000;
+    private final static int TIMEOUT_MS = 20000;
 
     /**
      * Minimum desired accuracy
      */
-    private final static int ACCURACY_THRESHOLD_M = 10;
+    private final static int ACCURACY_THRESHOLD_M = 8;
 
     private final static String TAG = "LocationPoller";
 
@@ -54,9 +56,13 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        init();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    protected void init() {
         startTime = new Date();
         mGoogleApiClient.connect();
-        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -66,6 +72,8 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public void onConnected(Bundle bundle) {
+
+        Log.i(TAG, "onConnected");
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -106,6 +114,9 @@ public abstract class LocationPollerService extends Service implements
     }
 
     private void notifyLocation(Location location) {
+        Bundle extras = new Bundle();
+        extras.putSerializable(EXTRA_START_TIME, startTime);
+        location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
         onLocationPolled(this, location);
         mGoogleApiClient.disconnect();

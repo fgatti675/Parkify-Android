@@ -65,7 +65,7 @@ public class DeviceListActivity extends Activity {
         prefs = Util.getSharedPreferences(this);
         selectedDeviceAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
 
-        setContentView(R.layout.device_list);
+        setContentView(R.layout.activity_device_list);
 
         title = (TextView) findViewById(R.id.title_dialog);
 
