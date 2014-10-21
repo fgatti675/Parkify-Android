@@ -270,7 +270,7 @@ public class MapsActivity extends Activity
             protected Object doInBackground(Object[] objects) {
                 try {
                     authToken = GoogleAuthUtil.getToken(MapsActivity.this, accountName, SCOPE);
-                    Log.d(TAG, authToken);
+                    Log.d(TAG, "Auth token: " + authToken);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (GoogleAuthException e) {
@@ -751,6 +751,9 @@ public class MapsActivity extends Activity
 
 
     private void zoomToMyLocation() {
+
+        Log.d(TAG, "zoomToMyLocation");
+
         LatLng userPosition = getUserPosition();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
@@ -775,6 +778,8 @@ public class MapsActivity extends Activity
      */
     private void zoomToCar() {
 
+        Log.d(TAG, "zoomToCar");
+
         if (carMarker == null) return;
 
         LatLng loc = getCarPosition();
@@ -786,8 +791,6 @@ public class MapsActivity extends Activity
                     .build()), null);
 
             showCarTimeToast();
-        } else {
-            Util.createToast(this, getString(R.string.car_not_found), Toast.LENGTH_SHORT);
         }
     }
 
