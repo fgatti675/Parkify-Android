@@ -17,11 +17,7 @@ public class Util {
 	 * Shared preferences constants
 	 */
 	public static final String PREF_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
-	public static final String PREF_CAR_LATITUDE = "PREF_CAR_LATITUDE";
-	public static final String PREF_CAR_LONGITUDE = "PREF_CAR_LONGITUDE";
-	public static final String PREF_CAR_ACCURACY = "PREF_CAR_ACCURACY";
-	public static final String PREF_CAR_PROVIDER = "PREF_CAR_PROVIDER";
-	public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
+
 
 	public static final float WALKING_SPEED = 1.4F; // walking speed in m/s
 

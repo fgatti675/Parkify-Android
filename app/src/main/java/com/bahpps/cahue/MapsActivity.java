@@ -667,7 +667,7 @@ public class MapsActivity extends Activity
     private void showCarTimeToast() {
         String toastMsg = getString(R.string.car_was_here);
 
-        long timeDiff = Calendar.getInstance().getTimeInMillis() - prefs.getLong(Util.PREF_CAR_TIME, 0);
+        long timeDiff = Calendar.getInstance().getTimeInMillis() - prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0);
 
         String time = "";
 
@@ -675,10 +675,10 @@ public class MapsActivity extends Activity
         if (seconds < 60) {
             time = seconds + " " + getString(R.string.seconds);
         } else {
-            long minutos = timeDiff / (60 * 1000);
-            if (minutos < 60) {
-                time = minutos
-                        + (minutos > 1 ? " " + getString(R.string.minutes) : " "
+            long minutes = timeDiff / (60 * 1000);
+            if (minutes < 60) {
+                time = minutes
+                        + (minutes > 1 ? " " + getString(R.string.minutes) : " "
                         + getString(R.string.minute));
             } else {
                 long hours = timeDiff / (60 * 60 * 1000);
