@@ -29,6 +29,9 @@ import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.CircleOptionsCreator;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.bahpps.cahue.util.BluetoothDetector;
@@ -82,6 +85,8 @@ public class MapsActivity extends Activity
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
+    private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
+
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
 
     private static final int REQUEST_CODE_EMAIL = 1;
@@ -103,6 +108,7 @@ public class MapsActivity extends Activity
     private GoogleApiClient googleApiClient;
 
     private Marker carMarker;
+    private Circle carAccuracy;
 
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
@@ -377,7 +383,7 @@ public class MapsActivity extends Activity
             @Override
             protected void onPostExecute(Document doc) {
                 directionPoint = md.getDirection(doc);
-                PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.argb(85, 242, 69, 54));
+                PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
 
                 for (int i = 0; i < directionPoint.size(); i++) {
                     rectLine.add(directionPoint.get(i));
@@ -508,9 +514,9 @@ public class MapsActivity extends Activity
     private void setCar(Location carLocation) {
 
         // remove previous
-        if (carMarker != null) {
-            carMarker.remove();
-        }
+        if (carMarker != null) carMarker.remove();
+        if (carAccuracy != null) carAccuracy.remove();
+
 
         if (carLocation == null) {
             // remove directionsPolyLine if there too
@@ -519,10 +525,9 @@ public class MapsActivity extends Activity
                 directionsPolyLine = null;
             }
             carMarker = null;
+            carAccuracy = null;
             return;
         }
-
-        // TODO accuracy
 
         double latitude = carLocation.getLatitude();
         double longitude = carLocation.getLongitude();
@@ -534,12 +539,23 @@ public class MapsActivity extends Activity
             iconFactory.setContentRotation(-90);
             iconFactory.setStyle(IconGenerator.STYLE_RED);
 
+            LatLng carLatLng = new LatLng(latitude, longitude);
+
             // Uses a colored icon.
             carMarker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(latitude, longitude))
+                    .position(carLatLng)
                     .snippet("")
                     .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(getResources().getText(R.string.car).toString().toUpperCase())))
                     .anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()));
+
+            CircleOptions circleOptions = new CircleOptions()
+                    .center(carLatLng)   //set center
+                    .radius(carLocation.getAccuracy())   //set radius in meters
+                    .fillColor(LIGHT_RED)
+                    .strokeColor(LIGHT_RED)
+                    .strokeWidth(0);
+
+            carAccuracy = mMap.addCircle(circleOptions);
 
 
         } else {
@@ -709,6 +725,7 @@ public class MapsActivity extends Activity
         Location location = new Location(Util.TAPPED_PROVIDER);
         location.setLatitude(latLng.latitude);
         location.setLongitude(latLng.longitude);
+        location.setAccuracy(10);
 
         SetCarPositionDialog dialog = new SetCarPositionDialog();
         dialog.setLocation(location);
