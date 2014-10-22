@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
- * Created by Francesco on 11/10/2014.
+ * Service in charge of querying the Fusion Table including the parking spots.
+ * The result is accessed via a listener
  */
 public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>> {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    static{
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     private static final String TAG = "ParkingSpotsService";
     private static final String BROWSER_KEY = "AIzaSyB5ukn97hu5159E3cBuUvLvXKV7IsgQG38"; // Using a browser key instead of an Android key for some stupid reason
@@ -38,6 +43,11 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
     private LatLngBounds latLngBounds;
     private ParkingSpotsUpdateListener listener;
 
+    /**
+     * Create a new service. {@code #execute()} must be called afterwards
+     * @param latLngBounds
+     * @param listener
+     */
     public ParkingSpotsService(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         this.latLngBounds = latLngBounds;
         this.listener = listener;
@@ -59,7 +69,7 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
             String sqlString = String.format(
                     Locale.ENGLISH,
                     "SELECT * FROM %s WHERE ST_INTERSECTS(Location, RECTANGLE(LATLNG(%f, %f), LATLNG(%f, %f)))",
-                    TABLE_ID,
+                    getTableId(),
                     latLngBounds.southwest.latitude,
                     latLngBounds.southwest.longitude,
                     latLngBounds.northeast.latitude,
@@ -103,6 +113,20 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
         listener.onLocationsUpdate(parkingSpots);
     }
 
+    /**
+     * Table the query will be run against.
+     * Can be overridden for testing purposes.
+     *
+     * @return
+     */
+    public String getTableId() {
+        return TABLE_ID;
+    }
+
+    /**
+     * Components that use this service must implement a listener using this interface to get the
+     * parking locations
+     */
     public interface ParkingSpotsUpdateListener {
         void onLocationsUpdate(List<ParkingSpot> parkingSpots);
     }

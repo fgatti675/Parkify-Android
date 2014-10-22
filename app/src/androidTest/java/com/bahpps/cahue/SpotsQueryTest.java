@@ -8,6 +8,9 @@ import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +18,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-public class ApplicationTest extends ActivityTestCase {
+public class SpotsQueryTest extends ActivityTestCase {
+
+
+    private static final String TEST_TABLE_ID = "1Pa5hqK1KxKwgZmbgBFJ5opcbRGHELFsCL6CyE8bf";
 
 
     /**
@@ -32,22 +38,36 @@ public class ApplicationTest extends ActivityTestCase {
 
         Log.i("Test", "Testing fusion tables query");
 
-//        LatLngBounds latLngBounds = LatLngBounds.builder() // Alcorcon
-//                .include(new LatLng(40.350358, -3.821536))
-//                .include(new LatLng(40.346335, -3.817309))
-//                .build();
+        List<ParkingSpot> expectedResult = new ArrayList<ParkingSpot>() {
+            {
+                add(new ParkingSpot(
+                        Long.valueOf(6245697686863872L).toString(),
+                        new LatLng(48.129830, 11.559060),
+                        new Date(1413928884000L)
+                        ));
+            }
+        };
+
 
         LatLngBounds latLngBounds = LatLngBounds.builder() // Munich
-                .include(new LatLng(48.132219,11.561716))
-                .include(new LatLng(48.123913,11.553905))
+                .include(new LatLng(48.132219, 11.561716))
+                .include(new LatLng(48.123913, 11.553905))
                 .build();
+
+        final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
         final ParkingSpotsService parkingSpotsService = new ParkingSpotsService(latLngBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
+                result.addAll(parkingSpots);
                 signal.countDown();
             }
-        });
+        }) {
+            @Override
+            public String getTableId() {
+                return TEST_TABLE_ID;
+            }
+        };
 
         // Execute the async task on the UI thread! THIS IS KEY!
         runTestOnUiThread(new Runnable() {
@@ -64,6 +84,6 @@ public class ApplicationTest extends ActivityTestCase {
         signal.await(60, TimeUnit.SECONDS);
 
         // The task is done, and now you can assert some things!
-        assertTrue("Happiness", true);
+        assertEquals(expectedResult, result);
     }
 }

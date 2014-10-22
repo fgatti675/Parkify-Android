@@ -31,13 +31,19 @@ public class ParkingSpot implements Parcelable {
                 }
             };
 
+    public ParkingSpot() {
+    }
+
     public ParkingSpot(Parcel parcel) {
         id = parcel.readString();
         location = parcel.readParcelable(LatLng.class.getClassLoader());
         time = (Date) parcel.readSerializable();
     }
 
-    public ParkingSpot() {
+    public ParkingSpot(String id, LatLng location, Date time) {
+        this.id = id;
+        this.location = location;
+        this.time = time;
     }
 
     @Override
@@ -59,5 +65,27 @@ public class ParkingSpot implements Parcelable {
                 ", location=" + location +
                 ", time=" + time +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParkingSpot that = (ParkingSpot) o;
+
+        if (!id.equals(that.id)) return false;
+        if (!location.equals(that.location)) return false;
+        if (!time.equals(that.time)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + location.hashCode();
+        result = 31 * result + time.hashCode();
+        return result;
     }
 }
