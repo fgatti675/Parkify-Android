@@ -3,8 +3,13 @@ package com.bahpps.cahue.spots;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.bahpps.cahue.R;
+import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +22,9 @@ public class SpotsDelegate implements Parcelable {
 
     private List<ParkingSpot> spots;
     private GoogleMap mMap;
-    private LatLngBounds currentView;
+    private LatLngBounds currentBounds;
+
+    private ParkingSpotsService service;
 
     public static final Parcelable.Creator<SpotsDelegate> CREATOR =
             new Parcelable.Creator<SpotsDelegate>() {
@@ -32,9 +39,8 @@ public class SpotsDelegate implements Parcelable {
                 }
             };
 
-
-    public SpotsDelegate(GoogleMap mMap) {
-        this.mMap = mMap;
+    public SpotsDelegate() {
+        spots = new ArrayList<ParkingSpot>();
     }
 
     public void setMap(GoogleMap map) {
@@ -44,6 +50,32 @@ public class SpotsDelegate implements Parcelable {
     public SpotsDelegate(Parcel parcel) {
         ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(SpotsDelegate.class.getClassLoader());
         spots = Arrays.asList(spotsArray);
+    }
+
+    public boolean applyBounds(LatLngBounds bounds) {
+        if (currentBounds != null
+                && currentBounds.contains(bounds.northeast)
+                && currentBounds.contains(bounds.southwest)) {
+            return false;
+        }
+
+        currentBounds = bounds;
+
+        service = new TestParkingSpotsService(currentBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
+            @Override
+            public synchronized void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
+                if (service != null && service.equals(this)) {
+                    for (ParkingSpot parkingSpot : parkingSpots) {
+                        mMap.clear();
+                        mMap.addMarker(new MarkerOptions()
+                                .position(parkingSpot.location));
+                    }
+                }
+
+            }
+        });
+        service.execute();
+        return true;
     }
 
     @Override

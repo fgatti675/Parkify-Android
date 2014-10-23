@@ -169,7 +169,6 @@ public class MapsActivity extends Activity
         setContentView(R.layout.activity_main);
 
         setUpLocationClientIfNeeded();
-        setUpMapIfNeeded();
 
 
         iconFactory = new IconGenerator(this);
@@ -195,7 +194,7 @@ public class MapsActivity extends Activity
         if (savedInstanceState == null) {
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
-            spotsDelegate = new SpotsDelegate(mMap);
+            spotsDelegate = new SpotsDelegate();
         } else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
@@ -203,9 +202,11 @@ public class MapsActivity extends Activity
             mMap.clear();
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
-            spotsDelegate.setMap(mMap);
-
         }
+
+        setUpMapIfNeeded();
+
+        spotsDelegate.setMap(mMap);
 
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
@@ -304,9 +305,7 @@ public class MapsActivity extends Activity
                 // Notify users that they must pick an account to proceed.
                 Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
             }
-        }
-
-        else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
                 requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
                 && resultCode == RESULT_OK) {
             // Receiving a result that follows a GoogleAuthException, try auth again
@@ -775,7 +774,7 @@ public class MapsActivity extends Activity
 
 
     private void queryParkingLocations() {
-                new ParkingSpotsService( mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
+        new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
     }
 
 
@@ -783,7 +782,6 @@ public class MapsActivity extends Activity
     public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
         Log.d(TAG, "onLocationsUpdate");
     }
-
 
 
     @Override
@@ -807,6 +805,8 @@ public class MapsActivity extends Activity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-
+        LatLngBounds curScreen = mMap.getProjection()
+                .getVisibleRegion().latLngBounds;
+        spotsDelegate.applyBounds(curScreen);
     }
 }

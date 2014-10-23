@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.debug;
 
 import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 /**
 * Created by Francesco on 23/10/2014.
 */
-class TestParkingSpotsService extends ParkingSpotsService {
+public class TestParkingSpotsService extends ParkingSpotsService {
 
 
     private static final String TEST_TABLE_ID = "1Pa5hqK1KxKwgZmbgBFJ5opcbRGHELFsCL6CyE8bf";

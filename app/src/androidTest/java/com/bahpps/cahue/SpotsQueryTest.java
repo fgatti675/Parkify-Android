@@ -3,6 +3,7 @@ package com.bahpps.cahue;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
+import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.model.LatLng;
