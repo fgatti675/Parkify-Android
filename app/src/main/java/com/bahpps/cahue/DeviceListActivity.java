@@ -30,6 +30,8 @@ import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,9 +40,9 @@ import java.util.Set;
  * Intent.
  */
 public class DeviceListActivity extends Activity {
+
     // Debugging
     private static final String TAG = "DeviceListActivity";
-
 
     // Return Intent extra
     public static final String EXTRA_DEVICE_ADDRESS = "device_address";
@@ -52,7 +54,6 @@ public class DeviceListActivity extends Activity {
 
     private String selectedDeviceAddress = "";
 
-    private TextView title;
 
     private SharedPreferences prefs;
 
@@ -67,13 +68,10 @@ public class DeviceListActivity extends Activity {
 
         setContentView(R.layout.activity_device_list);
 
-        title = (TextView) findViewById(R.id.title_dialog);
-
         // Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
 
-        // Initialize array adapters. One for already paired devices and
-        // one for newly discovered devices
+        // Initialize array adapter
         mDevicesArrayAdapter = new DeviceListAdapter();
 
         // Find and set up the ListView for paired devices
@@ -181,23 +179,25 @@ public class DeviceListActivity extends Activity {
 
     // The on-click listener for all devices in the ListViews
     private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
-        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             // Cancel discovery because it's costly and we're about to connect
             mBtAdapter.cancelDiscovery();
 
+            BluetoothDevice device = mDevicesArrayAdapter.getItem(i);
+
             // Get the device MAC address, which is the last 17 chars in the
             // View
-            String info = ((TextView) v.findViewById(R.id.name)).getText().toString();
-            String address = info.substring(info.length() - 17);
+            String name = device.getName();
+            String address = device.getAddress();
 
-            Log.d("List", "Clicked: " + info + " " + address);
+            Log.d("List", "Clicked: " + name + " " + address);
 
             prefs.edit().putString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, address).apply();
 
             // Create the result Intent and include the MAC address
             Intent intent = new Intent();
             intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
-            intent.putExtra(EXTRA_DEVICE_NAME, info.substring(0, info.length() - 18));
+            intent.putExtra(EXTRA_DEVICE_NAME, name);
 
             // Set result and finish this Activity
             setResult(Activity.RESULT_OK, intent);
@@ -237,10 +237,10 @@ public class DeviceListActivity extends Activity {
 
     class DeviceListAdapter extends BaseAdapter {
 
-        private Context mContext;
+
         ArrayList<BluetoothDevice> mDevices;
 
-        public DeviceListAdapter() {
+        DeviceListAdapter() {
             mDevices = new ArrayList<BluetoothDevice>();
         }
 
@@ -256,8 +256,7 @@ public class DeviceListActivity extends Activity {
             return mDevices.size();
         }
 
-        public Object getItem(int position) {
-
+        public BluetoothDevice getItem(int position) {
             return mDevices.get(position);
         }
 
@@ -269,7 +268,7 @@ public class DeviceListActivity extends Activity {
 
             View view;
 
-            // Code for recliclying views
+            // Code for recycling views
             if (convertView == null) {
                 LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 view = inflator.inflate(R.layout.device_name, null);
@@ -290,7 +289,7 @@ public class DeviceListActivity extends Activity {
             // We set the name
             TextView t = (TextView) view.findViewById(R.id.name);
 
-            t.setText(device.getName() + "\n" + device.getAddress());
+            t.setText(device.getName());
 
             return view;
         }
