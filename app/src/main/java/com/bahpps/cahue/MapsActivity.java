@@ -125,7 +125,6 @@ public class MapsActivity extends Activity
 
     private IconGenerator iconFactory;
 
-
     /**
      * Directions delegate
      */
