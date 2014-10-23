@@ -39,7 +39,6 @@ import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.CircleOptionsCreator;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.bahpps.cahue.util.BluetoothDetector;
@@ -82,19 +81,9 @@ public class MapsActivity extends Activity
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener, ParkingSpotsService.ParkingSpotsUpdateListener {
 
-    /**
-     * Camera mode
-     */
-    private enum Mode {
-        FREE, FOLLOWING
-    }
-
-    private Mode mode;
-
     protected static final String TAG = "Maps";
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-    
 
     private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
@@ -133,20 +122,11 @@ public class MapsActivity extends Activity
 
     private IconGenerator iconFactory;
 
-    private ImageButton carButton;
-
-    private boolean justFinishedAnimating = false;
 
     /**
      * Directions delegate
      */
     private GMapV2Direction md;
-
-    /**
-     * Actual lines representing the directionsPolyLine
-     */
-    private Polyline directionsPolyLine;
-    private ArrayList<LatLng> directionPoint;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -160,7 +140,6 @@ public class MapsActivity extends Activity
                 Log.i(TAG, "Location received: " + location);
                 mMap.clear();
                 setCar(location);
-                drawDirections();
             }
 
         }
@@ -221,24 +200,6 @@ public class MapsActivity extends Activity
             mMap.clear();
         }
 
-        /**
-         * Restore mode if saved
-         */
-        if (savedInstanceState != null) {
-            mode = (Mode) savedInstanceState.getSerializable("mode");
-            directionPoint = (ArrayList) savedInstanceState.getSerializable("directionPoint");
-        }
-
-        /**
-         * Car button for indicating the camera mode
-         */
-        carButton = (ImageButton) findViewById(R.id.carButton);
-        carButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (mode == Mode.FREE) setMode(Mode.FOLLOWING);
-                else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
-            }
-        });
 
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
@@ -380,12 +341,6 @@ public class MapsActivity extends Activity
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
         super.onSaveInstanceState(savedInstanceState);
-
-        // Save UI state changes to the savedInstanceState.
-        // This bundle will be passed to onCreate if the process is
-        // killed and restarted.
-        savedInstanceState.putSerializable("mode", mode);
-        savedInstanceState.putSerializable("directionPoint", directionPoint);
     }
 
     /**
@@ -430,73 +385,6 @@ public class MapsActivity extends Activity
         });
     }
 
-    private void drawDirections() {
-
-        Log.i(TAG, "drawDirections");
-
-        final LatLng carPosition = getCarPosition();
-        final LatLng userPosition = getUserPosition();
-
-        if (directionsPolyLine != null) {
-            directionsPolyLine.remove();
-        }
-
-        if (carPosition == null || userPosition == null) {
-            return;
-        }
-
-        // don't set if they are too far
-        float distances[] = new float[3];
-        Location.distanceBetween(
-                carPosition.latitude,
-                carPosition.longitude,
-                userPosition.latitude,
-                userPosition.longitude,
-                distances);
-        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
-            return;
-        }
-
-        new AsyncTask<Object, Object, Document>() {
-
-            @Override
-            protected Document doInBackground(Object[] objects) {
-                Document doc = md.getDocument(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
-                return doc;
-            }
-
-            @Override
-            protected void onPostExecute(Document doc) {
-                directionPoint = md.getDirection(doc);
-                PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
-
-                for (int i = 0; i < directionPoint.size(); i++) {
-                    rectLine.add(directionPoint.get(i));
-                }
-                directionsPolyLine = mMap.addPolyline(rectLine);
-
-                updateCameraIfFollowing();
-            }
-
-        }.execute();
-
-    }
-
-    private void setMode(Mode mode) {
-
-        Log.i(TAG, "Setting mode to " + mode);
-
-        this.mode = mode;
-
-        updateCameraIfFollowing();
-
-        if (mode == Mode.FOLLOWING) {
-            carButton.setImageResource(R.drawable.ic_icon_car_red);
-        } else if (mode == Mode.FREE) {
-            carButton.setImageResource(R.drawable.ic_icon_car);
-        }
-
-    }
 
     private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
@@ -604,11 +492,6 @@ public class MapsActivity extends Activity
 
 
         if (carLocation == null) {
-            // remove directionsPolyLine if there too
-            if (directionsPolyLine != null) {
-                directionsPolyLine.remove();
-                directionsPolyLine = null;
-            }
             carMarker = null;
             carAccuracy = null;
             return;
@@ -714,20 +597,7 @@ public class MapsActivity extends Activity
     @Override
     public void onLocationChanged(Location location) {
 
-        updateCameraIfFollowing();
 
-        if (getCarPosition() != null && directionsPolyLine == null) {
-            drawDirections();
-        }
-
-    }
-
-    private void updateCameraIfFollowing() {
-
-        if (mode == Mode.FOLLOWING) {
-            if (!zoomToSeeBoth())
-                zoomToMyLocation();
-        }
     }
 
 
@@ -747,12 +617,6 @@ public class MapsActivity extends Activity
                     .target(userPosition)
                     .zoom(15.5f)
                     .build()));
-
-        if (mode == null)
-            setMode(Mode.FOLLOWING);
-        else
-            setMode(mode);
-
 
         queryParkingLocations();
 
@@ -834,16 +698,10 @@ public class MapsActivity extends Activity
                 .include(carPosition)
                 .include(userPosition);
 
-        if (directionsPolyLine != null) {
-            for (LatLng latLng : directionsPolyLine.getPoints())
-                builder.include(latLng);
-        }
-
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150), new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
-                justFinishedAnimating = true;
             }
 
             @Override
@@ -867,7 +725,6 @@ public class MapsActivity extends Activity
                 new GoogleMap.CancelableCallback() {
                     @Override
                     public void onFinish() {
-                        justFinishedAnimating = true;
                     }
 
                     @Override
@@ -895,7 +752,7 @@ public class MapsActivity extends Activity
                     .build()), null);
 
             showCarTimeToast();
-        } 
+        }
     }
 
     private LatLng getUserPosition() {
@@ -909,12 +766,6 @@ public class MapsActivity extends Activity
         return carMarker.getPosition();
     }
 
-
-    @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
-        if (!justFinishedAnimating) setMode(Mode.FREE);
-        justFinishedAnimating = false;
-    }
 
     private void queryParkingLocations() {
                 new ParkingSpotsService( mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
@@ -939,11 +790,16 @@ public class MapsActivity extends Activity
 
     @Override
     public void onMapClick(LatLng point) {
-        setMode(Mode.FREE);
+
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
 
     }
 }
