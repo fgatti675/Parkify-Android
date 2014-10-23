@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsService;
+import com.bahpps.cahue.spots.SpotsDelegate;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
@@ -97,6 +98,8 @@ public class MapsActivity extends Activity
     private static final String PREF_USER_EMAIL = "pref_user_email";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
+    private SpotsDelegate spotsDelegate;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -193,13 +196,17 @@ public class MapsActivity extends Activity
         if (savedInstanceState == null) {
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
+            spotsDelegate = new SpotsDelegate(mMap);
         } else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
             mMap = mapFragment.getMap();
             mMap.clear();
-        }
 
+            spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
+            spotsDelegate.setMap(mMap);
+
+        }
 
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
@@ -340,6 +347,7 @@ public class MapsActivity extends Activity
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
+        savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
         super.onSaveInstanceState(savedInstanceState);
     }
 

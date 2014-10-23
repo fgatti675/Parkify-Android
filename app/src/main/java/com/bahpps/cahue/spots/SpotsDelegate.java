@@ -3,6 +3,7 @@ package com.bahpps.cahue.spots;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
@@ -14,23 +15,31 @@ import java.util.List;
  */
 public class SpotsDelegate implements Parcelable {
 
-    List<ParkingSpot> spots;
+    private List<ParkingSpot> spots;
+    private GoogleMap mMap;
+    private LatLngBounds currentView;
 
     public static final Parcelable.Creator<SpotsDelegate> CREATOR =
-            new Parcelable.Creator<SpotsDelegate>()
-            {
+            new Parcelable.Creator<SpotsDelegate>() {
                 @Override
-                public SpotsDelegate createFromParcel(Parcel parcel)
-                {
+                public SpotsDelegate createFromParcel(Parcel parcel) {
                     return new SpotsDelegate(parcel);
                 }
 
                 @Override
-                public SpotsDelegate[] newArray(int size)
-                {
+                public SpotsDelegate[] newArray(int size) {
                     return new SpotsDelegate[size];
                 }
             };
+
+
+    public SpotsDelegate(GoogleMap mMap) {
+        this.mMap = mMap;
+    }
+
+    public void setMap(GoogleMap map) {
+        this.mMap = map;
+    }
 
     public SpotsDelegate(Parcel parcel) {
         ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(SpotsDelegate.class.getClassLoader());
