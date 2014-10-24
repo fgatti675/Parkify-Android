@@ -10,16 +10,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mapview"
-        android:name="com.google.android.gms.maps.MapFragment"
-        tools:layout="@layout/abc_search_view" />
+        android:name="com.google.android.gms.maps.MapFragment"/>
 
     <Button
         android:id="@+id/linkButton"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/carButton"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="5dp"
         android:text="@string/link_device"
-        android:background="@drawable/plain_button"/>
+        android:background="@drawable/plain_button"
+        android:layout_toLeftOf="@+id/carButton" />
+
+    <ImageButton
+        android:id="@+id/carButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:padding="8dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/plain_button"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_icon_car" />
+
 
 </RelativeLayout>

@@ -61,17 +61,19 @@ public class SpotsDelegate implements Parcelable {
 
         currentBounds = bounds;
 
+        /**
+         * In case there was a query running, cancel it
+         */
+        if (service != null) service.cancel(true);
+
         service = new TestParkingSpotsService(currentBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
-                if (service != null && service.equals(this)) {
-                    for (ParkingSpot parkingSpot : parkingSpots) {
-                        mMap.clear();
-                        mMap.addMarker(new MarkerOptions()
-                                .position(parkingSpot.location));
-                    }
+                mMap.clear();
+                for (ParkingSpot parkingSpot : parkingSpots) {
+                    mMap.addMarker(new MarkerOptions()
+                            .position(parkingSpot.location));
                 }
-
             }
         });
         service.execute();

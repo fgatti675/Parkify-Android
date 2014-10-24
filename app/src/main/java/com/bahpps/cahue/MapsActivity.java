@@ -159,7 +159,6 @@ public class MapsActivity extends Activity
             Location location = (Location) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
-                mMap.clear();
                 carLocation = location;
                 setUpCar();
                 drawDirections();
@@ -224,8 +223,18 @@ public class MapsActivity extends Activity
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.setMap(mMap);
-
         }
+
+        /**
+         * Car button for indicating the camera mode
+         */
+        carButton = (ImageButton) findViewById(R.id.carButton);
+        carButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (mode == Mode.FREE) setMode(Mode.FOLLOWING);
+                else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
+            }
+        });
 
         setUpMapIfNeeded();
 
@@ -593,7 +602,7 @@ public class MapsActivity extends Activity
      */
     private void setUpCar() {
 
-        mMap.clear();
+//        mMap.clear();
 
         if (carLocation == null) {
             return;
@@ -808,8 +817,8 @@ public class MapsActivity extends Activity
      */
     protected boolean zoomToSeeBoth() {
 
-        LatLng carPosition = getCarPosition();
-        LatLng userPosition = getUserPosition();
+        LatLng carPosition = getCarLatLng();
+        LatLng userPosition = getUserLatLng();
 
         if (carPosition == null || userPosition == null) return false;
 
@@ -835,7 +844,7 @@ public class MapsActivity extends Activity
 
         Log.d(TAG, "zoomToMyLocation");
 
-        LatLng userPosition = getUserPosition();
+        LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                         .target(userPosition)
@@ -862,7 +871,7 @@ public class MapsActivity extends Activity
 
         if (carMarker == null) return;
 
-        LatLng loc = getCarPosition();
+        LatLng loc = getCarLatLng();
 
         if (loc != null) {
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
