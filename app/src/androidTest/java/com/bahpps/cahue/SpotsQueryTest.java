@@ -3,13 +3,13 @@ package com.bahpps.cahue;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
+import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -19,10 +19,6 @@ import java.util.concurrent.TimeUnit;
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
 public class SpotsQueryTest extends ActivityTestCase {
-
-
-    private static final String TEST_TABLE_ID = "1Pa5hqK1KxKwgZmbgBFJ5opcbRGHELFsCL6CyE8bf";
-
 
     /**
      * This demonstrates how to test AsyncTasks in android JUnit. Below I used
@@ -44,7 +40,7 @@ public class SpotsQueryTest extends ActivityTestCase {
                         Long.valueOf(6245697686863872L).toString(),
                         new LatLng(48.129830, 11.559060),
                         new Date(1413928884000L)
-                        ));
+                ));
             }
         };
 
@@ -56,18 +52,14 @@ public class SpotsQueryTest extends ActivityTestCase {
 
         final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
-        final ParkingSpotsService parkingSpotsService = new ParkingSpotsService(latLngBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
-            @Override
-            public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
-                result.addAll(parkingSpots);
-                signal.countDown();
-            }
-        }) {
-            @Override
-            public String getTableId() {
-                return TEST_TABLE_ID;
-            }
-        };
+        final ParkingSpotsService parkingSpotsService = new TestParkingSpotsService(latLngBounds,
+                new ParkingSpotsService.ParkingSpotsUpdateListener() {
+                    @Override
+                    public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
+                        result.addAll(parkingSpots);
+                        signal.countDown();
+                    }
+                });
 
         // Execute the async task on the UI thread! THIS IS KEY!
         runTestOnUiThread(new Runnable() {
@@ -86,4 +78,5 @@ public class SpotsQueryTest extends ActivityTestCase {
         // The task is done, and now you can assert some things!
         assertEquals(expectedResult, result);
     }
+
 }

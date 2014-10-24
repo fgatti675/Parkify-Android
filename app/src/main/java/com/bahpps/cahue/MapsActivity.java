@@ -189,6 +189,9 @@ public class MapsActivity extends Activity
 
         setContentView(R.layout.activity_main);
 
+        setUpLocationClientIfNeeded();
+
+
         iconFactory = new IconGenerator(this);
 
         // Get local Bluetooth adapter
@@ -212,7 +215,7 @@ public class MapsActivity extends Activity
         if (savedInstanceState == null) {
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
-            spotsDelegate = new SpotsDelegate(mMap);
+            spotsDelegate = new SpotsDelegate();
         } else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
@@ -221,26 +224,12 @@ public class MapsActivity extends Activity
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.setMap(mMap);
+
         }
 
-        /**
-         * Restore mode if saved
-         */
-        if (savedInstanceState != null) {
-            mode = (Mode) savedInstanceState.getSerializable("mode");
-            directionPoint = (ArrayList) savedInstanceState.getSerializable("directionPoint");
-        }
+        setUpMapIfNeeded();
 
-        /**
-         * Car button for indicating the camera mode
-         */
-        carButton = (ImageButton) findViewById(R.id.carButton);
-        carButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (mode == Mode.FREE) setMode(Mode.FOLLOWING);
-                else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
-            }
-        });
+        spotsDelegate.setMap(mMap);
 
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
@@ -254,11 +243,6 @@ public class MapsActivity extends Activity
          * Preferences
          */
         prefs = Util.getSharedPreferences(this);
-
-        /**
-         *
-         */
-        setUpMapIfNeeded();
 
         // show help dialog only on first run of the app
         boolean dialogShown = prefs.getBoolean(Util.PREF_DIALOG_SHOWN, false);
@@ -824,8 +808,8 @@ public class MapsActivity extends Activity
      */
     protected boolean zoomToSeeBoth() {
 
-        LatLng carPosition = getCarLatLng();
-        LatLng userPosition = getUserLatLng();
+        LatLng carPosition = getCarPosition();
+        LatLng userPosition = getUserPosition();
 
         if (carPosition == null || userPosition == null) return false;
 
@@ -833,15 +817,10 @@ public class MapsActivity extends Activity
                 .include(carPosition)
                 .include(userPosition);
 
-        if (directionsPolyLine != null) {
-            for (LatLng latLng : directionsPolyLine.getPoints())
-                builder.include(latLng);
-        }
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150), new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {
-                justFinishedAnimating = true;
             }
 
             @Override
@@ -856,7 +835,7 @@ public class MapsActivity extends Activity
 
         Log.d(TAG, "zoomToMyLocation");
 
-        LatLng userPosition = getUserLatLng();
+        LatLng userPosition = getUserPosition();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                         .target(userPosition)
@@ -865,7 +844,6 @@ public class MapsActivity extends Activity
                 new GoogleMap.CancelableCallback() {
                     @Override
                     public void onFinish() {
-                        justFinishedAnimating = true;
                     }
 
                     @Override
@@ -882,9 +860,9 @@ public class MapsActivity extends Activity
 
         Log.d(TAG, "zoomToCar");
 
-        if (carLocation == null) return;
+        if (carMarker == null) return;
 
-        LatLng loc = getCarLatLng();
+        LatLng loc = getCarPosition();
 
         if (loc != null) {
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
@@ -909,7 +887,7 @@ public class MapsActivity extends Activity
 
 
     private void queryParkingLocations() {
-                new ParkingSpotsService( mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
+        new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
     }
 
     @Override
@@ -921,6 +899,11 @@ public class MapsActivity extends Activity
     public void onCameraChange(CameraPosition cameraPosition) {
         if (!justFinishedAnimating) setMode(Mode.FREE);
         justFinishedAnimating = false;
+
+
+        LatLngBounds curScreen = mMap.getProjection()
+                .getVisibleRegion().latLngBounds;
+        spotsDelegate.applyBounds(curScreen);
     }
 
 
@@ -942,5 +925,4 @@ public class MapsActivity extends Activity
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
-
 }
