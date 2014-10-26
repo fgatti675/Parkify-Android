@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -89,7 +88,7 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
                         spot.id = element.get(0);
                         spot.time = dateFormat.parse(element.get(1));
                         String[] tokens = element.get(2).split(", ");
-                        spot.location = new LatLng(Double.parseDouble(tokens[0]), Double.parseDouble(tokens[1]));
+                        spot.position = new LatLng(Double.parseDouble(tokens[0]), Double.parseDouble(tokens[1]));
                         spots.add(spot);
                     } catch (ParseException e) {
                         e.printStackTrace();

@@ -4,19 +4,20 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.Date;
 
 /**
  * Created by Francesco on 11/10/2014.
  */
-public class ParkingSpot implements Parcelable {
+public class ParkingSpot implements Parcelable, ClusterItem {
 
-    String id;
+    private String id;
 
-    LatLng location;
+    private LatLng position;
 
-    Date time;
+    private Date time;
 
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
             new Parcelable.Creator<ParkingSpot>() {
@@ -31,18 +32,15 @@ public class ParkingSpot implements Parcelable {
                 }
             };
 
-    public ParkingSpot() {
-    }
-
     public ParkingSpot(Parcel parcel) {
         id = parcel.readString();
-        location = parcel.readParcelable(LatLng.class.getClassLoader());
+        position = parcel.readParcelable(LatLng.class.getClassLoader());
         time = (Date) parcel.readSerializable();
     }
 
     public ParkingSpot(String id, LatLng location, Date time) {
         this.id = id;
-        this.location = location;
+        this.position = location;
         this.time = time;
     }
 
@@ -54,7 +52,7 @@ public class ParkingSpot implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
-        parcel.writeParcelable(location, 0);
+        parcel.writeParcelable(position, 0);
         parcel.writeSerializable(time);
     }
 
@@ -62,7 +60,7 @@ public class ParkingSpot implements Parcelable {
     public String toString() {
         return "ParkingSpot{" +
                 "id='" + id + '\'' +
-                ", location=" + location +
+                ", position=" + position +
                 ", time=" + time +
                 '}';
     }
@@ -75,7 +73,7 @@ public class ParkingSpot implements Parcelable {
         ParkingSpot that = (ParkingSpot) o;
 
         if (!id.equals(that.id)) return false;
-        if (!location.equals(that.location)) return false;
+        if (!position.equals(that.position)) return false;
         if (!time.equals(that.time)) return false;
 
         return true;
@@ -84,8 +82,13 @@ public class ParkingSpot implements Parcelable {
     @Override
     public int hashCode() {
         int result = id.hashCode();
-        result = 31 * result + location.hashCode();
+        result = 31 * result + position.hashCode();
         result = 31 * result + time.hashCode();
         return result;
+    }
+
+    @Override
+    public LatLng getPosition() {
+        return position;
     }
 }
