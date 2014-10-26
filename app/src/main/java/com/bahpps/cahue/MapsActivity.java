@@ -82,6 +82,14 @@ public class MapsActivity extends Activity
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener, ParkingSpotsService.ParkingSpotsUpdateListener {
 
+    /**
+     * Camera mode
+     */
+    private enum Mode {
+        FREE, FOLLOWING;
+    }
+    private Mode mode;
+
     protected static final String TAG = "Maps";
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
@@ -101,6 +109,8 @@ public class MapsActivity extends Activity
 
     private SpotsDelegate spotsDelegate;
 
+    private Marker carMarker;
+
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -113,8 +123,7 @@ public class MapsActivity extends Activity
 
     private GoogleApiClient googleApiClient;
 
-    private Marker carMarker;
-    private Circle carAccuracy;
+    private Location carLocation;
 
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
@@ -125,10 +134,20 @@ public class MapsActivity extends Activity
 
     private IconGenerator iconFactory;
 
+    private ImageButton carButton;
+
+    private boolean justFinishedAnimating = false;
+
     /**
      * Directions delegate
      */
     private GMapV2Direction md;
+
+    /**
+     * Actual lines representing the directionsPolyLine
+     */
+    private Polyline directionsPolyLine;
+    private ArrayList<LatLng> directionPoint;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -140,8 +159,9 @@ public class MapsActivity extends Activity
             Location location = (Location) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
-                mMap.clear();
-                setCar(location);
+                carLocation = location;
+                setUpCar();
+                drawDirections();
             }
 
         }
@@ -199,10 +219,22 @@ public class MapsActivity extends Activity
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
             mMap = mapFragment.getMap();
-            mMap.clear();
+            setUpMap();
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
+            spotsDelegate.setMap(mMap);
         }
+
+        /**
+         * Car button for indicating the camera mode
+         */
+        carButton = (ImageButton) findViewById(R.id.carButton);
+        carButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (mode == Mode.FREE) setMode(Mode.FOLLOWING);
+                else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
+            }
+        });
 
         setUpMapIfNeeded();
 
@@ -227,8 +259,12 @@ public class MapsActivity extends Activity
             showHelpDialog();
         }
 
-        Location carLocation = CarLocationManager.getStoredLocation(this);
-        setCar(carLocation);
+        if (carLocation == null)
+            carLocation = CarLocationManager.getStoredLocation(this);
+        setUpCar();
+
+        setUpLocationClientIfNeeded();
+
 
         bindBillingService();
 
@@ -305,7 +341,9 @@ public class MapsActivity extends Activity
                 // Notify users that they must pick an account to proceed.
                 Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
             }
-        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+        }
+
+        else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
                 requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
                 && resultCode == RESULT_OK) {
             // Receiving a result that follows a GoogleAuthException, try auth again
@@ -346,7 +384,12 @@ public class MapsActivity extends Activity
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
         savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
-        super.onSaveInstanceState(savedInstanceState);
+
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putSerializable("mode", mode);
+        savedInstanceState.putSerializable("directionPoint", directionPoint);
     }
 
     /**
@@ -359,6 +402,58 @@ public class MapsActivity extends Activity
             return true;
         }
         return false;
+    }
+
+    private void drawDirections() {
+
+        Log.i(TAG, "drawDirections");
+
+        final LatLng carPosition = getCarLatLng();
+        final LatLng userPosition = getUserLatLng();
+
+        if (directionsPolyLine != null) {
+            directionsPolyLine.remove();
+        }
+
+        if (carPosition == null || userPosition == null) {
+            return;
+        }
+
+        // don't set if they are too far
+        float distances[] = new float[3];
+        Location.distanceBetween(
+                carPosition.latitude,
+                carPosition.longitude,
+                userPosition.latitude,
+                userPosition.longitude,
+                distances);
+        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
+            return;
+        }
+
+        new AsyncTask<Object, Object, Document>() {
+
+            @Override
+            protected Document doInBackground(Object[] objects) {
+                Document doc = md.getDocument(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
+                return doc;
+            }
+
+            @Override
+            protected void onPostExecute(Document doc) {
+                directionPoint = md.getDirection(doc);
+                PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
+
+                for (int i = 0; i < directionPoint.size(); i++) {
+                    rectLine.add(directionPoint.get(i));
+                }
+                directionsPolyLine = mMap.addPolyline(rectLine);
+
+                updateCameraIfFollowing();
+            }
+
+        }.execute();
+
     }
 
     /**
@@ -391,6 +486,21 @@ public class MapsActivity extends Activity
         });
     }
 
+    private void setMode(Mode mode) {
+
+        Log.i(TAG, "Setting mode to " + mode);
+
+        this.mode = mode;
+
+        updateCameraIfFollowing();
+
+        if (mode == Mode.FOLLOWING) {
+            carButton.setImageResource(R.drawable.ic_icon_car_red);
+        } else if (mode == Mode.FREE) {
+            carButton.setImageResource(R.drawable.ic_icon_car);
+        }
+
+    }
 
     private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
@@ -490,16 +600,11 @@ public class MapsActivity extends Activity
     /**
      * Displays the car in the map
      */
-    private void setCar(Location carLocation) {
+    private void setUpCar() {
 
-        // remove previous
-        if (carMarker != null) carMarker.remove();
-        if (carAccuracy != null) carAccuracy.remove();
-
+//        mMap.clear();
 
         if (carLocation == null) {
-            carMarker = null;
-            carAccuracy = null;
             return;
         }
 
@@ -508,7 +613,7 @@ public class MapsActivity extends Activity
 
         if (latitude != 0 && longitude != 0) {
 
-            Log.i(TAG, "Setting car in map: " + latitude + " " + longitude);
+            Log.i(TAG, "Setting car in map: " + carLocation);
 
             iconFactory.setContentRotation(-90);
             iconFactory.setStyle(IconGenerator.STYLE_RED);
@@ -529,7 +634,7 @@ public class MapsActivity extends Activity
                     .strokeColor(LIGHT_RED)
                     .strokeWidth(0);
 
-            carAccuracy = mMap.addCircle(circleOptions);
+            mMap.addCircle(circleOptions);
 
 
         } else {
@@ -580,7 +685,8 @@ public class MapsActivity extends Activity
 
     private void removeCar() {
         CarLocationManager.removeStoredLocation(this);
-        setCar(null);
+        carLocation = null;
+        setUpCar();
     }
 
     /**
@@ -603,7 +709,20 @@ public class MapsActivity extends Activity
     @Override
     public void onLocationChanged(Location location) {
 
+        updateCameraIfFollowing();
 
+        if (getCarLatLng() != null && directionsPolyLine == null) {
+            drawDirections();
+        }
+
+    }
+
+    private void updateCameraIfFollowing() {
+
+        if (mode == Mode.FOLLOWING) {
+            if (!zoomToSeeBoth())
+                zoomToMyLocation();
+        }
     }
 
 
@@ -617,14 +736,17 @@ public class MapsActivity extends Activity
                 REQUEST,
                 this);
         // call convenience method that zooms map on our location only on starting the app
-        LatLng userPosition = getUserPosition();
+        LatLng userPosition = getUserLatLng();
         if (userPosition != null)
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
                     .zoom(15.5f)
                     .build()));
 
-        queryParkingLocations();
+        if (mode == null)
+            setMode(Mode.FOLLOWING);
+        else
+            setMode(mode);
 
     }
 
@@ -695,8 +817,8 @@ public class MapsActivity extends Activity
      */
     protected boolean zoomToSeeBoth() {
 
-        LatLng carPosition = getCarPosition();
-        LatLng userPosition = getUserPosition();
+        LatLng carPosition = getCarLatLng();
+        LatLng userPosition = getUserLatLng();
 
         if (carPosition == null || userPosition == null) return false;
 
@@ -722,7 +844,7 @@ public class MapsActivity extends Activity
 
         Log.d(TAG, "zoomToMyLocation");
 
-        LatLng userPosition = getUserPosition();
+        LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                         .target(userPosition)
@@ -749,7 +871,7 @@ public class MapsActivity extends Activity
 
         if (carMarker == null) return;
 
-        LatLng loc = getCarPosition();
+        LatLng loc = getCarLatLng();
 
         if (loc != null) {
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
@@ -761,15 +883,15 @@ public class MapsActivity extends Activity
         }
     }
 
-    private LatLng getUserPosition() {
+    private LatLng getUserLatLng() {
         Location userLastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         if (userLastLocation == null) return null;
         return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
     }
 
-    private LatLng getCarPosition() {
-        if (carMarker == null) return null;
-        return carMarker.getPosition();
+    private LatLng getCarLatLng() {
+        if (carLocation == null) return null;
+        return new LatLng(carLocation.getLatitude(), carLocation.getLongitude());
     }
 
 
@@ -777,10 +899,20 @@ public class MapsActivity extends Activity
         new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
     }
 
-
     @Override
     public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
         Log.d(TAG, "onLocationsUpdate");
+    }
+    
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        if (!justFinishedAnimating) setMode(Mode.FREE);
+        justFinishedAnimating = false;
+
+
+        LatLngBounds curScreen = mMap.getProjection()
+                .getVisibleRegion().latLngBounds;
+        spotsDelegate.applyBounds(curScreen);
     }
 
 
@@ -801,12 +933,5 @@ public class MapsActivity extends Activity
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
-    }
-
-    @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
-        LatLngBounds curScreen = mMap.getProjection()
-                .getVisibleRegion().latLngBounds;
-        spotsDelegate.applyBounds(curScreen);
     }
 }
