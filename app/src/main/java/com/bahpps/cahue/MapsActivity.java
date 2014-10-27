@@ -109,7 +109,7 @@ public class MapsActivity extends Activity
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
                 parkedCarDelegate.setCarLocation(location);
-                parkedCarDelegate.draw();
+                drawMarkers();
             }
 
         }
@@ -154,7 +154,7 @@ public class MapsActivity extends Activity
         carButton = (ImageButton) findViewById(R.id.carButton);
         carButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                parkedCarDelegate.setUpOrChangeMode();
+                parkedCarDelegate.changeMode();
             }
         });
 
@@ -296,6 +296,10 @@ public class MapsActivity extends Activity
         savedInstanceState.putParcelable("parkedCarDelegate", parkedCarDelegate);
     }
 
+    private void drawMarkers(){
+        mMap.clear();
+        parkedCarDelegate.draw();
+    }
 
 
     private void showHelpDialog() {
@@ -315,9 +319,8 @@ public class MapsActivity extends Activity
 
         parkedCarDelegate.init(this, mMap, carButton);
         parkedCarDelegate.setCarLocationIfNull(CarLocationManager.getStoredLocation(this));
-        parkedCarDelegate.draw();
 
-        googleApiClient.connect();
+        drawMarkers();
 
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
@@ -332,6 +335,7 @@ public class MapsActivity extends Activity
             linkButton.setVisibility(View.VISIBLE);
         }
 
+        googleApiClient.connect();
 
     }
 
@@ -489,8 +493,6 @@ public class MapsActivity extends Activity
                     .target(userPosition)
                     .zoom(15.5f)
                     .build()));
-
-        parkedCarDelegate.setUpOrChangeMode();
 
 
     }

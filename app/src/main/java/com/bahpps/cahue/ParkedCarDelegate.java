@@ -70,6 +70,8 @@ public class ParkedCarDelegate implements Parcelable {
     private List<LatLng> directionPoints;
     private boolean directionsDisplayed = false;
 
+    private AsyncTask<Object, Object, Document> directionsAsyncTask;
+
     /**
      * Directions delegate
      */
@@ -95,6 +97,7 @@ public class ParkedCarDelegate implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeSerializable(mode);
         parcel.writeParcelable(carLocation, 0);
+        parcel.writeParcelable(userLocation, 0);
 
         LatLng[] directionsArray = new LatLng[directionPoints.size()];
         parcel.writeParcelableArray(directionPoints.toArray(directionsArray), 0);
@@ -107,6 +110,7 @@ public class ParkedCarDelegate implements Parcelable {
     public ParkedCarDelegate(Parcel parcel) {
         mode = (Mode) parcel.readSerializable();
         carLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
+        userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
 
         LatLng[] directionsArray = (LatLng[]) parcel.readParcelableArray(ParkedCarDelegate.class.getClassLoader());
         directionPoints = Arrays.asList(directionsArray);
@@ -121,7 +125,7 @@ public class ParkedCarDelegate implements Parcelable {
     }
 
     public void setCarLocationIfNull(Location carLocation) {
-        if (carLocation == null)
+        if (this.carLocation == null)
             setCarLocation(carLocation);
     }
 
@@ -187,8 +191,6 @@ public class ParkedCarDelegate implements Parcelable {
 
     private void drawDirections() {
 
-        Log.i(TAG, "drawDirections");
-
         final LatLng carPosition = getCarLatLng();
         final LatLng userPosition = getUserLatLng();
 
@@ -200,6 +202,8 @@ public class ParkedCarDelegate implements Parcelable {
         if (carPosition == null || userPosition == null) {
             return;
         }
+
+        Log.i(TAG, "Drawing directions");
 
         // don't set if they are too far
         float distances[] = new float[3];
@@ -213,7 +217,13 @@ public class ParkedCarDelegate implements Parcelable {
             return;
         }
 
-        new AsyncTask<Object, Object, Document>() {
+        /**
+         * Cancel if something is going on
+         */
+        if(directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED)
+            directionsAsyncTask.cancel(true);
+
+        directionsAsyncTask = new AsyncTask<Object, Object, Document>() {
 
             @Override
             protected Document doInBackground(Object[] objects) {
@@ -235,7 +245,8 @@ public class ParkedCarDelegate implements Parcelable {
                 updateCameraIfFollowing();
             }
 
-        }.execute();
+        };
+        directionsAsyncTask.execute();
 
     }
 
@@ -285,7 +296,7 @@ public class ParkedCarDelegate implements Parcelable {
     }
 
 
-    public void setUpOrChangeMode() {
+    public void changeMode() {
         if (mode == null || mode == Mode.FREE) setMode(Mode.FOLLOWING);
         else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
     }
