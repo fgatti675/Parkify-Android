@@ -80,7 +80,8 @@ public class MapsActivity extends Activity
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener, ParkingSpotsService.ParkingSpotsUpdateListener {
+        GoogleMap.OnMapClickListener,
+        GoogleMap.OnMarkerClickListener {
 
     /**
      * Camera mode
@@ -88,6 +89,7 @@ public class MapsActivity extends Activity
     private enum Mode {
         FREE, FOLLOWING;
     }
+
     private Mode mode;
 
     protected static final String TAG = "Maps";
@@ -97,6 +99,11 @@ public class MapsActivity extends Activity
     private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
+
+    /**
+     * If zoom is more far than this, we don't display the markers
+     */
+    private static final float MAX_ZOOM = 13.5F;
 
     static final int REQUEST_CODE_PICK_ACCOUNT = 0;
     static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
@@ -341,9 +348,7 @@ public class MapsActivity extends Activity
                 // Notify users that they must pick an account to proceed.
                 Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
             }
-        }
-
-        else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
                 requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
                 && resultCode == RESULT_OK) {
             // Receiving a result that follows a GoogleAuthException, try auth again
@@ -488,7 +493,7 @@ public class MapsActivity extends Activity
 
     private void setMode(Mode mode) {
 
-        Log.i(TAG, "Setting mode to " + mode);
+        Log.v(TAG, "Setting mode to " + mode);
 
         this.mode = mode;
 
@@ -737,11 +742,16 @@ public class MapsActivity extends Activity
                 this);
         // call convenience method that zooms map on our location only on starting the app
         LatLng userPosition = getUserLatLng();
-        if (userPosition != null)
+        if (userPosition != null) {
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
-                    .zoom(15.5f)
+                    .zoom(MAX_ZOOM)
                     .build()));
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .target(userPosition)
+                    .zoom(15.5F)
+                    .build()));
+        }
 
         if (mode == null)
             setMode(Mode.FOLLOWING);
@@ -894,25 +904,22 @@ public class MapsActivity extends Activity
         return new LatLng(carLocation.getLatitude(), carLocation.getLongitude());
     }
 
-
-    private void queryParkingLocations() {
-        new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
-    }
-
-    @Override
-    public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
-        Log.d(TAG, "onLocationsUpdate");
-    }
-    
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         if (!justFinishedAnimating) setMode(Mode.FREE);
         justFinishedAnimating = false;
 
-
-        LatLngBounds curScreen = mMap.getProjection()
-                .getVisibleRegion().latLngBounds;
-        spotsDelegate.applyBounds(curScreen);
+        float zoom = mMap.getCameraPosition().zoom;
+        Log.d(TAG, "zoom: " + zoom);
+        if (zoom < 13.5) {
+            LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
+            spotsDelegate.applyBounds(curScreen);
+        } else {
+            /**
+             * Too far
+             */
+            spotsDelegate.hideMarkers();
+        }
     }
 
 

@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -55,7 +56,7 @@ public class SpotsQueryTest extends ActivityTestCase {
         final ParkingSpotsService parkingSpotsService = new TestParkingSpotsService(latLngBounds,
                 new ParkingSpotsService.ParkingSpotsUpdateListener() {
                     @Override
-                    public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
+                    public void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                         result.addAll(parkingSpots);
                         signal.countDown();
                     }

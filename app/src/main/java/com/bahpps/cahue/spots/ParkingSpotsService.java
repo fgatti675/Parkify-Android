@@ -16,18 +16,22 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 /**
  * Service in charge of querying the Fusion Table including the parking spots.
  * The result is accessed via a listener
  */
-public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>> {
+public class ParkingSpotsService extends AsyncTask<Void, Void, Set<ParkingSpot>> {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    static{
+
+    static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
@@ -44,6 +48,7 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
 
     /**
      * Create a new service. {@code #execute()} must be called afterwards
+     *
      * @param latLngBounds
      * @param listener
      */
@@ -59,10 +64,10 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
     }
 
     @Override
-    protected List<ParkingSpot> doInBackground(Void... voids) {
+    protected Set<ParkingSpot> doInBackground(Void... voids) {
 
         Log.i(TAG, "Retrieving parking spots " + latLngBounds);
-        List<ParkingSpot> spots = new ArrayList<ParkingSpot>();
+        Set<ParkingSpot> spots = new HashSet<ParkingSpot>();
         try {
 
             String sqlString = String.format(
@@ -84,11 +89,10 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
                 for (ArrayList<String> element : rows) {
 
                     try {
-                        ParkingSpot spot = new ParkingSpot();
-                        spot.id = element.get(0);
-                        spot.time = dateFormat.parse(element.get(1));
-                        String[] tokens = element.get(2).split(", ");
-                        spot.position = new LatLng(Double.parseDouble(tokens[0]), Double.parseDouble(tokens[1]));
+                        String[] positionArray = element.get(2).split(", ");
+                        LatLng position = new LatLng(Double.parseDouble(positionArray[0]), Double.parseDouble(positionArray[1]));
+                        Date time = dateFormat.parse(element.get(1));
+                        ParkingSpot spot = new ParkingSpot(element.get(0), position, time);
                         spots.add(spot);
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -105,8 +109,7 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
     }
 
     @Override
-    protected void onPostExecute(List<ParkingSpot> parkingSpots) {
-
+    protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
         Log.d(TAG, parkingSpots.toString());
         super.onPostExecute(parkingSpots);
         listener.onLocationsUpdate(parkingSpots);
@@ -127,6 +130,6 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, List<ParkingSpot>
      * parking locations
      */
     public interface ParkingSpotsUpdateListener {
-        void onLocationsUpdate(List<ParkingSpot> parkingSpots);
+        void onLocationsUpdate(Set<ParkingSpot> parkingSpots);
     }
 }

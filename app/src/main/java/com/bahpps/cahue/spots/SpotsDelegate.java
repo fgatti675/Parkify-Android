@@ -11,7 +11,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Francesco on 21/10/2014.
@@ -19,9 +21,14 @@ import java.util.List;
 public class SpotsDelegate implements Parcelable {
 
     private static final String TAG = "SpotsDelegate";
-    private List<ParkingSpot> spots;
+    private Set<ParkingSpot> spots;
     private GoogleMap mMap;
     private LatLngBounds currentBounds;
+
+    /**
+     * If markers shouldn't be displayed (like zoom is too far)
+     */
+    private boolean hideMarkers = false;
 
     private ParkingSpotsService service;
 
@@ -39,7 +46,7 @@ public class SpotsDelegate implements Parcelable {
             };
 
     public SpotsDelegate() {
-        spots = new ArrayList<ParkingSpot>();
+        spots = new HashSet<ParkingSpot>();
     }
 
     public void setMap(GoogleMap map) {
@@ -48,13 +55,14 @@ public class SpotsDelegate implements Parcelable {
 
     public SpotsDelegate(Parcel parcel) {
         ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(SpotsDelegate.class.getClassLoader());
-        spots = Arrays.asList(spotsArray);
+        spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
     }
 
     public boolean applyBounds(LatLngBounds bounds) {
         if (currentBounds != null
                 && currentBounds.contains(bounds.northeast)
                 && currentBounds.contains(bounds.southwest)) {
+            draw();
             return false;
         }
 
@@ -67,12 +75,9 @@ public class SpotsDelegate implements Parcelable {
 
         service = new TestParkingSpotsService(currentBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
-            public synchronized void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
-                mMap.clear();
-                for (ParkingSpot parkingSpot : parkingSpots) {
-                    mMap.addMarker(new MarkerOptions()
-                            .position(parkingSpot.getPosition()));
-                }
+            public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
+                spots = new HashSet<ParkingSpot>(parkingSpots);
+                draw();
             }
         });
 
@@ -81,6 +86,14 @@ public class SpotsDelegate implements Parcelable {
 
         service.execute();
         return true;
+    }
+
+    public synchronized void draw() {
+        mMap.clear();
+        Log.d(TAG, "Drawing spots");
+        for (ParkingSpot parkingSpot : spots) {
+            mMap.addMarker(new MarkerOptions().position(parkingSpot.getPosition()));
+        }
     }
 
     @Override
@@ -93,4 +106,9 @@ public class SpotsDelegate implements Parcelable {
         ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
         parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
     }
+
+    public void hideMarkers() {
+        hideMarkers = true;
+    }
+
 }
