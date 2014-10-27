@@ -291,7 +291,7 @@ public class ParkedCarDelegate implements Parcelable {
 
         toastMsg = String.format(toastMsg, time);
 
-        Util.createToast(mContext, toastMsg, Toast.LENGTH_SHORT);
+        Util.createUpperToast(mContext, toastMsg, Toast.LENGTH_SHORT);
 
     }
 

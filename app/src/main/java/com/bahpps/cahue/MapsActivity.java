@@ -28,9 +28,10 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.bahpps.cahue.spots.ParkingSpot;
-import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.bahpps.cahue.spots.SpotsDelegate;
+import com.bahpps.cahue.util.BluetoothDetector;
+import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.util.Util;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
@@ -38,13 +39,6 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.bahpps.cahue.util.BluetoothDetector;
-import com.bahpps.cahue.util.CarLocationManager;
-import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -55,21 +49,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.ui.IconGenerator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 public class MapsActivity extends Activity
         implements
@@ -81,15 +69,9 @@ public class MapsActivity extends Activity
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener {
 
-
-
-
     protected static final String TAG = "Maps";
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-
-
-    private static final int MAX_DIRECTIONS_DISTANCE = 5000;
 
     /**
      * If zoom is more far than this, we don't display the markers
@@ -107,8 +89,6 @@ public class MapsActivity extends Activity
 
     private SpotsDelegate spotsDelegate;
     private ParkedCarDelegate parkedCarDelegate;
-
-
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -130,7 +110,6 @@ public class MapsActivity extends Activity
     private Button linkButton;
 
     private ImageButton carButton;
-
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -199,7 +178,6 @@ public class MapsActivity extends Activity
             }
         });
 
-
         /**
          * Try to reuse map
          */
@@ -209,6 +187,7 @@ public class MapsActivity extends Activity
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
             spotsDelegate = new SpotsDelegate();
+            parkedCarDelegate = new ParkedCarDelegate();
         } else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
@@ -216,20 +195,10 @@ public class MapsActivity extends Activity
             setUpMap();
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
-            spotsDelegate.setMap(mMap);
+            parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
 
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
         }
-        /**
-         * Restore mode if saved
-         */
-            if (savedInstanceState != null) {
-                parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
-            } else {
-                parkedCarDelegate = new ParkedCarDelegate();
-            }
-
-        spotsDelegate.setMap(mMap);
 
         // button for linking a BT device
         linkButton = (Button) findViewById(R.id.linkButton);
@@ -390,6 +359,7 @@ public class MapsActivity extends Activity
     private void drawMarkers(){
         mMap.clear();
         parkedCarDelegate.draw();
+        spotsDelegate.draw();
     }
 
 
@@ -439,6 +409,8 @@ public class MapsActivity extends Activity
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
 
+        spotsDelegate.setMap(mMap);
+
         parkedCarDelegate.init(this, mMap, carButton);
         parkedCarDelegate.setCarLocationIfNull(CarLocationManager.getStoredLocation(this));
 
@@ -450,7 +422,7 @@ public class MapsActivity extends Activity
         // bt adress on the linked device
         String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
 
-        // we hide the linkbutton if the app is linked
+        // we hide the link button if the app is linked
         if (!btAddress.equals("")) {
             linkButton.setVisibility(View.GONE);
         } else {
@@ -595,7 +567,6 @@ public class MapsActivity extends Activity
         parkedCarDelegate.setUserLocation(location);
         parkedCarDelegate.updateCameraIfFollowing();
 
-
         /**
          * Set initial zoom level
          */
@@ -674,8 +645,8 @@ public class MapsActivity extends Activity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        parkedCarDelegate.onCameraChange(cameraPosition);
 
+        parkedCarDelegate.onCameraChange(cameraPosition);
 
         float zoom = mMap.getCameraPosition().zoom;
         Log.d(TAG, "zoom: " + zoom);

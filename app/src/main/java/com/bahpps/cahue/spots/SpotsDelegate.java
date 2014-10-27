@@ -89,7 +89,6 @@ public class SpotsDelegate implements Parcelable {
     }
 
     public synchronized void draw() {
-        mMap.clear();
         Log.d(TAG, "Drawing spots");
         for (ParkingSpot parkingSpot : spots) {
             mMap.addMarker(new MarkerOptions().position(parkingSpot.getPosition()));
