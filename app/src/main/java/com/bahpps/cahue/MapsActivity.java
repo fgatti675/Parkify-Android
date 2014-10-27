@@ -37,6 +37,7 @@ import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -77,7 +78,8 @@ public class MapsActivity extends Activity
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMapClickListener,
+        GoogleMap.OnMarkerClickListener {
 
 
 
@@ -88,6 +90,11 @@ public class MapsActivity extends Activity
 
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
+
+    /**
+     * If zoom is more far than this, we don't display the markers
+     */
+    private static final float MAX_ZOOM = 13.5F;
 
     static final int REQUEST_CODE_PICK_ACCOUNT = 0;
     static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
@@ -210,6 +217,8 @@ public class MapsActivity extends Activity
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.setMap(mMap);
+
+            initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
         }
         /**
          * Restore mode if saved
@@ -318,9 +327,7 @@ public class MapsActivity extends Activity
                 // Notify users that they must pick an account to proceed.
                 Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
             }
-        }
-
-        else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
                 requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
                 && resultCode == RESULT_OK) {
             // Receiving a result that follows a GoogleAuthException, try auth again
@@ -362,10 +369,22 @@ public class MapsActivity extends Activity
 
         savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
 
-        // Save UI state changes to the savedInstanceState.
-        // This bundle will be passed to onCreate if the process is
-        // killed and restarted.
         savedInstanceState.putParcelable("parkedCarDelegate", parkedCarDelegate);
+
+        savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
+
+    }
+
+    /**
+     * Checks whether the device currently has a network connection
+     */
+    private boolean isDeviceOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
     }
 
     private void drawMarkers(){
@@ -577,6 +596,10 @@ public class MapsActivity extends Activity
         parkedCarDelegate.updateCameraIfFollowing();
 
 
+        /**
+         * Set initial zoom level
+         */
+        setInitialCamera();
     }
 
 
@@ -590,13 +613,35 @@ public class MapsActivity extends Activity
                 REQUEST,
                 this);
         // call convenience method that zooms map on our location only on starting the app
+        setInitialCamera();
+
+
+    }
+
+    private boolean initialCameraSet = false;
+
+    private void setInitialCamera() {
+
+        if (initialCameraSet) return;
+
         LatLng userPosition = getUserLatLng();
-        if (userPosition != null)
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+        if (userPosition != null && !initialCameraSet) {
+
+            CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
-                    .zoom(15.5f)
+                    .zoom(MAX_ZOOM)
+                    .build());
+            mMap.moveCamera(update);
+
+            doSpotsQuery();
+
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .target(userPosition)
+                    .zoom(15.5F)
                     .build()));
 
+            initialCameraSet = true;
+        }
 
     }
 
@@ -626,18 +671,38 @@ public class MapsActivity extends Activity
         return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        return parkedCarDelegate.onMarkerClick(marker);
-    }
 
-    
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         parkedCarDelegate.onCameraChange(cameraPosition);
-        
-        LatLngBounds curScreen = mMap.getProjection()                .getVisibleRegion().latLngBounds;
+
+
+        float zoom = mMap.getCameraPosition().zoom;
+        Log.d(TAG, "zoom: " + zoom);
+
+        /**
+         * Query for current camera position
+         */
+        if (zoom >= MAX_ZOOM) {
+            Log.d(TAG, "querying: " + zoom);
+            doSpotsQuery();
+        }
+        /**
+         * Too far
+         */
+        else {
+            spotsDelegate.hideMarkers();
+        }
+    }
+
+    private void doSpotsQuery() {
+        LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
         spotsDelegate.applyBounds(curScreen);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return parkedCarDelegate.onMarkerClick(marker);
     }
 
 
