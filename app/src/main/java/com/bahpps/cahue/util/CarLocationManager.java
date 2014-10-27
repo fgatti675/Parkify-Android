@@ -89,4 +89,10 @@ public class CarLocationManager {
         Log.i(TAG, "Removed location");
     }
 
+    public static long getParkingTime(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0);
+    }
+
+
 }
