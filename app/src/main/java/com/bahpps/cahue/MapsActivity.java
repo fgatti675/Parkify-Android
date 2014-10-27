@@ -38,6 +38,7 @@ import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -230,6 +231,8 @@ public class MapsActivity extends Activity
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.setMap(mMap);
+
+            initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
         }
 
         /**
@@ -395,6 +398,8 @@ public class MapsActivity extends Activity
         // killed and restarted.
         savedInstanceState.putSerializable("mode", mode);
         savedInstanceState.putSerializable("directionPoint", directionPoint);
+
+        savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
     }
 
     /**
@@ -720,6 +725,10 @@ public class MapsActivity extends Activity
             drawDirections();
         }
 
+        /**
+         * Set initial zoom level
+         */
+        setInitialCamera();
     }
 
     private void updateCameraIfFollowing() {
@@ -741,22 +750,39 @@ public class MapsActivity extends Activity
                 REQUEST,
                 this);
         // call convenience method that zooms map on our location only on starting the app
-        LatLng userPosition = getUserLatLng();
-        if (userPosition != null) {
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                    .target(userPosition)
-                    .zoom(MAX_ZOOM)
-                    .build()));
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                    .target(userPosition)
-                    .zoom(15.5F)
-                    .build()));
-        }
+        setInitialCamera();
 
         if (mode == null)
             setMode(Mode.FOLLOWING);
         else
             setMode(mode);
+
+    }
+
+    private boolean initialCameraSet = false;
+
+    private void setInitialCamera() {
+
+        if (initialCameraSet) return;
+
+        LatLng userPosition = getUserLatLng();
+        if (userPosition != null && !initialCameraSet) {
+
+            CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .target(userPosition)
+                    .zoom(MAX_ZOOM)
+                    .build());
+            mMap.moveCamera(update);
+
+            doSpotsQuery();
+
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .target(userPosition)
+                    .zoom(15.5F)
+                    .build()));
+
+            initialCameraSet = true;
+        }
 
     }
 
@@ -911,15 +937,25 @@ public class MapsActivity extends Activity
 
         float zoom = mMap.getCameraPosition().zoom;
         Log.d(TAG, "zoom: " + zoom);
-        if (zoom < 13.5) {
-            LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
-            spotsDelegate.applyBounds(curScreen);
-        } else {
-            /**
-             * Too far
-             */
+
+        /**
+         * Query for current camera position
+         */
+        if (zoom >= MAX_ZOOM) {
+            Log.d(TAG, "querying: " + zoom);
+            doSpotsQuery();
+        }
+        /**
+         * Too far
+         */
+        else {
             spotsDelegate.hideMarkers();
         }
+    }
+
+    private void doSpotsQuery() {
+        LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
+        spotsDelegate.applyBounds(curScreen);
     }
 
 
