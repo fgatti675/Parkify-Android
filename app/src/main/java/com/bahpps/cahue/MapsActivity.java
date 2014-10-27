@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -44,7 +43,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.CarLocationManager;
-import com.bahpps.cahue.util.GMapV2Direction;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -66,7 +64,6 @@ import com.google.maps.android.ui.IconGenerator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,21 +77,15 @@ public class MapsActivity extends Activity
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener, ParkingSpotsService.ParkingSpotsUpdateListener {
+        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
 
-    /**
-     * Camera mode
-     */
-    private enum Mode {
-        FREE, FOLLOWING;
-    }
-    private Mode mode;
+
+
 
     protected static final String TAG = "Maps";
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
-    private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
 
@@ -108,8 +99,9 @@ public class MapsActivity extends Activity
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private SpotsDelegate spotsDelegate;
+    private ParkedCarDelegate parkedCarDelegate;
 
-    private Marker carMarker;
+
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -123,8 +115,6 @@ public class MapsActivity extends Activity
 
     private GoogleApiClient googleApiClient;
 
-    private Location carLocation;
-
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
 
@@ -132,22 +122,8 @@ public class MapsActivity extends Activity
 
     private Button linkButton;
 
-    private IconGenerator iconFactory;
-
     private ImageButton carButton;
 
-    private boolean justFinishedAnimating = false;
-
-    /**
-     * Directions delegate
-     */
-    private GMapV2Direction md;
-
-    /**
-     * Actual lines representing the directionsPolyLine
-     */
-    private Polyline directionsPolyLine;
-    private ArrayList<LatLng> directionPoint;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -159,9 +135,8 @@ public class MapsActivity extends Activity
             Location location = (Location) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
-                carLocation = location;
-                setUpCar();
-                drawDirections();
+                parkedCarDelegate.setCarLocation(location);
+                drawMarkers();
             }
 
         }
@@ -188,11 +163,6 @@ public class MapsActivity extends Activity
 
         setContentView(R.layout.activity_main);
 
-        setUpLocationClientIfNeeded();
-
-
-        iconFactory = new IconGenerator(this);
-
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -203,8 +173,25 @@ public class MapsActivity extends Activity
             Util.noBluetooth(this);
         }
 
-        if (md == null)
-            md = new GMapV2Direction();
+
+        /**
+         * Car button for indicating the camera mode
+         */
+        carButton = (ImageButton) findViewById(R.id.carButton);
+        carButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                parkedCarDelegate.changeMode();
+            }
+        });
+
+        // button for linking a BT device
+        linkButton = (Button) findViewById(R.id.linkButton);
+        linkButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startDeviceSelection();
+            }
+        });
+
 
         /**
          * Try to reuse map
@@ -224,19 +211,14 @@ public class MapsActivity extends Activity
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.setMap(mMap);
         }
-
         /**
-         * Car button for indicating the camera mode
+         * Restore mode if saved
          */
-        carButton = (ImageButton) findViewById(R.id.carButton);
-        carButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (mode == Mode.FREE) setMode(Mode.FOLLOWING);
-                else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
+            if (savedInstanceState != null) {
+                parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
+            } else {
+                parkedCarDelegate = new ParkedCarDelegate();
             }
-        });
-
-        setUpMapIfNeeded();
 
         spotsDelegate.setMap(mMap);
 
@@ -259,11 +241,6 @@ public class MapsActivity extends Activity
             showHelpDialog();
         }
 
-        if (carLocation == null)
-            carLocation = CarLocationManager.getStoredLocation(this);
-        setUpCar();
-
-        setUpLocationClientIfNeeded();
 
 
         bindBillingService();
@@ -388,73 +365,14 @@ public class MapsActivity extends Activity
         // Save UI state changes to the savedInstanceState.
         // This bundle will be passed to onCreate if the process is
         // killed and restarted.
-        savedInstanceState.putSerializable("mode", mode);
-        savedInstanceState.putSerializable("directionPoint", directionPoint);
+        savedInstanceState.putParcelable("parkedCarDelegate", parkedCarDelegate);
     }
 
-    /**
-     * Checks whether the device currently has a network connection
-     */
-    private boolean isDeviceOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        }
-        return false;
+    private void drawMarkers(){
+        mMap.clear();
+        parkedCarDelegate.draw();
     }
 
-    private void drawDirections() {
-
-        Log.i(TAG, "drawDirections");
-
-        final LatLng carPosition = getCarLatLng();
-        final LatLng userPosition = getUserLatLng();
-
-        if (directionsPolyLine != null) {
-            directionsPolyLine.remove();
-        }
-
-        if (carPosition == null || userPosition == null) {
-            return;
-        }
-
-        // don't set if they are too far
-        float distances[] = new float[3];
-        Location.distanceBetween(
-                carPosition.latitude,
-                carPosition.longitude,
-                userPosition.latitude,
-                userPosition.longitude,
-                distances);
-        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
-            return;
-        }
-
-        new AsyncTask<Object, Object, Document>() {
-
-            @Override
-            protected Document doInBackground(Object[] objects) {
-                Document doc = md.getDocument(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
-                return doc;
-            }
-
-            @Override
-            protected void onPostExecute(Document doc) {
-                directionPoint = md.getDirection(doc);
-                PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
-
-                for (int i = 0; i < directionPoint.size(); i++) {
-                    rectLine.add(directionPoint.get(i));
-                }
-                directionsPolyLine = mMap.addPolyline(rectLine);
-
-                updateCameraIfFollowing();
-            }
-
-        }.execute();
-
-    }
 
     /**
      * This method is a hook for background threads and async tasks that need to provide the
@@ -486,21 +404,6 @@ public class MapsActivity extends Activity
         });
     }
 
-    private void setMode(Mode mode) {
-
-        Log.i(TAG, "Setting mode to " + mode);
-
-        this.mode = mode;
-
-        updateCameraIfFollowing();
-
-        if (mode == Mode.FOLLOWING) {
-            carButton.setImageResource(R.drawable.ic_icon_car_red);
-        } else if (mode == Mode.FREE) {
-            carButton.setImageResource(R.drawable.ic_icon_car);
-        }
-
-    }
 
     private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
@@ -511,10 +414,16 @@ public class MapsActivity extends Activity
 
     @Override
     protected void onResume() {
+
         super.onResume();
+
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
-        googleApiClient.connect();
+
+        parkedCarDelegate.init(this, mMap, carButton);
+        parkedCarDelegate.setCarLocationIfNull(CarLocationManager.getStoredLocation(this));
+
+        drawMarkers();
 
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
@@ -529,6 +438,7 @@ public class MapsActivity extends Activity
             linkButton.setVisibility(View.VISIBLE);
         }
 
+        googleApiClient.connect();
 
     }
 
@@ -597,51 +507,7 @@ public class MapsActivity extends Activity
         mMap.setOnMarkerClickListener(this);
     }
 
-    /**
-     * Displays the car in the map
-     */
-    private void setUpCar() {
 
-//        mMap.clear();
-
-        if (carLocation == null) {
-            return;
-        }
-
-        double latitude = carLocation.getLatitude();
-        double longitude = carLocation.getLongitude();
-
-        if (latitude != 0 && longitude != 0) {
-
-            Log.i(TAG, "Setting car in map: " + carLocation);
-
-            iconFactory.setContentRotation(-90);
-            iconFactory.setStyle(IconGenerator.STYLE_RED);
-
-            LatLng carLatLng = new LatLng(latitude, longitude);
-
-            // Uses a colored icon.
-            carMarker = mMap.addMarker(new MarkerOptions()
-                    .position(carLatLng)
-                    .snippet("")
-                    .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(getResources().getText(R.string.car).toString().toUpperCase())))
-                    .anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()));
-
-            CircleOptions circleOptions = new CircleOptions()
-                    .center(carLatLng)   //set center
-                    .radius(carLocation.getAccuracy())   //set radius in meters
-                    .fillColor(LIGHT_RED)
-                    .strokeColor(LIGHT_RED)
-                    .strokeWidth(0);
-
-            mMap.addCircle(circleOptions);
-
-
-        } else {
-            Log.i(TAG, "No car location available");
-        }
-
-    }
 
     /**
      * Show menu method
@@ -684,9 +550,7 @@ public class MapsActivity extends Activity
     }
 
     private void removeCar() {
-        CarLocationManager.removeStoredLocation(this);
-        carLocation = null;
-        setUpCar();
+        parkedCarDelegate.removeCar();
     }
 
     /**
@@ -709,20 +573,10 @@ public class MapsActivity extends Activity
     @Override
     public void onLocationChanged(Location location) {
 
-        updateCameraIfFollowing();
+        parkedCarDelegate.setUserLocation(location);
+        parkedCarDelegate.updateCameraIfFollowing();
 
-        if (getCarLatLng() != null && directionsPolyLine == null) {
-            drawDirections();
-        }
 
-    }
-
-    private void updateCameraIfFollowing() {
-
-        if (mode == Mode.FOLLOWING) {
-            if (!zoomToSeeBoth())
-                zoomToMyLocation();
-        }
     }
 
 
@@ -743,10 +597,6 @@ public class MapsActivity extends Activity
                     .zoom(15.5f)
                     .build()));
 
-        if (mode == null)
-            setMode(Mode.FOLLOWING);
-        else
-            setMode(mode);
 
     }
 
@@ -754,48 +604,6 @@ public class MapsActivity extends Activity
     public void onConnectionSuspended(int i) {
 
     }
-
-
-    /**
-     * This method shows the Toast when the car icon is pressed, telling the user the parking time
-     */
-    private void showCarTimeToast() {
-        String toastMsg = getString(R.string.car_was_here);
-
-        long timeDiff = Calendar.getInstance().getTimeInMillis() - prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0);
-
-        String time = "";
-
-        long seconds = timeDiff / 1000;
-        if (seconds < 60) {
-            time = seconds + " " + getString(R.string.seconds);
-        } else {
-            long minutes = timeDiff / (60 * 1000);
-            if (minutes < 60) {
-                time = minutes
-                        + (minutes > 1 ? " " + getString(R.string.minutes) : " "
-                        + getString(R.string.minute));
-            } else {
-                long hours = timeDiff / (60 * 60 * 1000);
-                if (hours < 24) {
-                    time = hours
-                            + (hours > 1 ? " " + getString(R.string.hours) : " "
-                            + getString(R.string.hour));
-                } else {
-                    long days = timeDiff / (24 * 60 * 60 * 1000);
-                    time = days
-                            + (days > 1 ? " " + getString(R.string.days) : " "
-                            + getString(R.string.day));
-                }
-            }
-        }
-
-        toastMsg = String.format(toastMsg, time);
-
-        Util.createUpperToast(this, toastMsg, Toast.LENGTH_SHORT);
-
-    }
-
 
     @Override
     public void onMapLongClick(LatLng latLng) {
@@ -812,122 +620,30 @@ public class MapsActivity extends Activity
 
     }
 
-    /**
-     * This method zooms to see both user and the car.
-     */
-    protected boolean zoomToSeeBoth() {
-
-        LatLng carPosition = getCarLatLng();
-        LatLng userPosition = getUserLatLng();
-
-        if (carPosition == null || userPosition == null) return false;
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder()
-                .include(carPosition)
-                .include(userPosition);
-
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150), new GoogleMap.CancelableCallback() {
-            @Override
-            public void onFinish() {
-            }
-
-            @Override
-            public void onCancel() {
-            }
-        });
-        return true;
-    }
-
-
-    private void zoomToMyLocation() {
-
-        Log.d(TAG, "zoomToMyLocation");
-
-        LatLng userPosition = getUserLatLng();
-        if (userPosition == null) return;
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .target(userPosition)
-                        .zoom(15.5f)
-                        .build()),
-                new GoogleMap.CancelableCallback() {
-                    @Override
-                    public void onFinish() {
-                    }
-
-                    @Override
-                    public void onCancel() {
-                    }
-                });
-    }
-
-
-    /**
-     * This method zooms to the car's location.
-     */
-    private void zoomToCar() {
-
-        Log.d(TAG, "zoomToCar");
-
-        if (carMarker == null) return;
-
-        LatLng loc = getCarLatLng();
-
-        if (loc != null) {
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                    .target(loc)
-                    .zoom(15.5f)
-                    .build()), null);
-
-            showCarTimeToast();
-        }
-    }
-
     private LatLng getUserLatLng() {
         Location userLastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         if (userLastLocation == null) return null;
         return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
     }
 
-    private LatLng getCarLatLng() {
-        if (carLocation == null) return null;
-        return new LatLng(carLocation.getLatitude(), carLocation.getLongitude());
-    }
-
-
-    private void queryParkingLocations() {
-        new ParkingSpotsService(mMap.getProjection().getVisibleRegion().latLngBounds, MapsActivity.this).execute();
-    }
-
     @Override
-    public void onLocationsUpdate(List<ParkingSpot> parkingSpots) {
-        Log.d(TAG, "onLocationsUpdate");
+    public boolean onMarkerClick(Marker marker) {
+        return parkedCarDelegate.onMarkerClick(marker);
     }
+
     
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        if (!justFinishedAnimating) setMode(Mode.FREE);
-        justFinishedAnimating = false;
-
-
-        LatLngBounds curScreen = mMap.getProjection()
-                .getVisibleRegion().latLngBounds;
+        parkedCarDelegate.onCameraChange(cameraPosition);
+        
+        LatLngBounds curScreen = mMap.getProjection()                .getVisibleRegion().latLngBounds;
         spotsDelegate.applyBounds(curScreen);
     }
 
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
-        if (marker.equals(carMarker)) {
-            showCarTimeToast();
-        }
-        return false;
-    }
-
-
-    @Override
     public void onMapClick(LatLng point) {
-
+        parkedCarDelegate.setModeFree();
     }
 
     @Override

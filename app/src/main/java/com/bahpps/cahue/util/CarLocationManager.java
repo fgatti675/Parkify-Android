@@ -54,12 +54,15 @@ public class CarLocationManager {
 
         SharedPreferences prefs = Util.getSharedPreferences(context);
 
+        if(!prefs.contains(PREF_CAR_LATITUDE) || !prefs.contains(PREF_CAR_LONGITUDE)) {
+            Log.i(TAG, "No car parked location stored");
+            return null;
+        }
+
         // Details of the last location fix
         int lastLatitude = prefs.getInt(PREF_CAR_LATITUDE, 0);
         int lastLongitude = prefs.getInt(PREF_CAR_LONGITUDE, 0);
         int lastAccuracy = prefs.getInt(PREF_CAR_ACCURACY, 0);
-
-        if(lastLatitude == 0 || lastLongitude == 0) return null;
 
         Location lastLocation = new Location(prefs.getString(PREF_CAR_PROVIDER, ""));
         lastLocation.setLatitude(lastLatitude / 1E6);
@@ -88,5 +91,11 @@ public class CarLocationManager {
 
         Log.i(TAG, "Removed location");
     }
+
+    public static long getParkingTime(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0);
+    }
+
 
 }
