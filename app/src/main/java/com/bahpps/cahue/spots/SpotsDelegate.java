@@ -59,7 +59,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
     }
 
-    public boolean applyBounds(LatLngBounds viewPort, LatLngBounds queryPort) {
+    public boolean applyBounds(LatLngBounds viewPort) {
         if (currentBounds != null
                 && currentBounds.contains(viewPort.northeast)
                 && currentBounds.contains(viewPort.southwest)) {
@@ -67,7 +67,13 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
             return false;
         }
 
-        currentBounds = viewPort;
+        // merge previous with current
+        currentBounds = LatLngBounds.builder()
+                .include(currentBounds.northeast)
+                .include(currentBounds.southwest)
+                .include(viewPort.northeast)
+                .include(viewPort.southwest)
+                .build();
 
         /**
          * In case there was a query running, cancel it
@@ -77,7 +83,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         service = new TestParkingSpotsService(currentBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
-                spots = new HashSet<ParkingSpot>(parkingSpots);
+                spots.addAll(parkingSpots);
                 delegatesManager.draw();
             }
         });

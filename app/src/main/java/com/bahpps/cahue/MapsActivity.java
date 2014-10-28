@@ -669,19 +669,19 @@ public class MapsActivity extends Activity
 
     private void doSpotsQuery(CameraPosition position) {
 
-        float previousZoom = mMap.getCameraPosition().zoom;
-        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
-                .zoom(MAX_ZOOM)
-                .build()));
-
-        LatLngBounds queryPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-
-        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
-                .zoom(previousZoom)
-                .build()));
+//        float previousZoom = mMap.getCameraPosition().zoom;
+//        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
+//                .zoom(MAX_ZOOM)
+//                .build()));
+//
+//        LatLngBounds queryPort = mMap.getProjection().getVisibleRegion().latLngBounds;
+//
+//        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
+//                .zoom(previousZoom)
+//                .build()));
 
         LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-        spotsDelegate.applyBounds(viewPort, queryPort);
+        spotsDelegate.applyBounds(viewPort);
     }
 
     @Override
