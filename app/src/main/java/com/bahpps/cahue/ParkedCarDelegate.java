@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Created by francesco on 27.10.2014.
  */
-public class ParkedCarDelegate implements Parcelable {
+public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
     private static final String TAG = "ParkedCarDelegate";
 
@@ -137,10 +137,10 @@ public class ParkedCarDelegate implements Parcelable {
         this.userLocation = userLocation;
 
         if (!directionsDisplayed)
-            drawDirections();
+            delegatesManager.draw();
     }
 
-    public void draw(){
+    public void draw() {
         drawCar();
         drawDirections();
     }
@@ -186,7 +186,7 @@ public class ParkedCarDelegate implements Parcelable {
     public void removeCar() {
         carLocation = null;
         CarLocationManager.removeStoredLocation(mContext);
-        drawCar();
+        delegatesManager.draw();
     }
 
     private void drawDirections() {
@@ -220,7 +220,7 @@ public class ParkedCarDelegate implements Parcelable {
         /**
          * Cancel if something is going on
          */
-        if(directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED)
+        if (directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED)
             directionsAsyncTask.cancel(true);
 
         directionsAsyncTask = new AsyncTask<Object, Object, Document>() {
@@ -303,7 +303,8 @@ public class ParkedCarDelegate implements Parcelable {
 
     private void setMode(Mode mode) {
 
-        Log.i(TAG, "Setting mode to " + mode);
+        if (this.mode != mode)
+            Log.i(TAG, "Setting camera mode to " + mode);
 
         this.mode = mode;
 

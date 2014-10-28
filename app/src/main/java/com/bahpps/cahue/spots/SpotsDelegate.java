@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.bahpps.cahue.MarkerDelegate;
 import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -18,7 +19,7 @@ import java.util.Set;
 /**
  * Created by Francesco on 21/10/2014.
  */
-public class SpotsDelegate implements Parcelable {
+public class SpotsDelegate extends MarkerDelegate implements Parcelable {
 
     private static final String TAG = "SpotsDelegate";
     private Set<ParkingSpot> spots;
@@ -58,15 +59,15 @@ public class SpotsDelegate implements Parcelable {
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
     }
 
-    public boolean applyBounds(LatLngBounds bounds) {
+    public boolean applyBounds(LatLngBounds viewPort, LatLngBounds queryPort) {
         if (currentBounds != null
-                && currentBounds.contains(bounds.northeast)
-                && currentBounds.contains(bounds.southwest)) {
-            draw();
+                && currentBounds.contains(viewPort.northeast)
+                && currentBounds.contains(viewPort.southwest)) {
+            delegatesManager.draw();
             return false;
         }
 
-        currentBounds = bounds;
+        currentBounds = viewPort;
 
         /**
          * In case there was a query running, cancel it
@@ -77,18 +78,18 @@ public class SpotsDelegate implements Parcelable {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 spots = new HashSet<ParkingSpot>(parkingSpots);
-                draw();
+                delegatesManager.draw();
             }
         });
 
 
-        Log.d(TAG, "Starting query for bounds: " + bounds);
+        Log.d(TAG, "Starting query for viewPort: " + viewPort);
 
         service.execute();
         return true;
     }
 
-    public synchronized void draw() {
+    public void draw() {
         Log.d(TAG, "Drawing spots");
         for (ParkingSpot parkingSpot : spots) {
             mMap.addMarker(new MarkerOptions().position(parkingSpot.getPosition()));

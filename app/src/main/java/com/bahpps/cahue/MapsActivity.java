@@ -87,6 +87,7 @@ public class MapsActivity extends Activity
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
+    private MapsMarkersDelegatesManager mapsMarkersDelegatesManager;
     private SpotsDelegate spotsDelegate;
     private ParkedCarDelegate parkedCarDelegate;
 
@@ -218,8 +219,6 @@ public class MapsActivity extends Activity
         if (!dialogShown) {
             showHelpDialog();
         }
-
-
 
         bindBillingService();
 
@@ -357,9 +356,7 @@ public class MapsActivity extends Activity
     }
 
     private void drawMarkers(){
-        mMap.clear();
-        parkedCarDelegate.draw();
-        spotsDelegate.draw();
+        mapsMarkersDelegatesManager.draw();
     }
 
 
@@ -413,6 +410,10 @@ public class MapsActivity extends Activity
 
         parkedCarDelegate.init(this, mMap, carButton);
         parkedCarDelegate.setCarLocationIfNull(CarLocationManager.getStoredLocation(this));
+
+        mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
+        mapsMarkersDelegatesManager.add(parkedCarDelegate);
+        mapsMarkersDelegatesManager.add(spotsDelegate);
 
         drawMarkers();
 
@@ -604,7 +605,7 @@ public class MapsActivity extends Activity
                     .build());
             mMap.moveCamera(update);
 
-            doSpotsQuery();
+            doSpotsQuery(mMap.getCameraPosition());
 
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
@@ -656,7 +657,7 @@ public class MapsActivity extends Activity
          */
         if (zoom >= MAX_ZOOM) {
             Log.d(TAG, "querying: " + zoom);
-            doSpotsQuery();
+            doSpotsQuery(cameraPosition);
         }
         /**
          * Too far
@@ -666,9 +667,21 @@ public class MapsActivity extends Activity
         }
     }
 
-    private void doSpotsQuery() {
-        LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
-        spotsDelegate.applyBounds(curScreen);
+    private void doSpotsQuery(CameraPosition position) {
+
+        float previousZoom = mMap.getCameraPosition().zoom;
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
+                .zoom(MAX_ZOOM)
+                .build()));
+
+        LatLngBounds queryPort = mMap.getProjection().getVisibleRegion().latLngBounds;
+
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
+                .zoom(previousZoom)
+                .build()));
+
+        LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
+        spotsDelegate.applyBounds(viewPort, queryPort);
     }
 
     @Override
