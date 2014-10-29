@@ -192,8 +192,7 @@ public class MapsActivity extends Activity
         } else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
-            mMap = mapFragment.getMap();
-            setUpMap();
+//            mMap = mapFragment.getMap();
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
@@ -223,6 +222,8 @@ public class MapsActivity extends Activity
         bindBillingService();
 
         setUserAccount();
+
+        setUpMapIfNeeded();
 
     }
 
@@ -413,8 +414,6 @@ public class MapsActivity extends Activity
         mapsMarkersDelegatesManager.add(parkedCarDelegate);
         mapsMarkersDelegatesManager.add(spotsDelegate);
 
-        drawMarkers();
-
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
 
@@ -429,6 +428,8 @@ public class MapsActivity extends Activity
         }
 
         googleApiClient.connect();
+
+        drawMarkers();
 
     }
 
