@@ -182,7 +182,7 @@ public class MapsActivity extends Activity
         /**
          * Try to reuse map
          */
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapview);
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
         if (savedInstanceState == null) {
             // First incarnation of this activity.
@@ -192,7 +192,7 @@ public class MapsActivity extends Activity
         } else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
-//            mMap = mapFragment.getMap();
+            mMap = mapFragment.getMap();
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
@@ -224,6 +224,12 @@ public class MapsActivity extends Activity
         setUserAccount();
 
         setUpMapIfNeeded();
+
+        spotsDelegate.setMap(mMap);
+        parkedCarDelegate.init(this, mMap, carButton);
+        mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
+        mapsMarkersDelegatesManager.add(parkedCarDelegate);
+        mapsMarkersDelegatesManager.add(spotsDelegate);
 
     }
 
@@ -336,10 +342,10 @@ public class MapsActivity extends Activity
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
+        super.onSaveInstanceState(savedInstanceState);
+
         savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
-
         savedInstanceState.putParcelable("parkedCarDelegate", parkedCarDelegate);
-
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
 
     }
@@ -407,13 +413,6 @@ public class MapsActivity extends Activity
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
 
-        spotsDelegate.setMap(mMap);
-        parkedCarDelegate.init(this, mMap, carButton);
-
-        mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
-        mapsMarkersDelegatesManager.add(parkedCarDelegate);
-        mapsMarkersDelegatesManager.add(spotsDelegate);
-
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
 
@@ -429,7 +428,6 @@ public class MapsActivity extends Activity
 
         googleApiClient.connect();
 
-        drawMarkers();
 
     }
 
@@ -460,8 +458,10 @@ public class MapsActivity extends Activity
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
+            Log.d(TAG, "Map was set up");
+
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.mapview))
+            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {

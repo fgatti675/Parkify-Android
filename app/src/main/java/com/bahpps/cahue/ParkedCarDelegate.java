@@ -52,7 +52,7 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
         FREE, FOLLOWING
     }
 
-    private Mode mode;
+    private Mode mode = Mode.FREE;
 
     private IconGenerator iconFactory;
 
@@ -66,7 +66,6 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
     /**
      * Actual lines representing the directions PolyLine
      */
-    private Polyline directionsPolyLine;
     private List<LatLng> directionPoints;
 
     private AsyncTask<Object, Object, Document> directionsAsyncTask;
@@ -124,6 +123,8 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
         if (carLocation == null)
             carLocation = CarLocationManager.getStoredLocation(context);
+
+        buttonUpdate();
     }
 
     public void setCarLocation(Location carLocation) {
@@ -141,6 +142,9 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
     }
 
     public void draw() {
+
+        Log.i(TAG, "Drawing parked car components");
+
         drawCar();
         drawDirections();
         updateCameraIfFollowing();
@@ -195,8 +199,8 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
         for (int i = 0; i < directionPoints.size(); i++) {
             rectLine.add(directionPoints.get(i));
         }
-        directionsPolyLine = mMap.addPolyline(rectLine);
 
+        mMap.addPolyline(rectLine);
 
     }
 
@@ -310,12 +314,16 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
         updateCameraIfFollowing();
 
+        buttonUpdate();
+
+    }
+
+    private void buttonUpdate(){
         if (mode == Mode.FOLLOWING) {
             carButton.setImageResource(R.drawable.ic_icon_car_red);
         } else if (mode == Mode.FREE) {
             carButton.setImageResource(R.drawable.ic_icon_car);
         }
-
     }
 
 
@@ -337,6 +345,8 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
      * This method zooms to see both user and the car.
      */
     protected boolean zoomToSeeBoth() {
+
+        Log.d(TAG, "zoomToSeeBoth");
 
         LatLng carPosition = getCarLatLng();
         LatLng userPosition = getUserLatLng();
