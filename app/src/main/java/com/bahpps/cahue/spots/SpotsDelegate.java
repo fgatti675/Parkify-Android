@@ -55,36 +55,46 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
     }
 
     public SpotsDelegate(Parcel parcel) {
-        ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(SpotsDelegate.class.getClassLoader());
+        ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
+        ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(classLoader);
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
+        currentBounds = parcel.readParcelable(classLoader);
     }
 
+    /**
+     * Set the bounds where
+     * @param viewPort
+     * @return
+     */
     public boolean applyBounds(LatLngBounds viewPort) {
         if (currentBounds != null
                 && currentBounds.contains(viewPort.northeast)
                 && currentBounds.contains(viewPort.southwest)) {
-            delegatesManager.draw();
+            redraw();
             return false;
         }
 
         // merge previous with current
-        currentBounds = LatLngBounds.builder()
-                .include(currentBounds.northeast)
-                .include(currentBounds.southwest)
-                .include(viewPort.northeast)
-                .include(viewPort.southwest)
-                .build();
+        if (currentBounds != null)
+            currentBounds = LatLngBounds.builder()
+                    .include(currentBounds.northeast)
+                    .include(currentBounds.southwest)
+                    .include(viewPort.northeast)
+                    .include(viewPort.southwest)
+                    .build();
+        else
+            currentBounds = viewPort;
 
         /**
          * In case there was a query running, cancel it
          */
-        if (service != null) service.cancel(true);
+//        if (service != null) service.cancel(true);
 
         service = new TestParkingSpotsService(currentBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 spots.addAll(parkingSpots);
-                delegatesManager.draw();
+                redraw();
             }
         });
 
@@ -97,6 +107,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
 
     public void draw() {
         Log.d(TAG, "Drawing spots");
+        if (hideMarkers) return;
         for (ParkingSpot parkingSpot : spots) {
             mMap.addMarker(new MarkerOptions().position(parkingSpot.getPosition()));
         }
@@ -111,10 +122,12 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
         parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
+        parcel.writeParcelable(currentBounds, 0);
     }
 
     public void hideMarkers() {
         hideMarkers = true;
+        redraw();
     }
 
 }

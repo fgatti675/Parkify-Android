@@ -5,7 +5,7 @@ package com.bahpps.cahue;
  */
 public abstract class MarkerDelegate {
 
-    protected MapsMarkersDelegatesManager delegatesManager;
+    private MapsMarkersDelegatesManager delegatesManager;
 
     public abstract void draw();
 
@@ -15,5 +15,9 @@ public abstract class MarkerDelegate {
 
     public void setDelegatesManager(MapsMarkersDelegatesManager delegatesManager) {
         this.delegatesManager = delegatesManager;
+    }
+
+    protected void redraw(){
+        delegatesManager.draw();
     }
 }

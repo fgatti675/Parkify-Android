@@ -68,7 +68,6 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
      */
     private Polyline directionsPolyLine;
     private List<LatLng> directionPoints;
-    private boolean directionsDisplayed = false;
 
     private AsyncTask<Object, Object, Document> directionsAsyncTask;
 
@@ -122,27 +121,29 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
         this.carButton = carButton;
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
-    }
 
-    public void setCarLocationIfNull(Location carLocation) {
-        if (this.carLocation == null)
-            setCarLocation(carLocation);
+        if (carLocation == null)
+            carLocation = CarLocationManager.getStoredLocation(context);
     }
 
     public void setCarLocation(Location carLocation) {
         this.carLocation = carLocation;
+        directionPoints.clear();
+        redraw();
     }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
 
-        if (!directionsDisplayed)
-            delegatesManager.draw();
+        if (directionPoints.isEmpty())
+            fetchDirections();
+
     }
 
     public void draw() {
         drawCar();
         drawDirections();
+        updateCameraIfFollowing();
     }
 
     /**
@@ -152,9 +153,6 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
         if (carLocation == null) {
             return;
-        } else {
-            if (carMarker != null) carMarker.remove();
-            if (directionsPolyLine != null) directionsPolyLine.remove();
         }
 
         Log.i(TAG, "Setting car in map: " + carLocation);
@@ -180,30 +178,40 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
         Circle accuracyCircle = mMap.addCircle(circleOptions);
 
-
     }
 
     public void removeCar() {
         carLocation = null;
         CarLocationManager.removeStoredLocation(mContext);
-        delegatesManager.draw();
+        redraw();
     }
 
     private void drawDirections() {
 
+        Log.d(TAG, "Drawing directions");
+
+        PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
+
+        for (int i = 0; i < directionPoints.size(); i++) {
+            rectLine.add(directionPoints.get(i));
+        }
+        directionsPolyLine = mMap.addPolyline(rectLine);
+
+
+    }
+
+    private void fetchDirections() {
+
         final LatLng carPosition = getCarLatLng();
         final LatLng userPosition = getUserLatLng();
 
-        if (directionsPolyLine != null) {
-            directionsPolyLine.remove();
-            directionsDisplayed = false;
-        }
+        directionPoints.clear();
 
         if (carPosition == null || userPosition == null) {
             return;
         }
 
-        Log.i(TAG, "Drawing directions");
+        Log.d(TAG, "Fetching directions");
 
         // don't set if they are too far
         float distances[] = new float[3];
@@ -234,20 +242,11 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
             @Override
             protected void onPostExecute(Document doc) {
                 directionPoints = directionsDelegate.getDirection(doc);
-                PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
-
-                for (int i = 0; i < directionPoints.size(); i++) {
-                    rectLine.add(directionPoints.get(i));
-                }
-                directionsPolyLine = mMap.addPolyline(rectLine);
-                directionsDisplayed = true;
-
-                updateCameraIfFollowing();
+                redraw();
             }
 
         };
         directionsAsyncTask.execute();
-
     }
 
     private LatLng getCarLatLng() {
@@ -259,6 +258,7 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
      * This method shows the Toast when the car icon is pressed, telling the user the parking time
      */
     private void showCarTimeToast() {
+
         String toastMsg = mContext.getString(R.string.car_was_here);
 
         long timeDiff = Calendar.getInstance().getTimeInMillis() - CarLocationManager.getParkingTime(mContext);
@@ -347,11 +347,8 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
                 .include(carPosition)
                 .include(userPosition);
 
-        if (directionsPolyLine != null) {
-            for (LatLng latLng : directionsPolyLine.getPoints())
-                builder.include(latLng);
-        }
-
+        for (LatLng latLng : directionPoints)
+            builder.include(latLng);
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150), new GoogleMap.CancelableCallback() {
             @Override

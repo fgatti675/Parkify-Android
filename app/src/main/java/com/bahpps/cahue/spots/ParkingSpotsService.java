@@ -109,6 +109,11 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, Set<ParkingSpot>>
     }
 
     @Override
+    protected void onCancelled() {
+        super.onCancelled();
+    }
+
+    @Override
     protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
         Log.d(TAG, parkingSpots.toString());
         super.onPostExecute(parkingSpots);

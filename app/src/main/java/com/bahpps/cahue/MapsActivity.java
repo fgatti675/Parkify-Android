@@ -407,9 +407,7 @@ public class MapsActivity extends Activity
         setUpLocationClientIfNeeded();
 
         spotsDelegate.setMap(mMap);
-
         parkedCarDelegate.init(this, mMap, carButton);
-        parkedCarDelegate.setCarLocationIfNull(CarLocationManager.getStoredLocation(this));
 
         mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
         mapsMarkersDelegatesManager.add(parkedCarDelegate);
