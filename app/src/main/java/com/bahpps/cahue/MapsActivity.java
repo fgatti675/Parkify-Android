@@ -224,6 +224,7 @@ public class MapsActivity extends Activity
         setUserAccount();
 
         setUpMapIfNeeded();
+        setUpMapListeners();
 
         spotsDelegate.setMap(mMap);
         parkedCarDelegate.init(this, mMap, carButton);
@@ -487,18 +488,20 @@ public class MapsActivity extends Activity
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.setOnMapClickListener(this);
-        mMap.setOnMapLongClickListener(this);
-        mMap.setOnCameraChangeListener(this);
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
-        mMap.setOnMarkerClickListener(this);
     }
 
 
+    private void setUpMapListeners(){
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnMapClickListener(this);
+        mMap.setOnMapLongClickListener(this);
+        mMap.setOnCameraChangeListener(this);
+    }
 
     /**
      * Show menu method
