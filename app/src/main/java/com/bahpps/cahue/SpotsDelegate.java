@@ -1,19 +1,18 @@
-package com.bahpps.cahue.spots;
+package com.bahpps.cahue;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.bahpps.cahue.MarkerDelegate;
 import com.bahpps.cahue.debug.TestParkingSpotsService;
+import com.bahpps.cahue.spots.ParkingSpot;
+import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,7 +23,8 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
     private static final String TAG = "SpotsDelegate";
     private Set<ParkingSpot> spots;
     private GoogleMap mMap;
-    private LatLngBounds currentBounds;
+    private LatLngBounds currentQueryBounds;
+    private LatLngBounds viewPort;
 
     /**
      * If markers shouldn't be displayed (like zoom is too far)
@@ -58,8 +58,11 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
         ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(classLoader);
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
-        currentBounds = parcel.readParcelable(classLoader);
+        currentQueryBounds = parcel.readParcelable(classLoader);
+        viewPort = parcel.readParcelable(classLoader);
     }
+
+
 
     /**
      * Set the bounds where
@@ -67,30 +70,32 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
      * @return
      */
     public boolean applyBounds(LatLngBounds viewPort) {
-        if (currentBounds != null
-                && currentBounds.contains(viewPort.northeast)
-                && currentBounds.contains(viewPort.southwest)) {
-            redraw();
+
+        this.viewPort = viewPort;
+
+        if (currentQueryBounds != null
+                && currentQueryBounds.contains(viewPort.northeast)
+                && currentQueryBounds.contains(viewPort.southwest)) {
             return false;
         }
 
         // merge previous with current
-        if (currentBounds != null)
-            currentBounds = LatLngBounds.builder()
-                    .include(currentBounds.northeast)
-                    .include(currentBounds.southwest)
+        if (currentQueryBounds != null)
+            currentQueryBounds = LatLngBounds.builder()
+                    .include(currentQueryBounds.northeast)
+                    .include(currentQueryBounds.southwest)
                     .include(viewPort.northeast)
                     .include(viewPort.southwest)
                     .build();
         else
-            currentBounds = viewPort;
+            currentQueryBounds = viewPort;
 
         /**
          * In case there was a query running, cancel it
          */
 //        if (service != null) service.cancel(true);
 
-        service = new TestParkingSpotsService(currentBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
+        service = new TestParkingSpotsService(currentQueryBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 spots.addAll(parkingSpots);
@@ -122,7 +127,8 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
         parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
-        parcel.writeParcelable(currentBounds, 0);
+        parcel.writeParcelable(currentQueryBounds, 0);
+        parcel.writeParcelable(viewPort, 0);
     }
 
     public void hideMarkers() {
@@ -130,4 +136,8 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         redraw();
     }
 
+    public void showMarkers() {
+        hideMarkers = false;
+        redraw();
+    }
 }

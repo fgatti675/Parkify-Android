@@ -28,7 +28,6 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.CarLocationManager;
 import com.bahpps.cahue.util.Util;
@@ -311,7 +310,7 @@ public class MapsActivity extends Activity
         }
 
 
-        // element purchse
+        // element purchase
         else if (requestCode == REQUEST_ON_PURCHASE) {
 
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
@@ -363,7 +362,7 @@ public class MapsActivity extends Activity
         return false;
     }
 
-    private void drawMarkers(){
+    private void drawMarkers() {
         mapsMarkersDelegatesManager.draw();
     }
 
@@ -496,7 +495,7 @@ public class MapsActivity extends Activity
     }
 
 
-    private void setUpMapListeners(){
+    private void setUpMapListeners() {
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
@@ -660,6 +659,7 @@ public class MapsActivity extends Activity
         if (zoom >= MAX_ZOOM) {
             Log.d(TAG, "querying: " + zoom);
             doSpotsQuery(cameraPosition);
+            spotsDelegate.showMarkers();
         }
         /**
          * Too far
@@ -672,18 +672,38 @@ public class MapsActivity extends Activity
     private void doSpotsQuery(CameraPosition position) {
 
 //        float previousZoom = mMap.getCameraPosition().zoom;
-//        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
+//        CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
 //                .zoom(MAX_ZOOM)
-//                .build()));
+//                .build());
+//        mMap.moveCamera(update);
 //
 //        LatLngBounds queryPort = mMap.getProjection().getVisibleRegion().latLngBounds;
 //
 //        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
 //                .zoom(previousZoom)
 //                .build()));
-
         LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-        spotsDelegate.applyBounds(viewPort);
+        LatLngBounds expanded = LatLngBounds.builder()
+                .include(getOffsetLatLng(viewPort.northeast, 2000, 2000))
+                .include(getOffsetLatLng(viewPort.southwest, -2000, -2000))
+                .build();
+        spotsDelegate.applyBounds(expanded);
+    }
+
+    public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
+
+        //Earth’s radius, sphere
+        double R = 6378137;
+
+        //Coordinate offsets in radians
+        double dLat = offsetNorth / R;
+        double dLon = offsetEast / (R * Math.cos(Math.PI * original.latitude / 180));
+
+        //OffsetPosition, decimal degrees
+        double nLat = original.latitude + dLat * 180 / Math.PI;
+        double nLon = original.longitude + dLon * 180 / Math.PI;
+
+        return new LatLng(nLat, nLon);
     }
 
     @Override
