@@ -1,5 +1,7 @@
 package com.bahpps.cahue;
 
+import com.google.android.gms.maps.model.CameraPosition;
+
 /**
  * Created by francesco on 28.10.2014.
  */
@@ -20,4 +22,8 @@ public abstract class MarkerDelegate {
     protected void redraw(){
         delegatesManager.draw();
     }
+
+    public abstract void onCameraChange(CameraPosition cameraPosition);
+
+
 }

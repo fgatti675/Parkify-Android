@@ -416,6 +416,7 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
                 });
     }
 
+    @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         if (!justFinishedAnimating) setMode(Mode.FREE);
         justFinishedAnimating = false;

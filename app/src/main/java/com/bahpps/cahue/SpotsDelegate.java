@@ -8,11 +8,15 @@ import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,11 +24,18 @@ import java.util.Set;
  */
 public class SpotsDelegate extends MarkerDelegate implements Parcelable {
 
+
+    /**
+     * If zoom is more far than this, we don't display the markers
+     */
+    public static final float MAX_ZOOM = 13.5F;
+
     private static final String TAG = "SpotsDelegate";
     private Set<ParkingSpot> spots;
     private GoogleMap mMap;
-    private LatLngBounds currentQueryBounds;
-    private LatLngBounds viewPort;
+    private List<LatLngBounds> queriedBounds = new ArrayList<LatLngBounds>();
+    private LatLngBounds viewBounds;
+    private LatLngBounds extendedViewBounds;
 
     /**
      * If markers shouldn't be displayed (like zoom is too far)
@@ -50,7 +61,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         spots = new HashSet<ParkingSpot>();
     }
 
-    public void setMap(GoogleMap map) {
+    public void init(GoogleMap map) {
         this.mMap = map;
     }
 
@@ -58,44 +69,44 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
         ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(classLoader);
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
-        currentQueryBounds = parcel.readParcelable(classLoader);
-        viewPort = parcel.readParcelable(classLoader);
+        LatLngBounds[] boundsArray = (LatLngBounds[]) parcel.readParcelableArray(classLoader);
+        queriedBounds = Arrays.asList(boundsArray);
+        viewBounds = parcel.readParcelable(classLoader);
     }
-
 
 
     /**
      * Set the bounds where
-     * @param viewPort
+     *
+     * @param viewPort What the user is actually seeing right now
+     * @param queryPort A broader space we want to query
      * @return
      */
-    public boolean applyBounds(LatLngBounds viewPort) {
+    private synchronized boolean applyBounds(LatLngBounds viewPort, LatLngBounds queryPort) {
 
-        this.viewPort = viewPort;
+        this.viewBounds = viewPort;
+        this.extendedViewBounds = queryPort;
 
-        if (currentQueryBounds != null
-                && currentQueryBounds.contains(viewPort.northeast)
-                && currentQueryBounds.contains(viewPort.southwest)) {
-            return false;
+        /**
+         * Check if this query is already contained in another one
+         */
+        for (LatLngBounds latLngBounds : queriedBounds) {
+            if (latLngBounds.contains(extendedViewBounds.northeast)
+                    && latLngBounds.contains(extendedViewBounds.southwest)) {
+                Log.d(TAG, "NO need to query again");
+                return false;
+            }
         }
 
         // merge previous with current
-        if (currentQueryBounds != null)
-            currentQueryBounds = LatLngBounds.builder()
-                    .include(currentQueryBounds.northeast)
-                    .include(currentQueryBounds.southwest)
-                    .include(viewPort.northeast)
-                    .include(viewPort.southwest)
-                    .build();
-        else
-            currentQueryBounds = viewPort;
+        queriedBounds.add(extendedViewBounds);
 
         /**
          * In case there was a query running, cancel it
          */
 //        if (service != null) service.cancel(true);
 
-        service = new TestParkingSpotsService(currentQueryBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
+        service = new TestParkingSpotsService(extendedViewBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 spots.addAll(parkingSpots);
@@ -104,7 +115,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         });
 
 
-        Log.d(TAG, "Starting query for viewPort: " + viewPort);
+        Log.d(TAG, "Starting query for queryPort: " + extendedViewBounds);
 
         service.execute();
         return true;
@@ -114,9 +125,43 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         Log.d(TAG, "Drawing spots");
         if (hideMarkers) return;
         for (ParkingSpot parkingSpot : spots) {
-            mMap.addMarker(new MarkerOptions().position(parkingSpot.getPosition()));
+            LatLng spotPosition = parkingSpot.getPosition();
+            if (extendedViewBounds.contains(spotPosition) || viewBounds.contains(spotPosition))
+                mMap.addMarker(new MarkerOptions().position(spotPosition));
         }
     }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        float zoom = mMap.getCameraPosition().zoom;
+        Log.d(TAG, "zoom: " + zoom);
+
+        /**
+         * Query for current camera position
+         */
+        if (zoom >= MAX_ZOOM) {
+            Log.d(TAG, "querying: " + zoom);
+
+            LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
+            viewPort.northeast.
+            LatLngBounds expanded = LatLngBounds.builder()
+                    .include(getOffsetLatLng(viewPort.getCenter(), 2000, 2000))
+                    .include(getOffsetLatLng(viewPort.getCenter(), -2000, -2000))
+                    .build();
+            applyBounds(viewPort, expanded);
+
+            showMarkers();
+        }
+        /**
+         * Too far
+         */
+        else {
+            hideMarkers();
+        }
+
+        redraw();
+    }
+
 
     @Override
     public int describeContents() {
@@ -127,17 +172,33 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
         parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
-        parcel.writeParcelable(currentQueryBounds, 0);
-        parcel.writeParcelable(viewPort, 0);
+        LatLngBounds[] boundsArray = new LatLngBounds[queriedBounds.size()];
+        parcel.writeParcelableArray(queriedBounds.toArray(boundsArray), 0);
+        parcel.writeParcelable(viewBounds, 0);
     }
 
-    public void hideMarkers() {
+    private void hideMarkers() {
         hideMarkers = true;
-        redraw();
     }
 
-    public void showMarkers() {
+    private void showMarkers() {
         hideMarkers = false;
-        redraw();
     }
+
+    public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
+
+        //Earth’s radius, sphere
+        double R = 6378137;
+
+        //Coordinate offsets in radians
+        double dLat = offsetNorth / R;
+        double dLon = offsetEast / (R * Math.cos(Math.PI * original.latitude / 180));
+
+        //OffsetPosition, decimal degrees
+        double nLat = original.latitude + dLat * 180 / Math.PI;
+        double nLon = original.longitude + dLon * 180 / Math.PI;
+
+        return new LatLng(nLat, nLon);
+    }
+
 }

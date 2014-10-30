@@ -72,11 +72,6 @@ public class MapsActivity extends Activity
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
-    /**
-     * If zoom is more far than this, we don't display the markers
-     */
-    private static final float MAX_ZOOM = 13.5F;
-
     static final int REQUEST_CODE_PICK_ACCOUNT = 0;
     static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
     static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 2;
@@ -225,7 +220,7 @@ public class MapsActivity extends Activity
         setUpMapIfNeeded();
         setUpMapListeners();
 
-        spotsDelegate.setMap(mMap);
+        spotsDelegate.init(mMap);
         parkedCarDelegate.init(this, mMap, carButton);
         mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
         mapsMarkersDelegatesManager.add(parkedCarDelegate);
@@ -602,11 +597,9 @@ public class MapsActivity extends Activity
 
             CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
-                    .zoom(MAX_ZOOM)
+                    .zoom(SpotsDelegate.MAX_ZOOM)
                     .build());
             mMap.moveCamera(update);
-
-            doSpotsQuery(mMap.getCameraPosition());
 
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
@@ -650,60 +643,8 @@ public class MapsActivity extends Activity
 
         parkedCarDelegate.onCameraChange(cameraPosition);
 
-        float zoom = mMap.getCameraPosition().zoom;
-        Log.d(TAG, "zoom: " + zoom);
+        spotsDelegate.onCameraChange(cameraPosition);
 
-        /**
-         * Query for current camera position
-         */
-        if (zoom >= MAX_ZOOM) {
-            Log.d(TAG, "querying: " + zoom);
-            doSpotsQuery(cameraPosition);
-            spotsDelegate.showMarkers();
-        }
-        /**
-         * Too far
-         */
-        else {
-            spotsDelegate.hideMarkers();
-        }
-    }
-
-    private void doSpotsQuery(CameraPosition position) {
-
-//        float previousZoom = mMap.getCameraPosition().zoom;
-//        CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
-//                .zoom(MAX_ZOOM)
-//                .build());
-//        mMap.moveCamera(update);
-//
-//        LatLngBounds queryPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-//
-//        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(position)
-//                .zoom(previousZoom)
-//                .build()));
-        LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-        LatLngBounds expanded = LatLngBounds.builder()
-                .include(getOffsetLatLng(viewPort.northeast, 2000, 2000))
-                .include(getOffsetLatLng(viewPort.southwest, -2000, -2000))
-                .build();
-        spotsDelegate.applyBounds(expanded);
-    }
-
-    public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
-
-        //Earth’s radius, sphere
-        double R = 6378137;
-
-        //Coordinate offsets in radians
-        double dLat = offsetNorth / R;
-        double dLon = offsetEast / (R * Math.cos(Math.PI * original.latitude / 180));
-
-        //OffsetPosition, decimal degrees
-        double nLat = original.latitude + dLat * 180 / Math.PI;
-        double nLon = original.longitude + dLon * 180 / Math.PI;
-
-        return new LatLng(nLat, nLon);
     }
 
     @Override
