@@ -1,6 +1,9 @@
 package com.bahpps.cahue;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.CameraPosition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +13,9 @@ import java.util.List;
  */
 public class MapsMarkersDelegatesManager {
 
-    List<MarkerDelegate> delegates = new ArrayList();
+    public final static String TAG = "MapsMarkersDelegatesManager";
+
+    List<AbstractMarkerDelegate> delegates = new ArrayList();
 
     GoogleMap mMap;
 
@@ -18,15 +23,26 @@ public class MapsMarkersDelegatesManager {
         this.mMap = map;
     }
 
-    public void add(MarkerDelegate markerDelegate) {
+    public void add(AbstractMarkerDelegate markerDelegate) {
         markerDelegate.setDelegatesManager(this);
         delegates.add(markerDelegate);
     }
 
-    public synchronized void draw(){
-        mMap.clear();
-        for(MarkerDelegate delegate:delegates)
-            delegate.draw();
+    public synchronized void drawIfNecessary() {
+
+        for (AbstractMarkerDelegate delegate : delegates) {
+            if (delegate.isNeedsRedraw()) {
+                Log.i(TAG, delegate.getClass().getSimpleName() + " is being redrawn because ");
+                delegate.doDraw();
+                delegate.setNeedsRedraw(false);
+            }
+        }
     }
 
+    public void onCameraChange(CameraPosition cameraPosition) {
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onCameraChange(cameraPosition);
+        }
+        drawIfNecessary();
+    }
 }

@@ -11,18 +11,21 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by Francesco on 21/10/2014.
  */
-public class SpotsDelegate extends MarkerDelegate implements Parcelable {
+public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable {
 
 
     /**
@@ -32,6 +35,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
 
     private static final String TAG = "SpotsDelegate";
     private Set<ParkingSpot> spots;
+    private Map<Marker, ParkingSpot> markerSpotsMap;
     private GoogleMap mMap;
     private List<LatLngBounds> queriedBounds = new ArrayList<LatLngBounds>();
     private LatLngBounds viewBounds;
@@ -63,6 +67,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
 
     public void init(GoogleMap map) {
         this.mMap = map;
+        markerSpotsMap = new HashMap<Marker, ParkingSpot>();
     }
 
     public SpotsDelegate(Parcel parcel) {
@@ -78,8 +83,8 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
     /**
      * Set the bounds where
      *
-     * @param viewPort What the user is actually seeing right now
-     * @param queryPort A broader space we want to query
+     * @param viewPort  What the user is actually seeing right now
+     * @param queryPort A broader space we want to query so that data is there when we move the camera
      * @return
      */
     private synchronized boolean applyBounds(LatLngBounds viewPort, LatLngBounds queryPort) {
@@ -91,14 +96,14 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
          * Check if this query is already contained in another one
          */
         for (LatLngBounds latLngBounds : queriedBounds) {
-            if (latLngBounds.contains(extendedViewBounds.northeast)
-                    && latLngBounds.contains(extendedViewBounds.southwest)) {
+            if (latLngBounds.contains(viewBounds.northeast)
+                    && latLngBounds.contains(viewBounds.southwest)) {
                 Log.d(TAG, "NO need to query again");
                 return false;
             }
         }
 
-        // merge previous with current
+        // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
         /**
@@ -110,7 +115,7 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 spots.addAll(parkingSpots);
-                redraw();
+                doDraw();
             }
         });
 
@@ -121,32 +126,45 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
         return true;
     }
 
-    public void draw() {
-        Log.d(TAG, "Drawing spots");
+    public void doDraw() {
+
+        // clear first
+        clear();
+
         if (hideMarkers) return;
+
+        Log.d(TAG, "Drawing spots");
         for (ParkingSpot parkingSpot : spots) {
             LatLng spotPosition = parkingSpot.getPosition();
-            if (extendedViewBounds.contains(spotPosition) || viewBounds.contains(spotPosition))
-                mMap.addMarker(new MarkerOptions().position(spotPosition));
+            if (extendedViewBounds.contains(spotPosition) || viewBounds.contains(spotPosition)) {
+                Marker marker = mMap.addMarker(new MarkerOptions().position(spotPosition));
+                markerSpotsMap.put(marker, parkingSpot);
+            }
         }
     }
+
+    private void clear() {
+        for(Marker marker: markerSpotsMap.keySet()){
+            marker.remove();
+        }
+    }
+
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         float zoom = mMap.getCameraPosition().zoom;
-        Log.d(TAG, "zoom: " + zoom);
+        Log.v(TAG, "zoom: " + zoom);
 
         /**
          * Query for current camera position
          */
         if (zoom >= MAX_ZOOM) {
-            Log.d(TAG, "querying: " + zoom);
+            Log.d(TAG, "Querying because we are close enough");
 
             LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-            viewPort.northeast.
             LatLngBounds expanded = LatLngBounds.builder()
-                    .include(getOffsetLatLng(viewPort.getCenter(), 2000, 2000))
-                    .include(getOffsetLatLng(viewPort.getCenter(), -2000, -2000))
+                    .include(getOffsetLatLng(viewPort.northeast, 500, 500))
+                    .include(getOffsetLatLng(viewPort.southwest, -500, -500))
                     .build();
             applyBounds(viewPort, expanded);
 
@@ -156,10 +174,12 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
          * Too far
          */
         else {
+            Log.d(TAG, "Too far to query locations");
             hideMarkers();
         }
 
-        redraw();
+        markAsDirty();
+
     }
 
 
@@ -187,14 +207,14 @@ public class SpotsDelegate extends MarkerDelegate implements Parcelable {
 
     public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
 
-        //Earth’s radius, sphere
+        // Earth’s radius, sphere
         double R = 6378137;
 
-        //Coordinate offsets in radians
+        // Coordinate offsets in radians
         double dLat = offsetNorth / R;
         double dLon = offsetEast / (R * Math.cos(Math.PI * original.latitude / 180));
 
-        //OffsetPosition, decimal degrees
+        // OffsetPosition, decimal degrees
         double nLat = original.latitude + dLat * 180 / Math.PI;
         double nLon = original.longitude + dLon * 180 / Math.PI;
 

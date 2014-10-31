@@ -15,6 +15,8 @@ public class ParkingSpot implements Parcelable, ClusterItem {
 
     private String id;
 
+    private String markerId;
+
     private LatLng position;
 
     private Date time;
@@ -34,6 +36,7 @@ public class ParkingSpot implements Parcelable, ClusterItem {
 
     public ParkingSpot(Parcel parcel) {
         id = parcel.readString();
+        markerId = parcel.readString();
         position = parcel.readParcelable(LatLng.class.getClassLoader());
         time = (Date) parcel.readSerializable();
     }
@@ -52,6 +55,7 @@ public class ParkingSpot implements Parcelable, ClusterItem {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
+        parcel.writeString(markerId);
         parcel.writeParcelable(position, 0);
         parcel.writeSerializable(time);
     }
@@ -90,5 +94,13 @@ public class ParkingSpot implements Parcelable, ClusterItem {
     @Override
     public LatLng getPosition() {
         return position;
+    }
+
+    public String getMarkerId() {
+        return markerId;
+    }
+
+    public void setMarkerId(String markerId) {
+        this.markerId = markerId;
     }
 }

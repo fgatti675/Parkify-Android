@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Created by francesco on 27.10.2014.
  */
-public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
+public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcelable {
 
     private static final String TAG = "ParkedCarDelegate";
 
@@ -61,7 +61,13 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
     private Location carLocation;
     private Location userLocation;
+
+    /**
+     * Map components
+     */
     private Marker carMarker;
+    private Circle accuracyCircle;
+    private Polyline directionsPolyline;
 
     /**
      * Actual lines representing the directions PolyLine
@@ -130,24 +136,32 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
     public void setCarLocation(Location carLocation) {
         this.carLocation = carLocation;
         directionPoints.clear();
-        redraw();
+        if (directionPoints.isEmpty())
+            fetchDirections(true);
+        doDraw();
     }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
 
         if (directionPoints.isEmpty())
-            fetchDirections();
+            fetchDirections(false);
 
+        doDraw();
     }
 
-    public void draw() {
-
+    public void doDraw() {
         Log.i(TAG, "Drawing parked car components");
-
+        clear();
         drawCar();
         drawDirections();
         updateCameraIfFollowing();
+    }
+
+    private void clear(){
+        if(carMarker != null) carMarker.remove();
+        if(accuracyCircle != null) accuracyCircle.remove();
+        if(directionsPolyline != null) directionsPolyline.remove();
     }
 
     /**
@@ -180,14 +194,14 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
                 .strokeColor(LIGHT_RED)
                 .strokeWidth(0);
 
-        Circle accuracyCircle = mMap.addCircle(circleOptions);
+        accuracyCircle = mMap.addCircle(circleOptions);
 
     }
 
     public void removeCar() {
         carLocation = null;
         CarLocationManager.removeStoredLocation(mContext);
-        redraw();
+        doDraw();
     }
 
     private void drawDirections() {
@@ -200,11 +214,11 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
             rectLine.add(directionPoints.get(i));
         }
 
-        mMap.addPolyline(rectLine);
+        directionsPolyline = mMap.addPolyline(rectLine);
 
     }
 
-    private void fetchDirections() {
+    private void fetchDirections(boolean restart) {
 
         final LatLng carPosition = getCarLatLng();
         final LatLng userPosition = getUserLatLng();
@@ -214,8 +228,6 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
         if (carPosition == null || userPosition == null) {
             return;
         }
-
-        Log.d(TAG, "Fetching directions");
 
         // don't set if they are too far
         float distances[] = new float[3];
@@ -232,8 +244,14 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
         /**
          * Cancel if something is going on
          */
-        if (directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED)
-            directionsAsyncTask.cancel(true);
+        if (directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED) {
+            if (restart)
+                directionsAsyncTask.cancel(true);
+            else
+                return;
+        }
+
+        Log.d(TAG, "Fetching directions");
 
         directionsAsyncTask = new AsyncTask<Object, Object, Document>() {
 
@@ -246,7 +264,7 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
             @Override
             protected void onPostExecute(Document doc) {
                 directionPoints = directionsDelegate.getDirection(doc);
-                redraw();
+                doDraw();
             }
 
         };
@@ -318,7 +336,7 @@ public class ParkedCarDelegate extends MarkerDelegate implements Parcelable {
 
     }
 
-    private void buttonUpdate(){
+    private void buttonUpdate() {
         if (mode == Mode.FOLLOWING) {
             carButton.setImageResource(R.drawable.ic_icon_car_red);
         } else if (mode == Mode.FREE) {

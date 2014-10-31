@@ -117,7 +117,6 @@ public class MapsActivity extends Activity
             if (location != null) {
                 Log.i(TAG, "Location received: " + location);
                 parkedCarDelegate.setCarLocation(location);
-                drawMarkers();
             }
 
         }
@@ -191,6 +190,13 @@ public class MapsActivity extends Activity
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
 
+            /**
+             * Do everything again
+             */
+            mMap.clear();
+            spotsDelegate.markAsDirty();
+            parkedCarDelegate.markAsDirty();
+
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
         }
 
@@ -225,6 +231,36 @@ public class MapsActivity extends Activity
         mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
         mapsMarkersDelegatesManager.add(parkedCarDelegate);
         mapsMarkersDelegatesManager.add(spotsDelegate);
+
+    }
+
+
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        setUpMapIfNeeded();
+        setUpLocationClientIfNeeded();
+
+        // when our activity resumes, we want to register for location updates
+        registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
+
+        // bt adress on the linked device
+        String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
+
+        // we hide the link button if the app is linked
+        if (!btAddress.equals("")) {
+            linkButton.setVisibility(View.GONE);
+        } else {
+            linkButton.setVisibility(View.VISIBLE);
+        }
+
+        googleApiClient.connect();
+
+        mapsMarkersDelegatesManager.drawIfNecessary();
+
 
     }
 
@@ -357,11 +393,6 @@ public class MapsActivity extends Activity
         return false;
     }
 
-    private void drawMarkers() {
-        mapsMarkersDelegatesManager.draw();
-    }
-
-
     /**
      * This method is a hook for background threads and async tasks that need to provide the
      * user a response UI when an exception occurs.
@@ -399,32 +430,6 @@ public class MapsActivity extends Activity
         prefs.edit().putBoolean(Util.PREF_DIALOG_SHOWN, true).apply();
     }
 
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
-        setUpMapIfNeeded();
-        setUpLocationClientIfNeeded();
-
-        // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
-
-        // bt adress on the linked device
-        String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
-
-        // we hide the link button if the app is linked
-        if (!btAddress.equals("")) {
-            linkButton.setVisibility(View.GONE);
-        } else {
-            linkButton.setVisibility(View.VISIBLE);
-        }
-
-        googleApiClient.connect();
-
-
-    }
 
     @Override
     protected void onPause() {
@@ -641,9 +646,8 @@ public class MapsActivity extends Activity
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-        parkedCarDelegate.onCameraChange(cameraPosition);
+        mapsMarkersDelegatesManager.onCameraChange(cameraPosition);
 
-        spotsDelegate.onCameraChange(cameraPosition);
 
     }
 
