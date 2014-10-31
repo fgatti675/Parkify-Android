@@ -1,13 +1,19 @@
 package com.bahpps.cahue;
 
+import android.graphics.Point;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.Log;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -27,6 +33,7 @@ import java.util.Set;
  */
 public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable {
 
+    private final Handler handler = new Handler();
 
     /**
      * If zoom is more far than this, we don't display the markers
@@ -35,7 +42,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
     private static final String TAG = "SpotsDelegate";
     private Set<ParkingSpot> spots;
-    private Map<Marker, ParkingSpot> markerSpotsMap;
+    private Map<ParkingSpot, Marker> spotMarkersMap;
     private GoogleMap mMap;
     private List<LatLngBounds> queriedBounds = new ArrayList<LatLngBounds>();
     private LatLngBounds viewBounds;
@@ -67,7 +74,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
     public void init(GoogleMap map) {
         this.mMap = map;
-        markerSpotsMap = new HashMap<Marker, ParkingSpot>();
+        spotMarkersMap = new HashMap<ParkingSpot, Marker>();
     }
 
     public SpotsDelegate(Parcel parcel) {
@@ -136,17 +143,46 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         Log.d(TAG, "Drawing spots");
         for (ParkingSpot parkingSpot : spots) {
             LatLng spotPosition = parkingSpot.getPosition();
-            if (extendedViewBounds.contains(spotPosition) || viewBounds.contains(spotPosition)) {
-                Marker marker = mMap.addMarker(new MarkerOptions().position(spotPosition));
-                markerSpotsMap.put(marker, parkingSpot);
+
+            Marker marker = spotMarkersMap.get(parkingSpot);
+
+            if (marker == null) {
+                marker = mMap.addMarker(new MarkerOptions().position(spotPosition));
+                marker.setVisible(false);
+                spotMarkersMap.put(parkingSpot, marker);
+            }
+
+            if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
+                makeMarkerVisible(marker);
             }
         }
     }
 
     private void clear() {
-        for(Marker marker: markerSpotsMap.keySet()){
-            marker.remove();
+        for (Marker marker : spotMarkersMap.values()) {
+            if (hideMarkers || !viewBounds.contains(marker.getPosition()))
+                marker.setVisible(false);
         }
+    }
+
+    private void makeMarkerVisible(final Marker marker) {
+
+        marker.setAlpha(0);
+        marker.setVisible(true);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                float alpha = marker.getAlpha()+ 0.05F;
+                if (alpha < 1) {
+                    // Post again 10ms later.
+                    marker.setAlpha(alpha);
+                    handler.postDelayed(this, 10);
+                } else {
+                    marker.setAlpha(1);
+                    // animation ended
+                }
+            }
+        });
     }
 
 
