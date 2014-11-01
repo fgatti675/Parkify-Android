@@ -1,19 +1,14 @@
 package com.bahpps.cahue;
 
-import android.graphics.Point;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.util.Log;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 
 import com.bahpps.cahue.debug.TestParkingSpotsService;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsService;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -32,6 +27,9 @@ import java.util.Set;
  * Created by Francesco on 21/10/2014.
  */
 public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable {
+
+    // Earth’s radius, sphere
+    private final static double EARTH_RADIUS = 6378137;
 
     private final Handler handler = new Handler();
 
@@ -172,7 +170,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         handler.post(new Runnable() {
             @Override
             public void run() {
-                float alpha = marker.getAlpha()+ 0.05F;
+                float alpha = marker.getAlpha() + 0.05F;
                 if (alpha < 1) {
                     // Post again 10ms later.
                     marker.setAlpha(alpha);
@@ -243,12 +241,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
     public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
 
-        // Earth’s radius, sphere
-        double R = 6378137;
-
         // Coordinate offsets in radians
-        double dLat = offsetNorth / R;
-        double dLon = offsetEast / (R * Math.cos(Math.PI * original.latitude / 180));
+        double dLat = offsetNorth / EARTH_RADIUS;
+        double dLon = offsetEast / (EARTH_RADIUS * Math.cos(Math.PI * original.latitude / 180));
 
         // OffsetPosition, decimal degrees
         double nLat = original.latitude + dLat * 180 / Math.PI;
