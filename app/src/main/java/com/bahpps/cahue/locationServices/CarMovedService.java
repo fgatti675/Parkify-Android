@@ -1,9 +1,11 @@
-package com.bahpps.cahue.util;
+package com.bahpps.cahue.locationServices;
 
 import android.content.Context;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.bahpps.cahue.util.CarLocationManager;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 
 /**
  * This class is in charge of uploading the location of the car to the server when BT connects
@@ -26,11 +29,19 @@ import java.io.UnsupportedEncodingException;
  *
  * @author Francesco
  */
-public class CarMovedPositionReceiver extends LocationPollerService {
+public class CarMovedService extends LocationPollerService {
 
 
     private final static String TAG = "CarMovedPositionReceiver";
     private final static String URL = "http://glossy-radio.appspot.com/spots";
+    private static final long MINIMUM_STAY_MS = 180000;
+
+    @Override
+    protected boolean checkPreconditions() {
+        long now = Calendar.getInstance().getTimeInMillis();
+        long parkingTime = CarLocationManager.getParkingTime(this);
+        return now-parkingTime > MINIMUM_STAY_MS;
+    }
 
     @Override
     public void onLocationPolled(Context context, final Location location) {

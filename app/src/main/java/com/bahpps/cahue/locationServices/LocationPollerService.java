@@ -1,4 +1,4 @@
-package com.bahpps.cahue.util;
+package com.bahpps.cahue.locationServices;
 
 import android.app.Service;
 import android.content.Context;
@@ -56,13 +56,17 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        init();
+        start();
         return super.onStartCommand(intent, flags, startId);
     }
 
-    protected void init() {
-        startTime = new Date();
-        mGoogleApiClient.connect();
+    protected void start() {
+        if (checkPreconditions()) {
+            startTime = new Date();
+            mGoogleApiClient.connect();
+        } else{
+            stopSelf();
+        }
     }
 
     @Override
@@ -112,6 +116,8 @@ public abstract class LocationPollerService extends Service implements
         }
 
     }
+
+    protected abstract boolean checkPreconditions();
 
     private void notifyLocation(Location location) {
         Bundle extras = new Bundle();
