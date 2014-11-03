@@ -11,15 +11,15 @@ import java.util.List;
 /**
  * Created by francesco on 28.10.2014.
  */
-public class MapsMarkersDelegatesManager {
+public class MapsMarkersManager {
 
-    public final static String TAG = "MapsMarkersDelegatesManager";
+    public final static String TAG = "MapsMarkersManager";
 
     List<AbstractMarkerDelegate> delegates = new ArrayList();
 
     GoogleMap mMap;
 
-    public MapsMarkersDelegatesManager(GoogleMap map) {
+    public MapsMarkersManager(GoogleMap map) {
         this.mMap = map;
     }
 
@@ -44,6 +44,12 @@ public class MapsMarkersDelegatesManager {
             delegate.onCameraChange(cameraPosition);
         }
         drawIfNecessary();
+    }
+
+    public void onResume(){
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onResume();
+        }
     }
 
     public void onPause(){

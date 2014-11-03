@@ -37,7 +37,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
     // Earth’s radius, sphere
     private final static double EARTH_RADIUS = 6378137;
-    private static final long TIMEOUT_MS = 5000;
+    private static final long TIMEOUT_MS = 60000;
 
     private final Handler handler = new Handler();
 
@@ -123,8 +123,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
         // we can rebuild this map because markers are removed on init
         spotMarkersMap = new HashMap<ParkingSpot, Marker>();
-        Log.d(TAG, "Setting task on init");
-        setUpResetTask();
     }
 
     public void setUpResetTask() {
@@ -247,6 +245,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
             if (hideMarkers || !viewBounds.contains(marker.getPosition()))
                 marker.setVisible(false);
         }
+    }
+
+    @Override
+    public void onResume() {
+        setUpResetTask();
     }
 
     @Override

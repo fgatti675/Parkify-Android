@@ -18,6 +18,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -80,7 +81,7 @@ public class MapsActivity extends Activity
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
-    private MapsMarkersDelegatesManager mapsMarkersDelegatesManager;
+    private MapsMarkersManager mapsMarkersManager;
     private SpotsDelegate spotsDelegate;
     private ParkedCarDelegate parkedCarDelegate;
 
@@ -141,6 +142,9 @@ public class MapsActivity extends Activity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setUpUserAccount(toolbar);
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -220,7 +224,7 @@ public class MapsActivity extends Activity
 
         bindBillingService();
 
-        setUserAccount();
+        setUpUserAccount();
 
         setUpMapIfNeeded();
         setUpMapListeners();
@@ -229,9 +233,9 @@ public class MapsActivity extends Activity
 
         spotsDelegate.init();
         parkedCarDelegate.init(this, mMap, carButton);
-        mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
-        mapsMarkersDelegatesManager.add(parkedCarDelegate);
-        mapsMarkersDelegatesManager.add(spotsDelegate);
+        mapsMarkersManager = new MapsMarkersManager(mMap);
+        mapsMarkersManager.add(parkedCarDelegate);
+        mapsMarkersManager.add(spotsDelegate);
 
     }
 
@@ -260,12 +264,13 @@ public class MapsActivity extends Activity
 
         googleApiClient.connect();
 
-        mapsMarkersDelegatesManager.drawIfNecessary();
+        mapsMarkersManager.onResume();
+        mapsMarkersManager.drawIfNecessary();
 
 
     }
 
-    private void setUserAccount() {
+    private void setUpUserAccount() {
         accountName = prefs.getString(PREF_USER_EMAIL, null);
         if (accountName == null) {
             try {
@@ -338,7 +343,7 @@ public class MapsActivity extends Activity
                 requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
                 && resultCode == RESULT_OK) {
             // Receiving a result that follows a GoogleAuthException, try auth again
-            setUserAccount();
+            setUpUserAccount();
         }
 
 
@@ -435,7 +440,7 @@ public class MapsActivity extends Activity
     @Override
     protected void onPause() {
         super.onPause();
-        mapsMarkersDelegatesManager.onPause();
+        mapsMarkersManager.onPause();
         if (googleApiClient != null) {
             googleApiClient.disconnect();
         }
@@ -648,7 +653,7 @@ public class MapsActivity extends Activity
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-        mapsMarkersDelegatesManager.onCameraChange(cameraPosition);
+        mapsMarkersManager.onCameraChange(cameraPosition);
 
 
     }

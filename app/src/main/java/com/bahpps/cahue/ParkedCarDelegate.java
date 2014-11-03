@@ -363,7 +363,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
      */
     protected boolean zoomToSeeBoth() {
 
-        Log.d(TAG, "zoomToSeeBoth");
+        Log.v(TAG, "zoomToSeeBoth");
 
         LatLng carPosition = getCarLatLng();
         LatLng userPosition = getUserLatLng();

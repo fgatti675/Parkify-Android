@@ -7,16 +7,16 @@ import com.google.android.gms.maps.model.CameraPosition;
  */
 public abstract class AbstractMarkerDelegate {
 
-    private MapsMarkersDelegatesManager delegatesManager;
+    private MapsMarkersManager delegatesManager;
     private boolean needsRedraw = true;
 
     public abstract void doDraw();
 
-    public MapsMarkersDelegatesManager getDelegatesManager() {
+    public MapsMarkersManager getDelegatesManager() {
         return delegatesManager;
     }
 
-    public void setDelegatesManager(MapsMarkersDelegatesManager delegatesManager) {
+    public void setDelegatesManager(MapsMarkersManager delegatesManager) {
         this.delegatesManager = delegatesManager;
     }
 
@@ -30,6 +30,10 @@ public abstract class AbstractMarkerDelegate {
 
     protected void markAsDirty() {
         setNeedsRedraw(true);
+    }
+
+    public void onResume() {
+
     }
 
     /**
