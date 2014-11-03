@@ -17,19 +17,28 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Francesco on 21/10/2014.
  */
 public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable {
 
+    private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+
     // Earth’s radius, sphere
     private final static double EARTH_RADIUS = 6378137;
+    private static final long TIMEOUT_MS = 5000;
 
     private final Handler handler = new Handler();
 
@@ -45,6 +54,12 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
     private List<LatLngBounds> queriedBounds = new ArrayList<LatLngBounds>();
     private LatLngBounds viewBounds;
     private LatLngBounds extendedViewBounds;
+
+    private Date lastResetTaskRequestTime;
+    private ScheduledFuture scheduledResetTask;
+
+    // in the next fetching of spots, clear the previous state
+    private boolean shouldBeReset = false;
 
     /**
      * If markers shouldn't be displayed (like zoom is too far)
@@ -68,11 +83,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
     public SpotsDelegate() {
         spots = new HashSet<ParkingSpot>();
-    }
-
-    public void init(GoogleMap map) {
-        this.mMap = map;
-        spotMarkersMap = new HashMap<ParkingSpot, Marker>();
+        lastResetTaskRequestTime = new Date();
     }
 
     public SpotsDelegate(Parcel parcel) {
@@ -82,6 +93,70 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         LatLngBounds[] boundsArray = (LatLngBounds[]) parcel.readParcelableArray(classLoader);
         queriedBounds = Arrays.asList(boundsArray);
         viewBounds = parcel.readParcelable(classLoader);
+        shouldBeReset = parcel.readByte() != 0;
+        lastResetTaskRequestTime = (Date) parcel.readSerializable();
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
+        parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
+        LatLngBounds[] boundsArray = new LatLngBounds[queriedBounds.size()];
+        parcel.writeParcelableArray(queriedBounds.toArray(boundsArray), 0);
+        parcel.writeParcelable(viewBounds, 0);
+        parcel.writeByte((byte) (shouldBeReset ? 1 : 0));
+        parcel.writeSerializable(lastResetTaskRequestTime);
+    }
+
+    public void setMap(GoogleMap map) {
+        this.mMap = map;
+    }
+
+    public void init() {
+        if (mMap == null)
+            throw new IllegalStateException("Please set a GoogleMap instance before calling the method init()");
+
+        spotMarkersMap = new HashMap<ParkingSpot, Marker>();
+        if (scheduledResetTask == null
+                || scheduledResetTask.isDone()
+                || System.currentTimeMillis() - lastResetTaskRequestTime.getTime() > TIMEOUT_MS) {
+            reset();
+            createResetTask();
+        }
+    }
+
+    public void createResetTask() {
+        Log.d(TAG, "Creating new reset task");
+        lastResetTaskRequestTime = new Date();
+
+        scheduledResetTask = scheduledExecutorService.schedule(
+                new Callable() {
+                    public Object call() throws Exception {
+                        shouldBeReset = true;
+                        createResetTask();
+                        return "Called!";
+                    }
+                },
+                TIMEOUT_MS,
+                TimeUnit.MILLISECONDS);
+
+    }
+
+    private void reset() {
+        Log.d(TAG, "spots reset");
+        queriedBounds.clear();
+        spots.clear();
+        spotMarkersMap.clear();
+    }
+
+    private boolean repeatLastQuery() {
+        return applyBounds(viewBounds, extendedViewBounds);
     }
 
 
@@ -101,8 +176,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
          * Check if this query is already contained in another one
          */
         for (LatLngBounds latLngBounds : queriedBounds) {
-            if (latLngBounds.contains(viewBounds.northeast)
-                    && latLngBounds.contains(viewBounds.southwest)) {
+            if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
                 Log.d(TAG, "NO need to query again");
                 return false;
             }
@@ -119,6 +193,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         service = new TestParkingSpotsService(extendedViewBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
+                if (shouldBeReset) {
+                    reset();
+                    repeatLastQuery();
+                    shouldBeReset = false;
+                }
                 spots.addAll(parkingSpots);
                 doDraw();
             }
@@ -143,18 +222,21 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
             LatLng spotPosition = parkingSpot.getPosition();
 
             Marker marker = spotMarkersMap.get(parkingSpot);
+            boolean fadeIn = false; // the marker will fade in when appearing for the first time
 
             if (marker == null) {
                 marker = mMap.addMarker(new MarkerOptions().position(spotPosition));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
+                fadeIn = true;
             }
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
-                makeMarkerVisible(marker);
+                makeMarkerVisible(marker, fadeIn);
             }
         }
     }
+
 
     private void clear() {
         for (Marker marker : spotMarkersMap.values()) {
@@ -163,24 +245,33 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         }
     }
 
-    private void makeMarkerVisible(final Marker marker) {
+    @Override
+    public void onPause() {
+        Log.d(TAG, "scheduledResetTask canceled");
+        scheduledResetTask.cancel(true);
+    }
 
-        marker.setAlpha(0);
+    private void makeMarkerVisible(final Marker marker, boolean fadeIn) {
+
         marker.setVisible(true);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                float alpha = marker.getAlpha() + 0.05F;
-                if (alpha < 1) {
-                    // Post again 10ms later.
-                    marker.setAlpha(alpha);
-                    handler.postDelayed(this, 10);
-                } else {
-                    marker.setAlpha(1);
-                    // animation ended
+
+        if (fadeIn) {
+            marker.setAlpha(0);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    float alpha = marker.getAlpha() + 0.05F;
+                    if (alpha < 1) {
+                        // Post again 12ms later.
+                        marker.setAlpha(alpha);
+                        handler.postDelayed(this, 12);
+                    } else {
+                        marker.setAlpha(1);
+                        // animation ended
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
 
@@ -216,20 +307,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
-        parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
-        LatLngBounds[] boundsArray = new LatLngBounds[queriedBounds.size()];
-        parcel.writeParcelableArray(queriedBounds.toArray(boundsArray), 0);
-        parcel.writeParcelable(viewBounds, 0);
-    }
 
     private void hideMarkers() {
         hideMarkers = true;

@@ -50,7 +50,6 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
 import org.json.JSONException;
@@ -226,7 +225,9 @@ public class MapsActivity extends Activity
         setUpMapIfNeeded();
         setUpMapListeners();
 
-        spotsDelegate.init(mMap);
+        spotsDelegate.setMap(mMap);
+
+        spotsDelegate.init();
         parkedCarDelegate.init(this, mMap, carButton);
         mapsMarkersDelegatesManager = new MapsMarkersDelegatesManager(mMap);
         mapsMarkersDelegatesManager.add(parkedCarDelegate);
@@ -434,6 +435,7 @@ public class MapsActivity extends Activity
     @Override
     protected void onPause() {
         super.onPause();
+        mapsMarkersDelegatesManager.onPause();
         if (googleApiClient != null) {
             googleApiClient.disconnect();
         }

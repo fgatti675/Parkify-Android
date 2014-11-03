@@ -33,6 +33,13 @@ public abstract class AbstractMarkerDelegate {
     }
 
     /**
+     * Should be called on the onPause cycle.
+     */
+    public void onPause(){
+
+    }
+
+    /**
      * Indicate this delegate that the camera of the map has changed.
      * This method need to implement the logic to load any new data if necessary (asynchronously).
      * If any changes are done, the method {@link #markAsDirty()} needs to be called

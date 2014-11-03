@@ -147,7 +147,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         if (directionPoints.isEmpty())
             fetchDirections(false);
 
-        doDraw();
     }
 
     public void doDraw() {

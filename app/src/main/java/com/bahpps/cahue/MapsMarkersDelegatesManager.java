@@ -45,4 +45,10 @@ public class MapsMarkersDelegatesManager {
         }
         drawIfNecessary();
     }
+
+    public void onPause(){
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onPause();
+        }
+    }
 }
