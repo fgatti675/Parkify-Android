@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -122,34 +121,39 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         if (mMap == null)
             throw new IllegalStateException("Please set a GoogleMap instance before calling the method init()");
 
+        // we can rebuild this map because markers are removed on init
         spotMarkersMap = new HashMap<ParkingSpot, Marker>();
-        if (scheduledResetTask == null
-                || scheduledResetTask.isDone()
-                || System.currentTimeMillis() - lastResetTaskRequestTime.getTime() > TIMEOUT_MS) {
-            reset();
-            createResetTask();
-        }
+        Log.d(TAG, "Setting task on init");
+        setUpResetTask();
     }
 
-    public void createResetTask() {
-        Log.d(TAG, "Creating new reset task");
-        lastResetTaskRequestTime = new Date();
+    public void setUpResetTask() {
 
-        scheduledResetTask = scheduledExecutorService.schedule(
-                new Callable() {
-                    public Object call() throws Exception {
+        Log.d(TAG, "Setting up repetitive reset task");
+
+        long timeFromLastTimeout = System.currentTimeMillis() - lastResetTaskRequestTime.getTime();
+        long nextTimeOut = TIMEOUT_MS - timeFromLastTimeout;
+        if (nextTimeOut < 0) nextTimeOut = 0;
+
+        Log.d(TAG, "Next time out (ms): " + nextTimeOut);
+
+        scheduledResetTask = scheduledExecutorService.scheduleAtFixedRate(
+                new Runnable() {
+                    public void run() {
+                        Log.d(TAG, "scheduledResetTask run");
+                        lastResetTaskRequestTime = new Date();
                         shouldBeReset = true;
-                        createResetTask();
-                        return "Called!";
+                        repeatLastQuery();
                     }
                 },
+                TIMEOUT_MS,
                 TIMEOUT_MS,
                 TimeUnit.MILLISECONDS);
 
     }
 
     private void reset() {
-        Log.d(TAG, "spots reset");
+        Log.d(TAG, "Spots reset");
         queriedBounds.clear();
         spots.clear();
         spotMarkersMap.clear();
@@ -175,12 +179,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         /**
          * Check if this query is already contained in another one
          */
-        for (LatLngBounds latLngBounds : queriedBounds) {
-            if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
-                Log.d(TAG, "NO need to query again");
-                return false;
+        if (!shouldBeReset)
+            for (LatLngBounds latLngBounds : queriedBounds) {
+                if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
+                    Log.d(TAG, "NO need to query again");
+                    return false;
+                }
             }
-        }
 
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
@@ -195,7 +200,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 if (shouldBeReset) {
                     reset();
-                    repeatLastQuery();
                     shouldBeReset = false;
                 }
                 spots.addAll(parkingSpots);
