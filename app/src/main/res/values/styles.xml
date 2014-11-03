@@ -1,13 +1,14 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">        <item name="actionBarIconColor">#fff</item>
-        <item name="actionBarInsetStart">@dimen/keyline_2</item>
-        <!--<item name="homeAsUpIndicator">@drawable/ic_up</item>-->
-        <item name="spinnerBarInsetStart">@dimen/keyline_2_minus_16dp</item>
-        <item name="popupItemBackground">?android:selectableItemBackground</item>
-        <item name="photoItemForeground">?android:selectableItemBackground</item>
-        <item name="photoItemForegroundBorderless">?android:selectableItemBackground</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <!--<item name="actionBarIconColor">#fff</item>-->
+        <!--<item name="actionBarInsetStart">@dimen/keyline_2</item>-->
+        <!--&lt;!&ndash;<item name="homeAsUpIndicator">@drawable/ic_up</item>&ndash;&gt;-->
+        <!--<item name="spinnerBarInsetStart">@dimen/keyline_2_minus_16dp</item>-->
+        <!--<item name="popupItemBackground">?android:selectableItemBackground</item>-->
+        <!--<item name="photoItemForeground">?android:selectableItemBackground</item>-->
+        <!--<item name="photoItemForegroundBorderless">?android:selectableItemBackground</item>-->
 
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
