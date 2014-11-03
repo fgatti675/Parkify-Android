@@ -40,8 +40,8 @@
             android:label="@string/select_device"
             android:parentActivityName=".MapsActivity" />
 
-        <service android:name=".util.ParkedCarLocationReceiver" />
-        <service android:name=".util.CarMovedPositionReceiver" />
+        <service android:name=".locationServices.ParkedCarService" />
+        <service android:name=".locationServices.CarMovedService" />
 
         <receiver android:name=".util.BluetoothDetector" >
             <intent-filter>
