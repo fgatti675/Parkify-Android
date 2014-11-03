@@ -15,12 +15,7 @@
   -->
 
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:iosched="http://schemas.android.com/apk/res-auto"
-    style="@style/HeaderBar"
-    iosched:theme="@style/ActionBarThemeOverlay"
-    iosched:popupTheme="@style/ActionBarPopupThemeOverlay"
+    xmlns:cahue="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar_actionbar"
-    iosched:titleTextAppearance="@style/ActionBar.TitleText"
-    iosched:contentInsetStart="?actionBarInsetStart"
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize" />
