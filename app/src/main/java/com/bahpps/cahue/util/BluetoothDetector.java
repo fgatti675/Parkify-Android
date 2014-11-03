@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.bahpps.cahue.locationServices.CarMovedService;
+import com.bahpps.cahue.locationServices.ParkedCarService;
+
 import java.util.GregorianCalendar;
 
 public class BluetoothDetector extends BroadcastReceiver {
@@ -59,7 +62,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         // we create an intent to start the location poller service, as declared in manifest
         Intent i = new Intent();
-        i.setClass(context,CarMovedPositionReceiver.class);
+        i.setClass(context,CarMovedService.class);
         context.startService(i);
 
 
@@ -77,7 +80,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         // we create an intent to start the location poller service, as declared in manifest
         Intent i = new Intent();
-        i.setClass(context,ParkedCarLocationReceiver.class);
+        i.setClass(context,ParkedCarService.class);
         context.startService(i);
 
     }

@@ -1,4 +1,4 @@
-package com.bahpps.cahue.util;
+package com.bahpps.cahue.locationServices;
 
 import android.app.Service;
 import android.content.Context;
@@ -29,12 +29,12 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Timeout after we consider the location may have changed too much
      */
-    private final static int TIMEOUT_MS = 20000;
+    private final static int TIMEOUT_MS = 22500;
 
     /**
      * Minimum desired accuracy
      */
-    private final static int ACCURACY_THRESHOLD_M = 8;
+    private final static int ACCURACY_THRESHOLD_M = 10;
 
     private final static String TAG = "LocationPoller";
 
@@ -56,13 +56,17 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        init();
+        start();
         return super.onStartCommand(intent, flags, startId);
     }
 
-    protected void init() {
-        startTime = new Date();
-        mGoogleApiClient.connect();
+    protected void start() {
+        if (checkPreconditions()) {
+            startTime = new Date();
+            mGoogleApiClient.connect();
+        } else{
+            stopSelf();
+        }
     }
 
     @Override
@@ -77,7 +81,7 @@ public abstract class LocationPollerService extends Service implements
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(1000);
+        mLocationRequest.setInterval(1500);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
@@ -112,6 +116,8 @@ public abstract class LocationPollerService extends Service implements
         }
 
     }
+
+    protected abstract boolean checkPreconditions();
 
     private void notifyLocation(Location location) {
         Bundle extras = new Bundle();

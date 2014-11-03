@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
-import android.view.View;
 
-import com.bahpps.cahue.util.LocationPollerService;
+import com.bahpps.cahue.locationServices.LocationPollerService;
 
 /**
 * Created by Francesco on 17/10/2014.
@@ -43,8 +41,13 @@ public class DebugService extends LocationPollerService {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d("debug", "onBind");
-        init();
+        start();
         return mBinder;
+    }
+
+    @Override
+    protected boolean checkPreconditions() {
+        return true;
     }
 
     public interface ServiceListener{
