@@ -168,6 +168,9 @@ public class GMapV2Direction {
     public ArrayList<LatLng> getDirection(Document doc) {
         NodeList nl1, nl2, nl3;
         ArrayList<LatLng> listGeopoints = new ArrayList<LatLng>();
+        if(doc == null)
+            return listGeopoints;
+
         nl1 = doc.getElementsByTagName("step");
         if (nl1.getLength() > 0) {
             for (int i = 0; i < nl1.getLength(); i++) {
