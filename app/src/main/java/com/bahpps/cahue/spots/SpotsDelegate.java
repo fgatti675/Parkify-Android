@@ -1,14 +1,20 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.spots;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import com.bahpps.cahue.debug.TestParkingSpotsService;
-import com.bahpps.cahue.spots.ParkingSpot;
-import com.bahpps.cahue.spots.ParkingSpotsService;
+import com.bahpps.cahue.AbstractMarkerDelegate;
+import com.bahpps.cahue.R;
+import com.bahpps.cahue.debug.TestParkingSpotsQuery;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -65,7 +71,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
      */
     private boolean hideMarkers = false;
 
-    private ParkingSpotsService service;
+    private ParkingSpotsQuery service;
 
     public static final Parcelable.Creator<SpotsDelegate> CREATOR =
             new Parcelable.Creator<SpotsDelegate>() {
@@ -79,6 +85,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
                     return new SpotsDelegate[size];
                 }
             };
+    private Context mContext;
 
     public SpotsDelegate() {
         spots = new HashSet<ParkingSpot>();
@@ -114,12 +121,17 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
     }
 
     public void setMap(GoogleMap map) {
-        this.mMap = map;
+
     }
 
-    public void init() {
+    public void init(Context context, GoogleMap map) {
+
+        this.mContext = context;
+        this.mMap = map;
+
         if (mMap == null)
             throw new IllegalStateException("Please set a GoogleMap instance before calling the method init()");
+
 
         // we can rebuild this map because markers are removed on init
         spotMarkersMap = new HashMap<ParkingSpot, Marker>();
@@ -193,7 +205,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
          */
 //        if (service != null) service.cancel(true);
 
-        service = new TestParkingSpotsService(extendedViewBounds, new ParkingSpotsService.ParkingSpotsUpdateListener() {
+        service = new TestParkingSpotsQuery(extendedViewBounds, new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 if (shouldBeReset) {
@@ -212,6 +224,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         return true;
     }
 
+    {
+
+    }
+
     public void doDraw() {
 
         // clear first
@@ -227,7 +243,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
             boolean fadeIn = false; // the marker will fade in when appearing for the first time
 
             if (marker == null) {
-                marker = mMap.addMarker(new MarkerOptions().position(spotPosition));
+                marker = mMap.addMarker(new MarkerOptions().icon(getMarkerBitmap()).position(spotPosition));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 fadeIn = true;
@@ -237,6 +253,22 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
                 makeMarkerVisible(marker, fadeIn);
             }
         }
+    }
+
+    BitmapDescriptor descriptor;
+
+    private BitmapDescriptor getMarkerBitmap() {
+        if (descriptor == null) {
+            int px = mContext.getResources().getDimensionPixelSize(R.dimen.marker_diameter);
+
+            Bitmap mDotMarkerBitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(mDotMarkerBitmap);
+            Drawable shape = mContext.getResources().getDrawable(R.drawable.marker);
+            shape.setBounds(0, 0, mDotMarkerBitmap.getWidth(), mDotMarkerBitmap.getHeight());
+            shape.draw(canvas);
+            descriptor = BitmapDescriptorFactory.fromBitmap(mDotMarkerBitmap);
+        }
+        return descriptor;
     }
 
 

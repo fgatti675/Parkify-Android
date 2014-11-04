@@ -4,4 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="keyline_2">72dp</dimen>
     <dimen name="keyline_2_minus_16dp">56dp</dimen>
+
+    <dimen name="marker_diameter">10dp</dimen>
 </resources>

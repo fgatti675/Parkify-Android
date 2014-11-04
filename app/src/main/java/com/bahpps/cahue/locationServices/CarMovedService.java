@@ -5,7 +5,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.parkedCar.CarLocationManager;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

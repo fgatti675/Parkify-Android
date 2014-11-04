@@ -3,9 +3,9 @@ package com.bahpps.cahue;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
-import com.bahpps.cahue.debug.TestParkingSpotsService;
+import com.bahpps.cahue.debug.TestParkingSpotsQuery;
 import com.bahpps.cahue.spots.ParkingSpot;
-import com.bahpps.cahue.spots.ParkingSpotsService;
+import com.bahpps.cahue.spots.ParkingSpotsQuery;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -53,8 +53,8 @@ public class SpotsQueryTest extends ActivityTestCase {
 
         final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
-        final ParkingSpotsService parkingSpotsService = new TestParkingSpotsService(latLngBounds,
-                new ParkingSpotsService.ParkingSpotsUpdateListener() {
+        final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(latLngBounds,
+                new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
                     @Override
                     public void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                         result.addAll(parkingSpots);
@@ -67,7 +67,7 @@ public class SpotsQueryTest extends ActivityTestCase {
 
             @Override
             public void run() {
-                parkingSpotsService.execute();
+                parkingSpotsQuery.execute();
             }
         });
 

@@ -20,8 +20,6 @@ import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -29,8 +27,10 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
+import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.BluetoothDetector;
-import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -66,7 +66,8 @@ public class MapsActivity extends ActionBarActivity
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener,
+        Toolbar.OnMenuItemClickListener {
 
     protected static final String TAG = "Maps";
 
@@ -144,7 +145,15 @@ public class MapsActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+
+        toolbar.setNavigationIcon(R.drawable.ic_logo);
+        toolbar.setTitle(R.string.app_name);
+//        toolbar.setSubtitle("Subtitle");
+
+        toolbar.inflateMenu(R.menu.main_menu);
+        toolbar.setOnMenuItemClickListener(this);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.theme_primary));
+        toolbar.setTitleTextColor(getResources().getColor(R.color.primary_text_default_material_dark));
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -229,9 +238,7 @@ public class MapsActivity extends ActionBarActivity
         setUpMapIfNeeded();
         setUpMapListeners();
 
-        spotsDelegate.setMap(mMap);
-
-        spotsDelegate.init();
+        spotsDelegate.init(this, mMap);
         parkedCarDelegate.init(this, mMap, carButton);
         mapsMarkersManager = new MapsMarkersManager(mMap);
         mapsMarkersManager.add(parkedCarDelegate);
@@ -509,39 +516,6 @@ public class MapsActivity extends ActionBarActivity
         mMap.setOnCameraChangeListener(this);
     }
 
-    /**
-     * Show menu method
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // inflate from xml
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.action_link_device:
-                startDeviceSelection();
-                return true;
-            case R.id.action_display_help:
-                showHelpDialog();
-                return true;
-            case R.id.action_remove_car:
-                removeCar();
-                return true;
-            case R.id.action_donate:
-                openDonationDialog();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
     private void openDonationDialog() {
         DonateDialog dialog = new DonateDialog();
@@ -652,10 +626,7 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-
         mapsMarkersManager.onCameraChange(cameraPosition);
-
-
     }
 
     @Override
@@ -672,5 +643,27 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+
+        // Handle presses on the action bar items
+        switch (menuItem.getItemId()) {
+            case R.id.action_link_device:
+                startDeviceSelection();
+                return true;
+            case R.id.action_display_help:
+                showHelpDialog();
+                return true;
+            case R.id.action_remove_car:
+                removeCar();
+                return true;
+            case R.id.action_donate:
+                openDonationDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(menuItem);
+        }
     }
 }

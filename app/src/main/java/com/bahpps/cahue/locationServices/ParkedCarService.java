@@ -4,7 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
-import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.parkedCar.CarLocationManager;
 
 /**
  * This class is in charge of receiving location updates, after and store it as the cars position.

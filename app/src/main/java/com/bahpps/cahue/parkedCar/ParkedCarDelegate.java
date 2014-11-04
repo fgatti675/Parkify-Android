@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.parkedCar;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -10,7 +10,8 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.bahpps.cahue.util.CarLocationManager;
+import com.bahpps.cahue.AbstractMarkerDelegate;
+import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.GMapV2Direction;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.maps.CameraUpdateFactory;

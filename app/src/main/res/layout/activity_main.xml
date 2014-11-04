@@ -17,8 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/map"
-        class="com.google.android.gms.maps.MapFragment"
-        tools:layout="@layout/abc_action_mode_bar" />
+        android:layout_below="@+id/toolbar_actionbar"
+        class="com.google.android.gms.maps.MapFragment" />
 
     <Button
         android:id="@+id/linkButton"

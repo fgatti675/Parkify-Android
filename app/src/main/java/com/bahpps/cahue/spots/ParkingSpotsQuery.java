@@ -27,7 +27,7 @@ import java.util.TimeZone;
  * Service in charge of querying the Fusion Table including the parking spots.
  * The result is accessed via a listener
  */
-public class ParkingSpotsService extends AsyncTask<Void, Void, Set<ParkingSpot>> {
+public class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<ParkingSpot>> {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -35,11 +35,10 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, Set<ParkingSpot>>
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    private static final String TAG = "ParkingSpotsService";
+    private static final String TAG = "ParkingSpotsQuery";
     private static final String BROWSER_KEY = "AIzaSyB5ukn97hu5159E3cBuUvLvXKV7IsgQG38"; // Using a browser key instead of an Android key for some stupid reason
 
     private static final String APPLICATION_NAME = "Cahue";
-    private static final String TABLE_NAME = "Spots";
     private static final String TABLE_ID = "1KdObSc-BOSKNnH9zyei7WG--X1w4AyomUj-pB7Ii";
 
     private Fusiontables fusiontables;
@@ -52,7 +51,7 @@ public class ParkingSpotsService extends AsyncTask<Void, Void, Set<ParkingSpot>>
      * @param latLngBounds
      * @param listener
      */
-    public ParkingSpotsService(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
+    public ParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         this.latLngBounds = latLngBounds;
         this.listener = listener;
 
