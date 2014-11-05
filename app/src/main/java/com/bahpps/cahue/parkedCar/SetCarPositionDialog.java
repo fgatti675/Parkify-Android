@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.parkedCar;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.bahpps.cahue.R;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 
 

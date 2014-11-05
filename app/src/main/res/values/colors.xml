@@ -33,6 +33,12 @@
 
     <color name="theme_accent_2">#ff8f75</color>
 
+    <color name="marker_red">#ffff0010</color>
+    <color name="marker_yellow">#FFF919</color>
+    <color name="marker_green">#00FF3F</color>
+
+    <color name="translucent_actionbar_background">#b80b2d38</color>
+
     <!--<color name="all_track_color">#ff222222</color>-->
     <!--<color name="home_pane_header">#99000000</color>-->
 

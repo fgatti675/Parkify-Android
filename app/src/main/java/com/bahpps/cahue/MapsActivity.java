@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
+import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
 import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
@@ -152,17 +153,17 @@ public class MapsActivity extends ActionBarActivity
 
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
-        toolbar.setBackgroundColor(getResources().getColor(R.color.theme_primary));
-        toolbar.setTitleTextColor(getResources().getColor(R.color.primary_text_default_material_dark));
+//        toolbar.setBackgroundColor(getResources().getColor(R.color.theme_primary));
+//        toolbar.setTitleTextColor(getResources().getColor(R.color.primary_text_default_material_dark));
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
-            Util.noBluetooth(this);
+            noBluetooth(this);
         } else if (!mBluetoothAdapter.isEnabled()) {
-            Util.noBluetooth(this);
+            noBluetooth(this);
         }
 
 
@@ -533,9 +534,9 @@ public class MapsActivity extends ActionBarActivity
     protected void startDeviceSelection() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
-            Util.noBluetooth(this);
+            noBluetooth(this);
         } else if (!mBluetoothAdapter.isEnabled()) {
-            Util.noBluetooth(this);
+            noBluetooth(this);
         } else {
             startActivityForResult(new Intent(MapsActivity.this, DeviceListActivity.class), 0);
         }
@@ -665,5 +666,12 @@ public class MapsActivity extends ActionBarActivity
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
+    }
+
+    /**
+     * Shows a toast in case no BT is detected
+     */
+    public static void noBluetooth(Context context) {
+        Util.createUpperToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_LONG);
     }
 }

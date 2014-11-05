@@ -3,7 +3,8 @@ package com.bahpps.cahue.spots;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -12,6 +13,7 @@ import android.util.Log;
 import com.bahpps.cahue.AbstractMarkerDelegate;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.debug.TestParkingSpotsQuery;
+import com.bahpps.cahue.util.MarkerFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -224,9 +226,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         return true;
     }
 
-    {
-
-    }
 
     public void doDraw() {
 
@@ -243,7 +242,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
             boolean fadeIn = false; // the marker will fade in when appearing for the first time
 
             if (marker == null) {
-                marker = mMap.addMarker(new MarkerOptions().icon(getMarkerBitmap()).position(spotPosition));
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext);
+                marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 fadeIn = true;
@@ -253,22 +253,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
                 makeMarkerVisible(marker, fadeIn);
             }
         }
-    }
-
-    BitmapDescriptor descriptor;
-
-    private BitmapDescriptor getMarkerBitmap() {
-        if (descriptor == null) {
-            int px = mContext.getResources().getDimensionPixelSize(R.dimen.marker_diameter);
-
-            Bitmap mDotMarkerBitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(mDotMarkerBitmap);
-            Drawable shape = mContext.getResources().getDrawable(R.drawable.marker);
-            shape.setBounds(0, 0, mDotMarkerBitmap.getWidth(), mDotMarkerBitmap.getHeight());
-            shape.draw(canvas);
-            descriptor = BitmapDescriptorFactory.fromBitmap(mDotMarkerBitmap);
-        }
-        return descriptor;
     }
 
 
