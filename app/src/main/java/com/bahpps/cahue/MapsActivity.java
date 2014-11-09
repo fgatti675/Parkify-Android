@@ -2,6 +2,8 @@ package com.bahpps.cahue;
 
 import android.accounts.AccountManager;
 import android.app.Dialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -23,29 +25,31 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
 import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.BluetoothDetector;
-import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -108,6 +112,11 @@ public class MapsActivity extends ActionBarActivity
 
     private ImageButton carButton;
 
+
+    private FrameLayout detailsContainer;
+    private MarkerDetailsFragment markerDetailsFragment;
+    private boolean detailsDisplayed = false;
+
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -153,8 +162,6 @@ public class MapsActivity extends ActionBarActivity
 
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
-//        toolbar.setBackgroundColor(getResources().getColor(R.color.theme_primary));
-//        toolbar.setTitleTextColor(getResources().getColor(R.color.primary_text_default_material_dark));
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -185,6 +192,21 @@ public class MapsActivity extends ActionBarActivity
             }
         });
 
+        detailsContainer = (FrameLayout) findViewById(R.id.marker_details_container);
+        Button detailsButton = (Button) findViewById(R.id.details_button);
+        detailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                markerDetailsFragment = new MarkerDetailsFragment();
+
+                FragmentManager fragMan = getFragmentManager();
+                FragmentTransaction fragTransaction = fragMan.beginTransaction();
+                fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, "DETAILS_FRAGMENT");
+                fragTransaction.commit();
+                detailsDisplayed = true;
+            }
+        });
+
         /**
          * Try to reuse map
          */
@@ -211,6 +233,7 @@ public class MapsActivity extends ActionBarActivity
             parkedCarDelegate.markAsDirty();
 
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
+            detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
         }
 
         // button for linking a BT device
@@ -247,6 +270,18 @@ public class MapsActivity extends ActionBarActivity
 
     }
 
+    @Override
+    public void onBackPressed() {
+        if (detailsDisplayed) {
+            FragmentManager fragMan = getFragmentManager();
+            FragmentTransaction fragTransaction = fragMan.beginTransaction();
+            fragTransaction.remove(markerDetailsFragment);
+            fragTransaction.commit();
+            detailsDisplayed = false;
+        } else{
+            super.onBackPressed();
+        }
+    }
 
 
     @Override
@@ -392,6 +427,7 @@ public class MapsActivity extends ActionBarActivity
         savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
         savedInstanceState.putParcelable("parkedCarDelegate", parkedCarDelegate);
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
+        savedInstanceState.putBoolean("detailsDisplayed", detailsDisplayed);
 
     }
 
