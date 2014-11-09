@@ -27,7 +27,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -78,6 +77,8 @@ public class MapsActivity extends ActionBarActivity
 
     private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
+    static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
+
     static final int REQUEST_CODE_PICK_ACCOUNT = 0;
     static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
     static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 2;
@@ -111,7 +112,6 @@ public class MapsActivity extends ActionBarActivity
     private Button linkButton;
 
     private ImageButton carButton;
-
 
     private FrameLayout detailsContainer;
     private MarkerDetailsFragment markerDetailsFragment;
@@ -198,14 +198,16 @@ public class MapsActivity extends ActionBarActivity
             @Override
             public void onClick(View view) {
                 markerDetailsFragment = new MarkerDetailsFragment();
+                markerDetailsFragment.setRetainInstance(true);
 
-                FragmentManager fragMan = getFragmentManager();
-                FragmentTransaction fragTransaction = fragMan.beginTransaction();
-                fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, "DETAILS_FRAGMENT");
+                FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
+                fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
                 fragTransaction.commit();
                 detailsDisplayed = true;
             }
         });
+
+        markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
         /**
          * Try to reuse map
