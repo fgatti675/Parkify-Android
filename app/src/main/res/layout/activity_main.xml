@@ -7,73 +7,46 @@
     android:orientation="vertical"
     tools:context=".MapsActivity">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/sliding_layout"
+    <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom"
-        sothree:panelHeight="68dp"
-        sothree:shadowHeight="4dp">
+        android:id="@+id/map"
+        class="com.google.android.gms.maps.MapFragment" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/sliding_layout"
-            android:layout_gravity="center_horizontal">
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DETAILS"
+        android:id="@+id/details_button"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/carButton"
+        android:layout_alignEnd="@+id/carButton"
+        android:layout_marginTop="77dp" />
 
-            <fragment
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/map"
-                class="com.google.android.gms.maps.MapFragment" />
+    <ImageButton
+        android:id="@+id/carButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/marker_details_container"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/buttons_margin"
+        android:layout_marginRight="@dimen/buttons_margin"
+        android:padding="@dimen/default_padding"
+        android:adjustViewBounds="true"
+        android:background="@drawable/plain_button"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_icon_car" />
 
-            <Button
-                android:id="@+id/linkButton"
-                android:layout_width="fill_parent"
-                android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignTop="@+id/carButton"
-                android:layout_marginLeft="@dimen/buttons_margin"
-                android:layout_marginRight="@dimen/buttons_margin"
-                android:text="@string/link_device"
-                android:background="@drawable/plain_button"
-                android:layout_toLeftOf="@+id/carButton" />
-
-            <ImageButton
-                android:id="@+id/carButton"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginBottom="@dimen/buttons_margin"
-                android:layout_marginRight="@dimen/buttons_margin"
-                android:padding="@dimen/default_padding"
-                android:adjustViewBounds="true"
-                android:background="@drawable/plain_button"
-                android:scaleType="fitXY"
-                android:src="@drawable/ic_icon_car" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="DETAILS"
-                android:id="@+id/details_button"
-                android:layout_alignParentTop="true"
-                android:layout_alignRight="@+id/carButton"
-                android:layout_alignEnd="@+id/carButton"
-                android:layout_marginTop="77dp" />
-        </RelativeLayout>
-
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/marker_details_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            tools:context="com.bahpps.cahue.MarkerDetailsFragment" />
-
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/marker_details_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        tools:context="com.bahpps.cahue.MarkerDetailsFragment" />
 
     <include layout="@layout/toolbar_actionbar_translucent" />
 

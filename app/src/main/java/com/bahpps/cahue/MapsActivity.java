@@ -59,7 +59,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -112,8 +111,6 @@ public class MapsActivity extends ActionBarActivity
     private BluetoothAdapter mBluetoothAdapter = null;
 
     private SharedPreferences prefs;
-
-    private Button linkButton;
 
     private ImageButton carButton;
 
@@ -189,13 +186,6 @@ public class MapsActivity extends ActionBarActivity
             }
         });
 
-        // button for linking a BT device
-        linkButton = (Button) findViewById(R.id.linkButton);
-        linkButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startDeviceSelection();
-            }
-        });
 
         /**
          * Try to reuse map
@@ -226,40 +216,29 @@ public class MapsActivity extends ActionBarActivity
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
         }
 
-        // button for linking a BT device
-        linkButton = (Button) findViewById(R.id.linkButton);
-        linkButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startDeviceSelection();
-            }
-        });
 
         /**
          * Details
          */
         detailsContainer = (FrameLayout) findViewById(R.id.marker_details_container);
         Button detailsButton = (Button) findViewById(R.id.details_button);
-        markerDetailsFragment = new MarkerDetailsFragment();
-        markerDetailsFragment.setRetainInstance(true);
 
-        final SlidingUpPanelLayout slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
+        if (markerDetailsFragment == null) {
+            markerDetailsFragment = new MarkerDetailsFragment();
+            markerDetailsFragment.setRetainInstance(true);
 
-        FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
-        fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
-        fragTransaction.commit();
+            FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
+            fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
+            fragTransaction.commit();
+        }
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                detailsDisplayed = !detailsDisplayed;
-                if (detailsDisplayed)
-                    slidingUpPanelLayout.hidePanel();
-                else
-                    slidingUpPanelLayout.showPanel();
-
+                showDetails();
             }
         });
 
-        markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
         /**
          * Preferences
@@ -287,14 +266,66 @@ public class MapsActivity extends ActionBarActivity
 
     }
 
+    private void showDetails() {
+        detailsDisplayed = true;
+        TranslateAnimation animation = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 1F,
+                Animation.RELATIVE_TO_SELF, 0);
+        animation.setDuration(1000);
+//        animation.setAnimationListener(new Animation.AnimationListener() {
+//            @Override
+//            public void onAnimationStart(Animation animation) {
+//                detailsContainer.setVisibility(View.VISIBLE);
+//            }
+//
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//            }
+//
+//            @Override
+//            public void onAnimationRepeat(Animation animation) {
+//            }
+//        });
+
+        carButton.startAnimation(animation);
+//        detailsContainer.startAnimation(animation);
+    }
+
+    private void hideDetails() {
+        detailsDisplayed = false;
+        TranslateAnimation animation = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 1F);
+        animation.setDuration(1000);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                detailsContainer.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        detailsContainer.startAnimation(animation);
+    }
+
     @Override
     public void onBackPressed() {
         if (detailsDisplayed) {
-            FragmentManager fragMan = getFragmentManager();
-            FragmentTransaction fragTransaction = fragMan.beginTransaction();
-            fragTransaction.remove(markerDetailsFragment);
-            fragTransaction.commit();
-            detailsDisplayed = false;
+//            FragmentManager fragMan = getFragmentManager();
+//            FragmentTransaction fragTransaction = fragMan.beginTransaction();
+//            fragTransaction.remove(markerDetailsFragment);
+//            fragTransaction.commit();
+            hideDetails();
         } else {
             super.onBackPressed();
         }
@@ -314,13 +345,6 @@ public class MapsActivity extends ActionBarActivity
 
         // bt adress on the linked device
         String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
-
-        // we hide the link button if the app is linked
-        if (!btAddress.equals("")) {
-            linkButton.setVisibility(View.GONE);
-        } else {
-            linkButton.setVisibility(View.VISIBLE);
-        }
 
         googleApiClient.connect();
 
