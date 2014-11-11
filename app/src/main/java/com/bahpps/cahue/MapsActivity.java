@@ -19,11 +19,14 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -56,6 +59,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -155,6 +159,7 @@ public class MapsActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        ViewCompat.setElevation(toolbar, 5);
 
         toolbar.setNavigationIcon(R.drawable.ic_logo);
         toolbar.setTitle(R.string.app_name);
@@ -191,23 +196,6 @@ public class MapsActivity extends ActionBarActivity
                 startDeviceSelection();
             }
         });
-
-        detailsContainer = (FrameLayout) findViewById(R.id.marker_details_container);
-        Button detailsButton = (Button) findViewById(R.id.details_button);
-        detailsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                markerDetailsFragment = new MarkerDetailsFragment();
-                markerDetailsFragment.setRetainInstance(true);
-
-                FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
-                fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
-                fragTransaction.commit();
-                detailsDisplayed = true;
-            }
-        });
-
-        markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
         /**
          * Try to reuse map
@@ -247,6 +235,33 @@ public class MapsActivity extends ActionBarActivity
         });
 
         /**
+         * Details
+         */
+        detailsContainer = (FrameLayout) findViewById(R.id.marker_details_container);
+        Button detailsButton = (Button) findViewById(R.id.details_button);
+        markerDetailsFragment = new MarkerDetailsFragment();
+        markerDetailsFragment.setRetainInstance(true);
+
+        final SlidingUpPanelLayout slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+
+        FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
+        fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
+        fragTransaction.commit();
+        detailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                detailsDisplayed = !detailsDisplayed;
+                if (detailsDisplayed)
+                    slidingUpPanelLayout.hidePanel();
+                else
+                    slidingUpPanelLayout.showPanel();
+
+            }
+        });
+
+        markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
+
+        /**
          * Preferences
          */
         prefs = Util.getSharedPreferences(this);
@@ -280,7 +295,7 @@ public class MapsActivity extends ActionBarActivity
             fragTransaction.remove(markerDetailsFragment);
             fragTransaction.commit();
             detailsDisplayed = false;
-        } else{
+        } else {
             super.onBackPressed();
         }
     }
