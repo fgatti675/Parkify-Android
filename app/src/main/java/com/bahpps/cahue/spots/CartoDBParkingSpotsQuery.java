@@ -2,16 +2,28 @@ package com.bahpps.cahue.spots;
 
 import android.util.Log;
 
-import com.cartodb.CartoDBClientIF;
-import com.cartodb.CartoDBException;
-import com.cartodb.impl.ApiKeyCartoDBClient;
-import com.cartodb.model.CartoDBResponse;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.api.services.fusiontables.Fusiontables;
 import com.google.api.services.fusiontables.model.Sqlresponse;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,35 +41,24 @@ import java.util.TimeZone;
  */
 public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
+
     private static final String TAG = "ParkingSpotsQuery";
     private static final String API_KEY = "3037e96df92be2c06ee3d1d1e15c089157c33419"; // Using a browser key instead of an Android key for some stupid reason
 
-    private static final String ACCOUNT_NAME = "Cahue";
+    private static final String ACCOUNT_NAME = "cahue";
     private static final String TABLE_NAME = "spots";
+    private static final String URL = "http://" + ACCOUNT_NAME + ".cartodb.com/api/v2/sql?api_key=" + API_KEY;
 
-    CartoDBClientIF cartoDBClient;
-
-    /**
-     * Create a new service. {@code #execute()} must be called afterwards
-     *
-     * @param latLngBounds
-     * @param listener
-     */
     public CartoDBParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         super(latLngBounds, listener);
-
-        try {
-            cartoDBClient = new ApiKeyCartoDBClient(ACCOUNT_NAME, API_KEY);
-        } catch (CartoDBException e) {
-            e.printStackTrace();
-        }
     }
+
 
     @Override
     protected Set<ParkingSpot> doInBackground(Void... voids) {
@@ -75,34 +76,69 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
                 latLngBounds.northeast.latitude
         );
 
-        // get rows as a Map
-        CartoDBResponse<Map<String, Object>> res = null;
+        JSONObject json = doQuery(sqlString);
         try {
-            res = cartoDBClient.request("select * from mytable limit 1");
-        } catch (CartoDBException e) {
-            e.printStackTrace();
-        }
-//            System.out.print(res.getRows().get(0).get("cartodb_id"));
+            JSONArray rows = json.getJSONArray("rows");
+            for(int i = 0 ; i < rows.length(); i++){
 
+                JSONObject entry = rows.getJSONObject(i);
 
-        if (res != null) {
-            for (Map<String, Object> row : res.getRows()) {
+                String id = entry.getString("id");
+                Date date = dateFormat.parse(entry.getString("created_at"));
+                double latitude = entry.getDouble("latitude");
+                double longitude = entry.getDouble("longitude");
 
-                System.out.println(row);
-//                    try {
-//                        String[] positionArray = element.get(2).split(", ");
-//                        LatLng position = new LatLng(Double.parseDouble(row.get("")), Double.parseDouble(positionArray[1]));
-//                        Date time = dateFormat.parse(element.get(1));
-//                        ParkingSpot spot = new ParkingSpot(element.get(0), position, time);
-//                        spots.add(spot);
-//                    } catch (ParseException e) {
-//                        e.printStackTrace();
-//                    }
+                ParkingSpot spot = new ParkingSpot(id, new LatLng(latitude, longitude), date);
+                spots.add(spot);
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
 
         return spots;
+    }
+
+    private JSONObject doQuery(String sql) {
+        try {
+
+            Log.i(TAG, "Posting users location");
+            String url = URL + "&q=" + URLEncoder.encode(sql, "ISO-8859-1");
+
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept", "application/json");
+            httpGet.setHeader("Content-type", "application/json");
+
+            Log.i(TAG, "Getting\n" + url);
+
+            HttpResponse response = httpclient.execute(httpGet);
+            StatusLine statusLine = response.getStatusLine();
+
+            Log.i(TAG, "Query result: " + statusLine.getStatusCode());
+            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                String result = EntityUtils.toString(response.getEntity());
+                Log.i(TAG, "Query result: " + result);
+                JSONObject json = new JSONObject(result);
+                return json;
+            } else {
+                //Closes the connection.
+                response.getEntity().getContent().close();
+                throw new IOException(statusLine.getReasonPhrase());
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 
