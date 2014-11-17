@@ -31,7 +31,7 @@ public class FusionParkingSpotsQuery extends ParkingSpotsQuery {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private static final String TAG = "ParkingSpotsQuery";

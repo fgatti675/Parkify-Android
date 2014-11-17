@@ -44,7 +44,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
 
