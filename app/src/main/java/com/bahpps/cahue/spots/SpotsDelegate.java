@@ -1,22 +1,16 @@
 package com.bahpps.cahue.spots;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
-import com.bahpps.cahue.R;
 import com.bahpps.cahue.debug.TestParkingSpotsQuery;
 import com.bahpps.cahue.util.MarkerFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -207,7 +201,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
          */
 //        if (service != null) service.cancel(true);
 
-        service = new TestParkingSpotsQuery(extendedViewBounds, new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
+        service = new CartoDBParkingSpotsQuery(extendedViewBounds, new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 if (shouldBeReset) {

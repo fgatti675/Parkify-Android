@@ -4,6 +4,7 @@ import android.test.ActivityTestCase;
 import android.util.Log;
 
 import com.bahpps.cahue.debug.TestParkingSpotsQuery;
+import com.bahpps.cahue.spots.FusionParkingSpotsQuery;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.ParkingSpotsQuery;
 import com.google.android.gms.maps.model.LatLng;
