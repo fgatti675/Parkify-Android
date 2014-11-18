@@ -45,11 +45,10 @@ public class FusionParkingSpotsQuery extends ParkingSpotsQuery {
     /**
      * Create a new service. {@code #execute()} must be called afterwards
      *
-     * @param latLngBounds
      * @param listener
      */
-    public FusionParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
-        super(latLngBounds, listener);
+    public FusionParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
+        super(listener);
 
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new JacksonFactory();

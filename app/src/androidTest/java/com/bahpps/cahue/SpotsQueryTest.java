@@ -47,14 +47,14 @@ public class SpotsQueryTest extends ActivityTestCase {
         };
 
 
-        LatLngBounds latLngBounds = LatLngBounds.builder() // Munich
+        final LatLngBounds latLngBounds = LatLngBounds.builder() // Munich
                 .include(new LatLng(48.132219, 11.561716))
                 .include(new LatLng(48.123913, 11.553905))
                 .build();
 
         final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
-        final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(latLngBounds,
+        final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
                     @Override
                     public void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
@@ -68,7 +68,7 @@ public class SpotsQueryTest extends ActivityTestCase {
 
             @Override
             public void run() {
-                parkingSpotsQuery.execute();
+                parkingSpotsQuery.retrieveLocationsIn(latLngBounds);
             }
         });
 
