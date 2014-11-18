@@ -3,6 +3,7 @@ package com.bahpps.cahue.spots;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.Set;
@@ -14,10 +15,22 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
     protected LatLngBounds latLngBounds;
     protected ParkingSpotsUpdateListener listener;
+    protected LatLng center;
+    protected int limit;
 
-    public ParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
-        this.latLngBounds = latLngBounds;
+    public ParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
         this.listener = listener;
+    }
+
+    public void retrieveLocationsIn(LatLngBounds latLngBounds){
+        this.latLngBounds = latLngBounds;
+        execute();
+    }
+
+    public void retrieveLocationsCloseTo(LatLng location, int limit) {
+        this.center = location;
+        this.limit = limit;
+        execute();
     }
 
     @Override
@@ -31,7 +44,6 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
         super.onPostExecute(parkingSpots);
         listener.onLocationsUpdate(parkingSpots);
     }
-
 
     /**
      * Components that use this service must implement a listener using this interface to get the

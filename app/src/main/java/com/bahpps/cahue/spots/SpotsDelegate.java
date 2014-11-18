@@ -196,12 +196,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        /**
-         * In case there was a query running, cancel it
-         */
-//        if (service != null) service.cancel(true);
-
-        service = new CartoDBParkingSpotsQuery(extendedViewBounds, new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
+        service = new CartoDBParkingSpotsQuery(new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
                 if (shouldBeReset) {
@@ -213,10 +208,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
             }
         });
 
-
         Log.d(TAG, "Starting query for queryPort: " + extendedViewBounds);
 
-        service.execute();
+        service.retrieveLocationsIn(extendedViewBounds);
         return true;
     }
 

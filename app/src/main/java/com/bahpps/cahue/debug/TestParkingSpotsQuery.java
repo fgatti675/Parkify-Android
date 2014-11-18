@@ -14,11 +14,10 @@ public class TestParkingSpotsQuery extends FusionParkingSpotsQuery {
     /**
      * Create a new service. {@code #execute()} must be called afterwards
      *
-     * @param latLngBounds
      * @param listener
      */
-    public TestParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
-        super(latLngBounds, listener);
+    public TestParkingSpotsQuery( ParkingSpotsUpdateListener listener) {
+        super(listener);
     }
 
     @Override

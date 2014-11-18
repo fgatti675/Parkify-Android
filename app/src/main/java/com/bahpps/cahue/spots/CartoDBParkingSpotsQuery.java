@@ -49,14 +49,14 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
 
     private static final String TAG = "ParkingSpotsQuery";
-    private static final String API_KEY = "3037e96df92be2c06ee3d1d1e15c089157c33419"; // Using a browser key instead of an Android key for some stupid reason
+    private static final String API_KEY = "3037e96df92be2c06ee3d1d1e15c089157c33419";
 
     private static final String ACCOUNT_NAME = "cahue";
     private static final String TABLE_NAME = "spots";
-    private static final String URL = "http://" + ACCOUNT_NAME + ".cartodb.com/api/v2/sql?api_key=" + API_KEY;
+    private static final String URL = "http://" + ACCOUNT_NAME + ".cartodb.com/api/v2/sql?format=GeoJSON&api_key=" + API_KEY;
 
-    public CartoDBParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
-        super(latLngBounds, listener);
+    public CartoDBParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
+        super(listener);
     }
 
 
@@ -78,15 +78,19 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
         JSONObject json = doQuery(sqlString);
         try {
-            JSONArray rows = json.getJSONArray("rows");
+            JSONArray rows = json.getJSONArray("features");
             for(int i = 0 ; i < rows.length(); i++){
 
                 JSONObject entry = rows.getJSONObject(i);
 
-                String id = entry.getString("id");
-                Date date = dateFormat.parse(entry.getString("created_at"));
-                double latitude = entry.getDouble("latitude");
-                double longitude = entry.getDouble("longitude");
+                JSONObject properties = entry.getJSONObject("properties");
+                String id = properties.getString("id");
+                Date date = dateFormat.parse(properties.getString("created_at"));
+
+                JSONObject geometry = entry.getJSONObject("geometry");
+                JSONArray coordinates = geometry.getJSONArray("coordinates");
+                double latitude = coordinates.getDouble(1);
+                double longitude = coordinates.getDouble(0);
 
                 ParkingSpot spot = new ParkingSpot(id, new LatLng(latitude, longitude), date);
                 spots.add(spot);
@@ -104,7 +108,6 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
     private JSONObject doQuery(String sql) {
         try {
 
-            Log.i(TAG, "Posting users location");
             String url = URL + "&q=" + URLEncoder.encode(sql, "ISO-8859-1");
 
             HttpClient httpclient = new DefaultHttpClient();
