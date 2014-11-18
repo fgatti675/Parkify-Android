@@ -276,24 +276,21 @@ public class MapsActivity extends ActionBarActivity
 
         Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
         detailsDisplayed = true;
-//        TranslateAnimation animation = new TranslateAnimation(
-//                Animation.RELATIVE_TO_SELF, 0,
-//                Animation.RELATIVE_TO_SELF, 0,
-//                Animation.ABSOLUTE, detailsContainer.getHeight(),
-//                Animation.RELATIVE_TO_SELF, 0);
         TranslateAnimation animation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
         animation.setDuration(1000);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) detailsContainer.getLayoutParams();
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                params.removeRule(RelativeLayout.BELOW);
+                detailsContainer.setLayoutParams(params);
                 detailsContainer.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) carButton.getLayoutParams();
-//                params.addRule(RelativeLayout.ABOVE, R.id.marker_details_container);
-//                params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
             }
 
             @Override
@@ -322,6 +319,9 @@ public class MapsActivity extends ActionBarActivity
             @Override
             public void onAnimationEnd(Animation animation) {
                 detailsContainer.setVisibility(View.INVISIBLE);
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) detailsContainer.getLayoutParams();
+                params.addRule(RelativeLayout.BELOW, R.id.map);
+                params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             }
 
             @Override
