@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.bahpps.cahue"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -17,13 +17,6 @@ android {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-}
-
-repositories {
-    maven {
-
-        url "http://clojars.org/repo"
     }
 }
 

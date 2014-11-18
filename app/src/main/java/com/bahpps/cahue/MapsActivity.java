@@ -25,11 +25,14 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -59,6 +62,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.plus.model.people.Person;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -267,48 +271,29 @@ public class MapsActivity extends ActionBarActivity
     }
 
     private void showDetails() {
+
+        if (detailsDisplayed) return;
+
+        Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
         detailsDisplayed = true;
-        TranslateAnimation animation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, 1F,
-                Animation.RELATIVE_TO_SELF, 0);
-        animation.setDuration(1000);
-//        animation.setAnimationListener(new Animation.AnimationListener() {
-//            @Override
-//            public void onAnimationStart(Animation animation) {
-//                detailsContainer.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void onAnimationEnd(Animation animation) {
-//            }
-//
-//            @Override
-//            public void onAnimationRepeat(Animation animation) {
-//            }
-//        });
-
-        carButton.startAnimation(animation);
-//        detailsContainer.startAnimation(animation);
-    }
-
-    private void hideDetails() {
-        detailsDisplayed = false;
-        TranslateAnimation animation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, 0,
-                Animation.RELATIVE_TO_SELF, 1F);
+//        TranslateAnimation animation = new TranslateAnimation(
+//                Animation.RELATIVE_TO_SELF, 0,
+//                Animation.RELATIVE_TO_SELF, 0,
+//                Animation.ABSOLUTE, detailsContainer.getHeight(),
+//                Animation.RELATIVE_TO_SELF, 0);
+        TranslateAnimation animation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
         animation.setDuration(1000);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+                detailsContainer.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.setVisibility(View.GONE);
+//                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) carButton.getLayoutParams();
+//                params.addRule(RelativeLayout.ABOVE, R.id.marker_details_container);
+//                params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             }
 
             @Override
@@ -316,6 +301,41 @@ public class MapsActivity extends ActionBarActivity
             }
         });
         detailsContainer.startAnimation(animation);
+
+        TranslateAnimation buttonAnimation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
+        buttonAnimation.setDuration(1000);
+        carButton.startAnimation(buttonAnimation);
+
+    }
+
+    private void hideDetails() {
+
+        if (!detailsDisplayed) return;
+
+        detailsDisplayed = false;
+        TranslateAnimation animation = createHideAnimation();
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                detailsContainer.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        detailsContainer.startAnimation(animation);
+        carButton.startAnimation(createHideAnimation());
+    }
+
+    private TranslateAnimation createHideAnimation() {
+        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
+        animation.setDuration(1000);
+        return animation;
     }
 
     @Override
