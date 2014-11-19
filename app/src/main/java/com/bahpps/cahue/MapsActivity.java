@@ -2,7 +2,6 @@ package com.bahpps.cahue;
 
 import android.accounts.AccountManager;
 import android.app.Dialog;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
@@ -25,13 +24,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -62,12 +58,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.plus.model.people.Person;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends ActionBarActivity
         implements
@@ -95,7 +92,7 @@ public class MapsActivity extends ActionBarActivity
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
-    private MapsMarkersManager mapsMarkersManager;
+    List<AbstractMarkerDelegate> delegates = new ArrayList();
     private SpotsDelegate spotsDelegate;
     private ParkedCarDelegate parkedCarDelegate;
 
@@ -116,11 +113,11 @@ public class MapsActivity extends ActionBarActivity
 
     private SharedPreferences prefs;
 
-    private ImageButton carButton;
-
     private FrameLayout detailsContainer;
     private MarkerDetailsFragment markerDetailsFragment;
     private boolean detailsDisplayed = false;
+
+
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -178,17 +175,6 @@ public class MapsActivity extends ActionBarActivity
         } else if (!mBluetoothAdapter.isEnabled()) {
             noBluetooth(this);
         }
-
-
-        /**
-         * Car button for indicating the camera mode
-         */
-        carButton = (ImageButton) findViewById(R.id.carButton);
-        carButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                parkedCarDelegate.changeMode();
-            }
-        });
 
 
         /**
@@ -263,10 +249,10 @@ public class MapsActivity extends ActionBarActivity
         setUpMapListeners();
 
         spotsDelegate.init(this, mMap);
-        parkedCarDelegate.init(this, mMap, carButton);
-        mapsMarkersManager = new MapsMarkersManager(mMap);
-        mapsMarkersManager.add(parkedCarDelegate);
-        mapsMarkersManager.add(spotsDelegate);
+        parkedCarDelegate.init(this, mMap, null);
+
+        delegates.add(parkedCarDelegate);
+        delegates.add(spotsDelegate);
 
     }
 
@@ -299,10 +285,6 @@ public class MapsActivity extends ActionBarActivity
         });
         detailsContainer.startAnimation(animation);
 
-        TranslateAnimation buttonAnimation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
-        buttonAnimation.setDuration(1000);
-        carButton.startAnimation(buttonAnimation);
-
     }
 
     private void hideDetails() {
@@ -310,7 +292,8 @@ public class MapsActivity extends ActionBarActivity
         if (!detailsDisplayed) return;
 
         detailsDisplayed = false;
-        TranslateAnimation animation = createHideAnimation();
+        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
+        animation.setDuration(1000);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -329,14 +312,8 @@ public class MapsActivity extends ActionBarActivity
             }
         });
         detailsContainer.startAnimation(animation);
-        carButton.startAnimation(createHideAnimation());
     }
 
-    private TranslateAnimation createHideAnimation() {
-        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
-        animation.setDuration(1000);
-        return animation;
-    }
 
     @Override
     public void onBackPressed() {
@@ -368,8 +345,11 @@ public class MapsActivity extends ActionBarActivity
 
         googleApiClient.connect();
 
-        mapsMarkersManager.onResume();
-        mapsMarkersManager.drawIfNecessary();
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onResume();
+        }
+
+        drawIfNecessary();
 
 
     }
@@ -545,7 +525,11 @@ public class MapsActivity extends ActionBarActivity
     @Override
     protected void onPause() {
         super.onPause();
-        mapsMarkersManager.onPause();
+
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onPause();
+        }
+
         if (googleApiClient != null) {
             googleApiClient.disconnect();
         }
@@ -645,8 +629,9 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onLocationChanged(Location location) {
 
-        parkedCarDelegate.setUserLocation(location);
-        parkedCarDelegate.updateCameraIfFollowing();
+        for(AbstractMarkerDelegate delegate: delegates){
+            delegate.onLocationChanged(location);
+        }
 
         /**
          * Set initial zoom level
@@ -724,7 +709,10 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        mapsMarkersManager.onCameraChange(cameraPosition);
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onCameraChange(cameraPosition);
+        }
+        drawIfNecessary();
     }
 
     @Override
@@ -762,6 +750,21 @@ public class MapsActivity extends ActionBarActivity
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
+        }
+    }
+
+
+    /**
+     * Redraw delegates if they need it
+     */
+    public void drawIfNecessary() {
+
+        for (AbstractMarkerDelegate delegate : delegates) {
+            if (delegate.isNeedsRedraw()) {
+                Log.i(TAG, delegate.getClass().getSimpleName() + " is being redrawn because ");
+                delegate.doDraw();
+                delegate.setNeedsRedraw(false);
+            }
         }
     }
 

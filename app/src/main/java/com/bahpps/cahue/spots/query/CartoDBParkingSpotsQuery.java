@@ -46,7 +46,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
     private static final String ACCOUNT_NAME = "cahue";
     private static final String TABLE_NAME = "spots";
-    private static final String URL = "http://" + ACCOUNT_NAME + ".cartodb.com/api/v2/sql?format=GeoJSON&api_key=" + API_KEY;
+    private static final String URL = "http://" + ACCOUNT_NAME + ".cartodb.com/api/v2/sql?format=GeoJSON";
 
     public CartoDBParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
         super(listener);
@@ -62,6 +62,8 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
         String sqlString = buildSQL();
 
         JSONObject json = doQuery(sqlString);
+        if(json == null)
+            listener.onError(this);
         try {
             JSONArray rows = json.getJSONArray("features");
             for (int i = 0; i < rows.length(); i++) {
@@ -117,8 +119,8 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
             return String.format(
                     Locale.ENGLISH,
-                    "SELECT * FROM %s \n" +
-                            "ORDER BY the_geom <-> ST_SetSRID(ST_Point(%f, %f),4326)\n" +
+                    "SELECT * FROM %s " +
+                            "ORDER BY the_geom <-> ST_SetSRID(ST_Point(%f, %f),4326) " +
                             "LIMIT %d",
                     getTableId(),
                     center.longitude,

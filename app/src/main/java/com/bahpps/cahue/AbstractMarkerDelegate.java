@@ -1,5 +1,7 @@
 package com.bahpps.cahue;
 
+import android.location.Location;
+
 import com.google.android.gms.maps.model.CameraPosition;
 
 /**
@@ -7,18 +9,9 @@ import com.google.android.gms.maps.model.CameraPosition;
  */
 public abstract class AbstractMarkerDelegate {
 
-    private MapsMarkersManager delegatesManager;
     private boolean needsRedraw = true;
 
     public abstract void doDraw();
-
-    public MapsMarkersManager getDelegatesManager() {
-        return delegatesManager;
-    }
-
-    public void setDelegatesManager(MapsMarkersManager delegatesManager) {
-        this.delegatesManager = delegatesManager;
-    }
 
     public boolean isNeedsRedraw() {
         return needsRedraw;
@@ -52,5 +45,10 @@ public abstract class AbstractMarkerDelegate {
      */
     public abstract void onCameraChange(CameraPosition cameraPosition);
 
+    /**
+     * Called when the user changes location
+     * @param location
+     */
+    public abstract void onLocationChanged(Location location);
 
 }

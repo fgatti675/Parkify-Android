@@ -142,11 +142,13 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         doDraw();
     }
 
-    public void setUserLocation(Location userLocation) {
+    public void onLocationChanged(Location userLocation) {
         this.userLocation = userLocation;
 
         if (directionPoints.isEmpty())
             fetchDirections(false);
+
+        updateCameraIfFollowing();
 
     }
 
@@ -337,6 +339,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private void buttonUpdate() {
+        if(carButton == null)
+            return;
         if (mode == Mode.FOLLOWING) {
             carButton.setImageResource(R.drawable.ic_icon_car_red);
         } else if (mode == Mode.FREE) {

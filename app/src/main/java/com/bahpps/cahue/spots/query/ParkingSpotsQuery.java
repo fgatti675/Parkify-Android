@@ -46,7 +46,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
         execute();
     }
 
-    public void retrieveLocationsCloseTo(LatLng location, int limit) {
+    public void retrieveNearbySpots(LatLng location, int limit) {
         this.center = location;
         this.limit = limit;
         mode = Mode.closestSpots;
@@ -62,7 +62,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
         Log.d("ParkingSpotsQuery", parkingSpots.toString());
         super.onPostExecute(parkingSpots);
-        listener.onLocationsUpdate(parkingSpots);
+        listener.onSpotsUpdate(this, parkingSpots);
     }
 
     /**
@@ -70,6 +70,8 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
      * parking locations
      */
     public interface ParkingSpotsUpdateListener {
-        void onLocationsUpdate(Set<ParkingSpot> parkingSpots);
+        void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots);
+
+        void onError(ParkingSpotsQuery query);
     }
 }

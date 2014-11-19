@@ -55,7 +55,7 @@ public class SpotsQueryTest extends ActivityTestCase {
         final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
                     @Override
-                    public void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
+                    public void onSpotsUpdate(Set<ParkingSpot> parkingSpots) {
                         result.addAll(parkingSpots);
                         signal.countDown();
                     }
