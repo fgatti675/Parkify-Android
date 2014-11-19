@@ -49,15 +49,18 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private final static double EARTH_RADIUS = 6378137;
     private final static long TIMEOUT_MS = 60000;
 
-    // number of locations being retrieved on closest spots query
+    // number of spots being retrieved on nearby spots query
     private final static int CLOSEST_LOCATIONS = 100;
+
+    // max number of spots displayed at once
+    private static final int MARKERS_LIMIT = 100;
 
     private final Handler handler = new Handler();
 
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    public final static float MAX_ZOOM = 11F;
+    public final static float MAX_ZOOM = 0F;
 
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
@@ -256,12 +259,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             reset();
             shouldBeReset = false;
         }
-
-        LatLngBounds.Builder builder = LatLngBounds.builder();
-        for (ParkingSpot spot : parkingSpots) {
-            builder.include(spot.getPosition());
+        if (!parkingSpots.isEmpty()) {
+            LatLngBounds.Builder builder = LatLngBounds.builder();
+            for (ParkingSpot spot : parkingSpots) {
+                builder.include(spot.getPosition());
+            }
+            queriedBounds.add(builder.build());
         }
-        queriedBounds.add(builder.build());
         spots.addAll(parkingSpots);
 
         doDraw();
@@ -285,6 +289,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (hideMarkers) return;
 
         Log.d(TAG, "Drawing spots");
+        int i = 0;
         for (ParkingSpot parkingSpot : spots) {
             LatLng spotPosition = parkingSpot.getPosition();
 
@@ -302,6 +307,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
                 makeMarkerVisible(marker, fadeIn);
             }
+            i++;
+            if(i > MARKERS_LIMIT) return;
         }
     }
 

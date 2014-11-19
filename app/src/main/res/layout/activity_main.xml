@@ -18,24 +18,11 @@
         android:layout_height="wrap_content"
         android:text="DETAILS"
         android:id="@+id/details_button"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/carButton"
-        android:layout_alignEnd="@+id/carButton"
-        android:layout_marginTop="77dp" />
+        android:layout_marginTop="29dp"
+        android:layout_below="@+id/include"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="24dp" />
 
-    <ImageButton
-        android:id="@+id/carButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_above="@+id/marker_details_container"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/buttons_margin"
-        android:layout_marginRight="@dimen/buttons_margin"
-        android:padding="@dimen/default_padding"
-        android:adjustViewBounds="true"
-        android:background="@drawable/plain_button"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_icon_car" />
 
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -46,6 +33,6 @@
         android:visibility="invisible"
         tools:context="com.bahpps.cahue.MarkerDetailsFragment" />
 
-    <include layout="@layout/toolbar_actionbar_translucent" />
+    <include layout="@layout/toolbar_actionbar_translucent"/>
 
 </RelativeLayout>
