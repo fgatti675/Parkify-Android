@@ -1,8 +1,9 @@
-package com.bahpps.cahue.spots;
+package com.bahpps.cahue.spots.query;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.bahpps.cahue.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -13,10 +14,27 @@ import java.util.Set;
  */
 public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<ParkingSpot>> {
 
+    /**
+     * Mode the query is being run
+     */
+    public enum Mode{
+        /**
+         * Query the spots in the viewPort
+         */
+        viewPort,
+
+        /**
+         * Query the closest spots
+         */
+        closestSpots
+    }
+
     protected LatLngBounds latLngBounds;
     protected ParkingSpotsUpdateListener listener;
     protected LatLng center;
-    protected int limit;
+    protected Integer limit;
+
+    protected Mode mode;
 
     public ParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
         this.listener = listener;
@@ -24,12 +42,14 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
     public void retrieveLocationsIn(LatLngBounds latLngBounds){
         this.latLngBounds = latLngBounds;
+        mode = Mode.viewPort;
         execute();
     }
 
     public void retrieveLocationsCloseTo(LatLng location, int limit) {
         this.center = location;
         this.limit = limit;
+        mode = Mode.closestSpots;
         execute();
     }
 

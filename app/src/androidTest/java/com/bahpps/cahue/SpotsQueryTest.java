@@ -4,9 +4,8 @@ import android.test.ActivityTestCase;
 import android.util.Log;
 
 import com.bahpps.cahue.debug.TestParkingSpotsQuery;
-import com.bahpps.cahue.spots.FusionParkingSpotsQuery;
 import com.bahpps.cahue.spots.ParkingSpot;
-import com.bahpps.cahue.spots.ParkingSpotsQuery;
+import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -45,7 +44,6 @@ public class SpotsQueryTest extends ActivityTestCase {
                 ));
             }
         };
-
 
         final LatLngBounds latLngBounds = LatLngBounds.builder() // Munich
                 .include(new LatLng(48.132219, 11.561716))

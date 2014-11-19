@@ -1,11 +1,9 @@
-package com.bahpps.cahue.spots;
+package com.bahpps.cahue.spots.query;
 
 import android.util.Log;
 
+import com.bahpps.cahue.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.api.services.fusiontables.Fusiontables;
-import com.google.api.services.fusiontables.model.Sqlresponse;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -13,8 +11,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -26,12 +22,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -63,23 +56,15 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
     @Override
     protected Set<ParkingSpot> doInBackground(Void... voids) {
 
-        Log.i(TAG, "Retrieving parking spots " + latLngBounds);
         Set<ParkingSpot> spots = new HashSet<ParkingSpot>();
 
-        String sqlString = String.format(
-                Locale.ENGLISH,
-                "SELECT * FROM %s WHERE the_geom && ST_MakeEnvelope(%f, %f, %f, %f, 4326)",
-                getTableId(),
-                latLngBounds.southwest.longitude,
-                latLngBounds.southwest.latitude,
-                latLngBounds.northeast.longitude,
-                latLngBounds.northeast.latitude
-        );
+        Log.i(TAG, "Retrieving parking spots " + latLngBounds);
+        String sqlString = buildSQL();
 
         JSONObject json = doQuery(sqlString);
         try {
             JSONArray rows = json.getJSONArray("features");
-            for(int i = 0 ; i < rows.length(); i++){
+            for (int i = 0; i < rows.length(); i++) {
 
                 JSONObject entry = rows.getJSONObject(i);
 
@@ -93,6 +78,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
                 double longitude = coordinates.getDouble(0);
 
                 ParkingSpot spot = new ParkingSpot(id, new LatLng(latitude, longitude), date);
+                if(mode == Mode.closestSpots) spot.setClosest(true);
                 spots.add(spot);
             }
         } catch (JSONException e) {
@@ -103,6 +89,47 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
 
         return spots;
+    }
+
+    private String buildSQL() {
+
+        if (mode == Mode.viewPort) {
+
+            if (latLngBounds == null)
+                throw new IllegalStateException("There must be a latLngBound set as a viewport to build the SQL query.");
+
+            return String.format(
+                    Locale.ENGLISH,
+                    "SELECT * FROM %s " +
+                            "WHERE the_geom && ST_MakeEnvelope(%f, %f, %f, %f, 4326)",
+                    getTableId(),
+                    latLngBounds.southwest.longitude,
+                    latLngBounds.southwest.latitude,
+                    latLngBounds.northeast.longitude,
+                    latLngBounds.northeast.latitude
+            );
+        }
+
+        else if (mode == Mode.closestSpots) {
+
+            if (center == null || limit == null)
+                throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");
+
+            return String.format(
+                    Locale.ENGLISH,
+                    "SELECT * FROM %s \n" +
+                            "ORDER BY the_geom <-> ST_SetSRID(ST_Point(%f, %f),4326)\n" +
+                            "LIMIT %d",
+                    getTableId(),
+                    center.longitude,
+                    center.latitude,
+                    limit.intValue()
+            );
+        }
+
+        else {
+            throw new IllegalStateException("Did you introduce a new mode?");
+        }
     }
 
     private JSONObject doQuery(String sql) {

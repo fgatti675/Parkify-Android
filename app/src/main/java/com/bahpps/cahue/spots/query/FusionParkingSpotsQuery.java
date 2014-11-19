@@ -1,9 +1,9 @@
-package com.bahpps.cahue.spots;
+package com.bahpps.cahue.spots.query;
 
 import android.util.Log;
 
+import com.bahpps.cahue.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;

@@ -7,7 +7,8 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
-import com.bahpps.cahue.debug.TestParkingSpotsQuery;
+import com.bahpps.cahue.spots.query.CartoDBParkingSpotsQuery;
+import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.bahpps.cahue.util.MarkerFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -17,7 +18,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -41,6 +42,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
     private final static double EARTH_RADIUS = 6378137;
     private static final long TIMEOUT_MS = 60000;
 
+    // numbber of locations being retrieved on closest spots query
+    private static final int CLOSEST_LOCATIONS = 100;
+
     private final Handler handler = new Handler();
 
     /**
@@ -52,12 +56,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
     private GoogleMap mMap;
-    private List<LatLngBounds> queriedBounds = new ArrayList<LatLngBounds>();
+    private List<LatLngBounds> queriedBounds = new CopyOnWriteArrayList<LatLngBounds>();
     private LatLngBounds viewBounds;
     private LatLngBounds extendedViewBounds;
 
     private Date lastResetTaskRequestTime;
     private ScheduledFuture scheduledResetTask;
+
+    private Context mContext;
 
     // in the next fetching of spots, clear the previous state
     private boolean shouldBeReset = false;
@@ -67,7 +73,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
      */
     private boolean hideMarkers = false;
 
-    private ParkingSpotsQuery service;
+    private ParkingSpotsQuery closestQuery;
+    private ParkingSpotsQuery areaQuery;
 
     public static final Parcelable.Creator<SpotsDelegate> CREATOR =
             new Parcelable.Creator<SpotsDelegate>() {
@@ -81,7 +88,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
                     return new SpotsDelegate[size];
                 }
             };
-    private Context mContext;
 
     public SpotsDelegate() {
         spots = new HashSet<ParkingSpot>();
@@ -116,9 +122,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         parcel.writeSerializable(lastResetTaskRequestTime);
     }
 
-    public void setMap(GoogleMap map) {
-
-    }
 
     public void init(Context context, GoogleMap map) {
 
@@ -127,7 +130,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
 
         if (mMap == null)
             throw new IllegalStateException("Please set a GoogleMap instance before calling the method init()");
-
 
         // we can rebuild this map because markers are removed on init
         spotMarkersMap = new HashMap<ParkingSpot, Marker>();
@@ -166,21 +168,39 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
     }
 
     private boolean repeatLastQuery() {
-        return applyBounds(viewBounds, extendedViewBounds);
+        return queryCameraView();
     }
 
+    private synchronized boolean queryClosestSpots(LatLng center){
+        closestQuery = new CartoDBParkingSpotsQuery(new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
+            @Override
+            public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
+                SpotsDelegate.this.onLocationsUpdate(parkingSpots);
+            }
+        });
+
+        Log.d(TAG, "Starting query for queryBounds: " + extendedViewBounds);
+        closestQuery.retrieveLocationsCloseTo(center, CLOSEST_LOCATIONS);
+
+        return true;
+    }
 
     /**
-     * Set the bounds where
+     * Set the bounds where the camera is currently looking.
+     * A query is done
      *
-     * @param viewPort  What the user is actually seeing right now
-     * @param queryPort A broader space we want to query so that data is there when we move the camera
      * @return
      */
-    private synchronized boolean applyBounds(LatLngBounds viewPort, LatLngBounds queryPort) {
+    private synchronized boolean queryCameraView() {
 
-        this.viewBounds = viewPort;
-        this.extendedViewBounds = queryPort;
+        // What the user is actually seeing right now
+        this.viewBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+
+        // A broader space we want to query so that data is there when we move the camera
+        this.extendedViewBounds = LatLngBounds.builder()
+                .include(getOffsetLatLng(viewBounds.northeast, 500, 500))
+                .include(getOffsetLatLng(viewBounds.southwest, -500, -500))
+                .build();
 
         /**
          * Check if this query is already contained in another one
@@ -196,22 +216,27 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        service = new CartoDBParkingSpotsQuery(new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
+        areaQuery = new CartoDBParkingSpotsQuery(new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
             @Override
             public synchronized void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
-                if (shouldBeReset) {
-                    reset();
-                    shouldBeReset = false;
-                }
-                spots.addAll(parkingSpots);
-                doDraw();
+                SpotsDelegate.this.onLocationsUpdate(parkingSpots);
             }
         });
 
-        Log.d(TAG, "Starting query for queryPort: " + extendedViewBounds);
+        Log.d(TAG, "Starting query for queryBounds: " + extendedViewBounds);
+        areaQuery.retrieveLocationsIn(extendedViewBounds);
 
-        service.retrieveLocationsIn(extendedViewBounds);
         return true;
+
+    }
+
+    private void onLocationsUpdate(Set<ParkingSpot> parkingSpots) {
+        if (shouldBeReset) {
+            reset();
+            shouldBeReset = false;
+        }
+        spots.addAll(parkingSpots);
+        doDraw();
     }
 
 
@@ -297,12 +322,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable 
         if (zoom >= MAX_ZOOM) {
             Log.d(TAG, "Querying because we are close enough");
 
-            LatLngBounds viewPort = mMap.getProjection().getVisibleRegion().latLngBounds;
-            LatLngBounds expanded = LatLngBounds.builder()
-                    .include(getOffsetLatLng(viewPort.northeast, 500, 500))
-                    .include(getOffsetLatLng(viewPort.southwest, -500, -500))
-                    .build();
-            applyBounds(viewPort, expanded);
+
+            queryCameraView();
 
             showMarkers();
         }

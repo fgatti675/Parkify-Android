@@ -1,7 +1,6 @@
 package com.bahpps.cahue.debug;
 
-import com.bahpps.cahue.spots.FusionParkingSpotsQuery;
-import com.google.android.gms.maps.model.LatLngBounds;
+import com.bahpps.cahue.spots.query.FusionParkingSpotsQuery;
 
 /**
 * Created by Francesco on 23/10/2014.

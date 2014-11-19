@@ -21,6 +21,11 @@ public class ParkingSpot implements Parcelable, ClusterItem {
 
     private Date time;
 
+    /**
+     * Is the retrieved spot considered one of the closest to the user.
+     */
+    private boolean closest = false;
+
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
             new Parcelable.Creator<ParkingSpot>() {
                 @Override
@@ -39,12 +44,21 @@ public class ParkingSpot implements Parcelable, ClusterItem {
         markerId = parcel.readString();
         position = parcel.readParcelable(LatLng.class.getClassLoader());
         time = (Date) parcel.readSerializable();
+        closest = parcel.readByte() != 0;
     }
 
     public ParkingSpot(String id, LatLng location, Date time) {
         this.id = id;
         this.position = location;
         this.time = time;
+    }
+
+    public boolean isClosest() {
+        return closest;
+    }
+
+    public void setClosest(boolean closest) {
+        this.closest = closest;
     }
 
     @Override
@@ -58,6 +72,7 @@ public class ParkingSpot implements Parcelable, ClusterItem {
         parcel.writeString(markerId);
         parcel.writeParcelable(position, 0);
         parcel.writeSerializable(time);
+        parcel.writeByte((byte) (closest ? 1 : 0));
     }
 
     @Override
