@@ -44,13 +44,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     private static final String TAG = "SpotsDelegate";
+    private static final String QUERY_TAG = "SpotsDelegateQuery";
 
     // Earth’s radius, sphere
     private final static double EARTH_RADIUS = 6378137;
     private final static long TIMEOUT_MS = 60000;
 
     // number of spots being retrieved on nearby spots query
-    private final static int CLOSEST_LOCATIONS = 100;
+    private final static int CLOSEST_LOCATIONS = 200;
 
     // max number of spots displayed at once
     private static final int MARKERS_LIMIT = 100;
@@ -193,7 +194,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         nearbyQuery = new CartoDBParkingSpotsQuery(this);
 
-        Log.d(TAG, "Starting query for closest spots to: " + userLocation);
+        Log.d(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
         nearbyQuery.retrieveNearbySpots(userLocation, CLOSEST_LOCATIONS);
 
         return true;
@@ -208,7 +209,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private synchronized boolean queryCameraView() {
 
         // What the user is actually seeing right now
-        this.viewBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+        setUpViewBounds();
 
         if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
             return false;
@@ -226,7 +227,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (!shouldBeReset) {
             for (LatLngBounds latLngBounds : queriedBounds) {
                 if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
-                    Log.d(TAG, "NO need to query again");
+                    Log.d(QUERY_TAG, "NO need to query again");
                     return false;
                 }
             }
@@ -237,11 +238,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         areaQuery = new CartoDBParkingSpotsQuery(this);
 
-        Log.d(TAG, "Starting query for queryBounds: " + extendedViewBounds);
+        Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.retrieveLocationsIn(extendedViewBounds);
 
         return true;
 
+    }
+
+    private void setUpViewBounds() {
+        this.viewBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
     }
 
     /**
@@ -289,7 +294,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (hideMarkers) return;
 
         Log.d(TAG, "Drawing spots");
-        int i = 0;
+
+        setUpViewBounds();
+
+        int displayedMarkers = 0;
+
         for (ParkingSpot parkingSpot : spots) {
             LatLng spotPosition = parkingSpot.getPosition();
 
@@ -306,9 +315,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
                 makeMarkerVisible(marker, fadeIn);
+                displayedMarkers++;
             }
-            i++;
-            if(i > MARKERS_LIMIT) return;
+
+            if(displayedMarkers > MARKERS_LIMIT) return;
         }
     }
 
@@ -388,8 +398,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     public void onLocationChanged(Location location) {
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() < TIMEOUT_MS)
+        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
             queryClosestSpots(userLocation);
+        else
+            Log.d(TAG, "No need to query for closest points again");
 
     }
 

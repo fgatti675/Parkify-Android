@@ -61,6 +61,8 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
         Log.i(TAG, "Retrieving parking spots " + latLngBounds);
         String sqlString = buildSQL();
 
+        Log.d(TAG, "SQL: " + sqlString);
+
         JSONObject json = doQuery(sqlString);
         if(json == null)
             listener.onError(this);
