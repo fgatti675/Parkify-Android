@@ -16,6 +16,7 @@
 <resources>
     <color name="transparent">#00000000</color>
 
+
     <color name="body_text_1">#de000000</color>
     <color name="body_text_2">#8a000000</color>
     <color name="body_text_3">#60000000</color>
@@ -38,6 +39,7 @@
     <color name="marker_green">#00FF3F</color>
 
     <color name="translucent_actionbar_background">#b80b2d38</color>
+    <color name="translucent_background">#b8eeeeee</color>
 
     <!--<color name="all_track_color">#ff222222</color>-->
     <!--<color name="home_pane_header">#99000000</color>-->

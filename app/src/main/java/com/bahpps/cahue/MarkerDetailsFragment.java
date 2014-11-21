@@ -4,9 +4,13 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.bahpps.cahue.spots.ParkingSpot;
 
 
 /**
@@ -18,14 +22,11 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class MarkerDetailsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_SPOT = "arg_spot";
+
+    private static ParkingSpot spot;
 
     private OnFragmentInteractionListener mListener;
 
@@ -33,16 +34,13 @@ public class MarkerDetailsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param spot Parameter 1.
      * @return A new instance of fragment MarkerDetailsFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static MarkerDetailsFragment newInstance(String param1, String param2) {
+    public static MarkerDetailsFragment newInstance(ParkingSpot spot) {
         MarkerDetailsFragment fragment = new MarkerDetailsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putParcelable(ARG_SPOT, spot);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,14 +53,19 @@ public class MarkerDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            spot = getArguments().getParcelable(ARG_SPOT);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onResume() {
+        super.onResume();
+        TextView timeAgo = (TextView) getView().findViewById(R.id.time);
+        timeAgo.setText(DateUtils.getRelativeTimeSpanString (spot.getTime().getTime()));
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_marker_details, container, false);
     }
@@ -73,6 +76,7 @@ public class MarkerDetailsFragment extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
+
 
     @Override
     public void onAttach(Activity activity) {

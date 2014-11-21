@@ -165,10 +165,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
                         Log.d(TAG, "scheduledResetTask run");
                         lastResetTaskRequestTime = new Date();
                         shouldBeReset = true;
+                        Toast.makeText(mContext, "Reset task fired", Toast.LENGTH_SHORT).show();
                         repeatLastQuery();
                     }
                 },
-                TIMEOUT_MS,
+                nextTimeOut,
                 TIMEOUT_MS,
                 TimeUnit.MILLISECONDS);
 
@@ -189,13 +190,16 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         this.userQueryLocation = userLocation;
 
-        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING)
+        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING) {
             return false;
+        }
 
         nearbyQuery = new CartoDBParkingSpotsQuery(this);
 
         Log.d(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
         nearbyQuery.retrieveNearbySpots(userLocation, CLOSEST_LOCATIONS);
+
+        Toast.makeText(mContext, "queryClosestSpots", Toast.LENGTH_SHORT).show();
 
         return true;
     }
@@ -240,6 +244,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.retrieveLocationsIn(extendedViewBounds);
+
+        Toast.makeText(mContext, "queryCameraView", Toast.LENGTH_SHORT).show();
 
         return true;
 
@@ -303,18 +309,16 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             LatLng spotPosition = parkingSpot.getPosition();
 
             Marker marker = spotMarkersMap.get(parkingSpot);
-            boolean fadeIn = false; // the marker will fade in when appearing for the first time
 
             if (marker == null) {
                 BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext);
                 marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
-                fadeIn = true;
             }
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
-                makeMarkerVisible(marker, fadeIn, parkingSpot);
+                makeMarkerVisible(marker, parkingSpot);
                 displayedMarkers++;
             }
 
@@ -326,6 +330,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
 
+    /**
+     * Remove the markers (only) from the map
+     */
     private void clear() {
         for (Marker marker : spotMarkersMap.values()) {
             if (hideMarkers || !viewBounds.contains(marker.getPosition()))
@@ -344,7 +351,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         scheduledResetTask.cancel(true);
     }
 
-    private void makeMarkerVisible(final Marker marker, boolean fadeIn, ParkingSpot spot) {
+    private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {
 
         marker.setVisible(true);
 

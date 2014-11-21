@@ -1,15 +1,24 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/large_padding"
+    android:background="@color/translucent_background"
     tools:context="com.bahpps.cahue.MarkerDetailsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:background="@color/background_material_light"
-        android:padding="80dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+    <ImageView
+        android:id="@+id/spot_image"
+        android:layout_width="48.5dp"
+        android:layout_height="30dp"
+        android:src="@drawable/spot_rectangle" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="match_parent"
+        android:padding="@dimen/default_padding"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:text="@string/hello_blank_fragment"
+        android:layout_toEndOf="@+id/spot_image" />
+
+</RelativeLayout>

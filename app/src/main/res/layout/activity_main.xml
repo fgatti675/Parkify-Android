@@ -19,7 +19,6 @@
         android:text="DETAILS"
         android:id="@+id/details_button"
         android:layout_marginTop="29dp"
-        android:layout_below="@+id/include"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="24dp" />
 
