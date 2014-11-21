@@ -13,6 +13,9 @@ import java.util.Date;
  */
 public class ParkingSpot implements Parcelable, ClusterItem {
 
+    private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
+    private static long YELLOW_TIME_THRESHOLD_MS = 30 * 60 * 1000;
+
     private String id;
 
     private String markerId;
@@ -117,5 +120,41 @@ public class ParkingSpot implements Parcelable, ClusterItem {
 
     public Date getTime() {
         return time;
+    }
+
+    /**
+     * Get the marker time based on the time it was created
+     *
+     * @return
+     */
+    public Type getMarkerType() {
+        long timeSinceSpotWasFree_ms = System.currentTimeMillis() - getTime().getTime();
+        if (timeSinceSpotWasFree_ms < GREEN_TIME_THRESHOLD_MS)
+            return Type.green;
+        else if (timeSinceSpotWasFree_ms < YELLOW_TIME_THRESHOLD_MS)
+            return Type.yellow;
+        else
+            return Type.red;
+    }
+
+    /**
+     * Created by Francesco on 19.11.2014.
+     */
+    public static enum Type {
+
+        red(0.03F), yellow(0.04F), green(0.06F);
+
+        /**
+         * Difference in alpha values per frame when the marker is included in the map
+         */
+        final float dAlpha;
+
+        Type(float dAlpha) {
+            this.dAlpha = dAlpha;
+        }
+
+        public float getDAlpha() {
+            return dAlpha;
+        }
     }
 }

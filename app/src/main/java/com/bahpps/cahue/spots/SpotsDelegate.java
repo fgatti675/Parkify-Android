@@ -314,11 +314,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             }
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
-                makeMarkerVisible(marker, fadeIn);
+                makeMarkerVisible(marker, fadeIn, parkingSpot);
                 displayedMarkers++;
             }
 
-            if(displayedMarkers > MARKERS_LIMIT) return;
+            if (displayedMarkers > MARKERS_LIMIT) {
+                Log.d(TAG, "Marker display limit reached");
+                return;
+            }
         }
     }
 
@@ -341,27 +344,27 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         scheduledResetTask.cancel(true);
     }
 
-    private void makeMarkerVisible(final Marker marker, boolean fadeIn) {
+    private void makeMarkerVisible(final Marker marker, boolean fadeIn, ParkingSpot spot) {
 
         marker.setVisible(true);
 
-        if (fadeIn) {
-            marker.setAlpha(0);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    float alpha = marker.getAlpha() + 0.05F;
-                    if (alpha < 1) {
-                        // Post again 12ms later.
-                        marker.setAlpha(alpha);
-                        handler.postDelayed(this, 12);
-                    } else {
-                        marker.setAlpha(1);
-                        // animation ended
-                    }
+        final float dAlpha  = spot.getMarkerType().dAlpha;
+
+        marker.setAlpha(0);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                float alpha = marker.getAlpha() + dAlpha;
+                if (alpha < 1) {
+                    // Post again 12ms later.
+                    marker.setAlpha(alpha);
+                    handler.postDelayed(this, 12);
+                } else {
+                    marker.setAlpha(1);
+                    // animation ended
                 }
-            });
-        }
+            }
+        });
     }
 
 

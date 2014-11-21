@@ -15,19 +15,18 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
  */
 public class MarkerFactory {
 
-    private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
-    private static long YELLOW_TIME_THRESHOLD_MS = 30 * 60 * 1000;
 
     public static BitmapDescriptor getMarkerBitmap(ParkingSpot spot, Context context){
-        long timeSinceSpotWasFree_ms
-                = System.currentTimeMillis() - spot.getTime().getTime() ;
 
-        if(timeSinceSpotWasFree_ms < GREEN_TIME_THRESHOLD_MS)
-            return getGreenMarker(context);
-        else if(timeSinceSpotWasFree_ms < YELLOW_TIME_THRESHOLD_MS)
-            return getYellowMarker(context);
-        else
-            return getRedMarker(context);
+        switch (spot.getMarkerType()){
+            case green:
+                return getGreenMarker(context);
+            case yellow:
+                return getYellowMarker(context);
+            case red:
+            default:
+                return getRedMarker(context);
+        }
 
     }
 
