@@ -3,6 +3,7 @@ package com.bahpps.cahue;
 import android.location.Location;
 
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Marker;
 
 /**
  * Created by francesco on 28.10.2014.
@@ -34,6 +35,15 @@ public abstract class AbstractMarkerDelegate {
      */
     public void onPause(){
 
+    }
+
+    /**
+     * Called when a marker is clicked
+     * @param marker
+     * @return
+     */
+    public boolean onMarkerClick(Marker marker) {
+        return false;
     }
 
     /**

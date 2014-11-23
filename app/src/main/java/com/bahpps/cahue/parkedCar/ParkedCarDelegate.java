@@ -448,6 +448,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         setMode(Mode.FREE);
     }
 
+    @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
             showCarTimeToast();

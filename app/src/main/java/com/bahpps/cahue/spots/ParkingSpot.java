@@ -15,6 +15,7 @@ public class ParkingSpot implements Parcelable, ClusterItem {
 
     private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
     private static long YELLOW_TIME_THRESHOLD_MS = 30 * 60 * 1000;
+    private static long ORANGE_TIME_THRESHOLD_MS = 60 * 60 * 1000;
 
     private String id;
 
@@ -133,6 +134,8 @@ public class ParkingSpot implements Parcelable, ClusterItem {
             return Type.green;
         else if (timeSinceSpotWasFree_ms < YELLOW_TIME_THRESHOLD_MS)
             return Type.yellow;
+        else if (timeSinceSpotWasFree_ms < ORANGE_TIME_THRESHOLD_MS)
+            return Type.orange;
         else
             return Type.red;
     }
@@ -142,7 +145,7 @@ public class ParkingSpot implements Parcelable, ClusterItem {
      */
     public static enum Type {
 
-        red(0.03F), yellow(0.04F), green(0.06F);
+        red(0.02F), yellow(0.03F), orange(0.04F), green(0.06F);
 
         /**
          * Difference in alpha values per frame when the marker is included in the map

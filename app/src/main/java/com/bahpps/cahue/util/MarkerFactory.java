@@ -23,6 +23,8 @@ public class MarkerFactory {
                 return getGreenMarker(context);
             case yellow:
                 return getYellowMarker(context);
+            case orange:
+                return getYellowMarker(context);
             case red:
             default:
                 return getRedMarker(context);
@@ -31,6 +33,7 @@ public class MarkerFactory {
     }
 
     private static BitmapDescriptor redMarker;
+    private static BitmapDescriptor orangeMarker;
     private static BitmapDescriptor yellowMarker;
     private static BitmapDescriptor greenMarker;
 
@@ -39,6 +42,13 @@ public class MarkerFactory {
             redMarker = createMarkerBitmap(context, R.drawable.red_marker);
         }
         return redMarker;
+    }
+
+    private static BitmapDescriptor getOrangeMarker(Context context){
+        if (orangeMarker == null) {
+            orangeMarker = createMarkerBitmap(context, R.drawable.orange_marker);
+        }
+        return orangeMarker;
     }
 
     private static BitmapDescriptor getYellowMarker(Context context){

@@ -60,8 +60,10 @@ public class MarkerDetailsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        TextView timeAgo = (TextView) getView().findViewById(R.id.time);
-        timeAgo.setText(DateUtils.getRelativeTimeSpanString (spot.getTime().getTime()));
+        if(spot != null) {
+            TextView timeAgo = (TextView) getView().findViewById(R.id.time);
+            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.getTime().getTime()));
+        }
     }
 
     @Override

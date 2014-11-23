@@ -64,33 +64,36 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
         Log.d(TAG, "SQL: " + sqlString);
 
         JSONObject json = doQuery(sqlString);
-        if(json == null)
-            listener.onError(this);
-        try {
-            JSONArray rows = json.getJSONArray("features");
-            for (int i = 0; i < rows.length(); i++) {
-
-                JSONObject entry = rows.getJSONObject(i);
-
-                JSONObject properties = entry.getJSONObject("properties");
-                String id = properties.getString("id");
-                Date date = dateFormat.parse(properties.getString("created_at"));
-
-                JSONObject geometry = entry.getJSONObject("geometry");
-                JSONArray coordinates = geometry.getJSONArray("coordinates");
-                double latitude = coordinates.getDouble(1);
-                double longitude = coordinates.getDouble(0);
-
-                ParkingSpot spot = new ParkingSpot(id, new LatLng(latitude, longitude), date);
-                if(mode == Mode.closestSpots) spot.setClosest(true);
-                spots.add(spot);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if (json == null) {
+            error = true;
         }
 
+        else {
+            try {
+                JSONArray rows = json.getJSONArray("features");
+                for (int i = 0; i < rows.length(); i++) {
+
+                    JSONObject entry = rows.getJSONObject(i);
+
+                    JSONObject properties = entry.getJSONObject("properties");
+                    String id = properties.getString("id");
+                    Date date = dateFormat.parse(properties.getString("created_at"));
+
+                    JSONObject geometry = entry.getJSONObject("geometry");
+                    JSONArray coordinates = geometry.getJSONArray("coordinates");
+                    double latitude = coordinates.getDouble(1);
+                    double longitude = coordinates.getDouble(0);
+
+                    ParkingSpot spot = new ParkingSpot(id, new LatLng(latitude, longitude), date);
+                    if (mode == Mode.closestSpots) spot.setClosest(true);
+                    spots.add(spot);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         return spots;
     }
@@ -112,9 +115,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
                     latLngBounds.northeast.longitude,
                     latLngBounds.northeast.latitude
             );
-        }
-
-        else if (mode == Mode.closestSpots) {
+        } else if (mode == Mode.closestSpots) {
 
             if (center == null || limit == null)
                 throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");
@@ -129,9 +130,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
                     center.latitude,
                     limit.intValue()
             );
-        }
-
-        else {
+        } else {
             throw new IllegalStateException("Did you introduce a new mode?");
         }
     }

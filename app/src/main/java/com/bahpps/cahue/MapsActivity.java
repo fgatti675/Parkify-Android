@@ -28,13 +28,13 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
+import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
@@ -75,7 +75,8 @@ public class MapsActivity extends ActionBarActivity
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
-        Toolbar.OnMenuItemClickListener {
+        Toolbar.OnMenuItemClickListener,
+        SpotsDelegate.SpotSelectedListener {
 
     protected static final String TAG = "Maps";
 
@@ -176,18 +177,25 @@ public class MapsActivity extends ActionBarActivity
             noBluetooth(this);
         }
 
-
         /**
          * Try to reuse map
          */
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
+        /**
+         * There is no saved instance so we create a few thigs
+         */
         if (savedInstanceState == null) {
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
             spotsDelegate = new SpotsDelegate();
             parkedCarDelegate = new ParkedCarDelegate();
-        } else {
+        }
+
+        /**
+         *
+         */
+        else {
             // Reincarnated activity. The obtained map is the same map instance in the previous
             // activity life cycle. There is no need to reinitialize it.
             mMap = mapFragment.getMap();
@@ -218,10 +226,8 @@ public class MapsActivity extends ActionBarActivity
             markerDetailsFragment = new MarkerDetailsFragment();
             markerDetailsFragment.setRetainInstance(true);
 
-            FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
-            fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
-            fragTransaction.commit();
         }
+
         detailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -229,6 +235,7 @@ public class MapsActivity extends ActionBarActivity
             }
         });
 
+        if(detailsDisplayed) detailsContainer.setVisibility(View.VISIBLE);
 
         /**
          * Preferences
@@ -248,7 +255,7 @@ public class MapsActivity extends ActionBarActivity
         setUpMapIfNeeded();
         setUpMapListeners();
 
-        spotsDelegate.init(this, mMap);
+        spotsDelegate.init(this, mMap, this);
         parkedCarDelegate.init(this, mMap, null);
 
         delegates.add(parkedCarDelegate);
@@ -263,26 +270,23 @@ public class MapsActivity extends ActionBarActivity
         Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
         detailsDisplayed = true;
         TranslateAnimation animation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
-        animation.setDuration(1000);
+        animation.setDuration(300);
+        animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) detailsContainer.getLayoutParams();
-                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                params.removeRule(RelativeLayout.BELOW);
-                detailsContainer.setLayoutParams(params);
                 detailsContainer.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, detailsContainer.getHeight());
         detailsContainer.startAnimation(animation);
 
     }
@@ -293,7 +297,8 @@ public class MapsActivity extends ActionBarActivity
 
         detailsDisplayed = false;
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
-        animation.setDuration(1000);
+        animation.setDuration(300);
+        animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -302,15 +307,13 @@ public class MapsActivity extends ActionBarActivity
             @Override
             public void onAnimationEnd(Animation animation) {
                 detailsContainer.setVisibility(View.INVISIBLE);
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) detailsContainer.getLayoutParams();
-                params.addRule(RelativeLayout.BELOW, R.id.map);
-                params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
         detailsContainer.startAnimation(animation);
     }
 
@@ -717,7 +720,10 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return parkedCarDelegate.onMarkerClick(marker);
+        for(AbstractMarkerDelegate delegate:delegates){
+            delegate.onMarkerClick(marker);
+        }
+        return false;
     }
 
 
@@ -773,5 +779,22 @@ public class MapsActivity extends ActionBarActivity
      */
     public static void noBluetooth(Context context) {
         Util.createUpperToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_LONG);
+    }
+
+    @Override
+    public void onSpotSelected(ParkingSpot spot) {
+
+        FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
+
+        if(markerDetailsFragment != null)
+            fragTransaction.remove(markerDetailsFragment);
+
+        markerDetailsFragment = MarkerDetailsFragment.newInstance(spot);
+        markerDetailsFragment.setRetainInstance(true);
+
+        fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
+        fragTransaction.commit();
+
+        showDetails();
     }
 }

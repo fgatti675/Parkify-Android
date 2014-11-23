@@ -17,7 +17,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     /**
      * Mode the query is being run
      */
-    public enum Mode{
+    public enum Mode {
         /**
          * Query the spots in the viewPort
          */
@@ -33,6 +33,10 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     protected ParkingSpotsUpdateListener listener;
     protected LatLng center;
     protected Integer limit;
+    /**
+     * Was there an error in the execution?
+     */
+    protected boolean error = false;
 
     protected Mode mode;
 
@@ -40,7 +44,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
         this.listener = listener;
     }
 
-    public void retrieveLocationsIn(LatLngBounds latLngBounds){
+    public void retrieveLocationsIn(LatLngBounds latLngBounds) {
         this.latLngBounds = latLngBounds;
         mode = Mode.viewPort;
         execute();
@@ -60,6 +64,10 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
     @Override
     protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
+
+        if (error)
+            listener.onError(this);
+
         Log.d("ParkingSpotsQuery", parkingSpots.toString());
         super.onPostExecute(parkingSpots);
         listener.onSpotsUpdate(this, parkingSpots);

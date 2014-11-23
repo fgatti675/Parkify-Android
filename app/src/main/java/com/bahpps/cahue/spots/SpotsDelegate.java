@@ -65,9 +65,12 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
+    private Map<Marker, ParkingSpot> markerSpotsMap;
+
     private GoogleMap mMap;
 
     private Context mContext;
+    private SpotSelectedListener spotSelectedListener;
 
     // in the next fetching of spots, clear the previous state
     private boolean shouldBeReset = false;
@@ -76,7 +79,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     private LatLngBounds viewBounds;
     private LatLngBounds extendedViewBounds;
-    private ParkingSpotsQuery areaQuery;
 
     private Date lastResetTaskRequestTime;
     private ScheduledFuture scheduledResetTask;
@@ -112,7 +114,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     public SpotsDelegate(Parcel parcel) {
         ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
-        ParkingSpot[] spotsArray = (ParkingSpot[]) parcel.readParcelableArray(classLoader);
+        ParkingSpot[] spotsArray = parcel.createTypedArray(ParkingSpot.CREATOR);
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
         LatLngBounds[] boundsArray = (LatLngBounds[]) parcel.readParcelableArray(classLoader);
         queriedBounds = Arrays.asList(boundsArray);
@@ -130,7 +132,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
-        parcel.writeParcelableArray(spots.toArray(spotsArray), 0);
+        parcel.writeTypedArray(spots.toArray(spotsArray), 0);
         LatLngBounds[] boundsArray = new LatLngBounds[queriedBounds.size()];
         parcel.writeParcelableArray(queriedBounds.toArray(boundsArray), 0);
         parcel.writeParcelable(viewBounds, 0);
@@ -139,13 +141,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
 
-    public void init(Context context, GoogleMap map) {
+    public void init(Context context, GoogleMap map, SpotSelectedListener spotSelectedListener) {
 
         this.mContext = context;
         this.mMap = map;
+        this.spotSelectedListener = spotSelectedListener;
 
         // we can rebuild this map because markers are removed on init
         spotMarkersMap = new HashMap<ParkingSpot, Marker>();
+        markerSpotsMap = new HashMap<Marker, ParkingSpot>();
 
     }
 
@@ -180,6 +184,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         queriedBounds.clear();
         spots.clear();
         spotMarkersMap.clear();
+        markerSpotsMap.clear();
     }
 
     private boolean repeatLastQuery() {
@@ -216,6 +221,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         setUpViewBounds();
 
         if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
+            Log.d(QUERY_TAG, "Abort camera query because view contains user");
             return false;
         }
 
@@ -231,7 +237,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (!shouldBeReset) {
             for (LatLngBounds latLngBounds : queriedBounds) {
                 if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
-                    Log.d(QUERY_TAG, "NO need to query again");
+                    Log.d(QUERY_TAG, "No need to query again camera");
                     return false;
                 }
             }
@@ -240,7 +246,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        areaQuery = new CartoDBParkingSpotsQuery(this);
+        ParkingSpotsQuery areaQuery = new CartoDBParkingSpotsQuery(this);
 
         Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.retrieveLocationsIn(extendedViewBounds);
@@ -315,6 +321,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
                 marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
+                markerSpotsMap.put(marker, parkingSpot);
             }
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
@@ -334,15 +341,23 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      * Remove the markers (only) from the map
      */
     private void clear() {
-        for (Marker marker : spotMarkersMap.values()) {
+        for (Marker marker : markerSpotsMap.keySet()) {
             if (hideMarkers || !viewBounds.contains(marker.getPosition()))
                 marker.setVisible(false);
         }
     }
 
     @Override
+    public boolean onMarkerClick(Marker marker) {
+        ParkingSpot spot = markerSpotsMap.get(marker);
+        spotSelectedListener.onSpotSelected(spot);
+        return true;
+    }
+
+    @Override
     public void onResume() {
         setUpResetTask();
+        doDraw();
     }
 
     @Override
@@ -435,6 +450,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         double nLon = original.longitude + dLon * 180 / Math.PI;
 
         return new LatLng(nLat, nLon);
+    }
+
+    public interface SpotSelectedListener{
+        void onSpotSelected(ParkingSpot spot);
     }
 
 }

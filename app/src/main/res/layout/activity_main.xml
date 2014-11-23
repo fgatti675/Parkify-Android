@@ -18,9 +18,8 @@
         android:layout_height="wrap_content"
         android:text="DETAILS"
         android:id="@+id/details_button"
-        android:layout_marginTop="29dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="24dp" />
+        android:layout_below="@+id/toolbar_actionbar"
+        android:layout_alignParentEnd="true" />
 
 
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -28,7 +27,8 @@
         android:id="@+id/marker_details_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/map"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:visibility="invisible"
         tools:context="com.bahpps.cahue.MarkerDetailsFragment" />
 
