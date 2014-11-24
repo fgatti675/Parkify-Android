@@ -3,6 +3,7 @@ package com.bahpps.cahue.spots;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.bahpps.cahue.R;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
@@ -13,22 +14,16 @@ import java.util.Date;
  */
 public class ParkingSpot implements Parcelable, ClusterItem {
 
-    private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
-    private static long YELLOW_TIME_THRESHOLD_MS = 30 * 60 * 1000;
-    private static long ORANGE_TIME_THRESHOLD_MS = 60 * 60 * 1000;
+    private static long GREEN_TIME_THRESHOLD_MS = 10 * 60 * 1000;
+    private static long YELLOW_TIME_THRESHOLD_MS = 45 * 60 * 1000;
+    private static long ORANGE_TIME_THRESHOLD_MS = 120 * 60 * 1000;
 
     private String id;
-
-    private String markerId;
 
     private LatLng position;
 
     private Date time;
 
-    /**
-     * Is the retrieved spot considered one of the closest to the user.
-     */
-    private boolean closest = false;
 
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
             new Parcelable.Creator<ParkingSpot>() {
@@ -45,10 +40,8 @@ public class ParkingSpot implements Parcelable, ClusterItem {
 
     public ParkingSpot(Parcel parcel) {
         id = parcel.readString();
-        markerId = parcel.readString();
         position = parcel.readParcelable(LatLng.class.getClassLoader());
         time = (Date) parcel.readSerializable();
-        closest = parcel.readByte() != 0;
     }
 
     public ParkingSpot(String id, LatLng location, Date time) {
@@ -57,13 +50,6 @@ public class ParkingSpot implements Parcelable, ClusterItem {
         this.time = time;
     }
 
-    public boolean isClosest() {
-        return closest;
-    }
-
-    public void setClosest(boolean closest) {
-        this.closest = closest;
-    }
 
     @Override
     public int describeContents() {
@@ -73,10 +59,8 @@ public class ParkingSpot implements Parcelable, ClusterItem {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
-        parcel.writeString(markerId);
         parcel.writeParcelable(position, 0);
         parcel.writeSerializable(time);
-        parcel.writeByte((byte) (closest ? 1 : 0));
     }
 
     @Override
@@ -115,9 +99,6 @@ public class ParkingSpot implements Parcelable, ClusterItem {
         return position;
     }
 
-    public String getMarkerId() {
-        return markerId;
-    }
 
     public Date getTime() {
         return time;
@@ -145,19 +126,25 @@ public class ParkingSpot implements Parcelable, ClusterItem {
      */
     public static enum Type {
 
-        red(0.02F), yellow(0.03F), orange(0.04F), green(0.06F);
+        red(0.02F, R.color.marker_red),
+        orange(0.04F, R.color.marker_orange),
+        yellow(0.03F, R.color.marker_yellow),
+        green(0.06F, R.color.marker_green);
 
         /**
          * Difference in alpha values per frame when the marker is included in the map
          */
-        final float dAlpha;
+        public final float dAlpha;
 
-        Type(float dAlpha) {
+        /**
+         * Resource color representing
+         */
+        public final int colorId;
+
+        Type(float dAlpha, int colorId) {
             this.dAlpha = dAlpha;
+            this.colorId = colorId;
         }
 
-        public float getDAlpha() {
-            return dAlpha;
-        }
     }
 }

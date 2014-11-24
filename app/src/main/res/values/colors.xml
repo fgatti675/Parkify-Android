@@ -34,8 +34,8 @@
 
     <color name="theme_accent_2">#ff8f75</color>
 
-    <color name="marker_red">#caff522a</color>
-    <color name="marker_orange">#ffffd65b</color>
+    <color name="marker_red">#ffff6031</color>
+    <color name="marker_orange">#ffffcf49</color>
     <color name="marker_yellow">#ffe6ff1d</color>
     <color name="marker_green">#FF02EDAF</color>
 

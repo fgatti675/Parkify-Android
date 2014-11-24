@@ -72,7 +72,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private Context mContext;
     private SpotSelectedListener spotSelectedListener;
 
-    // in the next fetching of spots, clear the previous state
+    // In the next spots update, clear the previous state
     private boolean shouldBeReset = false;
 
     private List<LatLngBounds> queriedBounds = new CopyOnWriteArrayList<LatLngBounds>();
@@ -86,7 +86,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     /**
      * If markers shouldn't be displayed (like zoom is too far)
      */
-    private boolean hideMarkers = false;
+    private boolean markersDisplayed = false;
 
     // location used as a center fos nearby spots query
     private LatLng userQueryLocation;
@@ -181,6 +181,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     private void reset() {
         Log.d(TAG, "Spots reset");
+        for (Marker marker : markerSpotsMap.keySet()) {
+            marker.remove();
+        }
         queriedBounds.clear();
         spots.clear();
         spotMarkersMap.clear();
@@ -276,6 +279,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             reset();
             shouldBeReset = false;
         }
+
+        /**
+         * We can consider that after an update, all
+         */
         if (!parkingSpots.isEmpty()) {
             LatLngBounds.Builder builder = LatLngBounds.builder();
             for (ParkingSpot spot : parkingSpots) {
@@ -283,6 +290,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             }
             queriedBounds.add(builder.build());
         }
+
         spots.addAll(parkingSpots);
 
         doDraw();
@@ -292,7 +300,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      * On getting an error when retrieving spots
      */
     @Override
-    public void onError(ParkingSpotsQuery query) {
+    public void onSpotsUpdateError(ParkingSpotsQuery query) {
         // do something if there is an error
         Toast.makeText(mContext, "Check internet connection", Toast.LENGTH_SHORT).show();
     }
@@ -300,10 +308,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     public void doDraw() {
 
-        // clear first
-        clear();
+        // hideMarkers first
+        hideMarkers();
 
-        if (hideMarkers) return;
+        if (!markersDisplayed) {
+            Log.d(TAG, "Abort drawing spots. Markers are hidden");
+            return;
+        }
 
         Log.d(TAG, "Drawing spots");
 
@@ -338,11 +349,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
 
     /**
-     * Remove the markers (only) from the map
+     * Hide non visible markers (outside of viewport)
      */
-    private void clear() {
+    private void hideMarkers() {
         for (Marker marker : markerSpotsMap.keySet()) {
-            if (hideMarkers || !viewBounds.contains(marker.getPosition()))
+            if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
                 marker.setVisible(false);
         }
     }
@@ -350,7 +361,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     @Override
     public boolean onMarkerClick(Marker marker) {
         ParkingSpot spot = markerSpotsMap.get(marker);
-        spotSelectedListener.onSpotSelected(spot);
+        if (spot != null)
+            spotSelectedListener.onSpotSelected(spot);
         return true;
     }
 
@@ -369,10 +381,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {
 
         marker.setVisible(true);
-
-        final float dAlpha  = spot.getMarkerType().dAlpha;
-
+        final float dAlpha = spot.getMarkerType().dAlpha;
         marker.setAlpha(0);
+
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -403,14 +414,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             queryCameraView();
 
-            showMarkers();
+            markersDisplayed = true;
         }
         /**
          * Too far
          */
         else {
             Log.d(TAG, "Too far to query locations");
-            hideMarkers();
+            markersDisplayed = false;
         }
 
         markAsDirty();
@@ -431,14 +442,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
 
-    private void hideMarkers() {
-        hideMarkers = true;
-    }
-
-    private void showMarkers() {
-        hideMarkers = false;
-    }
-
     public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
 
         // Coordinate offsets in radians
@@ -452,7 +455,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         return new LatLng(nLat, nLon);
     }
 
-    public interface SpotSelectedListener{
+    public interface SpotSelectedListener {
         void onSpotSelected(ParkingSpot spot);
     }
 

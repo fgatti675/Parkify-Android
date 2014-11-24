@@ -66,7 +66,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
 
         if (error)
-            listener.onError(this);
+            listener.onSpotsUpdateError(this);
 
         Log.d("ParkingSpotsQuery", parkingSpots.toString());
         super.onPostExecute(parkingSpots);
@@ -80,6 +80,6 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     public interface ParkingSpotsUpdateListener {
         void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots);
 
-        void onError(ParkingSpotsQuery query);
+        void onSpotsUpdateError(ParkingSpotsQuery query);
     }
 }

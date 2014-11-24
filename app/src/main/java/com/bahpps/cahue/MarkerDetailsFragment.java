@@ -1,13 +1,20 @@
 package com.bahpps.cahue;
 
 import android.app.Activity;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.format.DateUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.spots.ParkingSpot;
@@ -58,18 +65,25 @@ public class MarkerDetailsFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if(spot != null) {
-            TextView timeAgo = (TextView) getView().findViewById(R.id.time);
-            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.getTime().getTime()));
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_marker_details, container, false);
+        View view = inflater.inflate(R.layout.fragment_marker_details, container, false);
+        if (spot != null) {
+            // Set time ago
+            TextView timeAgo = (TextView) view.findViewById(R.id.time);
+            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.getTime().getTime()));
+
+            // Set rectangle color
+            ImageView rectangleImage = (ImageView) view.findViewById(R.id.spot_image);
+            GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
+            gradientDrawable.setStroke(20, getResources().getColor(spot.getMarkerType().colorId));
+        }
+        return view;
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = getActivity().getResources().getDisplayMetrics();
+        return dp * displayMetrics.densityDpi ;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

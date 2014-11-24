@@ -85,7 +85,6 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
                     double longitude = coordinates.getDouble(0);
 
                     ParkingSpot spot = new ParkingSpot(id, new LatLng(latitude, longitude), date);
-                    if (mode == Mode.closestSpots) spot.setClosest(true);
                     spots.add(spot);
                 }
             } catch (JSONException e) {
@@ -107,7 +106,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
             return String.format(
                     Locale.ENGLISH,
-                    "SELECT * FROM %s " +
+                    "SELECT created_at, id, the_geom FROM %s " +
                             "WHERE the_geom && ST_MakeEnvelope(%f, %f, %f, %f, 4326)",
                     getTableId(),
                     latLngBounds.southwest.longitude,
@@ -122,7 +121,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
 
             return String.format(
                     Locale.ENGLISH,
-                    "SELECT * FROM %s " +
+                    "SELECT created_at, id, the_geom FROM %s " +
                             "ORDER BY the_geom <-> ST_SetSRID(ST_Point(%f, %f),4326) " +
                             "LIMIT %d",
                     getTableId(),

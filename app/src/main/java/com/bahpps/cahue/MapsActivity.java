@@ -219,21 +219,8 @@ public class MapsActivity extends ActionBarActivity
          * Details
          */
         detailsContainer = (FrameLayout) findViewById(R.id.marker_details_container);
-        Button detailsButton = (Button) findViewById(R.id.details_button);
 
         markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
-        if (markerDetailsFragment == null) {
-            markerDetailsFragment = new MarkerDetailsFragment();
-            markerDetailsFragment.setRetainInstance(true);
-
-        }
-
-        detailsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDetails();
-            }
-        });
 
         if(detailsDisplayed) detailsContainer.setVisibility(View.VISIBLE);
 

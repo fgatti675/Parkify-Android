@@ -13,14 +13,6 @@
         android:id="@+id/map"
         class="com.google.android.gms.maps.MapFragment" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DETAILS"
-        android:id="@+id/details_button"
-        android:layout_below="@+id/toolbar_actionbar"
-        android:layout_alignParentEnd="true" />
-
 
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
