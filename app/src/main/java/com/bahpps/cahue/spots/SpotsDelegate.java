@@ -92,6 +92,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private LatLng userQueryLocation;
     private ParkingSpotsQuery nearbyQuery;
 
+    private ParkingSpot selectedSpot;
+
 
     public static final Parcelable.Creator<SpotsDelegate> CREATOR =
             new Parcelable.Creator<SpotsDelegate>() {
@@ -121,6 +123,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         viewBounds = parcel.readParcelable(classLoader);
         shouldBeReset = parcel.readByte() != 0;
         lastResetTaskRequestTime = (Date) parcel.readSerializable();
+        selectedSpot = parcel.readParcelable(classLoader);
     }
 
 
@@ -138,6 +141,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         parcel.writeParcelable(viewBounds, 0);
         parcel.writeByte((byte) (shouldBeReset ? 1 : 0));
         parcel.writeSerializable(lastResetTaskRequestTime);
+        parcel.writeParcelable(selectedSpot, 0);
     }
 
 
@@ -328,7 +332,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             Marker marker = spotMarkersMap.get(parkingSpot);
 
             if (marker == null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext);
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
                 marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
@@ -360,10 +364,31 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        ParkingSpot spot = markerSpotsMap.get(marker);
-        if (spot != null)
-            spotSelectedListener.onSpotSelected(spot);
+
+        clearSelectedSpot();
+
+        // apply new style and tell listener
+        selectedSpot = markerSpotsMap.get(marker);
+        if (selectedSpot != null) {
+            Marker selectedMarker = spotMarkersMap.get(selectedSpot);
+            selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot, mContext, true));
+            selectedMarker.showInfoWindow();
+
+            spotSelectedListener.onSpotSelected(selectedSpot);
+        }
         return true;
+    }
+
+    private void clearSelectedSpot() {
+        // clear previous selection
+        if (selectedSpot != null) {
+            Marker previousMarker = spotMarkersMap.get(selectedSpot);
+
+            // we may have restored the selected spot but it may not have been drawn (like on device rotation)
+            if (previousMarker != null)
+                previousMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot, mContext, false));
+        }
+        selectedSpot = null;
     }
 
     @Override
@@ -376,6 +401,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     public void onPause() {
         Log.d(TAG, "scheduledResetTask canceled");
         scheduledResetTask.cancel(true);
+    }
+
+    @Override
+    public void onDetailsClosed(){
+        clearSelectedSpot();
     }
 
     private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {

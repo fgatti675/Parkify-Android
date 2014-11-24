@@ -25,6 +25,6 @@
         android:id="@+id/imageButton"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/text"
-        android:src="@drawable/ic_action_location_found" />
+        android:src="@drawable/ic_action_favorite" />
 
 </RelativeLayout>

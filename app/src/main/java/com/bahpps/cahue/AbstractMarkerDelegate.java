@@ -38,6 +38,13 @@ public abstract class AbstractMarkerDelegate {
     }
 
     /**
+     * Called when the details view is closed
+     */
+    public void onDetailsClosed(){
+
+    }
+
+    /**
      * Called when a marker is clicked
      * @param marker
      * @return

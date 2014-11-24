@@ -1,23 +1,24 @@
 package com.bahpps.cahue;
 
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.GradientDrawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.format.DateUtils;
-import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.spots.ParkingSpot;
+
+import java.util.Locale;
 
 
 /**
@@ -25,15 +26,17 @@ import com.bahpps.cahue.spots.ParkingSpot;
  * Activities that contain this fragment must implement the
  * {@link MarkerDetailsFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link MarkerDetailsFragment#newInstance} factory method to
+ * Use the {@link MarkerDetailsFragment#create} factory method to
  * create an instance of this fragment.
  */
 public class MarkerDetailsFragment extends Fragment {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    // the fragment initialization parameters
     private static final String ARG_SPOT = "arg_spot";
+    private static final String ARG_LOCATION = "arg_location";
 
-    private static ParkingSpot spot;
+    private Location userLocation;
+    private ParkingSpot spot;
 
     private OnFragmentInteractionListener mListener;
 
@@ -44,10 +47,11 @@ public class MarkerDetailsFragment extends Fragment {
      * @param spot Parameter 1.
      * @return A new instance of fragment MarkerDetailsFragment.
      */
-    public static MarkerDetailsFragment newInstance(ParkingSpot spot) {
+    public static MarkerDetailsFragment create(ParkingSpot spot, Location userLocation) {
         MarkerDetailsFragment fragment = new MarkerDetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_SPOT, spot);
+        args.putParcelable(ARG_LOCATION, userLocation);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,6 +65,7 @@ public class MarkerDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             spot = getArguments().getParcelable(ARG_SPOT);
+            userLocation = getArguments().getParcelable(ARG_LOCATION);
         }
     }
 
@@ -69,21 +74,28 @@ public class MarkerDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_marker_details, container, false);
         if (spot != null) {
+
             // Set time ago
             TextView timeAgo = (TextView) view.findViewById(R.id.time);
             timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.getTime().getTime()));
 
+            // Update distance
+            TextView distance = (TextView) view.findViewById(R.id.distance);
+            updateDistance(distance);
+
             // Set rectangle color
             ImageView rectangleImage = (ImageView) view.findViewById(R.id.spot_image);
             GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
-            gradientDrawable.setStroke(20, getResources().getColor(spot.getMarkerType().colorId));
+            gradientDrawable.setStroke((int) dpToPx(8), getResources().getColor(spot.getMarkerType().colorId));
+
+            Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
+            view.startAnimation(fadeInAnimation);
         }
         return view;
     }
 
-    public int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = getActivity().getResources().getDisplayMetrics();
-        return dp * displayMetrics.densityDpi ;
+    public float dpToPx(int dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -93,6 +105,21 @@ public class MarkerDetailsFragment extends Fragment {
         }
     }
 
+    public void setUserLocation(Location userLocation) {
+        this.userLocation = userLocation;
+        TextView distance = (TextView) getView().findViewById(R.id.distance);
+        updateDistance(distance);
+    }
+
+    private void updateDistance(TextView textView) {
+        if (userLocation != null) {
+            Location spotLocation = new Location("spot");
+            spotLocation.setLatitude(spot.getPosition().latitude);
+            spotLocation.setLongitude(spot.getPosition().longitude);
+            float distanceM = spotLocation.distanceTo(userLocation);
+            textView.setText(String.format("%.1f km", distanceM / 1000));
+        }
+    }
 
     @Override
     public void onAttach(Activity activity) {

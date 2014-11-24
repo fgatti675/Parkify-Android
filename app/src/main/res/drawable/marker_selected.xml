@@ -6,7 +6,11 @@
     <solid
         android:color="@color/marker_green"/>
 
+    <stroke
+        android:width="4dp"
+        android:color="@color/white" />
+
     <size
-        android:width="@dimen/marker_diameter"
-        android:height="@dimen/marker_diameter"/>
+        android:width="@dimen/marker_diameter_selected"
+        android:height="@dimen/marker_diameter_selected"/>
 </shape>

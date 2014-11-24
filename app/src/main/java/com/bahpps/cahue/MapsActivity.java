@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -119,7 +118,6 @@ public class MapsActivity extends ActionBarActivity
     private boolean detailsDisplayed = false;
 
 
-
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -160,8 +158,9 @@ public class MapsActivity extends ActionBarActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 5);
 
-        toolbar.setNavigationIcon(R.drawable.ic_logo);
-        toolbar.setTitle(R.string.app_name);
+        toolbar.setLogo(R.drawable.cahue_logo);
+//        toolbar.setNavigationIcon(R.drawable.ic_logo);
+//        toolbar.setTitle(R.string.app_name);
 //        toolbar.setSubtitle("Subtitle");
 
         toolbar.inflateMenu(R.menu.main_menu);
@@ -222,7 +221,7 @@ public class MapsActivity extends ActionBarActivity
 
         markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
-        if(detailsDisplayed) detailsContainer.setVisibility(View.VISIBLE);
+        if (detailsDisplayed) detailsContainer.setVisibility(View.VISIBLE);
 
         /**
          * Preferences
@@ -308,10 +307,7 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onBackPressed() {
         if (detailsDisplayed) {
-//            FragmentManager fragMan = getFragmentManager();
-//            FragmentTransaction fragTransaction = fragMan.beginTransaction();
-//            fragTransaction.remove(markerDetailsFragment);
-//            fragTransaction.commit();
+            for (AbstractMarkerDelegate delegate : delegates) delegate.onDetailsClosed();
             hideDetails();
         } else {
             super.onBackPressed();
@@ -619,9 +615,12 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onLocationChanged(Location location) {
 
-        for(AbstractMarkerDelegate delegate: delegates){
+        for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onLocationChanged(location);
         }
+
+        if (markerDetailsFragment != null)
+            markerDetailsFragment.setUserLocation(location);
 
         /**
          * Set initial zoom level
@@ -691,9 +690,13 @@ public class MapsActivity extends ActionBarActivity
     }
 
     private LatLng getUserLatLng() {
-        Location userLastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        Location userLastLocation = getUserLocation();
         if (userLastLocation == null) return null;
         return new LatLng(userLastLocation.getLatitude(), userLastLocation.getLongitude());
+    }
+
+    private Location getUserLocation() {
+        return LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
     }
 
 
@@ -707,7 +710,7 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        for(AbstractMarkerDelegate delegate:delegates){
+        for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onMarkerClick(marker);
         }
         return false;
@@ -773,10 +776,10 @@ public class MapsActivity extends ActionBarActivity
 
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
-        if(markerDetailsFragment != null)
+        if (markerDetailsFragment != null)
             fragTransaction.remove(markerDetailsFragment);
 
-        markerDetailsFragment = MarkerDetailsFragment.newInstance(spot);
+        markerDetailsFragment = MarkerDetailsFragment.create(spot, getUserLocation());
         markerDetailsFragment.setRetainInstance(true);
 
         fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
