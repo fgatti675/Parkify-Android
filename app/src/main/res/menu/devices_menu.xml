@@ -3,6 +3,6 @@
     <item
         android:id="@+id/action_remove_link"
         android:title="@string/remove_link"
-        android:icon="@drawable/ic_action_remove"
+        android:icon="@drawable/ic_action_clear"
         android:showAsAction="withText" />
 </menu>
