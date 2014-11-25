@@ -173,7 +173,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
                         Log.d(TAG, "scheduledResetTask run");
                         lastResetTaskRequestTime = new Date();
                         shouldBeReset = true;
-                        Toast.makeText(mContext, "Reset task fired", Toast.LENGTH_SHORT).show();
                         repeatLastQuery();
                     }
                 },
@@ -210,8 +209,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         Log.d(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
         nearbyQuery.retrieveNearbySpots(userLocation, CLOSEST_LOCATIONS);
-
-        Toast.makeText(mContext, "queryClosestSpots", Toast.LENGTH_SHORT).show();
 
         return true;
     }
@@ -257,8 +254,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.retrieveLocationsIn(extendedViewBounds);
-
-        Toast.makeText(mContext, "queryCameraView", Toast.LENGTH_SHORT).show();
 
         return true;
 
@@ -333,7 +328,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             if (marker == null) {
                 BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
-                marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition));
+                marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);
@@ -385,8 +380,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             Marker previousMarker = spotMarkersMap.get(selectedSpot);
 
             // we may have restored the selected spot but it may not have been drawn (like on device rotation)
-            if (previousMarker != null)
-                previousMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot, mContext, false));
+            if (previousMarker != null) {
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(selectedSpot, mContext, false);
+                previousMarker.setIcon(markerBitmap);
+            }
         }
         selectedSpot = null;
     }
@@ -404,7 +401,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     @Override
-    public void onDetailsClosed(){
+    public void onDetailsClosed() {
         clearSelectedSpot();
     }
 

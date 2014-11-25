@@ -158,7 +158,7 @@ public class MapsActivity extends ActionBarActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 5);
 
-        toolbar.setLogo(R.drawable.cahue_logo);
+//        toolbar.setLogo(R.drawable.cahue_logo);
 //        toolbar.setNavigationIcon(R.drawable.ic_logo);
 //        toolbar.setTitle(R.string.app_name);
 //        toolbar.setSubtitle("Subtitle");

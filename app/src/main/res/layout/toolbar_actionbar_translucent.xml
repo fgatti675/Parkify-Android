@@ -15,11 +15,24 @@
   -->
 
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:iosched="http://schemas.android.com/apk/res-auto"
-    iosched:theme="@style/ActionBarThemeOverlay"
-    iosched:popupTheme="@style/ActionBarPopupThemeOverlay"
+    xmlns:cahue="http://schemas.android.com/apk/res-auto"
+    cahue:theme="@style/ActionBarThemeOverlay"
+    cahue:popupTheme="@style/ActionBarPopupThemeOverlay"
     android:id="@+id/toolbar_actionbar"
     android:background="@color/translucent_actionbar_background"
-    iosched:titleTextAppearance="@style/ActionBar.TitleText"
+    cahue:titleTextAppearance="@style/ActionBar.TitleText"
     android:layout_width="match_parent"
-    android:layout_height="?actionBarSize" />
+    android:layout_height="?actionBarSize"
+    android:gravity="left">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:src="@drawable/cahue_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitStart"
+        android:paddingTop="@dimen/large_padding"
+        android:paddingBottom="@dimen/large_padding">
+    </ImageView>
+
+</android.support.v7.widget.Toolbar>

@@ -36,13 +36,14 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="ActionBarThemeOverlay" parent="">
-        <item name="android:textColorPrimary">#fff</item>
-        <item name="colorControlNormal">?actionBarIconColor</item>
-        <item name="colorControlHighlight">#3fff</item>
+    <style name="ActionBarThemeOverlay">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <!--<item name="colorControlNormal">?actionBarIconColor</item>-->
+        <!--<item name="colorControlHighlight">@color/white</item>-->
     </style>
 
-    <style name="ActionBarPopupThemeOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="ActionBarPopupThemeOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 
     <style name="ActionBar.TitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">#fff</item>

@@ -107,8 +107,11 @@ public class MarkerDetailsFragment extends Fragment {
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
-        TextView distance = (TextView) getView().findViewById(R.id.distance);
-        updateDistance(distance);
+        View view = getView();
+        if(view != null) {
+            TextView distance = (TextView) view.findViewById(R.id.distance);
+            updateDistance(distance);
+        }
     }
 
     private void updateDistance(TextView textView) {
