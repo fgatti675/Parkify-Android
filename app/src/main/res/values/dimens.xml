@@ -5,7 +5,7 @@
     <dimen name="keyline_2">72dp</dimen>
     <dimen name="keyline_2_minus_16dp">56dp</dimen>
 
-    <dimen name="marker_diameter">12dp</dimen>
+    <dimen name="marker_diameter">10dp</dimen>
     <dimen name="marker_diameter_selected">18dp</dimen>
     <dimen name="buttons_margin">20dp</dimen>
     <dimen name="default_padding">8dp</dimen>
