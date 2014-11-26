@@ -6,7 +6,7 @@
     android:paddingTop="@dimen/default_padding"
     android:paddingBottom="@dimen/default_padding"
     android:background="@color/translucent_background"
-    tools:context="com.bahpps.cahue.MarkerDetailsFragment">
+    tools:context="com.bahpps.cahue.SpotDetailsFragment">
 
     <ImageView
         android:id="@+id/spot_image"
@@ -29,13 +29,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/hello_blank_fragment" />
+            android:text="@string/time_stub" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hello_blank_fragment"/>
+            android:text="@string/distance_stub"/>
 
     </LinearLayout>
 

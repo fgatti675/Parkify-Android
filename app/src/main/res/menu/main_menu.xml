@@ -15,16 +15,9 @@
         cahue:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_remove_car"
-        android:title="@string/remove_car"
-        android:icon="@drawable/ic_action_clear"
-        cahue:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_display_help"
         android:title="@string/help"
         android:icon="@drawable/ic_action_help"
         cahue:showAsAction="never" />
-
 
 </menu>

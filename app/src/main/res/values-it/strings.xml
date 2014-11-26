@@ -20,7 +20,7 @@
     <string name="car_not_found">La posizione della macchina non è stata stabilita</string>
     <string name="bt_not_available">Bluetooth non è disponibile</string>
     <string name="bt_linked_to">La posizione della macchina verrà registrata in disconnessione da %1$s</string>
-    <string name="car_was_here">La macchina era qui %1$s fa</string>
+    <string name="car_was_here">La macchina era qui %s</string>
     <string name="car_dialog_text">Ti piacerebbe impostare la posizione della macchina qui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancella</string>
@@ -34,7 +34,7 @@
     <string name="hours">ore</string>
     <string name="day">giorno</string>
     <string name="days">giorni</string>
-    <string name="car">macchina</string>
+    <string name="car">Macchina</string>
 
     <!-- Donations -->
     <string name="donation_intro">Questa applicazione è sostenuta da donazioni solo</string>

@@ -9,6 +9,7 @@ import android.util.Log;
 import com.bahpps.cahue.util.Util;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by francesco on 16.09.2014.
@@ -94,9 +95,9 @@ public class CarLocationManager {
         Log.i(TAG, "Removed location");
     }
 
-    public static long getParkingTime(Context context){
+    public static Date getParkingTime(Context context){
         SharedPreferences prefs = Util.getSharedPreferences(context);
-        return prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0);
+        return new Date(prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0));
     }
 
 
