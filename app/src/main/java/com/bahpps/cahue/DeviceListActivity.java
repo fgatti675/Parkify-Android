@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,7 +41,7 @@ import java.util.Set;
  * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
  * Intent.
  */
-public class DeviceListActivity extends Activity {
+public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemClickListener {
 
     // Debugging
     private static final String TAG = "DeviceListActivity";
@@ -63,10 +65,17 @@ public class DeviceListActivity extends Activity {
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
+        setContentView(R.layout.activity_device_list);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        ViewCompat.setElevation(toolbar, 5);
+
+        toolbar.inflateMenu(R.menu.devices_menu);
+        toolbar.setSubtitle(R.string.select_device_long);
+        toolbar.setOnMenuItemClickListener(this);
+
         prefs = Util.getSharedPreferences(this);
         selectedDeviceAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
-
-        setContentView(R.layout.activity_device_list);
 
         // Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
@@ -108,30 +117,7 @@ public class DeviceListActivity extends Activity {
         overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
     }
 
-    /**
-     * Show menu method
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
 
-        // inflate from xml
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.devices_menu, menu);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.action_remove_link:
-                removeLink();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
     private void removeLink() {
         prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).apply();
@@ -234,6 +220,18 @@ public class DeviceListActivity extends Activity {
             }
         }
     };
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        // Handle presses on the action bar items
+        switch (menuItem.getItemId()) {
+            case R.id.action_remove_link:
+                removeLink();
+                return true;
+            default:
+                return false;
+        }
+    }
 
     class DeviceListAdapter extends BaseAdapter {
 

@@ -26,5 +26,4 @@
         android:icon="@drawable/ic_action_help"
         cahue:showAsAction="never" />
 
-
 </menu>

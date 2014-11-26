@@ -5,7 +5,7 @@
 
     <!-- DeviceListActivity -->
     <string name="scanning">Buscando dispositivos...</string>
-    <string name="select_device">Selecciona un dispositivo para vincularlo con la aplicacion.</string>
+    <string name="select_device_long">Selecciona un dispositivo para vincularlo con la aplicacion.</string>
     <string name="none_paired">No se ha vinculado ningun dispositivo.</string>
     <string name="none_found">No se han encontrado dispositivos.</string>
     <string name="button_scan">Busca otros dispositivos</string>

@@ -40,7 +40,7 @@
     <color name="marker_yellow">#ffe6ff1d</color>
     <color name="marker_green">#FF02EDAF</color>
 
-    <color name="translucent_actionbar_background">#b80b2d38</color>
+    <color name="translucent_actionbar_background">#c50b2d38</color>
     <color name="translucent_background">#d9eeeeee</color>
 
     <!--<color name="all_track_color">#ff222222</color>-->

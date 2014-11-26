@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:gravity="center"
-    android:paddingTop="?android:attr/actionBarSize" >
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/top"
+    <include layout="@layout/toolbar_actionbar" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp" >
+        android:padding="@dimen/large_padding">
 
         <TextView
             android:id="@+id/title_dialog"
-            android:padding="10dp"
+            android:padding="@dimen/large_padding"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_device" />
+            android:text="@string/select_device_long" />
 
         <ListView
             android:id="@+id/paired_devices"
@@ -27,6 +28,5 @@
             android:stackFromBottom="true" />
 
     </LinearLayout>
+</LinearLayout>
 
-
-</RelativeLayout>

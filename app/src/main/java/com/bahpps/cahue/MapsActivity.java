@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -113,7 +114,7 @@ public class MapsActivity extends ActionBarActivity
 
     private SharedPreferences prefs;
 
-    private FrameLayout detailsContainer;
+    private View detailsContainer;
     private MarkerDetailsFragment markerDetailsFragment;
     private boolean detailsDisplayed = false;
 
@@ -158,11 +159,6 @@ public class MapsActivity extends ActionBarActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 5);
 
-//        toolbar.setLogo(R.drawable.cahue_logo);
-//        toolbar.setNavigationIcon(R.drawable.ic_logo);
-//        toolbar.setTitle(R.string.app_name);
-//        toolbar.setSubtitle("Subtitle");
-
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
 
@@ -182,7 +178,7 @@ public class MapsActivity extends ActionBarActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
         /**
-         * There is no saved instance so we create a few thigs
+         * There is no saved instance so we create a few things
          */
         if (savedInstanceState == null) {
             // First incarnation of this activity.
@@ -217,7 +213,7 @@ public class MapsActivity extends ActionBarActivity
         /**
          * Details
          */
-        detailsContainer = (FrameLayout) findViewById(R.id.marker_details_container);
+        detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
 
         markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 

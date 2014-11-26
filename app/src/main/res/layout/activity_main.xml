@@ -14,7 +14,7 @@
         class="com.google.android.gms.maps.MapFragment" />
 
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/marker_details_container"
         android:layout_width="match_parent"

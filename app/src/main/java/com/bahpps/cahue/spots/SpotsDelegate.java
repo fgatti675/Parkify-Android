@@ -54,7 +54,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private final static int CLOSEST_LOCATIONS = 200;
 
     // max number of spots displayed at once
-    private static final int MARKERS_LIMIT = 100;
+    private static final int MARKERS_LIMIT = 80;
 
     private final Handler handler = new Handler();
 
@@ -451,7 +451,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             markersDisplayed = false;
         }
 
-        markAsDirty();
+       doDraw();
 
     }
 

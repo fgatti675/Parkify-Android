@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!--<item name="actionBarIconColor">#fff</item>-->
         <!--<item name="actionBarInsetStart">@dimen/keyline_2</item>-->
         <!--&lt;!&ndash;<item name="homeAsUpIndicator">@drawable/ic_up</item>&ndash;&gt;-->
@@ -16,7 +16,7 @@
 
         <item name="android:textColorLink">@color/theme_accent_2</item>
 
-        <!--<item name="windowActionBar">false</item>-->
+        <item name="windowActionBar">false</item>
         <!--<item name="android:windowNoTitle">true</item>-->
 
         <!--<item name="android:windowContentOverlay">@null</item>-->
