@@ -3,6 +3,7 @@ package com.bahpps.cahue.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,6 +64,8 @@ public class Util {
 		return context.getSharedPreferences("CAHUE", Context.MODE_WORLD_READABLE);
 	}
 
-
+    public static float dpToPx(Context context, int dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
 
 }

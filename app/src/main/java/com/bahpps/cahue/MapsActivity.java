@@ -64,6 +64,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MapsActivity extends ActionBarActivity
@@ -76,7 +77,9 @@ public class MapsActivity extends ActionBarActivity
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
         Toolbar.OnMenuItemClickListener,
-        SpotsDelegate.SpotSelectedListener {
+        SpotsDelegate.SpotSelectedListener,
+        ParkedCarDelegate.CarSelectedListener,
+        CarDetailsFragment.OnCarPositionDeletedListener {
 
     protected static final String TAG = "Maps";
 
@@ -115,7 +118,7 @@ public class MapsActivity extends ActionBarActivity
     private SharedPreferences prefs;
 
     private View detailsContainer;
-    private MarkerDetailsFragment markerDetailsFragment;
+    private DetailsFragment detailsFragment;
     private boolean detailsDisplayed = false;
 
 
@@ -215,7 +218,7 @@ public class MapsActivity extends ActionBarActivity
          */
         detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
 
-        markerDetailsFragment = (MarkerDetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
+        detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
         if (detailsDisplayed) detailsContainer.setVisibility(View.VISIBLE);
 
@@ -238,7 +241,7 @@ public class MapsActivity extends ActionBarActivity
         setUpMapListeners();
 
         spotsDelegate.init(this, mMap, this);
-        parkedCarDelegate.init(this, mMap, null);
+        parkedCarDelegate.init(this, mMap, null, this);
 
         delegates.add(parkedCarDelegate);
         delegates.add(spotsDelegate);
@@ -615,8 +618,8 @@ public class MapsActivity extends ActionBarActivity
             delegate.onLocationChanged(location);
         }
 
-        if (markerDetailsFragment != null)
-            markerDetailsFragment.setUserLocation(location);
+        if (detailsFragment != null)
+            detailsFragment.setUserLocation(location);
 
         /**
          * Set initial zoom level
@@ -734,9 +737,6 @@ public class MapsActivity extends ActionBarActivity
             case R.id.action_display_help:
                 showHelpDialog();
                 return true;
-            case R.id.action_remove_car:
-                removeCar();
-                return true;
             case R.id.action_donate:
                 openDonationDialog();
                 return true;
@@ -768,19 +768,38 @@ public class MapsActivity extends ActionBarActivity
     }
 
     @Override
-    public void onSpotSelected(ParkingSpot spot) {
+    public void onSpotClicked(ParkingSpot spot) {
+        setDetailsFragment(SpotDetailsFragment.newInstance(spot, getUserLocation()));
+    }
 
+    @Override
+    public void onCarClicked(Location carLocation, Date parkingTime) {
+        setDetailsFragment(CarDetailsFragment.newInstance(carLocation, parkingTime));
+    }
+
+    /**
+     * Set the details fragment
+     * @param fragment
+     */
+    private void setDetailsFragment(DetailsFragment fragment){
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
-        if (markerDetailsFragment != null)
-            fragTransaction.remove(markerDetailsFragment);
+        if (detailsFragment != null)
+            fragTransaction.remove(detailsFragment);
 
-        markerDetailsFragment = MarkerDetailsFragment.create(spot, getUserLocation());
-        markerDetailsFragment.setRetainInstance(true);
+        detailsFragment = fragment;
+        detailsFragment.setRetainInstance(true);
+        detailsFragment.setUserLocation(getUserLocation());
 
-        fragTransaction.add(detailsContainer.getId(), markerDetailsFragment, DETAILS_FRAGMENT_TAG);
+        fragTransaction.add(detailsContainer.getId(), detailsFragment, DETAILS_FRAGMENT_TAG);
         fragTransaction.commit();
 
         showDetails();
+    }
+
+    @Override
+    public void onCarPositionDeleted() {
+        parkedCarDelegate.removeCar();
+        hideDetails();
     }
 }

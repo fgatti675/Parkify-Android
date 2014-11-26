@@ -3,21 +3,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/large_padding"
-    android:paddingTop="@dimen/default_padding"
-    android:paddingBottom="@dimen/default_padding"
     android:background="@color/translucent_background"
-    tools:context="com.bahpps.cahue.MarkerDetailsFragment">
+    tools:context="com.bahpps.cahue.SpotDetailsFragment">
 
     <ImageView
         android:id="@+id/spot_image"
-        android:layout_width="35dp"
-        android:layout_height="48.5dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
         android:src="@drawable/spot_rectangle"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true" />
 
     <LinearLayout
-        android:padding="@dimen/default_padding"
+        android:paddingLeft="@dimen/large_padding"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,13 +29,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/hello_blank_fragment" />
+            android:text="@string/time_stub" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hello_blank_fragment"/>
+            android:text="@string/distance_stub"/>
 
     </LinearLayout>
 

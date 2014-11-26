@@ -33,6 +33,7 @@ import org.w3c.dom.Document;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,6 +60,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     private GoogleMap mMap;
     private ImageButton carButton;
+    private CarSelectedListener carSelectedListener;
 
     private Location carLocation;
     private Location userLocation;
@@ -121,10 +123,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         directionPoints = Arrays.asList(directionsArray);
     }
 
-    public void init(Context context, GoogleMap map, ImageButton carButton) {
+    public void init(Context context, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
         mContext = context;
         this.mMap = map;
         this.carButton = carButton;
+        this.carSelectedListener = carSelectedListener;
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
 
@@ -202,8 +205,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public void removeCar() {
         carLocation = null;
+        directionPoints.clear();
         CarLocationManager.removeStoredLocation(mContext);
-        doDraw();
+        clear();
     }
 
     private void drawDirections() {
@@ -277,48 +281,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         if (carLocation == null) return null;
         return new LatLng(carLocation.getLatitude(), carLocation.getLongitude());
     }
-
-    /**
-     * This method shows the Toast when the car icon is pressed, telling the user the parking time
-     */
-    private void showCarTimeToast() {
-
-        String toastMsg = mContext.getString(R.string.car_was_here);
-
-        long timeDiff = Calendar.getInstance().getTimeInMillis() - CarLocationManager.getParkingTime(mContext);
-
-        String time = "";
-
-        long seconds = timeDiff / 1000;
-        if (seconds < 60) {
-            time = seconds + " " + mContext.getString(R.string.seconds);
-        } else {
-            long minutes = timeDiff / (60 * 1000);
-            if (minutes < 60) {
-                time = minutes
-                        + (minutes > 1 ? " " + mContext.getString(R.string.minutes) : " "
-                        + mContext.getString(R.string.minute));
-            } else {
-                long hours = timeDiff / (60 * 60 * 1000);
-                if (hours < 24) {
-                    time = hours
-                            + (hours > 1 ? " " + mContext.getString(R.string.hours) : " "
-                            + mContext.getString(R.string.hour));
-                } else {
-                    long days = timeDiff / (24 * 60 * 60 * 1000);
-                    time = days
-                            + (days > 1 ? " " + mContext.getString(R.string.days) : " "
-                            + mContext.getString(R.string.day));
-                }
-            }
-        }
-
-        toastMsg = String.format(toastMsg, time);
-
-        Util.createUpperToast(mContext, toastMsg, Toast.LENGTH_SHORT);
-
-    }
-
 
     public void changeMode() {
         if (mode == null || mode == Mode.FREE) setMode(Mode.FOLLOWING);
@@ -412,7 +374,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
                     .zoom(15.5f)
                     .build()), null);
 
-            showCarTimeToast();
         }
     }
 
@@ -451,7 +412,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
-            showCarTimeToast();
+            carSelectedListener.onCarClicked(carLocation, CarLocationManager.getParkingTime(mContext));
         }
         return false;
     }
@@ -459,6 +420,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public interface CarSelectedListener{
+        public void onCarClicked(Location carLocation, Date parkingTime);
     }
 
 }

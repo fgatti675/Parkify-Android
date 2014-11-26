@@ -39,7 +39,7 @@ public class CarMovedService extends LocationPollerService {
     @Override
     protected boolean checkPreconditions() {
         long now = Calendar.getInstance().getTimeInMillis();
-        long parkingTime = CarLocationManager.getParkingTime(this);
+        long parkingTime = CarLocationManager.getParkingTime(this).getTime();
         return now-parkingTime > MINIMUM_STAY_MS;
     }
 

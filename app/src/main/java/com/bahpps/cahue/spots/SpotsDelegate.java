@@ -369,7 +369,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot, mContext, true));
             selectedMarker.showInfoWindow();
 
-            spotSelectedListener.onSpotSelected(selectedSpot);
+            spotSelectedListener.onSpotClicked(selectedSpot);
         }
         return true;
     }
@@ -483,7 +483,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     public interface SpotSelectedListener {
-        void onSpotSelected(ParkingSpot spot);
+        void onSpotClicked(ParkingSpot spot);
     }
 
 }
