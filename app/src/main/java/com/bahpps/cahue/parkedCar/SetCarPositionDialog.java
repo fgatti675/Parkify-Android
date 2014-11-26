@@ -15,10 +15,10 @@ import com.bahpps.cahue.parkedCar.CarLocationManager;
 /**
  * This class is used as a dialog to ask the user if he is sure to store the location in
  * the indicated place.
- * @author Francesco
  *
+ * @author Francesco
  */
-public class SetCarPositionDialog extends DialogFragment  {
+public class SetCarPositionDialog extends DialogFragment {
 
     Location location;
 
@@ -48,5 +48,19 @@ public class SetCarPositionDialog extends DialogFragment  {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            location = savedInstanceState.getParcelable("location");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("location", location);
+        super.onSaveInstanceState(outState);
     }
 }
