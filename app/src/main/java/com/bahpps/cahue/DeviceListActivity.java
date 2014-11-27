@@ -14,26 +14,20 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,7 +35,7 @@ import java.util.Set;
  * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
  * Intent.
  */
-public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemClickListener {
+public class DeviceListActivity extends Activity {
 
     // Debugging
     private static final String TAG = "DeviceListActivity";
@@ -54,8 +48,7 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
     private BluetoothAdapter mBtAdapter;
     private DeviceListAdapter mDevicesArrayAdapter;
 
-    private String selectedDeviceAddress = "";
-
+    private Set<String> selectedDeviceAddresses;
 
     private SharedPreferences prefs;
 
@@ -63,19 +56,16 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
         setContentView(R.layout.activity_device_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 5);
 
-        toolbar.inflateMenu(R.menu.devices_menu);
         toolbar.setSubtitle(R.string.select_device_long);
-        toolbar.setOnMenuItemClickListener(this);
 
         prefs = Util.getSharedPreferences(this);
-        selectedDeviceAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
+
+        selectedDeviceAddresses = Util.getPairedDevices(this);
 
         // Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
@@ -86,7 +76,6 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
         // Find and set up the ListView for paired devices
         ListView pairedListView = (ListView) findViewById(R.id.paired_devices);
         pairedListView.setAdapter(mDevicesArrayAdapter);
-        pairedListView.setOnItemClickListener(mDeviceClickListener);
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -103,12 +92,9 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
 
         // If there are paired devices, add each one to the ArrayAdapter
-        if (pairedDevices.size() > 0) {
+        if (!pairedDevices.isEmpty()) {
             mDevicesArrayAdapter.setDevices(pairedDevices);
             mDevicesArrayAdapter.notifyDataSetChanged();
-        } else {
-            String noDevices = getResources().getText(R.string.none_paired).toString();
-            // mDevicesArrayAdapter.add(noDevices);
         }
 
         doDiscovery();
@@ -117,13 +103,6 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
         overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
     }
 
-
-
-    private void removeLink() {
-        prefs.edit().remove(BluetoothDetector.PREF_BT_DEVICE_ADDRESS).apply();
-        Util.createUpperToast(this, getString(R.string.link_removed), Toast.LENGTH_SHORT);
-        finish();
-    }
 
     @Override
     protected void onPause() {
@@ -149,10 +128,11 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
      * Start device discover with the BluetoothAdapter
      */
     private void doDiscovery() {
-        Log.d(TAG, "doDiscovery()");
+        Log.d(TAG, "doDiscovery");
 
         // Indicate scanning in the title
-        setProgressBarIndeterminateVisibility(Boolean.TRUE);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.toolbar_actionbar).findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.VISIBLE);
 
         // If we're already discovering, stop it
         if (mBtAdapter.isDiscovering()) {
@@ -163,33 +143,6 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
         mBtAdapter.startDiscovery();
     }
 
-    // The on-click listener for all devices in the ListViews
-    private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            // Cancel discovery because it's costly and we're about to connect
-            mBtAdapter.cancelDiscovery();
-
-            BluetoothDevice device = mDevicesArrayAdapter.getItem(i);
-
-            // Get the device MAC address, which is the last 17 chars in the
-            // View
-            String name = device.getName();
-            String address = device.getAddress();
-
-            Log.d("List", "Clicked: " + name + " " + address);
-
-            prefs.edit().putString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, address).apply();
-
-            // Create the result Intent and include the MAC address
-            Intent intent = new Intent();
-            intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
-            intent.putExtra(EXTRA_DEVICE_NAME, name);
-
-            // Set result and finish this Activity
-            setResult(Activity.RESULT_OK, intent);
-            finish();
-        }
-    };
 
     // The BroadcastReceiver that listens for discovered devices and
     // changes the title when discovery is finished
@@ -211,7 +164,9 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
                 // When discovery is finished, change the Activity title
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
 
-                setProgressBarIndeterminateVisibility(Boolean.FALSE);
+                ProgressBar progressBar = (ProgressBar) findViewById(R.id.toolbar_actionbar).findViewById(R.id.progressBar);
+                progressBar.setVisibility(View.GONE);
+
                 if (mDevicesArrayAdapter.getCount() == 0) {
                     // String noDevices = getResources().getText(
                     // R.string.none_found).toString();
@@ -221,20 +176,8 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
         }
     };
 
-    @Override
-    public boolean onMenuItemClick(MenuItem menuItem) {
-        // Handle presses on the action bar items
-        switch (menuItem.getItemId()) {
-            case R.id.action_remove_link:
-                removeLink();
-                return true;
-            default:
-                return false;
-        }
-    }
 
-    class DeviceListAdapter extends BaseAdapter {
-
+    private class DeviceListAdapter extends BaseAdapter {
 
         ArrayList<BluetoothDevice> mDevices;
 
@@ -264,7 +207,7 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
 
         public View getView(final int position, View convertView, ViewGroup parent) {
 
-            View view;
+            final View view;
 
             // Code for recycling views
             if (convertView == null) {
@@ -274,24 +217,38 @@ public class DeviceListActivity extends Activity implements Toolbar.OnMenuItemCl
                 view = convertView;
             }
 
-            BluetoothDevice device = mDevices.get(position);
+            final BluetoothDevice device = mDevices.get(position);
 
             // We set the visibility of the check image
-            ImageView img = (ImageView) view.findViewById(R.id.imageView1);
-            if (selectedDeviceAddress.equals(device.getAddress())) {
-                img.setVisibility(View.VISIBLE);
-            } else {
-                img.setVisibility(View.INVISIBLE);
-            }
+            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
+            Log.d(TAG, selectedDeviceAddresses.toString());
+            Log.d(TAG, device.getAddress());
+            boolean contains = selectedDeviceAddresses.contains(device.getAddress());
+            Log.d(TAG, "" + contains);
+            checkBox.setChecked(contains);
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-            // We set the name
-            TextView t = (TextView) view.findViewById(R.id.name);
+                    String name = device.getName();
+                    String address = device.getAddress();
 
-            t.setText(device.getName());
+                    if (checkBox.isChecked()) {
+                        selectedDeviceAddresses.add(address);
+                        Log.d(TAG, "Added: " + name + " " + address);
+                    } else {
+                        selectedDeviceAddresses.remove(address);
+                        Log.d(TAG, "Removed: " + name + " " + address);
+                    }
+
+                    prefs.edit().putStringSet(BluetoothDetector.PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
+                }
+            });
+
+            checkBox.setText(device.getName());
 
             return view;
         }
-
     }
 
 }

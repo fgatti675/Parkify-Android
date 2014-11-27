@@ -11,10 +11,12 @@ import com.bahpps.cahue.locationServices.CarMovedService;
 import com.bahpps.cahue.locationServices.ParkedCarService;
 
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BluetoothDetector extends BroadcastReceiver {
 
-    public static final String PREF_BT_DEVICE_ADDRESS = "PREF_BT_DEVICE_ADDRESS";
+    public static final String PREF_BT_DEVICE_ADDRESSES = "PREF_BT_DEVICE_ADDRESSES";
     public static final String PREF_BT_CONNECTION_TIME = "PREF_BT_CONNECTION_TIME";
     public static final String PREF_BT_DISCONNECTION_TIME = "PREF_BT_DISCONNECTION_TIME";
 
@@ -34,11 +36,10 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         // we need to get which BT device the user chose as the one of his car
 
-        SharedPreferences prefs = Util.getSharedPreferences(context);
-        String storedAddress = prefs.getString(PREF_BT_DEVICE_ADDRESS, "");
+        Set<String> storedAddress = Util.getPairedDevices(context);
 
         // If the device we just disconnected from is our chosen one
-        if (device.getAddress().equals(storedAddress)) {
+        if (storedAddress.contains(device.getAddress())) {
 
             Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 

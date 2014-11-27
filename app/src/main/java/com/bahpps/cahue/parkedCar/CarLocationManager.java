@@ -6,10 +6,14 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
+import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by francesco on 16.09.2014.

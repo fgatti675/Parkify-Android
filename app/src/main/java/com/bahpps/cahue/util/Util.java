@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.bahpps.cahue.R;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Util {
 
 	/*
@@ -66,6 +69,12 @@ public class Util {
 
     public static float dpToPx(Context context, int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
+
+
+    public static Set<String> getPairedDevices(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getStringSet(BluetoothDetector.PREF_BT_DEVICE_ADDRESSES, new HashSet<String>());
     }
 
 }

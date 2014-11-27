@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -325,9 +324,6 @@ public class MapsActivity extends ActionBarActivity
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
 
-        // bt adress on the linked device
-        String btAddress = prefs.getString(BluetoothDetector.PREF_BT_DEVICE_ADDRESS, "");
-
         googleApiClient.connect();
 
         for (AbstractMarkerDelegate delegate : delegates) {
@@ -335,7 +331,6 @@ public class MapsActivity extends ActionBarActivity
         }
 
         drawIfNecessary();
-
 
     }
 
