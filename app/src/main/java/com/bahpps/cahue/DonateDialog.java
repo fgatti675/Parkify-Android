@@ -1,6 +1,5 @@
 package com.bahpps.cahue;
 
-import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -14,7 +13,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -22,7 +20,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.google.android.gms.auth.GoogleAuthUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +72,7 @@ public class DonateDialog extends DialogFragment {
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        final LinearLayout view = (LinearLayout) inflater.inflate(R.layout.donate_dialog, null);
+        final LinearLayout view = (LinearLayout) inflater.inflate(R.layout.dialog_donate, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 

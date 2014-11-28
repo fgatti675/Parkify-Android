@@ -16,10 +16,6 @@ import java.util.Set;
 
 public class BluetoothDetector extends BroadcastReceiver {
 
-    public static final String PREF_BT_DEVICE_ADDRESSES = "PREF_BT_DEVICE_ADDRESSES";
-    public static final String PREF_BT_CONNECTION_TIME = "PREF_BT_CONNECTION_TIME";
-    public static final String PREF_BT_DISCONNECTION_TIME = "PREF_BT_DISCONNECTION_TIME";
-
 
     BluetoothDevice device;
 
@@ -55,12 +51,6 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         Log.d("Bluetooth", "onBtConnected");
 
-        // we store the time the bt device was disconnected
-        Util.getSharedPreferences(context)
-                .edit()
-                .putLong(PREF_BT_CONNECTION_TIME, (new GregorianCalendar().getTimeInMillis()))
-                .apply();
-
         // we create an intent to start the location poller service, as declared in manifest
         Intent i = new Intent();
         i.setClass(context,CarMovedService.class);
@@ -72,12 +62,6 @@ public class BluetoothDetector extends BroadcastReceiver {
     public void onBtDisconnected(Context context) {
 
         Log.d("Bluetooth", "onBtDisconnected");
-
-        // we store the time the bt device was disconnected
-        Util.getSharedPreferences(context)
-                .edit()
-                .putLong(PREF_BT_DISCONNECTION_TIME, (new GregorianCalendar().getTimeInMillis()))
-                .apply();
 
         // we create an intent to start the location poller service, as declared in manifest
         Intent i = new Intent();

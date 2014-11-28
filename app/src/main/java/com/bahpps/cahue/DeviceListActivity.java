@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
@@ -16,15 +15,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
@@ -50,7 +45,6 @@ public class DeviceListActivity extends Activity {
 
     private Set<String> selectedDeviceAddresses;
 
-    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +57,7 @@ public class DeviceListActivity extends Activity {
 
         toolbar.setSubtitle(R.string.select_device_long);
 
-        prefs = Util.getSharedPreferences(this);
-
         selectedDeviceAddresses = Util.getPairedDevices(this);
-
-        // Set result CANCELED in case the user backs out
-        setResult(Activity.RESULT_CANCELED);
 
         // Initialize array adapter
         mDevicesArrayAdapter = new DeviceListAdapter();
@@ -161,8 +150,11 @@ public class DeviceListActivity extends Activity {
                     mDevicesArrayAdapter.add(device);
                     mDevicesArrayAdapter.notifyDataSetChanged();
                 }
-                // When discovery is finished, change the Activity title
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+
+            }
+
+            // When discovery is finished, remove progress bar
+            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
 
                 ProgressBar progressBar = (ProgressBar) findViewById(R.id.toolbar_actionbar).findViewById(R.id.progressBar);
                 progressBar.setVisibility(View.GONE);
@@ -221,10 +213,7 @@ public class DeviceListActivity extends Activity {
 
             // We set the visibility of the check image
             final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
-            Log.d(TAG, selectedDeviceAddresses.toString());
-            Log.d(TAG, device.getAddress());
             boolean contains = selectedDeviceAddresses.contains(device.getAddress());
-            Log.d(TAG, "" + contains);
             checkBox.setChecked(contains);
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -241,7 +230,8 @@ public class DeviceListActivity extends Activity {
                         Log.d(TAG, "Removed: " + name + " " + address);
                     }
 
-                    prefs.edit().putStringSet(BluetoothDetector.PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
+                    Util.setPairedDevices(DeviceListActivity.this, selectedDeviceAddresses);
+
                 }
             });
 

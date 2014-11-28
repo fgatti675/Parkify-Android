@@ -86,9 +86,9 @@ public class MapsActivity extends ActionBarActivity
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
-    static final int REQUEST_CODE_PICK_ACCOUNT = 0;
-    static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1;
-    static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 2;
+    static final int REQUEST_CODE_PICK_ACCOUNT = 1;
+    static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 2;
+    static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 3;
     static final int REQUEST_ON_PURCHASE = 1001;
 
     private static final String PREF_USER_EMAIL = "pref_user_email";
