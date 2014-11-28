@@ -9,6 +9,7 @@ import android.util.Log;
 import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -29,80 +30,102 @@ public class CarLocationManager {
     public static final String PREF_CAR_PROVIDER = "PREF_CAR_PROVIDER";
     public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
 
+    public static final String PREF_LAST_PARKED_TIME = "PREF_LAST_PARKED_TIME";
+
     private final static String TAG = "CarLocationManager";
 
 
     /**
      * Persist the location of the car in the shared preferences
-     * @param loc
+     *
+     * @param car
      */
-    public static void saveLocation(Context context, Location loc){
+    public static void saveLocation(Context context, Car car) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
 
         SharedPreferences.Editor editor = prefs.edit();
 
+        String id = car.id;
+        Location loc = car.location;
+
         // We store the result
-        editor.putInt(PREF_CAR_LATITUDE, (int) (loc.getLatitude() * 1E6));
-        editor.putInt(PREF_CAR_LONGITUDE, (int) (loc.getLongitude() * 1E6));
-        editor.putInt(PREF_CAR_ACCURACY, (int) (loc.getAccuracy() * 1E6));
-        editor.putString(PREF_CAR_PROVIDER, loc.getProvider());
-        editor.putLong(PREF_CAR_TIME, Calendar.getInstance().getTimeInMillis());
+        editor.putInt(PREF_CAR_LATITUDE + id, (int) (loc.getLatitude() * 1E6));
+        editor.putInt(PREF_CAR_LONGITUDE + id, (int) (loc.getLongitude() * 1E6));
+        editor.putInt(PREF_CAR_ACCURACY + id, (int) (loc.getAccuracy() * 1E6));
+        editor.putString(PREF_CAR_PROVIDER + id, loc.getProvider());
+        long timeInMillis = Calendar.getInstance().getTimeInMillis();
+        editor.putLong(PREF_CAR_TIME + id, timeInMillis);
 
         editor.apply();
 
         Log.i(TAG, "Stored new location: " + loc);
 
         Intent intent = new Intent(INTENT);
-        intent.putExtra(INTENT_POSITION, loc);
+        intent.putExtra(INTENT_POSITION, car);
         context.sendBroadcast(intent);
     }
 
-    public static Location getStoredLocation(Context context){
+    public static List<Car> getStoredCars(Context context) {
+
+        Set<String> pairedDevices = Util.getPairedDevices(context);
+        List<Car> cars = new ArrayList<Car>();
+        for (String id : pairedDevices) {
+            Car storedCar = getStoredCar(context, id);
+            if (storedCar != null)
+                cars.add(storedCar);
+        }
+        return cars;
+    }
+
+    public static Car getStoredCar(Context context, String id) {
 
         SharedPreferences prefs = Util.getSharedPreferences(context);
 
-        if(!prefs.contains(PREF_CAR_LATITUDE) || !prefs.contains(PREF_CAR_LONGITUDE)) {
+        if (!prefs.contains(PREF_CAR_LATITUDE + id) || !prefs.contains(PREF_CAR_LONGITUDE + id)) {
             Log.i(TAG, "No car parked location stored");
             return null;
         }
 
         // Details of the last location fix
-        int lastLatitude = prefs.getInt(PREF_CAR_LATITUDE, 0);
-        int lastLongitude = prefs.getInt(PREF_CAR_LONGITUDE, 0);
-        int lastAccuracy = prefs.getInt(PREF_CAR_ACCURACY, 0);
+        int lastLatitude = prefs.getInt(PREF_CAR_LATITUDE + id, 0);
+        int lastLongitude = prefs.getInt(PREF_CAR_LONGITUDE + id, 0);
+        int lastAccuracy = prefs.getInt(PREF_CAR_ACCURACY + id, 0);
 
-        Location lastLocation = new Location(prefs.getString(PREF_CAR_PROVIDER, ""));
+        Location lastLocation = new Location(prefs.getString(PREF_CAR_PROVIDER + id, ""));
         lastLocation.setLatitude(lastLatitude / 1E6);
         lastLocation.setLongitude(lastLongitude / 1E6);
         lastLocation.setAccuracy((float) (lastAccuracy / 1E6));
 
-        Log.i(TAG, "Stored location was: " + lastLocation);
+        Date date = new Date(prefs.getLong(CarLocationManager.PREF_CAR_TIME + id, 0));
 
-        return lastLocation;
+        Car car = new Car();
+        car.id = id;
+        car.location = lastLocation;
+        car.time = date;
+
+        Log.i(TAG, "Stored car was: " + car);
+
+        return car;
 
     }
 
-    public static void removeStoredLocation(Context context){
+    public static void removeStoredLocation(Context context, String id) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
 
         SharedPreferences.Editor editor = prefs.edit();
 
         // We store the result
-        editor.remove(PREF_CAR_LATITUDE);
-        editor.remove(PREF_CAR_LONGITUDE);
-        editor.remove(PREF_CAR_ACCURACY);
-        editor.remove(PREF_CAR_PROVIDER);
-        editor.remove(PREF_CAR_TIME);
+        editor.remove(PREF_CAR_LATITUDE + id);
+        editor.remove(PREF_CAR_LONGITUDE + id);
+        editor.remove(PREF_CAR_ACCURACY + id);
+        editor.remove(PREF_CAR_PROVIDER + id);
+        editor.remove(PREF_CAR_TIME + id);
 
         editor.apply();
 
         Log.i(TAG, "Removed location");
     }
 
-    public static Date getParkingTime(Context context){
-        SharedPreferences prefs = Util.getSharedPreferences(context);
-        return new Date(prefs.getLong(CarLocationManager.PREF_CAR_TIME, 0));
-    }
 
 
 }

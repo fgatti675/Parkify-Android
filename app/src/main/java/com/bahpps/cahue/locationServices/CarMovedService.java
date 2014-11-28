@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 
 import org.apache.http.HttpResponse;
@@ -31,20 +32,20 @@ import java.util.Calendar;
  */
 public class CarMovedService extends LocationPollerService {
 
-
     private final static String TAG = "CarMovedPositionReceiver";
     private final static String URL = "http://glossy-radio.appspot.com/spots";
     private static final long MINIMUM_STAY_MS = 180000;
 
     @Override
-    protected boolean checkPreconditions() {
+    protected boolean checkPreconditions(String id) {
         long now = Calendar.getInstance().getTimeInMillis();
-        long parkingTime = CarLocationManager.getParkingTime(this).getTime();
+        Car storedCar = CarLocationManager.getStoredCar(this, id);
+        long parkingTime = storedCar.time.getTime();
         return now-parkingTime > MINIMUM_STAY_MS;
     }
 
     @Override
-    public void onLocationPolled(Context context, final Location location) {
+    public void onLocationPolled(Context context, final Location location, final String id) {
 
         new AsyncTask() {
 
@@ -58,6 +59,7 @@ public class CarMovedService extends LocationPollerService {
                     HttpPost httpPost = new HttpPost(URL);
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-type", "application/json");
+                    httpPost.setHeader("ID", id);
 
                     String json = getJSON(location);
                     Log.i(TAG, "Posting\n" + json);

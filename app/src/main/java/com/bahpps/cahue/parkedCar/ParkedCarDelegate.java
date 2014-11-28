@@ -46,6 +46,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
+    private Car car;
+
+    public Car getCar() {
+        return car;
+    }
 
     /**
      * Camera mode
@@ -62,7 +67,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     private ImageButton carButton;
     private CarSelectedListener carSelectedListener;
 
-    private Location carLocation;
     private Location userLocation;
 
     /**
@@ -103,7 +107,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeSerializable(mode);
-        parcel.writeParcelable(carLocation, 0);
+        parcel.writeParcelable(car, 0);
         parcel.writeParcelable(userLocation, 0);
 
         LatLng[] directionsArray = new LatLng[directionPoints.size()];
@@ -116,29 +120,28 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public ParkedCarDelegate(Parcel parcel) {
         mode = (Mode) parcel.readSerializable();
-        carLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
+        car = parcel.readParcelable(Car.class.getClassLoader());
         userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
 
         LatLng[] directionsArray = (LatLng[]) parcel.readParcelableArray(ParkedCarDelegate.class.getClassLoader());
         directionPoints = Arrays.asList(directionsArray);
     }
 
-    public void init(Context context, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
+    public void init(Context context, Car car, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
         mContext = context;
         this.mMap = map;
+        this.car = car;
         this.carButton = carButton;
         this.carSelectedListener = carSelectedListener;
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
 
-        if (carLocation == null)
-            carLocation = CarLocationManager.getStoredLocation(context);
 
         buttonUpdate();
     }
 
-    public void setCarLocation(Location carLocation) {
-        this.carLocation = carLocation;
+    public void setCarLocation(Car car) {
+        this.car = car;
         directionPoints.clear();
         if (directionPoints.isEmpty())
             fetchDirections(true);
@@ -174,11 +177,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
      */
     private void drawCar() {
 
-        if (carLocation == null) {
+        if (car == null) {
             return;
         }
 
-        Log.i(TAG, "Setting car in map: " + carLocation);
+        Log.i(TAG, "Setting car in map: " + car);
 
         iconFactory.setContentRotation(-90);
         iconFactory.setStyle(IconGenerator.STYLE_RED);
@@ -194,7 +197,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(carLatLng)   //set center
-                .radius(carLocation.getAccuracy())   //set radius in meters
+                .radius(car.location.getAccuracy())   //set radius in meters
                 .fillColor(LIGHT_RED)
                 .strokeColor(LIGHT_RED)
                 .strokeWidth(0);
@@ -204,9 +207,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public void removeCar() {
-        carLocation = null;
+        CarLocationManager.removeStoredLocation(mContext, car.id);
+        car = null;
         directionPoints.clear();
-        CarLocationManager.removeStoredLocation(mContext);
         clear();
     }
 
@@ -278,8 +281,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private LatLng getCarLatLng() {
-        if (carLocation == null) return null;
-        return new LatLng(carLocation.getLatitude(), carLocation.getLongitude());
+        if (car == null) return null;
+        return new LatLng(car.location.getLatitude(), car.location.getLongitude());
     }
 
     public void changeMode() {
@@ -364,7 +367,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         Log.d(TAG, "zoomToCar");
 
-        if (carLocation == null) return;
+        if (car == null) return;
 
         LatLng loc = getCarLatLng();
 
@@ -412,7 +415,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
-            carSelectedListener.onCarClicked(carLocation, CarLocationManager.getParkingTime(mContext));
+            carSelectedListener.onCarClicked(car);
         }
         return false;
     }
@@ -423,7 +426,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public interface CarSelectedListener{
-        public void onCarClicked(Location carLocation, Date parkingTime);
+        public void onCarClicked(Car car);
     }
 
 }

@@ -18,6 +18,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,12 +31,11 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
-import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.SpotsDelegate;
-import com.bahpps.cahue.util.BluetoothDetector;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -63,8 +63,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MapsActivity extends ActionBarActivity
         implements
@@ -97,7 +99,7 @@ public class MapsActivity extends ActionBarActivity
 
     List<AbstractMarkerDelegate> delegates = new ArrayList();
     private SpotsDelegate spotsDelegate;
-    private ParkedCarDelegate parkedCarDelegate;
+    private Map<Car, ParkedCarDelegate> parkedCarDelegateMap;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -128,10 +130,10 @@ public class MapsActivity extends ActionBarActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Location location = (Location) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
-            if (location != null) {
-                Log.i(TAG, "Location received: " + location);
-                parkedCarDelegate.setCarLocation(location);
+            Car car = (Car) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
+            if (car != null) {
+                Log.i(TAG, "Location received: " + car);
+                getParkedCarDelegate(car).setCarLocation(car);
             }
 
         }
@@ -179,6 +181,8 @@ public class MapsActivity extends ActionBarActivity
          */
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
+        parkedCarDelegateMap = new HashMap<Car, ParkedCarDelegate>();
+
         /**
          * There is no saved instance so we create a few things
          */
@@ -186,7 +190,12 @@ public class MapsActivity extends ActionBarActivity
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
             spotsDelegate = new SpotsDelegate();
-            parkedCarDelegate = new ParkedCarDelegate();
+
+            List<Car> cars = CarLocationManager.getStoredCars(this);
+            for (Car car : cars) {
+                ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate();
+                parkedCarDelegateMap.put(car, parkedCarDelegate);
+            }
         }
 
         /**
@@ -197,15 +206,20 @@ public class MapsActivity extends ActionBarActivity
             // activity life cycle. There is no need to reinitialize it.
             mMap = mapFragment.getMap();
 
-            spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
-            parkedCarDelegate = savedInstanceState.getParcelable("parkedCarDelegate");
-
             /**
              * Do everything again
              */
             mMap.clear();
+
+            spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.markAsDirty();
-            parkedCarDelegate.markAsDirty();
+
+            List<ParkedCarDelegate> parkedCarDelegates = savedInstanceState.getParcelableArrayList("parkedCarDelegates");
+            for (Parcelable parcelable : parkedCarDelegates) {
+                ParkedCarDelegate delegate = (ParkedCarDelegate) parcelable;
+                delegate.markAsDirty();
+                parkedCarDelegateMap.put(delegate.getCar(), delegate);
+            }
 
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
@@ -240,9 +254,12 @@ public class MapsActivity extends ActionBarActivity
         setUpMapListeners();
 
         spotsDelegate.init(this, mMap, this);
-        parkedCarDelegate.init(this, mMap, null, this);
 
-        delegates.add(parkedCarDelegate);
+        for (Car car : parkedCarDelegateMap.keySet()) {
+            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
+            parkedCarDelegate.init(this, car, mMap, null, this);
+            delegates.add(parkedCarDelegate);
+        }
         delegates.add(spotsDelegate);
 
     }
@@ -446,7 +463,7 @@ public class MapsActivity extends ActionBarActivity
         super.onSaveInstanceState(savedInstanceState);
 
         savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
-        savedInstanceState.putParcelable("parkedCarDelegate", parkedCarDelegate);
+        savedInstanceState.putParcelableArrayList("parkedCarDelegates", new ArrayList(parkedCarDelegateMap.values()));
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
         savedInstanceState.putBoolean("detailsDisplayed", detailsDisplayed);
 
@@ -585,10 +602,6 @@ public class MapsActivity extends ActionBarActivity
         dialog.show(getFragmentManager(), "DonateDialog");
     }
 
-    private void removeCar() {
-        parkedCarDelegate.removeCar();
-    }
-
     /**
      * Method used to start the pairing activity
      */
@@ -678,7 +691,7 @@ public class MapsActivity extends ActionBarActivity
         location.setAccuracy(10);
 
         SetCarPositionDialog dialog = new SetCarPositionDialog();
-        dialog.setLocation(location);
+        dialog.init(location);
         dialog.show(getFragmentManager(), "SetCarPositionDialog");
 
     }
@@ -713,7 +726,7 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public void onMapClick(LatLng point) {
-        parkedCarDelegate.setModeFree();
+//        parkedCarDelegateMap.setModeFree();
     }
 
     @Override
@@ -767,16 +780,13 @@ public class MapsActivity extends ActionBarActivity
         setDetailsFragment(SpotDetailsFragment.newInstance(spot, getUserLocation()));
     }
 
-    @Override
-    public void onCarClicked(Location carLocation, Date parkingTime) {
-        setDetailsFragment(CarDetailsFragment.newInstance(carLocation, parkingTime));
-    }
 
     /**
      * Set the details fragment
+     *
      * @param fragment
      */
-    private void setDetailsFragment(DetailsFragment fragment){
+    private void setDetailsFragment(DetailsFragment fragment) {
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
         if (detailsFragment != null)
@@ -793,8 +803,23 @@ public class MapsActivity extends ActionBarActivity
     }
 
     @Override
-    public void onCarPositionDeleted() {
-        parkedCarDelegate.removeCar();
+    public void onCarPositionDeleted(Car car) {
+        getParkedCarDelegate(car).removeCar();
         hideDetails();
+    }
+
+    private ParkedCarDelegate getParkedCarDelegate(Car car) {
+        ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
+        if (parkedCarDelegate == null) {
+            parkedCarDelegate = new ParkedCarDelegate();
+            parkedCarDelegate.init(this, car, mMap, null, this);
+            parkedCarDelegateMap.put(car, parkedCarDelegate);
+        }
+        return parkedCarDelegate;
+    }
+
+    @Override
+    public void onCarClicked(Car car) {
+        setDetailsFragment(CarDetailsFragment.newInstance(car));
     }
 }

@@ -24,7 +24,15 @@ public abstract class LocationPollerService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    /**
+     * Include the start time when sending intents
+     */
     public static final String EXTRA_START_TIME = "extra_time";
+
+    /**
+     * Receive the address of the BT device
+     */
+    public static final String EXTRA_BT_ID = "extra_bt_id";
 
     /**
      * Timeout after we consider the location may have changed too much
@@ -42,6 +50,9 @@ public abstract class LocationPollerService extends Service implements
 
     private Date startTime;
 
+    // BT address used as an ID for cars
+    private String id;
+
     private Location bestAccuracyLocation;
 
 
@@ -56,12 +67,13 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        id = intent.getExtras().getString(EXTRA_BT_ID);
         start();
         return super.onStartCommand(intent, flags, startId);
     }
 
     protected void start() {
-        if (checkPreconditions()) {
+        if (checkPreconditions(id)) {
             startTime = new Date();
             mGoogleApiClient.connect();
         } else{
@@ -117,17 +129,17 @@ public abstract class LocationPollerService extends Service implements
 
     }
 
-    protected abstract boolean checkPreconditions();
+    protected abstract boolean checkPreconditions(String id);
 
     private void notifyLocation(Location location) {
         Bundle extras = new Bundle();
         extras.putSerializable(EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
-        onLocationPolled(this, location);
+        onLocationPolled(this, location, id);
         mGoogleApiClient.disconnect();
         stopSelf();
     }
 
-    public abstract void onLocationPolled(Context context, Location location);
+    public abstract void onLocationPolled(Context context, Location location, String id);
 }

@@ -3,7 +3,6 @@ package com.bahpps.cahue;
 
 import android.app.Activity;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.format.DateUtils;
@@ -12,9 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import com.bahpps.cahue.parkedCar.Car;
 
 import java.util.Date;
 
@@ -27,12 +27,10 @@ import java.util.Date;
 public class CarDetailsFragment extends DetailsFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_CAR_LOCATION = "car_Location";
-    private static final String ARG_PARKING_TIME = "parking_time";
+    private static final String ARG_CAR = "car";
 
     private Location userLocation;
-    private Location carLocation;
-    private Date parkingTime;
+    private Car car;
 
     private OnCarPositionDeletedListener mListener;
 
@@ -42,12 +40,10 @@ public class CarDetailsFragment extends DetailsFragment {
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static CarDetailsFragment newInstance(Location carLocation, Date parkingTime) {
+    public static CarDetailsFragment newInstance(Car car) {
         CarDetailsFragment fragment = new CarDetailsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_CAR_LOCATION, carLocation);
-        args.putSerializable(ARG_PARKING_TIME, parkingTime);
+        args.putParcelable(ARG_CAR, car);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,8 +56,7 @@ public class CarDetailsFragment extends DetailsFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            carLocation = getArguments().getParcelable(ARG_CAR_LOCATION);
-            parkingTime = (Date) getArguments().getSerializable(ARG_PARKING_TIME);
+            car = getArguments().getParcelable(ARG_CAR);
         }
     }
 
@@ -69,11 +64,11 @@ public class CarDetailsFragment extends DetailsFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_car_details, container, false);
-        if (carLocation != null) {
+        if (car != null) {
 
             // Set time ago
             TextView timeAgo = (TextView) view.findViewById(R.id.time);
-            timeAgo.setText(DateUtils.getRelativeTimeSpanString(parkingTime.getTime()));
+            timeAgo.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
 
             // Update distance
             TextView distance = (TextView) view.findViewById(R.id.distance);
@@ -87,7 +82,7 @@ public class CarDetailsFragment extends DetailsFragment {
                 @Override
                 public void onClick(View view) {
                     if (mListener != null) {
-                        mListener.onCarPositionDeleted();
+                        mListener.onCarPositionDeleted(car);
                     }
                 }
             });
@@ -107,7 +102,7 @@ public class CarDetailsFragment extends DetailsFragment {
 
     private void updateDistance(TextView textView) {
         if (userLocation != null) {
-            float distanceM = carLocation.distanceTo(userLocation);
+            float distanceM = car.location.distanceTo(userLocation);
             textView.setText(String.format("%.1f km", distanceM / 1000));
         }
     }
@@ -142,7 +137,7 @@ public class CarDetailsFragment extends DetailsFragment {
      */
     public interface OnCarPositionDeletedListener {
 
-        public void onCarPositionDeleted();
+        public void onCarPositionDeleted(Car car);
 
     }
 

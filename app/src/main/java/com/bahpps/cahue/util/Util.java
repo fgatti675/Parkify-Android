@@ -23,6 +23,7 @@ public class Util {
     public static final String PREF_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
 
     public static final String TAPPED_PROVIDER = "Tapped";
+    public static final String CAR_OTHER_ID = "Id";
 
     /**
      * Method for printing our fancy custom Toast

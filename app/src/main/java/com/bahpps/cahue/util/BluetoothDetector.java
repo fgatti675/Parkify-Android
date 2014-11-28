@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bahpps.cahue.locationServices.CarMovedService;
+import com.bahpps.cahue.locationServices.LocationPollerService;
 import com.bahpps.cahue.locationServices.ParkedCarService;
 
 import java.util.GregorianCalendar;
@@ -15,7 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BluetoothDetector extends BroadcastReceiver {
-
 
     BluetoothDevice device;
 
@@ -27,46 +27,49 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
+        String address = device.getAddress();
+
         Log.d("Bluetooth", "Bluetooth: " + intent.getAction());
-        Log.d("Bluetooth", device.getName() + " " + device.getAddress());
+        Log.d("Bluetooth", device.getName() + " " + address);
 
         // we need to get which BT device the user chose as the one of his car
 
         Set<String> storedAddress = Util.getPairedDevices(context);
 
         // If the device we just disconnected from is our chosen one
-        if (storedAddress.contains(device.getAddress())) {
+        if (storedAddress.contains(address)) {
 
             Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
             if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                onBtDisconnected(context);
+                onBtDisconnected(context, address);
             } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-                onBtConnected(context);
+                onBtConnected(context, address);
             }
         }
     }
 
-    public void onBtConnected(Context context) {
+    public void onBtConnected(Context context, String address) {
 
         Log.d("Bluetooth", "onBtConnected");
 
         // we create an intent to start the location poller service, as declared in manifest
-        Intent i = new Intent();
-        i.setClass(context,CarMovedService.class);
-        context.startService(i);
-
+        Intent intent = new Intent();
+        intent.setClass(context, CarMovedService.class);
+        intent.putExtra(LocationPollerService.EXTRA_BT_ID, address);
+        context.startService(intent);
 
     }
 
-    public void onBtDisconnected(Context context) {
+    public void onBtDisconnected(Context context, String address) {
 
         Log.d("Bluetooth", "onBtDisconnected");
 
         // we create an intent to start the location poller service, as declared in manifest
-        Intent i = new Intent();
-        i.setClass(context,ParkedCarService.class);
-        context.startService(i);
+        Intent intent = new Intent();
+        intent.setClass(context, ParkedCarService.class);
+        intent.putExtra(LocationPollerService.EXTRA_BT_ID, address);
+        context.startService(intent);
 
     }
 }

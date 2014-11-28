@@ -19,7 +19,7 @@ public class DebugService extends LocationPollerService {
     ServiceListener serviceListener;
 
     @Override
-    public void onLocationPolled(Context context, Location location) {
+    public void onLocationPolled(Context context, Location location, String id) {
         serviceListener.onNewLocation(location);
     }
 
@@ -46,7 +46,7 @@ public class DebugService extends LocationPollerService {
     }
 
     @Override
-    protected boolean checkPreconditions() {
+    protected boolean checkPreconditions(String id) {
         return true;
     }
 
