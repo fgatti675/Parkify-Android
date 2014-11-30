@@ -115,8 +115,7 @@ public class CarLocationManager {
         /**
          * If location is set
          */
-        if (!prefs.contains(PREF_CAR_LATITUDE + id) || !prefs.contains(PREF_CAR_LONGITUDE + id)) {
-            Log.i(TAG, "No car parked location stored");
+        if (prefs.contains(PREF_CAR_LATITUDE + id) && prefs.contains(PREF_CAR_LONGITUDE + id)) {
 
             // Details of the last location fix
             int lastLatitude = prefs.getInt(PREF_CAR_LATITUDE + id, 0);
