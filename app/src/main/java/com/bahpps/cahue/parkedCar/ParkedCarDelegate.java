@@ -46,11 +46,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
-    private Car car;
 
-    public Car getCar() {
-        return car;
-    }
+    private Car car;
 
     /**
      * Camera mode
@@ -177,7 +174,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
      */
     private void drawCar() {
 
-        if (car == null) {
+        if (car == null || car.location == null) {
             return;
         }
 
@@ -204,6 +201,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         accuracyCircle = mMap.addCircle(circleOptions);
 
+    }
+
+
+    public Car getCar() {
+        return car;
     }
 
     public void removeCar() {
@@ -281,7 +283,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private LatLng getCarLatLng() {
-        if (car == null) return null;
+        if (car.location == null) return null;
         return new LatLng(car.location.getLatitude(), car.location.getLongitude());
     }
 

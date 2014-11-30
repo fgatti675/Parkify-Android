@@ -40,6 +40,7 @@ public class CarMovedService extends LocationPollerService {
     protected boolean checkPreconditions(String id) {
         long now = Calendar.getInstance().getTimeInMillis();
         Car storedCar = CarLocationManager.getStoredCar(this, id);
+        if(storedCar.time == null) return true;
         long parkingTime = storedCar.time.getTime();
         return now-parkingTime > MINIMUM_STAY_MS;
     }

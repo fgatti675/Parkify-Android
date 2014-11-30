@@ -118,8 +118,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
         ParkingSpot[] spotsArray = parcel.createTypedArray(ParkingSpot.CREATOR);
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
-        LatLngBounds[] boundsArray = (LatLngBounds[]) parcel.readParcelableArray(classLoader);
-        queriedBounds = Arrays.asList(boundsArray);
+        parcel.readTypedList(queriedBounds, LatLngBounds.CREATOR);
         viewBounds = parcel.readParcelable(classLoader);
         shouldBeReset = parcel.readByte() != 0;
         lastResetTaskRequestTime = (Date) parcel.readSerializable();
@@ -136,8 +135,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     public void writeToParcel(Parcel parcel, int i) {
         ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
         parcel.writeTypedArray(spots.toArray(spotsArray), 0);
-        LatLngBounds[] boundsArray = new LatLngBounds[queriedBounds.size()];
-        parcel.writeParcelableArray(queriedBounds.toArray(boundsArray), 0);
+        parcel.writeTypedList(queriedBounds);
         parcel.writeParcelable(viewBounds, 0);
         parcel.writeByte((byte) (shouldBeReset ? 1 : 0));
         parcel.writeSerializable(lastResetTaskRequestTime);
@@ -328,7 +326,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             if (marker == null) {
                 BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
-                marker = mMap.addMarker(new MarkerOptions().icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
+                marker = mMap.addMarker(new MarkerOptions().flat(true).icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);

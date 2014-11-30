@@ -101,7 +101,7 @@ public class CarDetailsFragment extends DetailsFragment {
     }
 
     private void updateDistance(TextView textView) {
-        if (userLocation != null) {
+        if (userLocation != null && car.location != null) {
             float distanceM = car.location.distanceTo(userLocation);
             textView.setText(String.format("%.1f km", distanceM / 1000));
         }

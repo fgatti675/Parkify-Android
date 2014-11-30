@@ -15,6 +15,8 @@ public class Car implements Parcelable{
 
     public String id;
 
+    public String name;
+
     public Location location;
 
     public Date time;
@@ -34,6 +36,7 @@ public class Car implements Parcelable{
 
     public Car(Parcel parcel) {
         id = parcel.readString();
+        name = parcel.readString();
         location = parcel.readParcelable(Location.class.getClassLoader());
         time = (Date) parcel.readSerializable();
     }
@@ -50,6 +53,7 @@ public class Car implements Parcelable{
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
+        parcel.writeString(name);
         parcel.writeParcelable(location, 0);
         parcel.writeSerializable(time);
     }
