@@ -163,10 +163,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         updateCameraIfFollowing();
     }
 
-    private void clear(){
-        if(carMarker != null) carMarker.remove();
-        if(accuracyCircle != null) accuracyCircle.remove();
-        if(directionsPolyline != null) directionsPolyline.remove();
+    private void clear() {
+        if (carMarker != null) carMarker.remove();
+        if (accuracyCircle != null) accuracyCircle.remove();
+        if (directionsPolyline != null) directionsPolyline.remove();
     }
 
     /**
@@ -186,10 +186,14 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         // Uses a colored icon.
         LatLng carLatLng = getCarLatLng();
 
+        String name = car.name;
+        if (name == null)
+            name = mContext.getResources().getText(R.string.car).toString();
+
         carMarker = mMap.addMarker(new MarkerOptions()
                 .position(carLatLng)
                 .snippet("")
-                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(mContext.getResources().getText(R.string.car).toString().toUpperCase())))
+                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name.toUpperCase())))
                 .anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()));
 
         CircleOptions circleOptions = new CircleOptions()
@@ -210,7 +214,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public void removeCar() {
         CarLocationManager.removeStoredLocation(mContext, car.id);
-        car = null;
+        car.location = null;
         directionPoints.clear();
         clear();
     }
@@ -306,7 +310,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private void buttonUpdate() {
-        if(carButton == null)
+        if (carButton == null)
             return;
         if (mode == Mode.FOLLOWING) {
             carButton.setImageResource(R.drawable.ic_icon_car_red);
@@ -427,7 +431,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         return 0;
     }
 
-    public interface CarSelectedListener{
+    public interface CarSelectedListener {
         public void onCarClicked(Car car);
     }
 

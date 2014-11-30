@@ -67,6 +67,10 @@ public class CarDetailsFragment extends DetailsFragment {
         if (car != null) {
 
             // Set time ago
+            TextView name = (TextView) view.findViewById(R.id.name);
+            name.setText(car.name);
+
+            // Set time ago
             TextView timeAgo = (TextView) view.findViewById(R.id.time);
             timeAgo.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
 

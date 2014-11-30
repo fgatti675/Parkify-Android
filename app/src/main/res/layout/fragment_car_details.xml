@@ -24,10 +24,16 @@
         android:id="@+id/linearLayout">
 
         <TextView
-            android:id="@+id/time"
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/time_stub" />
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/time_stub" />
 
         <TextView
