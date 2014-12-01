@@ -45,13 +45,14 @@ public class CarLocationManager {
         String id = car.id;
         Location loc = car.location;
 
+        car.time = new Date();
+
         // We store the result
         editor.putInt(PREF_CAR_LATITUDE + id, (int) (loc.getLatitude() * 1E6));
         editor.putInt(PREF_CAR_LONGITUDE + id, (int) (loc.getLongitude() * 1E6));
         editor.putInt(PREF_CAR_ACCURACY + id, (int) (loc.getAccuracy() * 1E6));
         editor.putString(PREF_CAR_PROVIDER + id, loc.getProvider());
-        long timeInMillis = Calendar.getInstance().getTimeInMillis();
-        editor.putLong(PREF_CAR_TIME + id, timeInMillis);
+        editor.putLong(PREF_CAR_TIME + id, car.time.getTime());
 
         editor.apply();
 
@@ -68,7 +69,7 @@ public class CarLocationManager {
      * @param context
      * @return
      */
-    public static List<Car> getStoredCars(Context context) {
+    public static List<Car> getAvailableCars(Context context) {
 
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 

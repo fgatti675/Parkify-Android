@@ -12,6 +12,7 @@ import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -32,7 +33,7 @@ public class SetCarPositionDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        final List<Car> cars = CarLocationManager.getStoredCars(getActivity());
+        final List<Car> cars = CarLocationManager.getAvailableCars(getActivity());
 
         // fill option names
         ArrayList<String> options = new ArrayList();

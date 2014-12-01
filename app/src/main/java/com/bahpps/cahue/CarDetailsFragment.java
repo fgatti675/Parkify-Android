@@ -25,8 +25,8 @@ import java.util.Date;
  * create an instance of this fragment.
  */
 public class CarDetailsFragment extends DetailsFragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
+    // the fragment initialization parameter
     private static final String ARG_CAR = "car";
 
     private Location userLocation;
@@ -91,6 +91,16 @@ public class CarDetailsFragment extends DetailsFragment {
                 }
             });
 
+            ImageButton follow = (ImageButton) view.findViewById(R.id.follow);
+            follow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mListener != null) {
+                        mListener.onFollowingClicked(car);
+                    }
+                }
+            });
+
         }
         return view;
     }
@@ -134,12 +144,10 @@ public class CarDetailsFragment extends DetailsFragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnCarPositionDeletedListener {
+
+        public void onFollowingClicked(Car car);
 
         public void onCarPositionDeleted(Car car);
 

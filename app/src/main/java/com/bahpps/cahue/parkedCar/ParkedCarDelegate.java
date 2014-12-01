@@ -86,6 +86,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     private GMapV2Direction directionsDelegate;
     private Context mContext;
 
+    private Date lastDirectionsUpdate;
+
     private boolean justFinishedAnimating = false;
 
     public static final Parcelable.Creator<ParkedCarDelegate> CREATOR =
@@ -106,9 +108,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         parcel.writeSerializable(mode);
         parcel.writeParcelable(car, 0);
         parcel.writeParcelable(userLocation, 0);
-
-        LatLng[] directionsArray = new LatLng[directionPoints.size()];
-        parcel.writeParcelableArray(directionPoints.toArray(directionsArray), 0);
+        parcel.writeTypedList(directionPoints);
+        parcel.writeSerializable(lastDirectionsUpdate);
     }
 
     public ParkedCarDelegate() {
@@ -119,9 +120,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         mode = (Mode) parcel.readSerializable();
         car = parcel.readParcelable(Car.class.getClassLoader());
         userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
-
-        LatLng[] directionsArray = (LatLng[]) parcel.readParcelableArray(ParkedCarDelegate.class.getClassLoader());
-        directionPoints = Arrays.asList(directionsArray);
+        parcel.readTypedList(directionPoints, LatLng.CREATOR);
+        lastDirectionsUpdate = (Date) parcel.readSerializable();
     }
 
     public void init(Context context, Car car, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
@@ -132,7 +132,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         this.carSelectedListener = carSelectedListener;
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
-
 
         buttonUpdate();
     }
@@ -148,7 +147,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void onLocationChanged(Location userLocation) {
         this.userLocation = userLocation;
 
-        if (directionPoints.isEmpty())
+        if (lastDirectionsUpdate == null || System.currentTimeMillis() - lastDirectionsUpdate.getTime() > 30000)
             fetchDirections(false);
 
         updateCameraIfFollowing();
@@ -278,6 +277,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
             @Override
             protected void onPostExecute(Document doc) {
+                lastDirectionsUpdate = new Date();
                 directionPoints = directionsDelegate.getDirection(doc);
                 doDraw();
             }
@@ -294,6 +294,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void changeMode() {
         if (mode == null || mode == Mode.FREE) setMode(Mode.FOLLOWING);
         else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
+    }
+
+    public void setFollowing(){
+       setMode(Mode.FOLLOWING);
     }
 
     private void setMode(Mode mode) {
@@ -414,9 +418,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         justFinishedAnimating = false;
     }
 
-    public void setModeFree() {
-        setMode(Mode.FREE);
-    }
 
     @Override
     public boolean onMarkerClick(Marker marker) {

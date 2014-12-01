@@ -66,7 +66,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MapsActivity extends ActionBarActivity
         implements
@@ -191,7 +190,7 @@ public class MapsActivity extends ActionBarActivity
             mapFragment.setRetainInstance(true);
             spotsDelegate = new SpotsDelegate();
 
-            List<Car> cars = CarLocationManager.getStoredCars(this);
+            List<Car> cars = CarLocationManager.getAvailableCars(this);
             for (Car car : cars) {
                 ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate();
                 parkedCarDelegateMap.put(car, parkedCarDelegate);
@@ -800,6 +799,11 @@ public class MapsActivity extends ActionBarActivity
         fragTransaction.commit();
 
         showDetails();
+    }
+
+    @Override
+    public void onFollowingClicked(Car car) {
+        getParkedCarDelegate(car).setFollowing();
     }
 
     @Override
