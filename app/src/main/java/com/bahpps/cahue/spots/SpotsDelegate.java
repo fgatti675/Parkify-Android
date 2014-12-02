@@ -427,7 +427,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
+    public void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating) {
         float zoom = mMap.getCameraPosition().zoom;
         Log.v(TAG, "zoom: " + zoom);
 

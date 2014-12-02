@@ -2,6 +2,7 @@ package com.bahpps.cahue;
 
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -15,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 
 import java.util.Date;
 
@@ -28,11 +30,15 @@ public class CarDetailsFragment extends DetailsFragment {
 
     // the fragment initialization parameter
     private static final String ARG_CAR = "car";
+    private static final String ARG_CAR_DELEGATE = "car_delegate";
 
     private Location userLocation;
     private Car car;
+    private ParkedCarDelegate parkedCarDelegate;
 
     private OnCarPositionDeletedListener mListener;
+
+    private ImageButton follow;
 
     /**
      * Use this factory method to create a new instance of
@@ -40,10 +46,11 @@ public class CarDetailsFragment extends DetailsFragment {
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
-    public static CarDetailsFragment newInstance(Car car) {
+    public static CarDetailsFragment newInstance(Car car, ParkedCarDelegate parkedCarDelegate) {
         CarDetailsFragment fragment = new CarDetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_CAR, car);
+        args.putParcelable(ARG_CAR_DELEGATE, parkedCarDelegate);
         fragment.setArguments(args);
         return fragment;
     }
@@ -57,6 +64,7 @@ public class CarDetailsFragment extends DetailsFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             car = getArguments().getParcelable(ARG_CAR);
+            parkedCarDelegate = getArguments().getParcelable(ARG_CAR_DELEGATE);
         }
     }
 
@@ -91,13 +99,15 @@ public class CarDetailsFragment extends DetailsFragment {
                 }
             });
 
-            ImageButton follow = (ImageButton) view.findViewById(R.id.follow);
+            follow = (ImageButton) view.findViewById(R.id.follow);
             follow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (mListener != null) {
                         mListener.onFollowingClicked(car);
+                        updateFollowButtonState();
                     }
+
                 }
             });
 
@@ -108,7 +118,7 @@ public class CarDetailsFragment extends DetailsFragment {
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
-        if(view != null) {
+        if (view != null) {
             TextView distance = (TextView) view.findViewById(R.id.distance);
             updateDistance(distance);
         }
@@ -137,6 +147,15 @@ public class CarDetailsFragment extends DetailsFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onCameraUpdate(boolean justFinishedAnimating) {
+        updateFollowButtonState();
+    }
+
+    private void updateFollowButtonState() {
+        follow.setEnabled(parkedCarDelegate.getMode() == ParkedCarDelegate.Mode.FOLLOWING);
     }
 
     /**

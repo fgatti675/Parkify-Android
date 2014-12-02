@@ -79,7 +79,8 @@ public class MapsActivity extends ActionBarActivity
         Toolbar.OnMenuItemClickListener,
         SpotsDelegate.SpotSelectedListener,
         ParkedCarDelegate.CarSelectedListener,
-        CarDetailsFragment.OnCarPositionDeletedListener {
+        CarDetailsFragment.OnCarPositionDeletedListener,
+        CameraUpdateListener {
 
     protected static final String TAG = "Maps";
 
@@ -160,7 +161,7 @@ public class MapsActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(toolbar, 5);
+        ViewCompat.setElevation(toolbar, 8);
 
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
@@ -229,6 +230,7 @@ public class MapsActivity extends ActionBarActivity
          * Details
          */
         detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
+        ViewCompat.setElevation(detailsContainer, 8);
 
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
@@ -252,15 +254,37 @@ public class MapsActivity extends ActionBarActivity
         setUpMapIfNeeded();
         setUpMapListeners();
 
+        /**
+         * Init spots delegate
+         */
         spotsDelegate.init(this, mMap, this);
-
-        for (Car car : parkedCarDelegateMap.keySet()) {
-            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-            parkedCarDelegate.init(this, car, mMap, null, this);
-            delegates.add(parkedCarDelegate);
-        }
         delegates.add(spotsDelegate);
 
+        /**
+         * Init the parked car delegates
+         */
+        for (Car car : parkedCarDelegateMap.keySet()) {
+            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
+            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            delegates.add(parkedCarDelegate);
+        }
+
+    }
+
+
+    /**
+     *
+     * @param car
+     * @return
+     */
+    private ParkedCarDelegate getParkedCarDelegate(Car car) {
+        ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
+        if (parkedCarDelegate == null) {
+            parkedCarDelegate = new ParkedCarDelegate();
+            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            parkedCarDelegateMap.put(car, parkedCarDelegate);
+        }
+        return parkedCarDelegate;
     }
 
     private void showDetails() {
@@ -709,8 +733,12 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onCameraChange(cameraPosition);
+            delegate.onCameraChange(cameraPosition, justFinishedAnimating);
         }
+
+        if(detailsFragment != null)
+            detailsFragment.onCameraUpdate(justFinishedAnimating);
+
         drawIfNecessary();
     }
 
@@ -812,18 +840,49 @@ public class MapsActivity extends ActionBarActivity
         hideDetails();
     }
 
-    private ParkedCarDelegate getParkedCarDelegate(Car car) {
-        ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-        if (parkedCarDelegate == null) {
-            parkedCarDelegate = new ParkedCarDelegate();
-            parkedCarDelegate.init(this, car, mMap, null, this);
-            parkedCarDelegateMap.put(car, parkedCarDelegate);
-        }
-        return parkedCarDelegate;
-    }
 
     @Override
     public void onCarClicked(Car car) {
-        setDetailsFragment(CarDetailsFragment.newInstance(car));
+        setDetailsFragment(CarDetailsFragment.newInstance(car, getParkedCarDelegate(car)));
     }
+
+
+    private boolean justFinishedAnimating = false;
+
+    @Override
+    public void onCameraUpdateRequest(CameraUpdate cameraUpdate) {
+        mMap.animateCamera(cameraUpdate, new GoogleMap.CancelableCallback() {
+            @Override
+            public void onFinish() {
+                justFinishedAnimating = true;
+            }
+
+            @Override
+            public void onCancel() {
+            }
+        });
+    }
+
+    private void zoomToMyLocation() {
+
+        Log.d(TAG, "zoomToMyLocation");
+
+        LatLng userPosition = getUserLatLng();
+        if (userPosition == null) return;
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                        .target(userPosition)
+                        .zoom(15.5f)
+                        .build()),
+                new GoogleMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
+                        justFinishedAnimating = true;
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+                });
+    }
+
 }

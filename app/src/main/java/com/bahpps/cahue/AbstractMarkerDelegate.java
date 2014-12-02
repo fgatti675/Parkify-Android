@@ -59,8 +59,9 @@ public abstract class AbstractMarkerDelegate {
      * If any changes are done, the method {@link #markAsDirty()} needs to be called
      *
      * @param cameraPosition
+     * @param justFinishedAnimating
      */
-    public abstract void onCameraChange(CameraPosition cameraPosition);
+    public abstract void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating);
 
     /**
      * Called when the user changes location

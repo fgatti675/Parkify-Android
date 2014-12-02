@@ -22,6 +22,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:visibility="invisible"
+        android:elevation="@dimen/elevation"
         tools:context="com.bahpps.cahue.SpotDetailsFragment" />
 
     <include layout="@layout/toolbar_actionbar_translucent"/>

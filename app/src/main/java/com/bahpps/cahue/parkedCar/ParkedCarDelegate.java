@@ -8,12 +8,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
+import com.bahpps.cahue.CameraUpdateListener;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.GMapV2Direction;
-import com.bahpps.cahue.util.Util;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -31,8 +30,6 @@ import com.google.maps.android.ui.IconGenerator;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +49,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     /**
      * Camera mode
      */
-    private enum Mode {
+    public enum Mode {
         FREE, FOLLOWING
     }
 
@@ -60,6 +57,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     private IconGenerator iconFactory;
 
+    private CameraUpdateListener cameraUpdateListener;
     private GoogleMap mMap;
     private ImageButton carButton;
     private CarSelectedListener carSelectedListener;
@@ -87,8 +85,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     private Context mContext;
 
     private Date lastDirectionsUpdate;
-
-    private boolean justFinishedAnimating = false;
 
     public static final Parcelable.Creator<ParkedCarDelegate> CREATOR =
             new Parcelable.Creator<ParkedCarDelegate>() {
@@ -124,8 +120,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         lastDirectionsUpdate = (Date) parcel.readSerializable();
     }
 
-    public void init(Context context, Car car, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
+    public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
         mContext = context;
+        this.cameraUpdateListener = cameraUpdateListener;
         this.mMap = map;
         this.car = car;
         this.carButton = carButton;
@@ -357,16 +354,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         for (LatLng latLng : directionPoints)
             builder.include(latLng);
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150), new GoogleMap.CancelableCallback() {
-            @Override
-            public void onFinish() {
-                justFinishedAnimating = true;
-            }
+        cameraUpdateListener.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
 
-            @Override
-            public void onCancel() {
-            }
-        });
         return true;
     }
 
@@ -382,42 +371,22 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         LatLng loc = getCarLatLng();
 
         if (loc != null) {
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+            cameraUpdateListener.onCameraUpdateRequest(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(loc)
                     .zoom(15.5f)
-                    .build()), null);
-
+                    .build()));
         }
     }
 
-    private void zoomToMyLocation() {
-
-        Log.d(TAG, "zoomToMyLocation");
-
-        LatLng userPosition = getUserLatLng();
-        if (userPosition == null) return;
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .target(userPosition)
-                        .zoom(15.5f)
-                        .build()),
-                new GoogleMap.CancelableCallback() {
-                    @Override
-                    public void onFinish() {
-                        justFinishedAnimating = true;
-                    }
-
-                    @Override
-                    public void onCancel() {
-                    }
-                });
-    }
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
+    public void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating) {
         if (!justFinishedAnimating) setMode(Mode.FREE);
-        justFinishedAnimating = false;
     }
 
+    public Mode getMode() {
+        return mode;
+    }
 
     @Override
     public boolean onMarkerClick(Marker marker) {

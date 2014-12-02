@@ -43,6 +43,7 @@
 
     <string name="pick_account">You must select an account in order to use this application</string>
 
+    <string name="name_stub" translatable="false">NAME</string>
     <string name="time_stub" translatable="false">TIME</string>
     <string name="distance_stub" translatable="false">DISTANCE</string>
 

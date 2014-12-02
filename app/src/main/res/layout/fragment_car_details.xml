@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/large_padding"
-    android:background="@color/translucent_background"
+    android:background="@color/background_material_light"
     tools:context="com.bahpps.cahue.SpotDetailsFragment">
 
     <ImageView
@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/time_stub" />
+            android:text="@string/name_stub" />
 
         <TextView
             android:id="@+id/time"
@@ -50,7 +50,8 @@
         android:id="@+id/follow"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/clear"
-        android:src="@drawable/ic_action_maps_navigation"/>
+        android:src="@drawable/ic_action_maps_navigation"
+        android:background="@drawable/plain_button"/>
 
     <ImageButton
         android:layout_width="wrap_content"
