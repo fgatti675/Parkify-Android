@@ -755,7 +755,7 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public void onMapClick(LatLng point) {
-//        parkedCarDelegateMap.setModeFree();
+
     }
 
     @Override

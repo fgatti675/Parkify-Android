@@ -136,8 +136,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void setCarLocation(Car car) {
         this.car = car;
         directionPoints.clear();
-        if (directionPoints.isEmpty())
-            fetchDirections(true);
+        fetchDirections(true);
         doDraw();
     }
 
@@ -160,6 +159,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private void clear() {
+        directionPoints.clear();
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
         if (directionsPolyline != null) directionsPolyline.remove();
@@ -211,7 +211,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void removeCar() {
         CarLocationManager.removeStoredLocation(mContext, car.id);
         car.location = null;
-        directionPoints.clear();
         clear();
     }
 
@@ -275,7 +274,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
             @Override
             protected void onPostExecute(Document doc) {
                 lastDirectionsUpdate = new Date();
-                directionPoints = directionsDelegate.getDirection(doc);
+                directionPoints.clear();
+                directionPoints.addAll(directionsDelegate.getDirection(doc));
                 doDraw();
             }
 
@@ -293,8 +293,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
     }
 
-    public void setFollowing(){
-       setMode(Mode.FOLLOWING);
+    public void setFollowing() {
+        setMode(Mode.FOLLOWING);
     }
 
     private void setMode(Mode mode) {

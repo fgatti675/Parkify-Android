@@ -33,9 +33,9 @@
 
     </style>
 
-    <style name="AppTheme.Button" parent="android:style/Widget.Button">
-        <item name="android:textSize">19sp</item>
-        <item name="android:layout_margin">0dip</item>
+    <style name="AppTheme.Button">
+        <!--<item name="android:textSize">19sp</item>-->
+        <!--<item name="android:layout_margin">0dip</item>-->
         <item name="android:background">#ff0000</item>
     </style>
 
