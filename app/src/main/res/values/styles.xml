@@ -18,6 +18,8 @@
         <item name="android:textColorLink">@color/theme_accent_2</item>
 
         <item name="windowActionBar">false</item>
+
+        <item name="android:buttonStyle">@style/AppTheme.Button</item>
         <!--<item name="android:windowNoTitle">true</item>-->
 
         <!--<item name="android:windowContentOverlay">@null</item>-->
@@ -29,6 +31,12 @@
         <!--<item name="android:dropDownListViewStyle">@style/Widget.IOSched.ListView.DropDown</item>-->
         <!--<item name="android:textAppearanceLargePopupMenu">@style/TextAppearance.LargePopupMenu</item>-->
 
+    </style>
+
+    <style name="AppTheme.Button" parent="android:style/Widget.Button">
+        <item name="android:textSize">19sp</item>
+        <item name="android:layout_margin">0dip</item>
+        <item name="android:background">#ff0000</item>
     </style>
 
     <style name="AppTheme.Transparent" parent="AppTheme">

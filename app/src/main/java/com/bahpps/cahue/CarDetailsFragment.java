@@ -14,6 +14,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
@@ -155,7 +156,8 @@ public class CarDetailsFragment extends DetailsFragment {
     }
 
     private void updateFollowButtonState() {
-        follow.setEnabled(parkedCarDelegate.getMode() == ParkedCarDelegate.Mode.FOLLOWING);
+        boolean enabled = parkedCarDelegate.getMode() == ParkedCarDelegate.Mode.FOLLOWING;
+        follow.setSelected(enabled);
     }
 
     /**

@@ -739,6 +739,8 @@ public class MapsActivity extends ActionBarActivity
         if(detailsFragment != null)
             detailsFragment.onCameraUpdate(justFinishedAnimating);
 
+        justFinishedAnimating = false;
+
         drawIfNecessary();
     }
 

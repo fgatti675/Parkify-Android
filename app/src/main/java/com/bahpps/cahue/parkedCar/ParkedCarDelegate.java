@@ -381,7 +381,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating) {
-        if (!justFinishedAnimating) setMode(Mode.FREE);
+        if (!justFinishedAnimating)
+            setMode(Mode.FREE);
     }
 
     public Mode getMode() {
