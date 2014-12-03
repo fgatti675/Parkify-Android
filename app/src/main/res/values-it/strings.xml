@@ -14,7 +14,7 @@
     <string name="link_removed">Collegamento con dispositivo eliminato</string>
     <string name="help">Aiuto</string>
     <string name="donate">Donazione</string>
-    <string name="remove_car">Elimina posizione della macchina</string>
+    <string name="remove_car">Eliminare la posizione della macchina?</string>
 
     <string name="position_waiting">Attesa di posizione</string>
     <string name="car_not_found">La posizione della macchina non è stata stabilita</string>

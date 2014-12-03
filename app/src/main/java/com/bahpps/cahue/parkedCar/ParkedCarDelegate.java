@@ -159,7 +159,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private void clear() {
-        directionPoints.clear();
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
         if (directionsPolyline != null) directionsPolyline.remove();

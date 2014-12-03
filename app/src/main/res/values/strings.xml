@@ -12,7 +12,7 @@
     <string name="link_device">Link device</string>
     <string name="help">Help</string>
     <string name="donate">Donate</string>
-    <string name="remove_car">Remove car location</string>
+    <string name="remove_car">Remove car location?</string>
     <string name="position_waiting">Waiting for user position</string>
     <string name="car_not_found">Car\'s position has not been established</string>
     <string name="bt_not_available">Bluetooth is not available</string>

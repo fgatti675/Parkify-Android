@@ -833,12 +833,11 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public void onFollowingClicked(Car car) {
-        getParkedCarDelegate(car).setFollowing();
+        // TODO: remove?
     }
 
     @Override
     public void onCarPositionDeleted(Car car) {
-        getParkedCarDelegate(car).removeCar();
         hideDetails();
     }
 

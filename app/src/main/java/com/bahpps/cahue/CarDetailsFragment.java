@@ -2,6 +2,10 @@ package com.bahpps.cahue;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -73,46 +77,62 @@ public class CarDetailsFragment extends DetailsFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_car_details, container, false);
-        if (car != null) {
 
-            // Set time ago
-            TextView name = (TextView) view.findViewById(R.id.name);
-            name.setText(car.name);
+        // Set time ago
+        TextView name = (TextView) view.findViewById(R.id.name);
+        name.setText(car.name);
 
-            // Set time ago
-            TextView timeAgo = (TextView) view.findViewById(R.id.time);
-            timeAgo.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+        // Set time ago
+        TextView timeAgo = (TextView) view.findViewById(R.id.time);
+        timeAgo.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
 
-            // Update distance
-            TextView distance = (TextView) view.findViewById(R.id.distance);
-            updateDistance(distance);
+        // Update distance
+        TextView distance = (TextView) view.findViewById(R.id.distance);
+        updateDistance(distance);
 
-            Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
-            view.startAnimation(fadeInAnimation);
+        Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
+        view.startAnimation(fadeInAnimation);
 
-            ImageButton clear = (ImageButton) view.findViewById(R.id.clear);
-            clear.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mListener != null) {
-                        mListener.onCarPositionDeleted(car);
-                    }
+        ImageButton clear = (ImageButton) view.findViewById(R.id.clear);
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(R.string.remove_car)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (mListener != null) {
+                                    parkedCarDelegate.removeCar();
+                                    mListener.onCarPositionDeleted(car);
+                                }
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                            }
+                        });
+                // Create the AlertDialog object and return it
+                builder.create().show();
+
+            }
+        });
+
+        follow = (ImageButton) view.findViewById(R.id.follow);
+        follow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onFollowingClicked(car);
+                    parkedCarDelegate.setFollowing();
+                    updateFollowButtonState();
                 }
-            });
 
-            follow = (ImageButton) view.findViewById(R.id.follow);
-            follow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mListener != null) {
-                        mListener.onFollowingClicked(car);
-                        updateFollowButtonState();
-                    }
+            }
+        });
 
-                }
-            });
+        updateFollowButtonState();
 
-        }
         return view;
     }
 
@@ -156,8 +176,11 @@ public class CarDetailsFragment extends DetailsFragment {
     }
 
     private void updateFollowButtonState() {
-        boolean enabled = parkedCarDelegate.getMode() == ParkedCarDelegate.Mode.FOLLOWING;
-        follow.setSelected(enabled);
+        boolean selected = parkedCarDelegate.getMode() == ParkedCarDelegate.Mode.FOLLOWING;
+        if (selected)
+            follow.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_maps_navigation_accent));
+        else
+            follow.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_maps_navigation));
     }
 
     /**
