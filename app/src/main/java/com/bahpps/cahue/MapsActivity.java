@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ScrollView;
@@ -273,7 +274,6 @@ public class MapsActivity extends ActionBarActivity
 
 
     /**
-     *
      * @param car
      * @return
      */
@@ -291,27 +291,38 @@ public class MapsActivity extends ActionBarActivity
 
         if (detailsDisplayed) return;
 
-        Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
-        detailsDisplayed = true;
-        TranslateAnimation animation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
-        animation.setDuration(300);
-        animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
-        animation.setAnimationListener(new Animation.AnimationListener() {
+        detailsContainer.setVisibility(View.VISIBLE);
+        detailsContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-                detailsContainer.setVisibility(View.VISIBLE);
-            }
+            public void onGlobalLayout() {
+                final int height = detailsContainer.getHeight();
+                Log.i(TAG, "DETAILS MEASURED HEIGHT " + height);
+                Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-            }
+                detailsDisplayed = true;
+                TranslateAnimation animation = new TranslateAnimation(0, 0, height, 0);
+                animation.setDuration(300);
+                animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, height);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                detailsContainer.startAnimation(animation);
+                detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
-        mMap.setPadding(0, Util.getActionBarSize(this), 0, detailsContainer.getHeight());
-        detailsContainer.startAnimation(animation);
+
 
     }
 
@@ -326,18 +337,18 @@ public class MapsActivity extends ActionBarActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+                mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, 0);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.setVisibility(View.INVISIBLE);
+                detailsContainer.setVisibility(View.GONE);
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
-        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
         detailsContainer.startAnimation(animation);
     }
 
@@ -736,7 +747,7 @@ public class MapsActivity extends ActionBarActivity
             delegate.onCameraChange(cameraPosition, justFinishedAnimating);
         }
 
-        if(detailsFragment != null)
+        if (detailsFragment != null)
             detailsFragment.onCameraUpdate(justFinishedAnimating);
 
         justFinishedAnimating = false;
