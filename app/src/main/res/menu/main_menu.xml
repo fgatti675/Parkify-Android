@@ -20,4 +20,9 @@
         android:icon="@drawable/ic_action_help"
         cahue:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_disconnect"
+        android:title="@string/disconnect"
+        cahue:showAsAction="never" />
+
 </menu>

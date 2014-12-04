@@ -43,6 +43,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
+    private static final int DIRECTIONS_EXPIRY = 30000;
 
     private Car car;
 
@@ -116,12 +117,15 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         mode = (Mode) parcel.readSerializable();
         car = parcel.readParcelable(Car.class.getClassLoader());
         userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
+        directionPoints = new ArrayList();
         parcel.readTypedList(directionPoints, LatLng.CREATOR);
         lastDirectionsUpdate = (Date) parcel.readSerializable();
     }
 
     public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
+
         mContext = context;
+
         this.cameraUpdateListener = cameraUpdateListener;
         this.mMap = map;
         this.car = car;
@@ -143,7 +147,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void onLocationChanged(Location userLocation) {
         this.userLocation = userLocation;
 
-        if (lastDirectionsUpdate == null || System.currentTimeMillis() - lastDirectionsUpdate.getTime() > 30000)
+        if (lastDirectionsUpdate == null || System.currentTimeMillis() - lastDirectionsUpdate.getTime() > DIRECTIONS_EXPIRY)
             fetchDirections(false);
 
         updateCameraIfFollowing();

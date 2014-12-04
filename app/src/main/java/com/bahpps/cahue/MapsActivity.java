@@ -68,7 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends ActionBarActivity
+public class MapsActivity extends PlusBaseActivity
         implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -89,9 +89,6 @@ public class MapsActivity extends ActionBarActivity
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
-    static final int REQUEST_CODE_PICK_ACCOUNT = 1;
-    static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 2;
-    static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 3;
     static final int REQUEST_ON_PURCHASE = 1001;
 
     private static final String PREF_USER_EMAIL = "pref_user_email";
@@ -109,8 +106,6 @@ public class MapsActivity extends ActionBarActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-    private String accountName;
-    private String authToken;
 
     private GoogleApiClient googleApiClient;
 
@@ -153,6 +148,40 @@ public class MapsActivity extends ActionBarActivity
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
+
+    @Override
+    protected void onPlusClientRevokeAccess() {
+
+    }
+
+    @Override
+    protected void onPlusClientSignIn() {
+
+    }
+
+    @Override
+    protected void onPlusClientSignOut() {
+        goToLogin();
+    }
+
+    private void goToLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
+    }
+
+    @Override
+    protected void onPlusClientBlockingUI(boolean show) {
+
+    }
+
+    @Override
+    protected void onLoginStatusChange() {
+
+        boolean connected = getPlusClient().isConnected();
+        if(!connected){
+            goToLogin();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,8 +279,6 @@ public class MapsActivity extends ActionBarActivity
 
         bindBillingService();
 
-        setUpUserAccount();
-
         setUpMapIfNeeded();
         setUpMapListeners();
 
@@ -270,6 +297,7 @@ public class MapsActivity extends ActionBarActivity
             delegates.add(parkedCarDelegate);
         }
 
+        signIn();
     }
 
 
@@ -385,53 +413,6 @@ public class MapsActivity extends ActionBarActivity
 
     }
 
-    private void setUpUserAccount() {
-        accountName = prefs.getString(PREF_USER_EMAIL, null);
-        if (accountName == null) {
-            try {
-                Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-                        new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
-                startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
-            } catch (ActivityNotFoundException e) {
-                // TODO
-            }
-        } else {
-            requestOauthToken();
-        }
-    }
-
-    private void requestOauthToken() {
-
-
-        Log.i(TAG, "requestOauthToken");
-
-        new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                try {
-                    authToken = GoogleAuthUtil.getToken(MapsActivity.this, accountName, SCOPE);
-                    Log.d(TAG, authToken);
-                    onAuthCompleted(authToken);
-                } catch (UserRecoverableAuthException userRecoverableException) {
-                    // GooglePlayServices.apk is either old, disabled, or not present
-                    // so we need to show the user some UI in the activity to recover.
-                    handleException(userRecoverableException);
-                    Log.d(TAG, "Auth token: " + authToken);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (GoogleAuthException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        }.execute();
-
-    }
-
-    private void onAuthCompleted(String authToken) {
-
-    }
-
     private void bindBillingService() {
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
@@ -441,29 +422,8 @@ public class MapsActivity extends ActionBarActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        // Receiving a result from the AccountPicker
-        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-            if (resultCode == RESULT_OK) {
-                accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                prefs.edit().putString(PREF_USER_EMAIL, accountName).apply();
-                Log.i(TAG, "Users email:" + accountName);
-
-                requestOauthToken();
-            } else if (resultCode == RESULT_CANCELED) {
-                // The account picker dialog closed without selecting an account.
-                // Notify users that they must pick an account to proceed.
-                Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
-            }
-        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
-                requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
-                && resultCode == RESULT_OK) {
-            // Receiving a result that follows a GoogleAuthException, try auth again
-            setUpUserAccount();
-        }
-
-
         // element purchase
-        else if (requestCode == REQUEST_ON_PURCHASE) {
+         if (requestCode == REQUEST_ON_PURCHASE) {
 
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
@@ -515,43 +475,11 @@ public class MapsActivity extends ActionBarActivity
         return false;
     }
 
-    /**
-     * This method is a hook for background threads and async tasks that need to provide the
-     * user a response UI when an exception occurs.
-     */
-    public void handleException(final Exception e) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (e instanceof GooglePlayServicesAvailabilityException) {
-                    // The Google Play services APK is old, disabled, or not present.
-                    // Show a dialog created by Google Play services that allows
-                    // the user to update the APK
-                    int statusCode = ((GooglePlayServicesAvailabilityException) e)
-                            .getConnectionStatusCode();
-                    Dialog dialog = GooglePlayServicesUtil.getErrorDialog(statusCode,
-                            MapsActivity.this,
-                            REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
-                    dialog.show();
-                } else if (e instanceof UserRecoverableAuthException) {
-                    // Unable to authenticate, such as when the user has not yet granted
-                    // the app access to the account, but the user can fix this.
-                    // Forward the user to an activity in Google Play services.
-                    Intent intent = ((UserRecoverableAuthException) e).getIntent();
-                    startActivityForResult(intent,
-                            REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
-                }
-            }
-        });
-    }
-
-
     private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
         dialog.show(getFragmentManager(), "InfoDialogFragment");
         prefs.edit().putBoolean(Util.PREF_DIALOG_SHOWN, true).apply();
     }
-
 
     @Override
     protected void onPause() {
@@ -788,9 +716,13 @@ public class MapsActivity extends ActionBarActivity
             case R.id.action_donate:
                 openDonationDialog();
                 return true;
+            case R.id.action_disconnect:
+                signOut();
+                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
+
     }
 
 

@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -118,6 +119,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
         ParkingSpot[] spotsArray = parcel.createTypedArray(ParkingSpot.CREATOR);
         spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
+        queriedBounds = new ArrayList();
         parcel.readTypedList(queriedBounds, LatLngBounds.CREATOR);
         viewBounds = parcel.readParcelable(classLoader);
         shouldBeReset = parcel.readByte() != 0;
