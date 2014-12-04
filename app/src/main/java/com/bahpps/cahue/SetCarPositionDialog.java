@@ -38,7 +38,7 @@ public class SetCarPositionDialog extends DialogFragment {
         // fill option names
         ArrayList<String> options = new ArrayList();
         for (Car car : cars) {
-            options.add(car.name);
+            options.add(car.name != null ? car.name : getString(R.string.other));
         }
         String[] optionsArray = new String[options.size()];
         optionsArray = options.toArray(optionsArray);
@@ -89,7 +89,6 @@ public class SetCarPositionDialog extends DialogFragment {
         outState.putParcelable("location", location);
         super.onSaveInstanceState(outState);
     }
-
 
 
 }
