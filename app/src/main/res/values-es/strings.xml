@@ -44,4 +44,5 @@
     <string name="thanks">¡Gracias por tu apoyo! :)</string>
 
     <string name="pick_account">Debes seleccionar una cuenta para utilizar esta aplicación</string>
+    <string name="other">Otro</string>
 </resources>

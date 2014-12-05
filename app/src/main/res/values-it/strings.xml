@@ -44,5 +44,6 @@
     <string name="thanks">Grazie per l\'aiuto! :)</string>
 
     <string name="pick_account">Devi selezionare una account</string>
+    <string name="other">Altro</string>
 
 </resources>

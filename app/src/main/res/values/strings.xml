@@ -46,5 +46,6 @@
     <string name="name_stub" translatable="false">NAME</string>
     <string name="time_stub" translatable="false">TIME</string>
     <string name="distance_stub" translatable="false">DISTANCE</string>
+    <string name="other">Other</string>
 
 </resources>

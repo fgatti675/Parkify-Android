@@ -83,6 +83,11 @@ public class CarLocationManager {
             if (storedCar != null)
                 cars.add(storedCar);
         }
+
+        // add a default car, mainly if the user wants to store the location of a non paired device
+        Car defaultCar = getStoredBTCar(context, "", bondedBTDevices);
+        cars.add(defaultCar);
+
         return cars;
     }
 
@@ -111,7 +116,6 @@ public class CarLocationManager {
                 car.name = device.getName();
             }
         }
-        if (car.name == null) return null;
 
         /**
          * If location is set
