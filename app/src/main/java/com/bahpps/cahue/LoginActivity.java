@@ -55,6 +55,11 @@ public class LoginActivity extends BaseActivity {
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    @Override
+    protected void onSignInRequired() {
+
+    }
+
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -79,13 +84,6 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onPlusClientBlockingUI(boolean show) {
         showProgress(show);
-    }
-
-    @Override
-    protected void onUpdate() {
-//        boolean connected = getGoogleApiClient().isConnected();
-//
-//        mPlusSignInButton.setVisibility(connected ? View.GONE : View.VISIBLE);
     }
 
     @Override

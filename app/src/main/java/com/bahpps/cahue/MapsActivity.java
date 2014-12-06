@@ -135,7 +135,11 @@ public class MapsActivity extends BaseActivity
 
     @Override
     protected void onPlusClientSignIn() {
-
+        LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
+                REQUEST,
+                this);
+        // call convenience method that zooms map on our location only on starting the app
+        setInitialCamera();
     }
 
     @Override
@@ -153,14 +157,6 @@ public class MapsActivity extends BaseActivity
 
     }
 
-    @Override
-    protected void onUpdate() {
-
-        boolean connected = getGoogleApiClient().isConnected();
-        if(!connected){
-            goToLogin();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -415,6 +411,14 @@ public class MapsActivity extends BaseActivity
                 }
             }
         }
+        else {
+             super.onActivityResult(requestCode, resultCode, data);
+         }
+    }
+
+    @Override
+    protected void onSignInRequired() {
+        goToLogin();
     }
 
 
@@ -561,21 +565,6 @@ public class MapsActivity extends BaseActivity
     }
 
 
-    /**
-     * Callback called when connected to GCore. Implementation of {@link GooglePlayServicesClient.ConnectionCallbacks}.
-     */
-    @Override
-    public void onConnected(Bundle connectionHint) {
-
-        LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
-                REQUEST,
-                this);
-        // call convenience method that zooms map on our location only on starting the app
-        setInitialCamera();
-
-
-    }
-
     private boolean initialCameraSet = false;
 
     private void setInitialCamera() {
@@ -598,11 +587,6 @@ public class MapsActivity extends BaseActivity
 
             initialCameraSet = true;
         }
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
 
     }
 
@@ -657,11 +641,6 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onMapClick(LatLng point) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
 

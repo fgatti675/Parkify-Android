@@ -71,16 +71,12 @@ public abstract class BaseActivity
      */
     protected abstract void onPlusClientBlockingUI(boolean show);
 
-    /**
-     * Called when there is a change in connection state.  If you have "Sign in"/ "Connect",
-     * "Sign out"/ "Disconnect", or "Revoke access" buttons, this lets you know when their states
-     * need to be updated.
-     */
-    protected abstract void onUpdate();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG, "mGoogleApiClient initialized");
 
         // Initialize the PlusClient connection.
         // Scopes indicate the information about the user your application will be able to access.
@@ -103,11 +99,11 @@ public abstract class BaseActivity
             mSignInClicked = true;
             resolveSignInError();
         }
-        onUpdate();
     }
 
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "mGoogleApiClient connecting");
         mGoogleApiClient.connect();
     }
 
@@ -139,13 +135,12 @@ public abstract class BaseActivity
             Log.v(TAG, "Sign out successful!");
         }
 
-        onUpdate();
     }
 
 
     @Override
-    protected void onActivityResult(int requestCode, int responseCode,
-                                    Intent intent) {
+    protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
+
         if (requestCode == OUR_REQUEST_CODE) {
             if (responseCode != RESULT_OK) {
                 mSignInClicked = false;
@@ -172,19 +167,18 @@ public abstract class BaseActivity
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected");
         mSignInClicked = false;
-        onUpdate();
         setProgressBarVisible(false);
         onPlusClientSignIn();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        Log.d(TAG, "onConnectionSuspended");
     }
 
 
     /**
-     * Connection failed for some reason (called by PlusClient)
+     * Connection failed for some reason
      * Try and resolve the result.  Failure here is usually not an indication of a serious error,
      * just that the user's input is needed.
      *
@@ -192,10 +186,15 @@ public abstract class BaseActivity
      */
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        Log.d(TAG, "onConnectionFailed");
+
+        if(result.getErrorCode() == ConnectionResult.SIGN_IN_REQUIRED){
+            onSignInRequired();
+        }
+
         if (!result.hasResolution()) {
-            GooglePlayServicesUtil.getErrorDialog(result.getErrorCode(), this,
-                    0).show();
+            GooglePlayServicesUtil
+                    .getErrorDialog(result.getErrorCode(), this, 0)
+                    .show();
             return;
         }
 
@@ -213,8 +212,14 @@ public abstract class BaseActivity
     }
 
     /**
+     * Called when signing in is required
+     */
+    protected abstract void onSignInRequired();
+
+
+    /**
      * Method to resolve any signin errors
-     * */
+     */
     private void resolveSignInError() {
         if (mConnectionResult.hasResolution()) {
             try {
@@ -233,7 +238,7 @@ public abstract class BaseActivity
 
     /**
      * Fetching user's information name, email, profile pic
-     * */
+     */
     private void getProfileInformation() {
         try {
             if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
@@ -271,7 +276,7 @@ public abstract class BaseActivity
 
     /**
      * Background Async task to load user profile picture from url
-     * */
+     */
     private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
