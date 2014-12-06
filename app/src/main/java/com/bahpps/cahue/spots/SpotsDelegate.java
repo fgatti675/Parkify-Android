@@ -159,13 +159,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     public void setUpResetTask() {
 
-        Log.d(TAG, "Setting up repetitive reset task");
+        Log.v(TAG, "Setting up repetitive reset task");
 
         long timeFromLastTimeout = System.currentTimeMillis() - lastResetTaskRequestTime.getTime();
         long nextTimeOut = TIMEOUT_MS - timeFromLastTimeout;
         if (nextTimeOut < 0) nextTimeOut = 0;
 
-        Log.d(TAG, "Next time out (ms): " + nextTimeOut);
+        Log.v(TAG, "Next time out (ms): " + nextTimeOut);
 
         scheduledResetTask = scheduledExecutorService.scheduleAtFixedRate(
                 new Runnable() {
@@ -207,7 +207,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         nearbyQuery = new CartoDBParkingSpotsQuery(this);
 
-        Log.d(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
+        Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
         nearbyQuery.retrieveNearbySpots(userLocation, CLOSEST_LOCATIONS);
 
         return true;
@@ -241,7 +241,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (!shouldBeReset) {
             for (LatLngBounds latLngBounds : queriedBounds) {
                 if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
-                    Log.d(QUERY_TAG, "No need to query again camera");
+                    Log.v(QUERY_TAG, "No need to query again camera");
                     return false;
                 }
             }
@@ -252,7 +252,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         ParkingSpotsQuery areaQuery = new CartoDBParkingSpotsQuery(this);
 
-        Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
+        Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.retrieveLocationsIn(extendedViewBounds);
 
         return true;
@@ -304,7 +304,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         Toast.makeText(mContext, "Check internet connection", Toast.LENGTH_SHORT).show();
     }
 
-
     public void doDraw() {
 
         // hideMarkers first
@@ -351,9 +350,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      * Hide non visible markers (outside of viewport)
      */
     private void hideMarkers() {
-        for (Marker marker : markerSpotsMap.keySet()) {
-            if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
-                marker.setVisible(false);
+        for (final Marker marker : markerSpotsMap.keySet()) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
+                        marker.setVisible(false);
+                }
+            });
         }
     }
 

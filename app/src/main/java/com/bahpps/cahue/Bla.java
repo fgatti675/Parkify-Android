@@ -1,7 +1,10 @@
 package com.bahpps.cahue;
 
+import android.accounts.AccountManager;
+import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,15 +15,16 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ScrollView;
@@ -33,8 +37,15 @@ import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.Util;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
+import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -50,13 +61,16 @@ import com.google.android.gms.maps.model.Marker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends BaseActivity
+public class Bla extends ActionBarActivity
         implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraChangeListener,
@@ -74,6 +88,9 @@ public class MapsActivity extends BaseActivity
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
+    static final int REQUEST_CODE_PICK_ACCOUNT = 1;
+    static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 2;
+    static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 3;
     static final int REQUEST_ON_PURCHASE = 1001;
 
     private static final String PREF_USER_EMAIL = "pref_user_email";
@@ -91,7 +108,10 @@ public class MapsActivity extends BaseActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
+    private String accountName;
+    private String authToken;
 
+    private GoogleApiClient googleApiClient;
 
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
@@ -132,35 +152,6 @@ public class MapsActivity extends BaseActivity
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
-
-    @Override
-    protected void onPlusClientSignIn() {
-
-    }
-
-    @Override
-    protected void onPlusClientSignOut() {
-        goToLogin();
-    }
-
-    private void goToLogin() {
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
-    }
-
-    @Override
-    protected void onPlusClientBlockingUI(boolean show) {
-
-    }
-
-    @Override
-    protected void onUpdate() {
-
-        boolean connected = getGoogleApiClient().isConnected();
-        if(!connected){
-            goToLogin();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -258,6 +249,8 @@ public class MapsActivity extends BaseActivity
 
         bindBillingService();
 
+        setUpUserAccount();
+
         setUpMapIfNeeded();
         setUpMapListeners();
 
@@ -280,6 +273,7 @@ public class MapsActivity extends BaseActivity
 
 
     /**
+     *
      * @param car
      * @return
      */
@@ -297,38 +291,27 @@ public class MapsActivity extends BaseActivity
 
         if (detailsDisplayed) return;
 
-        detailsContainer.setVisibility(View.VISIBLE);
-        detailsContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
+        detailsDisplayed = true;
+        TranslateAnimation animation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
+        animation.setDuration(300);
+        animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
+        animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onGlobalLayout() {
-                final int height = detailsContainer.getHeight();
-                Log.i(TAG, "DETAILS MEASURED HEIGHT " + height);
-                Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
+            public void onAnimationStart(Animation animation) {
+                detailsContainer.setVisibility(View.VISIBLE);
+            }
 
-                detailsDisplayed = true;
-                TranslateAnimation animation = new TranslateAnimation(0, 0, height, 0);
-                animation.setDuration(300);
-                animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
-                animation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+            }
 
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, height);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                detailsContainer.startAnimation(animation);
-                detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            @Override
+            public void onAnimationRepeat(Animation animation) {
             }
         });
-
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, detailsContainer.getHeight());
+        detailsContainer.startAnimation(animation);
 
     }
 
@@ -343,18 +326,18 @@ public class MapsActivity extends BaseActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, 0);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.setVisibility(View.GONE);
+                detailsContainer.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
         detailsContainer.startAnimation(animation);
     }
 
@@ -376,15 +359,65 @@ public class MapsActivity extends BaseActivity
         super.onResume();
 
         setUpMapIfNeeded();
+        setUpLocationClientIfNeeded();
 
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
+
+        googleApiClient.connect();
 
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onResume();
         }
 
         drawIfNecessary();
+
+    }
+
+    private void setUpUserAccount() {
+        accountName = prefs.getString(PREF_USER_EMAIL, null);
+        if (accountName == null) {
+            try {
+                Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+                        new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
+                startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
+            } catch (ActivityNotFoundException e) {
+                // TODO
+            }
+        } else {
+            requestOauthToken();
+        }
+    }
+
+    private void requestOauthToken() {
+
+
+        Log.i(TAG, "requestOauthToken");
+
+        new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                try {
+                    authToken = GoogleAuthUtil.getToken(Bla.this, accountName, SCOPE);
+                    Log.d(TAG, authToken);
+                    onAuthCompleted(authToken);
+                } catch (UserRecoverableAuthException userRecoverableException) {
+                    // GooglePlayServices.apk is either old, disabled, or not present
+                    // so we need to show the user some UI in the activity to recover.
+                    handleException(userRecoverableException);
+                    Log.d(TAG, "Auth token: " + authToken);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
+
+    }
+
+    private void onAuthCompleted(String authToken) {
 
     }
 
@@ -397,8 +430,29 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        // Receiving a result from the AccountPicker
+        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+            if (resultCode == RESULT_OK) {
+                accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                prefs.edit().putString(PREF_USER_EMAIL, accountName).apply();
+                Log.i(TAG, "Users email:" + accountName);
+
+                requestOauthToken();
+            } else if (resultCode == RESULT_CANCELED) {
+                // The account picker dialog closed without selecting an account.
+                // Notify users that they must pick an account to proceed.
+                Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
+            }
+        } else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
+                requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
+                && resultCode == RESULT_OK) {
+            // Receiving a result that follows a GoogleAuthException, try auth again
+            setUpUserAccount();
+        }
+
+
         // element purchase
-         if (requestCode == REQUEST_ON_PURCHASE) {
+        else if (requestCode == REQUEST_ON_PURCHASE) {
 
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
@@ -450,11 +504,43 @@ public class MapsActivity extends BaseActivity
         return false;
     }
 
+    /**
+     * This method is a hook for background threads and async tasks that need to provide the
+     * user a response UI when an exception occurs.
+     */
+    public void handleException(final Exception e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (e instanceof GooglePlayServicesAvailabilityException) {
+                    // The Google Play services APK is old, disabled, or not present.
+                    // Show a dialog created by Google Play services that allows
+                    // the user to update the APK
+                    int statusCode = ((GooglePlayServicesAvailabilityException) e)
+                            .getConnectionStatusCode();
+                    Dialog dialog = GooglePlayServicesUtil.getErrorDialog(statusCode,
+                            Bla.this,
+                            REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+                    dialog.show();
+                } else if (e instanceof UserRecoverableAuthException) {
+                    // Unable to authenticate, such as when the user has not yet granted
+                    // the app access to the account, but the user can fix this.
+                    // Forward the user to an activity in Google Play services.
+                    Intent intent = ((UserRecoverableAuthException) e).getIntent();
+                    startActivityForResult(intent,
+                            REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+                }
+            }
+        });
+    }
+
+
     private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
         dialog.show(getFragmentManager(), "InfoDialogFragment");
         prefs.edit().putBoolean(Util.PREF_DIALOG_SHOWN, true).apply();
     }
+
 
     @Override
     protected void onPause() {
@@ -464,6 +550,9 @@ public class MapsActivity extends BaseActivity
             delegate.onPause();
         }
 
+        if (googleApiClient != null) {
+            googleApiClient.disconnect();
+        }
         unregisterReceiver(carPosReceiver);
     }
 
@@ -497,6 +586,15 @@ public class MapsActivity extends BaseActivity
         }
     }
 
+    private void setUpLocationClientIfNeeded() {
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+        }
+    }
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
@@ -537,7 +635,7 @@ public class MapsActivity extends BaseActivity
         } else if (!mBluetoothAdapter.isEnabled()) {
             noBluetooth(this);
         } else {
-            startActivityForResult(new Intent(MapsActivity.this, DeviceListActivity.class), 0);
+            startActivityForResult(new Intent(Bla.this, DeviceListActivity.class), 0);
         }
     }
 
@@ -567,7 +665,7 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onConnected(Bundle connectionHint) {
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
                 REQUEST,
                 this);
         // call convenience method that zooms map on our location only on starting the app
@@ -628,7 +726,7 @@ public class MapsActivity extends BaseActivity
     }
 
     private Location getUserLocation() {
-        return LocationServices.FusedLocationApi.getLastLocation(getGoogleApiClient());
+        return LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
     }
 
 
@@ -638,7 +736,7 @@ public class MapsActivity extends BaseActivity
             delegate.onCameraChange(cameraPosition, justFinishedAnimating);
         }
 
-        if (detailsFragment != null)
+        if(detailsFragment != null)
             detailsFragment.onCameraUpdate(justFinishedAnimating);
 
         justFinishedAnimating = false;
@@ -679,13 +777,9 @@ public class MapsActivity extends BaseActivity
             case R.id.action_donate:
                 openDonationDialog();
                 return true;
-            case R.id.action_disconnect:
-                signOut();
-                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
-
     }
 
 
