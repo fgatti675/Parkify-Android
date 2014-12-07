@@ -70,8 +70,6 @@ public class MapsActivity extends BaseActivity
 
     protected static final String TAG = "Maps";
 
-    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
@@ -140,6 +138,8 @@ public class MapsActivity extends BaseActivity
                 this);
         // call convenience method that zooms map on our location only on starting the app
         setInitialCamera();
+
+
     }
 
     @Override

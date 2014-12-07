@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
+import com.bahpps.cahue.util.Util;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -40,9 +41,9 @@ public class CarMovedService extends LocationPollerService {
     protected boolean checkPreconditions(String id) {
         long now = Calendar.getInstance().getTimeInMillis();
         Car storedCar = CarLocationManager.getStoredCar(this, id);
-        if(storedCar.time == null) return true;
+        if (storedCar.time == null) return true;
         long parkingTime = storedCar.time.getTime();
-        return now-parkingTime > MINIMUM_STAY_MS;
+        return now - parkingTime > MINIMUM_STAY_MS;
     }
 
     @Override
@@ -61,6 +62,9 @@ public class CarMovedService extends LocationPollerService {
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setHeader("ID", id);
+                    String oauthToken = Util.getOauthToken(CarMovedService.this);
+                    if (oauthToken != null)
+                        httpPost.setHeader("Authorization", "OAuth " + oauthToken);
 
                     String json = getJSON(location);
                     Log.i(TAG, "Posting\n" + json);

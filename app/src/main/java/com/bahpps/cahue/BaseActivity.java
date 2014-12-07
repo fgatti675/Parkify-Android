@@ -12,6 +12,10 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bahpps.cahue.util.Util;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -20,6 +24,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.PlusClient;
 import com.google.android.gms.plus.model.people.Person;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -39,6 +44,8 @@ public abstract class BaseActivity
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private static final int OUR_REQUEST_CODE = 49404;
 
+    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
      * from starting further intents.
@@ -54,6 +61,9 @@ public abstract class BaseActivity
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
+
+    private String mLoggedEmail;
+    private String mAuthToken;
 
     /**
      * Called when the PlusClient is successfully connected.
@@ -169,6 +179,8 @@ public abstract class BaseActivity
         mSignInClicked = false;
         setProgressBarVisible(false);
         onPlusClientSignIn();
+        getProfileInformation();
+        requestOauthToken();
     }
 
     @Override
@@ -187,7 +199,7 @@ public abstract class BaseActivity
     @Override
     public void onConnectionFailed(ConnectionResult result) {
 
-        if(result.getErrorCode() == ConnectionResult.SIGN_IN_REQUIRED){
+        if (result.getErrorCode() == ConnectionResult.SIGN_IN_REQUIRED) {
             onSignInRequired();
         }
 
@@ -236,8 +248,34 @@ public abstract class BaseActivity
         return mGoogleApiClient;
     }
 
+    private void requestOauthToken() {
+
+        Log.i(TAG, "requestOauthToken");
+
+        new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                try {
+                    mAuthToken = GoogleAuthUtil.getToken(BaseActivity.this, mLoggedEmail, SCOPE);
+                    Util.saveOAuthToken(BaseActivity.this, mAuthToken);
+                } catch (UserRecoverableAuthException userRecoverableException) {
+                    // GooglePlayServices.apk is either old, disabled, or not present
+                    // so we need to show the user some UI in the activity to recover.
+                    onSignInRequired();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "Auth token: " + mAuthToken);
+                return null;
+            }
+        }.execute();
+
+    }
+
     /**
-     * Fetching user's information name, email, profile pic
+     * Fetching user's information name, mLoggedEmail, profile pic
      */
     private void getProfileInformation() {
         try {
@@ -247,14 +285,14 @@ public abstract class BaseActivity
                 String personName = currentPerson.getDisplayName();
                 String personPhotoUrl = currentPerson.getImage().getUrl();
                 String personGooglePlusProfile = currentPerson.getUrl();
-                String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+                mLoggedEmail = Plus.AccountApi.getAccountName(mGoogleApiClient);
 
                 Log.e(TAG, "Name: " + personName + ", plusProfile: "
-                        + personGooglePlusProfile + ", email: " + email
+                        + personGooglePlusProfile + ", mLoggedEmail: " + mLoggedEmail
                         + ", Image: " + personPhotoUrl);
 
 //                txtName.setText(personName);
-//                txtEmail.setText(email);
+//                txtEmail.setText(mLoggedEmail);
 
                 // by default the profile url gives 50x50 px image only
                 // we can replace the value with whatever dimension we want by

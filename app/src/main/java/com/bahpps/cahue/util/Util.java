@@ -3,6 +3,7 @@ package com.bahpps.cahue.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -62,7 +63,7 @@ public class Util {
      * @return
      */
     public static SharedPreferences getSharedPreferences(Context context) {
-        return context.getSharedPreferences("CAHUE", Context.MODE_WORLD_READABLE);
+        return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static float dpToPx(Context context, int dp) {
@@ -83,4 +84,18 @@ public class Util {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
     }
+
+
+    public static final String PREF_OAUTH_TOKEN = "PREF_OAUTH_TOKEN";
+
+    public static void saveOAuthToken(Context context, String token){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        prefs.edit().putString(PREF_OAUTH_TOKEN, token).apply();
+    }
+
+    public static String getOauthToken(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getString(PREF_OAUTH_TOKEN, null);
+    }
+
 }
