@@ -102,6 +102,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        super.writeToParcel(parcel, i);
         parcel.writeSerializable(mode);
         parcel.writeParcelable(car, 0);
         parcel.writeParcelable(userLocation, 0);
@@ -114,6 +115,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public ParkedCarDelegate(Parcel parcel) {
+        super(parcel);
         mode = (Mode) parcel.readSerializable();
         car = parcel.readParcelable(Car.class.getClassLoader());
         userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());

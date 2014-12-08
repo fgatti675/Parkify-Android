@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
+import com.bahpps.cahue.spots.ParkingSpot;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,10 +26,37 @@ import java.util.List;
 public class SetCarPositionDialog extends DialogFragment {
 
     private final static String TAG = "SetCarPositionDialog";
+    private static final String ARG_LOCATION = "arg_location";
 
     private Location location;
 
     Car selected;
+
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param location Parameter 1.
+     * @return A new instance of fragment MarkerDetailsFragment.
+     */
+    public static SetCarPositionDialog newInstance(Location location) {
+        SetCarPositionDialog fragment = new SetCarPositionDialog();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_LOCATION, location);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            location = getArguments().getParcelable(ARG_LOCATION);
+        }
+    }
+
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -70,24 +98,6 @@ public class SetCarPositionDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
-    }
-
-    public void init(Location location) {
-        this.location = location;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            location = savedInstanceState.getParcelable("location");
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable("location", location);
-        super.onSaveInstanceState(outState);
     }
 
 

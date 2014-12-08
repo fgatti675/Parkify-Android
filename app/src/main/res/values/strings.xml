@@ -3,7 +3,8 @@
 
     <string name="app_name">Cahue</string>
     <string name="scanning">Scanning for devices...</string>
-    <string name="select_device_long">Select a device to link to the app</string>
+    <string name="select_device">Select devices</string>
+    <string name="select_device_long">Select devices found in cars to be linked to the app</string>
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">No devices found</string>
     <string name="button_scan">Scan for devices</string>
@@ -24,15 +25,6 @@
     <string name="cancel">Cancel</string>
     <string name="info_text">Welcome to %1$s!\n\nThis app will automatically record your car\'s position when you walk away from it.\n\nAll you have to do is select which is the Bluetooth device installed in your car and forget about where you parked. You will need to keep your Bluetooth activated and at least one of GPS or WIFI.\n\nIf you want to set your car\'s position manually, you can long press in the map.\n\nPlease note that there are no ads. So any donations will be highly appreciated.</string>
     <string name="poll_location_debug" translatable="false">Poll location</string>
-
-    <!-- Time -->
-    <string name="seconds">seconds</string>
-    <string name="minute">minute</string>
-    <string name="minutes">minutes</string>
-    <string name="hour">hour</string>
-    <string name="hours">hours</string>
-    <string name="day">day</string>
-    <string name="days">days</string>
 
     <!-- Donations -->
     <string name="donation_intro">This application is supported by donations only</string>

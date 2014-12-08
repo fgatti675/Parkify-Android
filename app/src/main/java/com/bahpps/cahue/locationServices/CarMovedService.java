@@ -37,6 +37,11 @@ public class CarMovedService extends LocationPollerService {
     private final static String URL = "http://glossy-radio.appspot.com/spots";
     private static final long MINIMUM_STAY_MS = 180000;
 
+    /**
+     * Times we will be retrying to post a spot location
+     */
+    private static final int POST_RETRIES = 3;
+
     @Override
     protected boolean checkPreconditions(String id) {
         long now = Calendar.getInstance().getTimeInMillis();
@@ -48,11 +53,19 @@ public class CarMovedService extends LocationPollerService {
 
     @Override
     public void onLocationPolled(Context context, final Location location, final String id) {
+        postSpotLocation(location, id, POST_RETRIES);
+    }
 
-        new AsyncTask() {
+    protected void onLocationPost(HttpPost post){
+
+    }
+
+    private void postSpotLocation(final Location location, final String id, final int retries) {
+
+        new AsyncTask <Void, Void, HttpPost>() {
 
             @Override
-            protected Object doInBackground(Object[] objects) {
+            protected HttpPost doInBackground(Void[] objects) {
                 try {
 
                     Log.i(TAG, "Posting users location");
@@ -62,13 +75,16 @@ public class CarMovedService extends LocationPollerService {
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setHeader("ID", id);
+
                     String oauthToken = Util.getOauthToken(CarMovedService.this);
                     if (oauthToken != null)
-                        httpPost.setHeader("Authorization", "OAuth " + oauthToken);
+                        httpPost.setHeader("Authorization", "Bearer  " + oauthToken);
 
                     String json = getJSON(location);
                     Log.i(TAG, "Posting\n" + json);
                     httpPost.setEntity(new StringEntity(json));
+
+                    Log.d(TAG, httpPost.toString());
 
                     HttpResponse response = httpclient.execute(httpPost);
                     StatusLine statusLine = response.getStatusLine();
@@ -78,9 +94,14 @@ public class CarMovedService extends LocationPollerService {
                         Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
                     } else {
                         //Closes the connection.
-                        response.getEntity().getContent().close();
-                        throw new IOException(statusLine.getReasonPhrase());
+                        if (response != null && response.getEntity() != null) {
+                            response.getEntity().getContent().close();
+                            Log.e(TAG, statusLine.getReasonPhrase());
+                        }
+                        if (retries > 0)
+                            postSpotLocation(location, id, retries - 1);
                     }
+                    return httpPost;
 
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -92,8 +113,12 @@ public class CarMovedService extends LocationPollerService {
 
                 return null;
             }
-        }.execute();
 
+            @Override
+            protected void onPostExecute(HttpPost post) {
+                onLocationPost(post);
+            }
+        }.execute();
     }
 
 

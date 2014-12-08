@@ -16,6 +16,8 @@ import android.widget.TextView;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.locationServices.LocationPollerService;
 
+import org.apache.http.client.methods.HttpPost;
+
 import java.util.Date;
 
 
@@ -24,14 +26,15 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
 
     DebugService mService;
     boolean mBound = false;
-    TextView textView;
+    TextView locationTextView;
+    TextView postTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
 
-        ImageButton button = (ImageButton) findViewById(R.id.imageButton);
+        ImageButton button = (ImageButton) findViewById(R.id.debug_send_location);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -39,15 +42,17 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
             }
         });
 
-        textView = (TextView) findViewById(R.id.text);
+        locationTextView = (TextView) findViewById(R.id.locationText);
+        postTextView = (TextView) findViewById(R.id.postText);
     }
 
 
     private void pollLocation(){
         Log.d("debug", "Debug poll location ");
         Intent intent = new Intent(this, DebugService.class);
+        intent.putExtra(LocationPollerService.EXTRA_BT_ID, "DEBUG");
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        textView.setText("Polling...");
+        locationTextView.setText("Polling...");
     }
 
     @Override
@@ -87,6 +92,13 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
         Date startTime = (Date) location.getExtras().getSerializable(LocationPollerService.EXTRA_START_TIME);
         string += "\n" + (System.currentTimeMillis() - startTime.getTime()) + "ms";
         Log.d("debug", "Debug new location " + string);
-        textView.setText(string);
+        locationTextView.setText(string);
+    }
+
+    @Override
+    public void onLocationPost(HttpPost post) {
+        String string = post.toString();
+        Log.d("debug", "Debug new post " + string);
+        postTextView.setText(string);
     }
 }

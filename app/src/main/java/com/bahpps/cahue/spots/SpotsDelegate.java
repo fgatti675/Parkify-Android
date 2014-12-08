@@ -33,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -116,9 +117,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     public SpotsDelegate(Parcel parcel) {
+        super(parcel);
         ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
-        ParkingSpot[] spotsArray = parcel.createTypedArray(ParkingSpot.CREATOR);
-        spots = new HashSet<ParkingSpot>(Arrays.asList(spotsArray));
+        List spotsList = new ArrayList<ParkingSpot>();
+        parcel.readTypedList(spotsList, ParkingSpot.CREATOR);
+        spots = new HashSet<ParkingSpot>(spotsList);
         queriedBounds = new ArrayList();
         parcel.readTypedList(queriedBounds, LatLngBounds.CREATOR);
         viewBounds = parcel.readParcelable(classLoader);
@@ -135,8 +138,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        ParkingSpot[] spotsArray = new ParkingSpot[spots.size()];
-        parcel.writeTypedArray(spots.toArray(spotsArray), 0);
+        parcel.writeTypedList(new ArrayList<Parcelable>(spots));
         parcel.writeTypedList(queriedBounds);
         parcel.writeParcelable(viewBounds, 0);
         parcel.writeByte((byte) (shouldBeReset ? 1 : 0));
@@ -304,6 +306,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         Toast.makeText(mContext, "Check internet connection", Toast.LENGTH_SHORT).show();
     }
 
+    volatile int displayedMarkers;
+
     public void doDraw() {
 
         // hideMarkers first
@@ -318,30 +322,38 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         setUpViewBounds();
 
-        int displayedMarkers = 0;
+        for (final ParkingSpot parkingSpot : spots) {
 
-        for (ParkingSpot parkingSpot : spots) {
-            LatLng spotPosition = parkingSpot.getPosition();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
 
-            Marker marker = spotMarkersMap.get(parkingSpot);
+                    if (displayedMarkers > MARKERS_LIMIT) {
+                        Log.d(TAG, "Marker display limit reached");
+                        return;
+                    }
 
-            if (marker == null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
-                marker = mMap.addMarker(new MarkerOptions().flat(true).icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
-                marker.setVisible(false);
-                spotMarkersMap.put(parkingSpot, marker);
-                markerSpotsMap.put(marker, parkingSpot);
-            }
+                    LatLng spotPosition = parkingSpot.getPosition();
 
-            if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
-                makeMarkerVisible(marker, parkingSpot);
-                displayedMarkers++;
-            }
+                    Marker marker = spotMarkersMap.get(parkingSpot);
 
-            if (displayedMarkers > MARKERS_LIMIT) {
-                Log.d(TAG, "Marker display limit reached");
-                return;
-            }
+                    if (marker == null) {
+                        BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
+                        marker = mMap.addMarker(new MarkerOptions().flat(true).icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
+                        marker.setVisible(false);
+                        spotMarkersMap.put(parkingSpot, marker);
+                        markerSpotsMap.put(marker, parkingSpot);
+                    }
+
+                    if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
+                        makeMarkerVisible(marker, parkingSpot);
+                        displayedMarkers++;
+                    }
+
+                }
+            });
+
+
         }
     }
 
@@ -350,6 +362,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      * Hide non visible markers (outside of viewport)
      */
     private void hideMarkers() {
+
+        displayedMarkers = 0;
+
         for (final Marker marker : markerSpotsMap.keySet()) {
             handler.post(new Runnable() {
                 @Override
@@ -468,7 +483,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
             queryClosestSpots(userLocation);
         else
-            Log.d(TAG, "No need to query for closest points again");
+            Log.v(TAG, "No need to query for closest points again");
 
     }
 

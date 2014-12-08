@@ -1,7 +1,6 @@
 package com.bahpps.cahue;
 
 import android.app.FragmentTransaction;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,8 +32,6 @@ import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.util.Util;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -90,10 +87,6 @@ public class MapsActivity extends BaseActivity
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
 
-
-    // Local Bluetooth adapter
-    private BluetoothAdapter mBluetoothAdapter = null;
-
     private SharedPreferences prefs;
 
     private View detailsContainer;
@@ -139,7 +132,6 @@ public class MapsActivity extends BaseActivity
         // call convenience method that zooms map on our location only on starting the app
         setInitialCamera();
 
-
     }
 
     @Override
@@ -148,12 +140,15 @@ public class MapsActivity extends BaseActivity
     }
 
     private void goToLogin() {
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
+        if (!isFinishing()) {
+            Log.d(TAG, "goToLogin");
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
     }
 
     @Override
-    protected void onPlusClientBlockingUI(boolean show) {
+    protected void onConnectingStatusChange(boolean connecting) {
 
     }
 
@@ -170,16 +165,6 @@ public class MapsActivity extends BaseActivity
 
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
-
-        // Get local Bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        // If the adapter is null, then Bluetooth is not supported
-        if (mBluetoothAdapter == null) {
-            noBluetooth(this);
-        } else if (!mBluetoothAdapter.isEnabled()) {
-            noBluetooth(this);
-        }
 
         /**
          * Try to reuse map
@@ -228,6 +213,7 @@ public class MapsActivity extends BaseActivity
 
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
+
         }
 
 
@@ -291,41 +277,48 @@ public class MapsActivity extends BaseActivity
 
     private void showDetails() {
 
-        if (detailsDisplayed) return;
-
         detailsContainer.setVisibility(View.VISIBLE);
+
         detailsContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+
                 final int height = detailsContainer.getHeight();
-                Log.i(TAG, "DETAILS MEASURED HEIGHT " + height);
-                Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
 
-                detailsDisplayed = true;
-                TranslateAnimation animation = new TranslateAnimation(0, 0, height, 0);
-                animation.setDuration(300);
-                animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
-                animation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
+                if (detailsDisplayed) {
+                    setMapPadding(height);
+                } else {
+                    detailsDisplayed = true;
+                    TranslateAnimation animation = new TranslateAnimation(0, 0, height, 0);
+                    int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                    animation.setDuration(mediumAnimTime);
+                    animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
+                    animation.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
 
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, height);
-                    }
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            setMapPadding(height);
+                        }
 
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
 
-                    }
-                });
-                detailsContainer.startAnimation(animation);
+                        }
+                    });
+                    detailsContainer.startAnimation(animation);
+                }
                 detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
 
 
+    }
+
+    private void setMapPadding(int bottomPadding) {
+        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
     }
 
     private void hideDetails() {
@@ -334,12 +327,13 @@ public class MapsActivity extends BaseActivity
 
         detailsDisplayed = false;
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
-        animation.setDuration(300);
+        int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        animation.setDuration(mediumAnimTime);
         animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, 0);
+                setMapPadding(0);
             }
 
             @Override
@@ -394,7 +388,7 @@ public class MapsActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         // element purchase
-         if (requestCode == REQUEST_ON_PURCHASE) {
+        if (requestCode == REQUEST_ON_PURCHASE) {
 
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
@@ -410,10 +404,9 @@ public class MapsActivity extends BaseActivity
                     e.printStackTrace();
                 }
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
-        else {
-             super.onActivityResult(requestCode, resultCode, data);
-         }
     }
 
     @Override
@@ -425,6 +418,7 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy");
         if (iInAppBillingService != null) {
             unbindService(mServiceConn);
         }
@@ -514,6 +508,12 @@ public class MapsActivity extends BaseActivity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                drawIfNecessary();
+            }
+        });
     }
 
 
@@ -535,14 +535,7 @@ public class MapsActivity extends BaseActivity
      * Method used to start the pairing activity
      */
     protected void startDeviceSelection() {
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            noBluetooth(this);
-        } else if (!mBluetoothAdapter.isEnabled()) {
-            noBluetooth(this);
-        } else {
-            startActivityForResult(new Intent(MapsActivity.this, DeviceListActivity.class), 0);
-        }
+        startActivityForResult(new Intent(MapsActivity.this, DeviceSelectionActivity.class), 0);
     }
 
     /**
@@ -599,9 +592,10 @@ public class MapsActivity extends BaseActivity
         location.setLongitude(latLng.longitude);
         location.setAccuracy(10);
 
-        SetCarPositionDialog dialog = new SetCarPositionDialog();
-        dialog.init(location);
+        SetCarPositionDialog dialog = SetCarPositionDialog.newInstance(location);
         dialog.show(getFragmentManager(), "SetCarPositionDialog");
+
+        hideDetails();
 
     }
 
@@ -680,13 +674,7 @@ public class MapsActivity extends BaseActivity
                 delegate.setNeedsRedraw(false);
             }
         }
-    }
 
-    /**
-     * Shows a toast in case no BT is detected
-     */
-    public static void noBluetooth(Context context) {
-        Util.createUpperToast(context, context.getString(R.string.bt_not_available), Toast.LENGTH_LONG);
     }
 
     @Override
@@ -714,11 +702,6 @@ public class MapsActivity extends BaseActivity
         fragTransaction.commit();
 
         showDetails();
-    }
-
-    @Override
-    public void onFollowingClicked(Car car) {
-        // TODO: remove?
     }
 
     @Override

@@ -294,7 +294,8 @@ public class Bla extends ActionBarActivity
         Log.i(TAG, "DETAILS HEIGHT " + detailsContainer.getHeight());
         detailsDisplayed = true;
         TranslateAnimation animation = new TranslateAnimation(0, 0, detailsContainer.getHeight(), 0);
-        animation.setDuration(300);
+        int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        animation.setDuration(mediumAnimTime);
         animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -321,7 +322,9 @@ public class Bla extends ActionBarActivity
 
         detailsDisplayed = false;
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
-        animation.setDuration(300);
+
+        int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        animation.setDuration(mediumAnimTime);
         animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -635,7 +638,7 @@ public class Bla extends ActionBarActivity
         } else if (!mBluetoothAdapter.isEnabled()) {
             noBluetooth(this);
         } else {
-            startActivityForResult(new Intent(Bla.this, DeviceListActivity.class), 0);
+            startActivityForResult(new Intent(Bla.this, DeviceSelectionActivity.class), 0);
         }
     }
 
@@ -714,7 +717,6 @@ public class Bla extends ActionBarActivity
         location.setAccuracy(10);
 
         SetCarPositionDialog dialog = new SetCarPositionDialog();
-        dialog.init(location);
         dialog.show(getFragmentManager(), "SetCarPositionDialog");
 
     }
@@ -831,10 +833,6 @@ public class Bla extends ActionBarActivity
         showDetails();
     }
 
-    @Override
-    public void onFollowingClicked(Car car) {
-        // TODO: remove?
-    }
 
     @Override
     public void onCarPositionDeleted(Car car) {

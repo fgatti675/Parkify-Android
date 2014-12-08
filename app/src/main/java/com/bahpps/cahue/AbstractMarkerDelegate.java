@@ -1,16 +1,31 @@
 package com.bahpps.cahue;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 
+import com.bahpps.cahue.parkedCar.Car;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by francesco on 28.10.2014.
  */
-public abstract class AbstractMarkerDelegate {
+public abstract class AbstractMarkerDelegate implements Parcelable {
 
     private boolean needsRedraw = true;
+
+    public AbstractMarkerDelegate() {
+
+    }
+
+    public AbstractMarkerDelegate(Parcel parcel) {
+        needsRedraw = parcel.readByte() > 0;
+    }
 
     public abstract void doDraw();
 
@@ -26,6 +41,12 @@ public abstract class AbstractMarkerDelegate {
         setNeedsRedraw(true);
     }
 
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeByte((byte) (needsRedraw ? 1 : 0));
+    }
+
     public void onResume() {
 
     }
@@ -33,19 +54,20 @@ public abstract class AbstractMarkerDelegate {
     /**
      * Should be called on the onPause cycle.
      */
-    public void onPause(){
+    public void onPause() {
 
     }
 
     /**
      * Called when the details view is closed
      */
-    public void onDetailsClosed(){
+    public void onDetailsClosed() {
 
     }
 
     /**
      * Called when a marker is clicked
+     *
      * @param marker
      * @return
      */
@@ -65,6 +87,7 @@ public abstract class AbstractMarkerDelegate {
 
     /**
      * Called when the user changes location
+     *
      * @param location
      */
     public abstract void onLocationChanged(Location location);

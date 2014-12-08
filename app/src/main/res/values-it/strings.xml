@@ -5,7 +5,7 @@
 
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
-    <string name="select_device_long">Selezionare il dispositivo da collegare</string>
+    <string name="select_device_long">Selezionare i dispositivi BT delle auto da collegare.</string>
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">Nessun dispositivo associato</string>
     <string name="button_scan">Cerca dispositivi</string>
@@ -15,6 +15,8 @@
     <string name="help">Aiuto</string>
     <string name="donate">Donazione</string>
     <string name="remove_car">Eliminare la posizione della macchina?</string>
+
+    <string name="car">Macchina</string>
 
     <string name="position_waiting">Attesa di posizione</string>
     <string name="car_not_found">La posizione della macchina non è stata stabilita</string>
@@ -26,16 +28,6 @@
     <string name="cancel">Cancella</string>
     <string name="info_text">Benvenuto a %1$s!\n\nQuesta applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nTutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.\n\nQuesta app non ha la pubblicità. Le donazioni sono benvenute! </string>
 
-    <!-- Time -->
-    <string name="seconds">secondi</string>
-    <string name="minute">minuto</string>
-    <string name="minutes">minuti</string>
-    <string name="hour">ora</string>
-    <string name="hours">ore</string>
-    <string name="day">giorno</string>
-    <string name="days">giorni</string>
-    <string name="car">Macchina</string>
-
     <!-- Donations -->
     <string name="donation_intro">Questa applicazione è sostenuta da donazioni solo</string>
     <string name="donation_1">1 euro</string>
@@ -45,5 +37,6 @@
 
     <string name="pick_account">Devi selezionare una account</string>
     <string name="other">Altro</string>
+    <string name="select_device">Selezionare i dispositivi</string>
 
 </resources>

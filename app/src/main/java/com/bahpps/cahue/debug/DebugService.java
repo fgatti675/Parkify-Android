@@ -7,12 +7,15 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.bahpps.cahue.locationServices.CarMovedService;
 import com.bahpps.cahue.locationServices.LocationPollerService;
+
+import org.apache.http.client.methods.HttpPost;
 
 /**
 * Created by Francesco on 17/10/2014.
 */
-public class DebugService extends LocationPollerService {
+public class DebugService extends CarMovedService {
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -20,6 +23,7 @@ public class DebugService extends LocationPollerService {
 
     @Override
     public void onLocationPolled(Context context, Location location, String id) {
+        super.onLocationPolled(context,location,id);
         serviceListener.onNewLocation(location);
     }
 
@@ -50,7 +54,13 @@ public class DebugService extends LocationPollerService {
         return true;
     }
 
+    @Override
+    public void onLocationPost(HttpPost post){
+        serviceListener.onLocationPost(post);
+    }
+
     public interface ServiceListener{
         public void onNewLocation(Location location);
+        public void onLocationPost(HttpPost post);
     }
 }

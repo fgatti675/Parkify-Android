@@ -76,11 +76,16 @@ public abstract class BaseActivity
     protected abstract void onPlusClientSignOut();
 
     /**
-     * Called when the {@link PlusClient} is blocking the UI.  If you have a progress bar widget,
-     * this tells you when to show or hide it.
+     * Called when there is a change in connection state.  If you have "Sign in"/ "Connect",
+     * "Sign out"/ "Disconnect", or "Revoke access" buttons, this lets you know when their states
+     * need to be updated.
      */
-    protected abstract void onPlusClientBlockingUI(boolean show);
+    protected abstract void onConnectingStatusChange(boolean connecting);
 
+    /**
+     * Called when signing in is required
+     */
+    protected abstract void onSignInRequired();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,10 +110,11 @@ public abstract class BaseActivity
     public void signIn() {
         if (!mGoogleApiClient.isConnecting()) {
             // Show the dialog as we are now signing in.
-            setProgressBarVisible(true);
             mSignInClicked = true;
             resolveSignInError();
+            onConnectingStatusChange(true);
         }
+
     }
 
     protected void onStart() {
@@ -116,6 +122,7 @@ public abstract class BaseActivity
         Log.d(TAG, "mGoogleApiClient connecting");
         mGoogleApiClient.connect();
     }
+
 
     protected void onStop() {
         super.onStop();
@@ -140,11 +147,11 @@ public abstract class BaseActivity
             mGoogleApiClient.disconnect();
             mGoogleApiClient.connect();
 
-            onPlusClientSignOut();
-
             Log.v(TAG, "Sign out successful!");
         }
 
+        onConnectingStatusChange(false);
+        onPlusClientSignOut();
     }
 
 
@@ -165,11 +172,6 @@ public abstract class BaseActivity
     }
 
 
-    private void setProgressBarVisible(boolean flag) {
-        onPlusClientBlockingUI(flag);
-    }
-
-
     /**
      * Successfully connected
      */
@@ -177,16 +179,17 @@ public abstract class BaseActivity
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected");
         mSignInClicked = false;
-        setProgressBarVisible(false);
         onPlusClientSignIn();
         getProfileInformation();
         requestOauthToken();
+        onConnectingStatusChange(false);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "onConnectionSuspended");
     }
+
 
 
     /**
@@ -221,13 +224,9 @@ public abstract class BaseActivity
                 resolveSignInError();
             }
         }
+
+        onConnectingStatusChange(false);
     }
-
-    /**
-     * Called when signing in is required
-     */
-    protected abstract void onSignInRequired();
-
 
     /**
      * Method to resolve any signin errors
@@ -257,7 +256,8 @@ public abstract class BaseActivity
             protected Object doInBackground(Object[] objects) {
                 try {
                     mAuthToken = GoogleAuthUtil.getToken(BaseActivity.this, mLoggedEmail, SCOPE);
-                    Util.saveOAuthToken(BaseActivity.this, mAuthToken);
+                    if (mAuthToken != null)
+                        Util.saveOAuthToken(BaseActivity.this, mAuthToken);
                 } catch (UserRecoverableAuthException userRecoverableException) {
                     // GooglePlayServices.apk is either old, disabled, or not present
                     // so we need to show the user some UI in the activity to recover.

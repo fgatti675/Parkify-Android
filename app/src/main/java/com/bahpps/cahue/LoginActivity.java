@@ -8,6 +8,7 @@ import android.content.Intent;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -20,6 +21,8 @@ import com.google.android.gms.common.SignInButton;
  * A login screen that offers login via Google+
  */
 public class LoginActivity extends BaseActivity {
+
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     // UI references.
     private View mProgressView;
@@ -43,6 +46,7 @@ public class LoginActivity extends BaseActivity {
         } else {
             // Don't offer G+ sign in if the app's version is too low to support Google Play
             // Services.
+            // TODO: set error message
             mPlusSignInButton.setVisibility(View.GONE);
             return;
         }
@@ -59,31 +63,49 @@ public class LoginActivity extends BaseActivity {
      * Shows the progress UI and hides the login form.
      */
     public void showProgress(final boolean show) {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int animTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
 
-        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(
-                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        });
+        mProgressView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mProgressView.animate().setDuration(animTime).alpha(show ? 1 : 0)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mProgressView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+                    }
+                });
+
+        mPlusSignInButton.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mPlusSignInButton.animate().setDuration(animTime).alpha(!show ? 1 : 0)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mPlusSignInButton.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+                    }
+                });
     }
 
     @Override
     protected void onPlusClientSignIn() {
+        Log.d(TAG, "onPlusClientSignIn");
         startActivity(new Intent(this, MapsActivity.class));
+        finish();
     }
 
     @Override
-    protected void onPlusClientBlockingUI(boolean show) {
-        showProgress(show);
+    protected void onConnectingStatusChange(boolean connecting) {
+        if (!isFinishing())
+            showProgress(connecting);
     }
 
     @Override
     protected void onPlusClientSignOut() {
+        Log.d(TAG, "onPlusClientSignOut");
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
     }
 
     /**

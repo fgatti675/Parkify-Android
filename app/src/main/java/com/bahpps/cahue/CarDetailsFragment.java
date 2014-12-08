@@ -3,10 +3,7 @@ package com.bahpps.cahue;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -18,12 +15,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
-
-import java.util.Date;
 
 
 /**
@@ -42,6 +36,10 @@ public class CarDetailsFragment extends DetailsFragment {
     private ParkedCarDelegate parkedCarDelegate;
 
     private OnCarPositionDeletedListener mListener;
+
+    TextView name;
+    TextView time;
+    TextView distance;
 
     private ImageButton follow;
 
@@ -74,21 +72,33 @@ public class CarDetailsFragment extends DetailsFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        // update time ago
+        updateTimeTextView();
+
+        // Update distance
+        updateDistance();
+
+        updateFollowButtonState();
+
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_car_details, container, false);
 
         // Set time ago
-        TextView name = (TextView) view.findViewById(R.id.name);
-        name.setText(car.name);
+        name = (TextView) view.findViewById(R.id.name);
+        name.setText(car.name != null ? car.name : getResources().getString(R.string.car));
 
-        // Set time ago
-        TextView timeAgo = (TextView) view.findViewById(R.id.time);
-        timeAgo.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+        time = (TextView) view.findViewById(R.id.time);
 
-        // Update distance
-        TextView distance = (TextView) view.findViewById(R.id.distance);
-        updateDistance(distance);
+        distance = (TextView) view.findViewById(R.id.distance);
 
         Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
         view.startAnimation(fadeInAnimation);
@@ -123,32 +133,32 @@ public class CarDetailsFragment extends DetailsFragment {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
-                    mListener.onFollowingClicked(car);
                     parkedCarDelegate.setFollowing();
                     updateFollowButtonState();
                 }
 
             }
         });
-
-        updateFollowButtonState();
-
         return view;
+    }
+
+    private void updateTimeTextView() {
+        // Set time ago
+        time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
     }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
         if (view != null) {
-            TextView distance = (TextView) view.findViewById(R.id.distance);
-            updateDistance(distance);
+            updateDistance();
         }
     }
 
-    private void updateDistance(TextView textView) {
+    private void updateDistance() {
         if (userLocation != null && car.location != null) {
             float distanceM = car.location.distanceTo(userLocation);
-            textView.setText(String.format("%.1f km", distanceM / 1000));
+            distance.setText(String.format("%.1f km", distanceM / 1000));
         }
     }
 
@@ -190,8 +200,6 @@ public class CarDetailsFragment extends DetailsFragment {
      * activity.
      */
     public interface OnCarPositionDeletedListener {
-
-        public void onFollowingClicked(Car car);
 
         public void onCarPositionDeleted(Car car);
 

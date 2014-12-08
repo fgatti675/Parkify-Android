@@ -24,12 +24,19 @@
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/Widget.ProgressBar.Small"
-        android:visibility="gone" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            style="@android:style/Widget.ProgressBar"
+            android:layout_alignParentEnd="true"
+            android:visibility="gone" />
+
+    </RelativeLayout>
 </android.support.v7.widget.Toolbar>
 

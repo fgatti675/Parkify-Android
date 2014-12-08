@@ -5,7 +5,7 @@
 
     <!-- DeviceListActivity -->
     <string name="scanning">Buscando dispositivos...</string>
-    <string name="select_device_long">Selecciona un dispositivo para vincularlo con la aplicacion.</string>
+    <string name="select_device_long">Selecciona los dispositivos BT de los coches que se vincularán con la aplicacion. </string>
     <string name="none_paired">No se ha vinculado ningun dispositivo.</string>
     <string name="none_found">No se han encontrado dispositivos.</string>
     <string name="button_scan">Busca otros dispositivos</string>
@@ -15,6 +15,8 @@
     <string name="help">Ayuda</string>
     <string name="donate">Donación</string>
     <string name="remove_car">¿Eliminar la posición del coche?</string>
+
+    <string name="car">Coche</string>
 
     <string name="position_waiting">Esperando la posicion del usuario.</string>
     <string name="car_not_found">La posicion del coche no ha sido establecida.</string>
@@ -26,16 +28,6 @@
     <string name="cancel">Cancelar</string>
     <string name="info_text">¡Bienvenido a %1$s!\n\nEsta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\nTodo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte. Necesitarás tener el Bluetooth disponible y los servicios de localizacion activados\n\nSi quieres establecer la posicion de tu coche manualmente, puedes hacer click largo en cualquier punto del mapa.\n\nLa aplicación no tiene publicidad por lo que cualquier donación será muy agradecida!</string>
 
-    <!-- Time -->
-    <string name="seconds">segundos</string>
-    <string name="minute">minuto</string>
-    <string name="minutes">minutos</string>
-    <string name="hour">hora</string>
-    <string name="hours">horas</string>
-    <string name="day">dia</string>
-    <string name="days">dias</string>
-    <string name="car">Coche</string>
-
     <!-- Donations -->
     <string name="donation_intro">Esta aplicación se financia solo a través de donaciones.</string>
     <string name="donation_1">1 euro</string>
@@ -45,4 +37,5 @@
 
     <string name="pick_account">Debes seleccionar una cuenta para utilizar esta aplicación</string>
     <string name="other">Otro</string>
+    <string name="select_device">Selecciona dispositivos</string>
 </resources>
