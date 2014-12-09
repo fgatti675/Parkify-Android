@@ -14,8 +14,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
         }
     }
 }
@@ -32,4 +31,5 @@ dependencies {
     compile 'com.android.support:support-v13:21.0.0'
     compile 'com.google.apis:google-api-services-fusiontables:v1-rev56-1.19.0'
     compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.shamanland:fab:0.0.6'
 }

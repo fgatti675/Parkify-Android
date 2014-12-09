@@ -66,6 +66,13 @@ public abstract class AbstractMarkerDelegate implements Parcelable {
     }
 
     /**
+     * Called when the go to my location button is pressed
+     */
+    public void onZoomToMyLocation() {
+
+    }
+
+    /**
      * Called when a marker is clicked
      *
      * @param marker

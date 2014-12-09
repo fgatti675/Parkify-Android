@@ -166,12 +166,19 @@ public class MapsActivity extends BaseActivity
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
 
+        findViewById(R.id.my_location).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                zoomToMyLocation();
+            }
+        });
+
         /**
          * Try to reuse map
          */
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
-        parkedCarDelegateMap = new HashMap<Car, ParkedCarDelegate>();
+        parkedCarDelegateMap = new HashMap<>();
 
         /**
          * There is no saved instance so we create a few things
@@ -268,6 +275,7 @@ public class MapsActivity extends BaseActivity
     private ParkedCarDelegate getParkedCarDelegate(Car car) {
         ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
         if (parkedCarDelegate == null) {
+            Log.d(TAG, "Creating new ParkedCarDelegate");
             parkedCarDelegate = new ParkedCarDelegate();
             parkedCarDelegate.init(this, this, car, mMap, null, this);
             parkedCarDelegateMap.put(car, parkedCarDelegate);
@@ -736,11 +744,14 @@ public class MapsActivity extends BaseActivity
 
         Log.d(TAG, "zoomToMyLocation");
 
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onZoomToMyLocation();
+        }
+
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                         .target(userPosition)
-                        .zoom(15.5f)
                         .build()),
                 new GoogleMap.CancelableCallback() {
                     @Override

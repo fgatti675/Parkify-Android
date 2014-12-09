@@ -12,17 +12,17 @@ import java.util.Date;
 /**
  * Created by Francesco on 11/10/2014.
  */
-public class ParkingSpot implements Parcelable, ClusterItem {
+public class ParkingSpot implements Parcelable {
 
     private static long GREEN_TIME_THRESHOLD_MS = 10 * 60 * 1000;
     private static long YELLOW_TIME_THRESHOLD_MS = 45 * 60 * 1000;
     private static long ORANGE_TIME_THRESHOLD_MS = 120 * 60 * 1000;
 
-    private String id;
+    public final String id;
 
-    private LatLng position;
+    public final LatLng position;
 
-    private Date time;
+    public final Date time;
 
 
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
@@ -59,7 +59,7 @@ public class ParkingSpot implements Parcelable, ClusterItem {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
-        parcel.writeParcelable(position, 0);
+        parcel.writeParcelable(position, i);
         parcel.writeSerializable(time);
     }
 
@@ -94,23 +94,13 @@ public class ParkingSpot implements Parcelable, ClusterItem {
         return result;
     }
 
-    @Override
-    public LatLng getPosition() {
-        return position;
-    }
-
-
-    public Date getTime() {
-        return time;
-    }
-
     /**
      * Get the marker time based on the time it was created
      *
      * @return
      */
     public Type getMarkerType() {
-        long timeSinceSpotWasFree_ms = System.currentTimeMillis() - getTime().getTime();
+        long timeSinceSpotWasFree_ms = System.currentTimeMillis() - time.getTime();
         if (timeSinceSpotWasFree_ms < GREEN_TIME_THRESHOLD_MS)
             return Type.green;
         else if (timeSinceSpotWasFree_ms < YELLOW_TIME_THRESHOLD_MS)

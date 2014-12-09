@@ -104,8 +104,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);
         parcel.writeSerializable(mode);
-        parcel.writeParcelable(car, 0);
-        parcel.writeParcelable(userLocation, 0);
+        parcel.writeParcelable(car, i);
+        parcel.writeParcelable(userLocation, i);
         parcel.writeTypedList(directionPoints);
         parcel.writeSerializable(lastDirectionsUpdate);
     }
@@ -168,6 +168,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
         if (directionsPolyline != null) directionsPolyline.remove();
+    }
+
+    @Override
+    public void onZoomToMyLocation() {
+        setMode(Mode.FREE);
     }
 
     /**

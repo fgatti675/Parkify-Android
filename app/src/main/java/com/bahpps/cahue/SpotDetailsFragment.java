@@ -33,6 +33,9 @@ public class SpotDetailsFragment extends DetailsFragment {
     private Location userLocation;
     private ParkingSpot spot;
 
+    private TextView distance;
+    private ImageView rectangleImage;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -70,16 +73,13 @@ public class SpotDetailsFragment extends DetailsFragment {
 
             // Set time ago
             TextView timeAgo = (TextView) view.findViewById(R.id.time);
-            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.getTime().getTime()));
+            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
 
             // Update distance
-            TextView distance = (TextView) view.findViewById(R.id.distance);
-            updateDistance(distance);
+            distance = (TextView) view.findViewById(R.id.distance);
 
             // Set rectangle color
-            ImageView rectangleImage = (ImageView) view.findViewById(R.id.spot_image);
-            GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
-            gradientDrawable.setStroke((int) Util.dpToPx(getActivity(), 8), getResources().getColor(spot.getMarkerType().colorId));
+            rectangleImage = (ImageView) view.findViewById(R.id.spot_image);
 
             Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
             view.startAnimation(fadeInAnimation);
@@ -87,27 +87,35 @@ public class SpotDetailsFragment extends DetailsFragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateDistance();
+        updateRectangle();
+    }
 
     @Override
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
-        if(view != null) {
-            TextView distance = (TextView) view.findViewById(R.id.distance);
-            updateDistance(distance);
+        if (view != null) {
+            updateDistance();
         }
     }
+    private void updateRectangle() {
+        GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
+        gradientDrawable.setStroke((int) Util.dpToPx(getActivity(), 8), getResources().getColor(spot.getMarkerType().colorId));
+    }
 
-    private void updateDistance(TextView textView) {
+    private void updateDistance() {
         if (userLocation != null) {
             Location spotLocation = new Location("spot");
-            spotLocation.setLatitude(spot.getPosition().latitude);
-            spotLocation.setLongitude(spot.getPosition().longitude);
+            spotLocation.setLatitude(spot.position.latitude);
+            spotLocation.setLongitude(spot.position.longitude);
             float distanceM = spotLocation.distanceTo(userLocation);
-            textView.setText(String.format("%.1f km", distanceM / 1000));
+            distance.setText(String.format("%.1f km", distanceM / 1000));
         }
     }
-
 
 
 }

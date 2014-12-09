@@ -63,7 +63,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    public final static float MAX_ZOOM = 0F;
+    public final static float MAX_ZOOM = 10F;
 
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
@@ -112,24 +112,26 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
 
     public SpotsDelegate() {
-        spots = new HashSet<ParkingSpot>();
+        spots = new HashSet<>();
         lastResetTaskRequestTime = new Date();
     }
 
     public SpotsDelegate(Parcel parcel) {
+
         super(parcel);
-        ClassLoader classLoader = SpotsDelegate.class.getClassLoader();
-        List spotsList = new ArrayList<ParkingSpot>();
+        List<ParkingSpot> spotsList = new ArrayList<>();
         parcel.readTypedList(spotsList, ParkingSpot.CREATOR);
-        spots = new HashSet<ParkingSpot>(spotsList);
+        for (ParkingSpot spot : spotsList) {
+            if (spot.id == null) Log.e(TAG, "Spot regenerated wrong:" + spot);
+        }
+        spots = new HashSet<>(spotsList);
         queriedBounds = new ArrayList();
         parcel.readTypedList(queriedBounds, LatLngBounds.CREATOR);
-        viewBounds = parcel.readParcelable(classLoader);
+        viewBounds = parcel.readParcelable(LatLngBounds.class.getClassLoader());
         shouldBeReset = parcel.readByte() != 0;
         lastResetTaskRequestTime = (Date) parcel.readSerializable();
-        selectedSpot = parcel.readParcelable(classLoader);
+        selectedSpot = parcel.readParcelable(ParkingSpot.class.getClassLoader());
     }
-
 
     @Override
     public int describeContents() {
@@ -138,12 +140,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        super.writeToParcel(parcel, i);
         parcel.writeTypedList(new ArrayList<Parcelable>(spots));
         parcel.writeTypedList(queriedBounds);
-        parcel.writeParcelable(viewBounds, 0);
-        parcel.writeByte((byte) (shouldBeReset ? 1 : 0));
+        parcel.writeParcelable(viewBounds, i);
+        parcel.writeByte((byte) (shouldBeReset ? 1 : i));
         parcel.writeSerializable(lastResetTaskRequestTime);
-        parcel.writeParcelable(selectedSpot, 0);
+        parcel.writeParcelable(selectedSpot, i);
     }
 
 
@@ -287,7 +290,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (!parkingSpots.isEmpty()) {
             LatLngBounds.Builder builder = LatLngBounds.builder();
             for (ParkingSpot spot : parkingSpots) {
-                builder.include(spot.getPosition());
+                builder.include(spot.position);
             }
             queriedBounds.add(builder.build());
         }
@@ -333,7 +336,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
                         return;
                     }
 
-                    LatLng spotPosition = parkingSpot.getPosition();
+                    LatLng spotPosition = parkingSpot.position;
 
                     Marker marker = spotMarkersMap.get(parkingSpot);
 
@@ -470,7 +473,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             markersDisplayed = false;
         }
 
-       doDraw();
+        doDraw();
 
     }
 

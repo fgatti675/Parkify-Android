@@ -54,7 +54,7 @@ public class Car implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
         parcel.writeString(name);
-        parcel.writeParcelable(location, 0);
+        parcel.writeParcelable(location, i);
         parcel.writeSerializable(time);
     }
 
