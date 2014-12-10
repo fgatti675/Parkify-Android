@@ -92,16 +92,22 @@ public abstract class BaseActivity
         super.onCreate(savedInstanceState);
 
         Log.d(TAG, "mGoogleApiClient initialized");
+    }
 
-        // Initialize the PlusClient connection.
-        // Scopes indicate the information about the user your application will be able to access.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Plus.API)
-                .addApi(LocationServices.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+    private void setUpLocationClientIfNeeded() {
+
+        if (mGoogleApiClient == null) {
+
+            // Initialize the PlusClient connection.
+            // Scopes indicate the information about the user your application will be able to access.
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Plus.API)
+                    .addApi(LocationServices.API)
+                    .addScope(Plus.SCOPE_PLUS_LOGIN)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+        }
     }
 
     /**
@@ -119,6 +125,7 @@ public abstract class BaseActivity
 
     protected void onStart() {
         super.onStart();
+        setUpLocationClientIfNeeded();
         Log.d(TAG, "mGoogleApiClient connecting");
         mGoogleApiClient.connect();
     }
