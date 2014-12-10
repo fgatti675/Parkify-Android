@@ -89,7 +89,8 @@ public class MapsActivity extends BaseActivity
 
     private SharedPreferences prefs;
 
-    private View detailsContainer;
+    private View myLocationButton;
+    private ScrollView detailsContainer;
     private DetailsFragment detailsFragment;
     private boolean detailsDisplayed = false;
 
@@ -166,7 +167,8 @@ public class MapsActivity extends BaseActivity
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
 
-        findViewById(R.id.my_location).setOnClickListener(new View.OnClickListener() {
+        myLocationButton = findViewById(R.id.my_location);
+        myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 zoomToMyLocation();
@@ -317,6 +319,7 @@ public class MapsActivity extends BaseActivity
                         }
                     });
                     detailsContainer.startAnimation(animation);
+                    myLocationButton.startAnimation(animation);
                 }
                 detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
@@ -334,10 +337,13 @@ public class MapsActivity extends BaseActivity
         if (!detailsDisplayed) return;
 
         detailsDisplayed = false;
+
+        setMapPadding(0);
+
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         animation.setDuration(mediumAnimTime);
-        animation.setInterpolator(this, R.anim.my_decelerate_interpolator);
+        animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -346,14 +352,17 @@ public class MapsActivity extends BaseActivity
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.setVisibility(View.GONE);
+                detailsContainer.setVisibility(View.INVISIBLE);
+                detailsContainer.removeAllViews();
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
             }
         });
+
         detailsContainer.startAnimation(animation);
+        myLocationButton.startAnimation(animation);
     }
 
 
@@ -751,6 +760,7 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                        .zoom(mMap.getCameraPosition().zoom)
                         .target(userPosition)
                         .build()),
                 new GoogleMap.CancelableCallback() {
