@@ -77,7 +77,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     // In the next spots update, clear the previous state
     private boolean shouldBeReset = false;
 
-    private List<LatLngBounds> queriedBounds = new CopyOnWriteArrayList<LatLngBounds>();
+    private List<LatLngBounds> queriedBounds;
 
     private LatLngBounds viewBounds;
     private LatLngBounds extendedViewBounds;
@@ -112,6 +112,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
 
     public SpotsDelegate() {
+        queriedBounds = new ArrayList<>();
         spots = new HashSet<>();
         lastResetTaskRequestTime = new Date();
     }

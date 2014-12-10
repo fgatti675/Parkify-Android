@@ -123,16 +123,16 @@ public abstract class BaseActivity
 
     }
 
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         setUpLocationClientIfNeeded();
         Log.d(TAG, "mGoogleApiClient connecting");
         mGoogleApiClient.connect();
     }
 
 
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
