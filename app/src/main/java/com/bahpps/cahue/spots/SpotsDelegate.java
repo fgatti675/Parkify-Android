@@ -63,7 +63,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    public final static float MAX_ZOOM = 10F;
+    public final static float MAX_ZOOM = 0F;
 
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
@@ -397,6 +397,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         return true;
     }
 
+    /**
+     * Clear previously selected spot
+     */
     private void clearSelectedSpot() {
         // clear previous selection
         if (selectedSpot != null) {
