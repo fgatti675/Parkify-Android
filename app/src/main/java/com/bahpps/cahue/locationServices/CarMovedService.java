@@ -2,9 +2,11 @@ package com.bahpps.cahue.locationServices;
 
 import android.content.Context;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.util.Util;
@@ -34,7 +36,7 @@ import java.util.Calendar;
 public class CarMovedService extends LocationPollerService {
 
     private final static String TAG = "CarMovedPositionReceiver";
-    private final static String URL = "http://glossy-radio.appspot.com/spots";
+
     private static final long MINIMUM_STAY_MS = 180000;
 
     /**
@@ -70,8 +72,14 @@ public class CarMovedService extends LocationPollerService {
 
                     Log.i(TAG, "Posting users location");
 
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme("https")
+                            .authority(Endpoints.BASE_URL)
+                            .appendPath(Endpoints.SPOTS_PATH);
+
+
                     HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost(URL);
+                    HttpPost httpPost = new HttpPost(builder.build().toString());
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setHeader("ID", id);

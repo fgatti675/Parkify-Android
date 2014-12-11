@@ -86,7 +86,8 @@ public class FusionParkingSpotsQuery extends ParkingSpotsQuery {
                         String[] positionArray = element.get(2).split(", ");
                         LatLng position = new LatLng(Double.parseDouble(positionArray[0]), Double.parseDouble(positionArray[1]));
                         Date time = dateFormat.parse(element.get(1));
-                        ParkingSpot spot = new ParkingSpot(element.get(0), position, time);
+                        Long id = Long.parseLong(element.get(0));
+                        ParkingSpot spot = new ParkingSpot(id, position, time);
                         spots.add(spot);
                     } catch (ParseException e) {
                         e.printStackTrace();

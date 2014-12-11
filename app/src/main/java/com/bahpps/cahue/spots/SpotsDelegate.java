@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
+import com.bahpps.cahue.spots.query.AppEngineSpotsQuery;
 import com.bahpps.cahue.spots.query.CartoDBParkingSpotsQuery;
 import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.bahpps.cahue.util.MarkerFactory;
@@ -211,7 +212,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             return false;
         }
 
-        nearbyQuery = new CartoDBParkingSpotsQuery(this);
+        nearbyQuery = new AppEngineSpotsQuery(this);
 
         Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
         nearbyQuery.retrieveNearbySpots(userLocation, CLOSEST_LOCATIONS);
@@ -256,7 +257,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        ParkingSpotsQuery areaQuery = new CartoDBParkingSpotsQuery(this);
+        ParkingSpotsQuery areaQuery = new AppEngineSpotsQuery(this);
 
         Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.retrieveLocationsIn(extendedViewBounds);

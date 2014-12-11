@@ -76,7 +76,7 @@ public class CartoDBParkingSpotsQuery extends ParkingSpotsQuery {
                     JSONObject entry = rows.getJSONObject(i);
 
                     JSONObject properties = entry.getJSONObject("properties");
-                    String id = properties.getString("id");
+                    Long id = Long.parseLong(properties.getString("id"));
                     Date date = dateFormat.parse(properties.getString("created_at"));
 
                     JSONObject geometry = entry.getJSONObject("geometry");

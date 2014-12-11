@@ -6,8 +6,13 @@ package com.bahpps.cahue;
 public class Endpoints {
 
 
-    private final static String URL = "http://glossy-radio.appspot.com/spots";
+    public final static String BASE_URL = "glossy-radio.appspot.com";
+
+    public final static String SPOTS_PATH = "spots";
 
 
-    private final static String URL = "http://glossy-radio.appspot.com/spots";
+    public final static String RETRIEVE_NEAREST = "nearest";
+
+
+    public final static String RETRIEVE_AREA = "area";
 }

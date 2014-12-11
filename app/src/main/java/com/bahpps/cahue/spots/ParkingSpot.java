@@ -18,7 +18,7 @@ public class ParkingSpot implements Parcelable {
     private static long YELLOW_TIME_THRESHOLD_MS = 45 * 60 * 1000;
     private static long ORANGE_TIME_THRESHOLD_MS = 120 * 60 * 1000;
 
-    public final String id;
+    public final Long id;
 
     public final LatLng position;
 
@@ -39,12 +39,12 @@ public class ParkingSpot implements Parcelable {
             };
 
     public ParkingSpot(Parcel parcel) {
-        id = parcel.readString();
+        id = parcel.readLong();
         position = parcel.readParcelable(LatLng.class.getClassLoader());
         time = (Date) parcel.readSerializable();
     }
 
-    public ParkingSpot(String id, LatLng location, Date time) {
+    public ParkingSpot(Long id, LatLng location, Date time) {
         this.id = id;
         this.position = location;
         this.time = time;
@@ -58,7 +58,7 @@ public class ParkingSpot implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
+        parcel.writeLong(id);
         parcel.writeParcelable(position, i);
         parcel.writeSerializable(time);
     }

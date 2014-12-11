@@ -130,6 +130,7 @@ public class MapsActivity extends BaseActivity
         LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
                 REQUEST,
                 this);
+
         // call convenience method that zooms map on our location only on starting the app
         setInitialCamera();
 
@@ -381,7 +382,7 @@ public class MapsActivity extends BaseActivity
     protected void onResume() {
 
         super.onResume();
-
+//        setUpMap();
         setUpMapIfNeeded();
 
         // when our activity resumes, we want to register for location updates
@@ -506,9 +507,7 @@ public class MapsActivity extends BaseActivity
             mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                     .getMap();
             // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }
+            setUpMap();
         }
     }
 
@@ -760,7 +759,7 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .zoom(mMap.getCameraPosition().zoom)
+                        .zoom(Math.max(mMap.getCameraPosition().zoom, 14))
                         .target(userPosition)
                         .build()),
                 new GoogleMap.CancelableCallback() {

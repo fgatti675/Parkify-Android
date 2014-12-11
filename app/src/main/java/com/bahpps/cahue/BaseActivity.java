@@ -52,7 +52,7 @@ public abstract class BaseActivity
      */
     private boolean mIntentInProgress;
 
-    private boolean mSignInClicked;
+    private boolean mSigningIn;
 
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
@@ -116,7 +116,7 @@ public abstract class BaseActivity
     public void signIn() {
         if (!mGoogleApiClient.isConnecting()) {
             // Show the dialog as we are now signing in.
-            mSignInClicked = true;
+            mSigningIn = true;
             resolveSignInError();
             onConnectingStatusChange(true);
         }
@@ -167,7 +167,7 @@ public abstract class BaseActivity
 
         if (requestCode == OUR_REQUEST_CODE) {
             if (responseCode != RESULT_OK) {
-                mSignInClicked = false;
+                mSigningIn = false;
             }
 
             mIntentInProgress = false;
@@ -185,7 +185,7 @@ public abstract class BaseActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected");
-        mSignInClicked = false;
+        mSigningIn = false;
         onPlusClientSignIn();
         getProfileInformation();
         requestOauthToken();
@@ -224,7 +224,7 @@ public abstract class BaseActivity
             // Store the ConnectionResult for later usage
             mConnectionResult = result;
 
-            if (mSignInClicked) {
+            if (mSigningIn) {
                 // The user has already clicked 'sign-in' so we attempt to
                 // resolve all
                 // errors until the user is signed in, or they cancel.
