@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -39,6 +38,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -63,15 +63,13 @@ public class MapsActivity extends BaseActivity
         SpotsDelegate.SpotSelectedListener,
         ParkedCarDelegate.CarSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
-        CameraUpdateListener {
+        CameraUpdateListener, OnMapReadyCallback {
 
     protected static final String TAG = "Maps";
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
-
-    private static final String PREF_USER_EMAIL = "pref_user_email";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -86,8 +84,6 @@ public class MapsActivity extends BaseActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-
-    private SharedPreferences prefs;
 
     private View myLocationButton;
     private ScrollView detailsContainer;
@@ -180,15 +176,17 @@ public class MapsActivity extends BaseActivity
          * Try to reuse map
          */
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-
+//        mapFragment.getMapAsync(this);
         parkedCarDelegateMap = new HashMap<>();
 
         /**
          * There is no saved instance so we create a few things
          */
         if (savedInstanceState == null) {
+
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
+
             spotsDelegate = new SpotsDelegate();
 
             List<Car> cars = CarLocationManager.getAvailableCars(this);
@@ -226,7 +224,6 @@ public class MapsActivity extends BaseActivity
 
         }
 
-
         /**
          * Details
          */
@@ -235,16 +232,11 @@ public class MapsActivity extends BaseActivity
 
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
-        if (detailsDisplayed) detailsContainer.setVisibility(View.VISIBLE);
+        detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-        /**
-         * Preferences
-         */
-        prefs = Util.getSharedPreferences(this);
 
         // show help dialog only on first run of the app
-        boolean dialogShown = prefs.getBoolean(Util.PREF_DIALOG_SHOWN, false);
-        if (!dialogShown) {
+        if (!Util.isDialogShown(this)) {
             showHelpDialog();
         }
 
@@ -469,7 +461,7 @@ public class MapsActivity extends BaseActivity
     private void showHelpDialog() {
         InfoDialog dialog = new InfoDialog();
         dialog.show(getFragmentManager(), "InfoDialogFragment");
-        prefs.edit().putBoolean(Util.PREF_DIALOG_SHOWN, true).apply();
+        Util.setDialogShown(this, true);
     }
 
     @Override
@@ -774,4 +766,8 @@ public class MapsActivity extends BaseActivity
                 });
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+    }
 }

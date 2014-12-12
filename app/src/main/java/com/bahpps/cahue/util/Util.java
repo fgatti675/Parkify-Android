@@ -23,8 +23,9 @@ public class Util {
      */
     public static final String PREF_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
 
+    public static final String PREF_OAUTH_TOKEN = "PREF_OAUTH_TOKEN";
+
     public static final String TAPPED_PROVIDER = "Tapped";
-    public static final String CAR_OTHER_ID = "Id";
 
     /**
      * Method for printing our fancy custom Toast
@@ -85,9 +86,6 @@ public class Util {
         prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
     }
 
-
-    public static final String PREF_OAUTH_TOKEN = "PREF_OAUTH_TOKEN";
-
     public static void saveOAuthToken(Context context, String token){
         SharedPreferences prefs = Util.getSharedPreferences(context);
         prefs.edit().putString(PREF_OAUTH_TOKEN, token).apply();
@@ -96,6 +94,16 @@ public class Util {
     public static String getOauthToken(Context context){
         SharedPreferences prefs = Util.getSharedPreferences(context);
         return prefs.getString(PREF_OAUTH_TOKEN, null);
+    }
+
+    public static boolean isDialogShown(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getBoolean(PREF_DIALOG_SHOWN, false);
+    }
+
+    public static void setDialogShown(Context context, boolean shown){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_DIALOG_SHOWN, shown).apply();
     }
 
 }
