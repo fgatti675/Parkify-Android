@@ -159,8 +159,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         this.spotSelectedListener = spotSelectedListener;
 
         // we can rebuild this map because markers are removed on init
-        spotMarkersMap = new HashMap<ParkingSpot, Marker>();
-        markerSpotsMap = new HashMap<Marker, ParkingSpot>();
+        spotMarkersMap = new HashMap<>();
+        markerSpotsMap = new HashMap<>();
+
 
     }
 
@@ -311,7 +312,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         Toast.makeText(mContext, "Check internet connection", Toast.LENGTH_SHORT).show();
     }
 
-    volatile int displayedMarkers;
+    int displayedMarkers;
 
     public void doDraw() {
 
@@ -329,35 +330,27 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         for (final ParkingSpot parkingSpot : spots) {
 
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
+            if (displayedMarkers > MARKERS_LIMIT) {
+                Log.v(TAG, "Marker display limit reached");
+                return;
+            }
 
-                    if (displayedMarkers > MARKERS_LIMIT) {
-                        Log.d(TAG, "Marker display limit reached");
-                        return;
-                    }
+            LatLng spotPosition = parkingSpot.position;
 
-                    LatLng spotPosition = parkingSpot.position;
+            Marker marker = spotMarkersMap.get(parkingSpot);
 
-                    Marker marker = spotMarkersMap.get(parkingSpot);
+            if (marker == null) {
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
+                marker = mMap.addMarker(new MarkerOptions().flat(true).icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
+                marker.setVisible(false);
+                spotMarkersMap.put(parkingSpot, marker);
+                markerSpotsMap.put(marker, parkingSpot);
+            }
 
-                    if (marker == null) {
-                        BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
-                        marker = mMap.addMarker(new MarkerOptions().flat(true).icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
-                        marker.setVisible(false);
-                        spotMarkersMap.put(parkingSpot, marker);
-                        markerSpotsMap.put(marker, parkingSpot);
-                    }
-
-                    if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
-                        makeMarkerVisible(marker, parkingSpot);
-                        displayedMarkers++;
-                    }
-
-                }
-            });
-
+            if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
+                makeMarkerVisible(marker, parkingSpot);
+                displayedMarkers++;
+            }
 
         }
     }
@@ -416,11 +409,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     @Override
-    public void onResume() {
-        spotMarkersMap.clear();
-        markerSpotsMap.clear();
-        setUpResetTask();
+    public void onMapReady() {
         doDraw();
+    }
+
+    @Override
+    public void onResume() {
+        setUpResetTask();
     }
 
     @Override

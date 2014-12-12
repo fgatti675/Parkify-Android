@@ -146,6 +146,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         doDraw();
     }
 
+    @Override
+    public void onMapReady() {
+        doDraw();
+    }
+
     public void onLocationChanged(Location userLocation) {
         this.userLocation = userLocation;
 

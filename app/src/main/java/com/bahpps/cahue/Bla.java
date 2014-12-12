@@ -370,7 +370,7 @@ public class Bla extends ActionBarActivity
         googleApiClient.connect();
 
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onResume();
+            delegate.onMapReady();
         }
 
         drawIfNecessary();

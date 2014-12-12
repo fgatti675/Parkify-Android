@@ -39,7 +39,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -176,7 +175,7 @@ public class MapsActivity extends BaseActivity
          * Try to reuse map
          */
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-//        mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(this);
         parkedCarDelegateMap = new HashMap<>();
 
         /**
@@ -200,14 +199,6 @@ public class MapsActivity extends BaseActivity
          *
          */
         else {
-            // Reincarnated activity. The obtained map is the same map instance in the previous
-            // activity life cycle. There is no need to reinitialize it.
-            mMap = mapFragment.getMap();
-
-            /**
-             * Do everything again
-             */
-            mMap.clear();
 
             spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
             spotsDelegate.markAsDirty();
@@ -242,14 +233,34 @@ public class MapsActivity extends BaseActivity
 
         bindBillingService();
 
-        setUpMapIfNeeded();
+        /**
+         * Create delegates
+         */
+        delegates.add(spotsDelegate);
+
+        for (Car car : parkedCarDelegateMap.keySet()) {
+            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
+            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            delegates.add(parkedCarDelegate);
+        }
+
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        mMap = googleMap;
+
+        setUpMap();
         setUpMapListeners();
 
         /**
-         * Init spots delegate
+         * Do everything again
          */
+        mMap.clear();
+
         spotsDelegate.init(this, mMap, this);
-        delegates.add(spotsDelegate);
 
         /**
          * Init the parked car delegates
@@ -257,11 +268,12 @@ public class MapsActivity extends BaseActivity
         for (Car car : parkedCarDelegateMap.keySet()) {
             ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
             parkedCarDelegate.init(this, this, car, mMap, null, this);
-            delegates.add(parkedCarDelegate);
         }
 
+        for (AbstractMarkerDelegate delegate : delegates) {
+            delegate.onMapReady();
+        }
     }
-
 
     /**
      * @param car
@@ -374,17 +386,13 @@ public class MapsActivity extends BaseActivity
     protected void onResume() {
 
         super.onResume();
-//        setUpMap();
-        setUpMapIfNeeded();
-
-        // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
 
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onResume();
         }
 
-        drawIfNecessary();
+        // when our activity resumes, we want to register for location updates
+        registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
 
     }
 
@@ -475,33 +483,6 @@ public class MapsActivity extends BaseActivity
         unregisterReceiver(carPosReceiver);
     }
 
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            Log.d(TAG, "Map was set up");
-
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            setUpMap();
-        }
-    }
 
 
     /**
@@ -517,12 +498,6 @@ public class MapsActivity extends BaseActivity
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                drawIfNecessary();
-            }
-        });
     }
 
 
@@ -765,10 +740,5 @@ public class MapsActivity extends BaseActivity
                     public void onCancel() {
                     }
                 });
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
     }
 }

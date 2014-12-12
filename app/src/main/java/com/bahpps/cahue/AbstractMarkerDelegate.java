@@ -47,6 +47,16 @@ public abstract class AbstractMarkerDelegate implements Parcelable {
         parcel.writeByte((byte) (needsRedraw ? 1 : 0));
     }
 
+    /**
+     * Called when the map is ready to be used
+     */
+    public void onMapReady() {
+
+    }
+
+    /**
+     * Should be called on the onResume cycle.
+     */
     public void onResume() {
 
     }
