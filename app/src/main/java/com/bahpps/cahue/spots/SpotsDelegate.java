@@ -417,6 +417,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     @Override
     public void onResume() {
+        spotMarkersMap.clear();
+        markerSpotsMap.clear();
         setUpResetTask();
         doDraw();
     }

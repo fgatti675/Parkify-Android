@@ -74,4 +74,14 @@ public class Car implements Parcelable{
     public int hashCode() {
         return id.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", location=" + location +
+                ", time=" + time +
+                '}';
+    }
 }

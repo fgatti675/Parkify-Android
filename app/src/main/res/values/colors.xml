@@ -26,6 +26,8 @@
     <color name="body_text_1_inverse">#deffffff</color>
     <color name="body_text_2_inverse">#8affffff</color>
 
+    <color name="background">#ffffffff</color>
+
     <color name="theme_primary">#ff116071</color>
     <color name="theme_primary_dark">#0B2D38</color>
     <color name="theme_primary_light">#7986cb</color>
@@ -38,7 +40,7 @@
     <color name="marker_red">#ffff6031</color>
     <color name="marker_orange">#ffffcf49</color>
     <color name="marker_yellow">#ffe6ff1d</color>
-    <color name="marker_green">#FF02EDAF</color>
+    <color name="marker_green">#02edaf</color>
 
     <color name="translucent_actionbar_background">#d3116071</color>
 
