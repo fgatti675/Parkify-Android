@@ -429,7 +429,8 @@ public class MapsActivity extends BaseActivity
 
     @Override
     protected void onSignInRequired() {
-        goToLogin();
+        Log.d(TAG, "onSignInRequired");
+        signIn();
     }
 
 

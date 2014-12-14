@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -41,14 +42,17 @@ public class FusionParkingSpotsQuery extends ParkingSpotsQuery {
     private static final String TABLE_ID = "1KdObSc-BOSKNnH9zyei7WG--X1w4AyomUj-pB7Ii";
 
     private Fusiontables fusiontables;
+    private LatLngBounds latLngBounds;
 
     /**
      * Create a new service. {@code #execute()} must be called afterwards
      *
+     * @param latLngBounds
      * @param listener
      */
-    public FusionParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
+    public FusionParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         super(listener);
+        this.latLngBounds = latLngBounds;
 
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new JacksonFactory();

@@ -29,13 +29,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/time_stub" />
+            tools:text="@string/time_stub" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/distance_stub"/>
+            tools:text="@string/distance_stub"/>
 
     </LinearLayout>
 

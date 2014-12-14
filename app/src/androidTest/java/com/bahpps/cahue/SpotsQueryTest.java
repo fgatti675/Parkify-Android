@@ -38,7 +38,7 @@ public class SpotsQueryTest extends ActivityTestCase {
         List<ParkingSpot> expectedResult = new ArrayList<ParkingSpot>() {
             {
                 add(new ParkingSpot(
-                        Long.valueOf(6245697686863872L).toString(),
+                        6245697686863872L,
                         new LatLng(48.129830, 11.559060),
                         new Date(1413928884000L)
                 ));
@@ -53,11 +53,18 @@ public class SpotsQueryTest extends ActivityTestCase {
         final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
         final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(
+                latLngBounds,
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
+
                     @Override
-                    public void onSpotsUpdate(Set<ParkingSpot> parkingSpots) {
+                    public void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots) {
                         result.addAll(parkingSpots);
                         signal.countDown();
+                    }
+
+                    @Override
+                    public void onSpotsUpdateError(ParkingSpotsQuery query) {
+
                     }
                 });
 
@@ -66,7 +73,7 @@ public class SpotsQueryTest extends ActivityTestCase {
 
             @Override
             public void run() {
-                parkingSpotsQuery.retrieveLocationsIn(latLngBounds);
+                parkingSpotsQuery.execute();
             }
         });
 

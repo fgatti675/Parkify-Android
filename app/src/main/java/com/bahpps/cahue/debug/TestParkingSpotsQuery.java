@@ -1,6 +1,7 @@
 package com.bahpps.cahue.debug;
 
 import com.bahpps.cahue.spots.query.FusionParkingSpotsQuery;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 /**
 * Created by Francesco on 23/10/2014.
@@ -15,8 +16,8 @@ public class TestParkingSpotsQuery extends FusionParkingSpotsQuery {
      *
      * @param listener
      */
-    public TestParkingSpotsQuery( ParkingSpotsUpdateListener listener) {
-        super(listener);
+    public TestParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
+        super(latLngBounds, listener);
     }
 
     @Override

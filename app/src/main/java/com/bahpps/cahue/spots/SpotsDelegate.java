@@ -10,8 +10,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
-import com.bahpps.cahue.spots.query.AppEngineSpotsQuery;
-import com.bahpps.cahue.spots.query.CartoDBParkingSpotsQuery;
+import com.bahpps.cahue.spots.query.AreaSpotsQuery;
+import com.bahpps.cahue.spots.query.NearestSpotsQuery;
 import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.bahpps.cahue.util.MarkerFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,18 +23,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -213,10 +210,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             return false;
         }
 
-        nearbyQuery = new AppEngineSpotsQuery(this);
+        nearbyQuery = new NearestSpotsQuery(userLocation, CLOSEST_LOCATIONS, this);
 
         Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
-        nearbyQuery.retrieveNearbySpots(userLocation, CLOSEST_LOCATIONS);
+        nearbyQuery.execute();
 
         return true;
     }
@@ -258,10 +255,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        ParkingSpotsQuery areaQuery = new AppEngineSpotsQuery(this);
+        ParkingSpotsQuery areaQuery = new AreaSpotsQuery(extendedViewBounds, this);
 
         Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
-        areaQuery.retrieveLocationsIn(extendedViewBounds);
+        areaQuery.execute();
 
         return true;
 

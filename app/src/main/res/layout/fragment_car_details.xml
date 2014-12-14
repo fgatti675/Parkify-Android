@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,6 +19,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/spot_image"
         android:id="@+id/linearLayout">
@@ -28,25 +29,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/name_stub" />
+            tools:text="@string/name_stub" />
 
         <TextView
             android:id="@+id/time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/time_stub" />
+            tools:text="@string/time_stub" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/distance_stub"/>
+            tools:text="@string/distance_stub" />
 
     </LinearLayout>
 
     <ImageButton
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/follow"
         android:layout_centerVertical="true"
         android:layout_toStartOf="@+id/clear"
@@ -60,4 +61,4 @@
         android:layout_alignEnd="@+id/linearLayout"
         android:src="@drawable/ic_action_navigation_close"/>
 
-</RelativeLayout>
+</LinearLayout>
