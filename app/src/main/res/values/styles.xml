@@ -17,7 +17,7 @@
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="android:textColorLink">@color/theme_accent_2</item>
 
-        <!--<item name="android:textColorPrimary">@color/theme_accent_1</item>-->
+        <item name="android:textColorPrimary">@color/body_text_2</item>
         <item name="android:textColorSecondary">@color/body_text_1</item>
 
 
