@@ -257,7 +257,7 @@ public class Bla extends ActionBarActivity
         /**
          * Init spots delegate
          */
-        spotsDelegate.init(this, mMap, this);
+        spotsDelegate.init(this,  this);
         delegates.add(spotsDelegate);
 
         /**
@@ -265,7 +265,7 @@ public class Bla extends ActionBarActivity
          */
         for (Car car : parkedCarDelegateMap.keySet()) {
             ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            parkedCarDelegate.init(this, this, car,  null, this);
             delegates.add(parkedCarDelegate);
         }
 
@@ -281,7 +281,7 @@ public class Bla extends ActionBarActivity
         ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
         if (parkedCarDelegate == null) {
             parkedCarDelegate = new ParkedCarDelegate();
-            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            parkedCarDelegate.init(this, this, car,  null, this);
             parkedCarDelegateMap.put(car, parkedCarDelegate);
         }
         return parkedCarDelegate;
@@ -370,7 +370,7 @@ public class Bla extends ActionBarActivity
         googleApiClient.connect();
 
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onMapReady();
+            delegate.onMapReady(mMap);
         }
 
         drawIfNecessary();

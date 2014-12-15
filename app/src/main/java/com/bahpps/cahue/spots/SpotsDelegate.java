@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
 import com.bahpps.cahue.spots.query.AppEngineSpotsQuery;
-import com.bahpps.cahue.spots.query.CartoDBParkingSpotsQuery;
 import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.bahpps.cahue.util.MarkerFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,18 +22,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -152,10 +148,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
 
-    public void init(Context context, GoogleMap map, SpotSelectedListener spotSelectedListener) {
+    public void init(Context context,  SpotSelectedListener spotSelectedListener) {
 
         this.mContext = context;
-        this.mMap = map;
         this.spotSelectedListener = spotSelectedListener;
 
         // we can rebuild this map because markers are removed on init
@@ -409,7 +404,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     @Override
-    public void onMapReady() {
+    public void onMapReady(GoogleMap map) {
+        Log.d(TAG, "onMapReady");
+        this.mMap = map;
+        spotMarkersMap.clear();
+        markerSpotsMap.clear();
         doDraw();
     }
 

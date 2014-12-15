@@ -124,12 +124,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         lastDirectionsUpdate = (Date) parcel.readSerializable();
     }
 
-    public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, GoogleMap map, ImageButton carButton, CarSelectedListener carSelectedListener) {
+    public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, ImageButton carButton, CarSelectedListener carSelectedListener) {
 
         mContext = context;
 
         this.cameraUpdateListener = cameraUpdateListener;
-        this.mMap = map;
         this.car = car;
         this.carButton = carButton;
         this.carSelectedListener = carSelectedListener;
@@ -147,7 +146,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     @Override
-    public void onMapReady() {
+    public void onMapReady(GoogleMap map) {
+        this.mMap = map;
         doDraw();
     }
 

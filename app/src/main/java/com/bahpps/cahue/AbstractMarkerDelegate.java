@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.bahpps.cahue.parkedCar.Car;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -49,8 +50,9 @@ public abstract class AbstractMarkerDelegate implements Parcelable {
 
     /**
      * Called when the map is ready to be used
+     * @param mMap
      */
-    public void onMapReady() {
+    public void onMapReady(GoogleMap mMap) {
 
     }
 
