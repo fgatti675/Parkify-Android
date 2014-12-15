@@ -149,10 +149,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
 
-    public void init(Context context, GoogleMap map, SpotSelectedListener spotSelectedListener) {
+    public void init(Context context,  SpotSelectedListener spotSelectedListener) {
 
         this.mContext = context;
-        this.mMap = map;
         this.spotSelectedListener = spotSelectedListener;
 
         // we can rebuild this map because markers are removed on init
@@ -406,7 +405,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     @Override
-    public void onMapReady() {
+    public void onMapReady(GoogleMap map) {
+        Log.d(TAG, "onMapReady");
+        this.mMap = map;
+        spotMarkersMap.clear();
+        markerSpotsMap.clear();
         doDraw();
     }
 

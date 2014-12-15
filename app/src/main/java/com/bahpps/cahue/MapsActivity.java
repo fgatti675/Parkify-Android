@@ -39,6 +39,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -237,13 +238,13 @@ public class MapsActivity extends BaseActivity
          * Create delegates
          */
         delegates.add(spotsDelegate);
+        spotsDelegate.init(this, this);
 
         for (Car car : parkedCarDelegateMap.keySet()) {
             ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            parkedCarDelegate.init(this, this, car, null, this);
             delegates.add(parkedCarDelegate);
         }
-
 
     }
 
@@ -260,18 +261,36 @@ public class MapsActivity extends BaseActivity
          */
         mMap.clear();
 
-        spotsDelegate.init(this, mMap, this);
-
-        /**
-         * Init the parked car delegates
-         */
-        for (Car car : parkedCarDelegateMap.keySet()) {
-            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-            parkedCarDelegate.init(this, this, car, mMap, null, this);
-        }
-
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onMapReady();
+            delegate.onMapReady(mMap);
+        }
+    }
+
+    /**
+     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
+     * installed) and the map has not already been instantiated.. This will ensure that we only ever
+     * call {@link #setUpMap()} once when {@link #mMap} is not null.
+     * <p/>
+     * If it isn't installed {@link SupportMapFragment} (and
+     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
+     * install/update the Google Play services APK on their device.
+     * <p/>
+     * A user can return to this FragmentActivity after following the prompt and correctly
+     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
+     * have been completely destroyed during this process (it is likely that it would only be
+     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
+     * method in {@link #onResume()} to guarantee that it will be called.
+     */
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            Log.d(TAG, "Map was set up");
+
+            // Try to obtain the map from the SupportMapFragment.
+            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
+            // Check if we were successful in obtaining the map.
+            setUpMap();
         }
     }
 
@@ -284,7 +303,8 @@ public class MapsActivity extends BaseActivity
         if (parkedCarDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
             parkedCarDelegate = new ParkedCarDelegate();
-            parkedCarDelegate.init(this, this, car, mMap, null, this);
+            parkedCarDelegate.init(this, this, car, null, this);
+            parkedCarDelegate.onMapReady(mMap);
             parkedCarDelegateMap.put(car, parkedCarDelegate);
         }
         return parkedCarDelegate;
