@@ -1,5 +1,6 @@
 package com.bahpps.cahue.spots.query;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -21,8 +22,8 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
     protected Integer limit;
 
 
-    public NearestSpotsQuery(LatLng center, Integer limit, ParkingSpotsUpdateListener listener) {
-        super(listener);
+    public NearestSpotsQuery(Context context, LatLng center, Integer limit, ParkingSpotsUpdateListener listener) {
+        super(context, listener);
         this.center = center;
         this.limit = limit;
     }
@@ -30,22 +31,22 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
     @Override
     protected Set<ParkingSpot> doInBackground(Void... voids) {
 
-            if (center == null || limit == null)
-                throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");
+        if (center == null || limit == null)
+            throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");
 
-            Uri.Builder builder = new Uri.Builder();
-            builder.scheme("https")
-                    .authority(Endpoints.BASE_URL)
-                    .appendPath(Endpoints.SPOTS_PATH)
-                    .appendPath(Endpoints.RETRIEVE_NEAREST)
-                    .appendQueryParameter("lat", Double.toString(center.latitude))
-                    .appendQueryParameter("long", Double.toString(center.longitude))
-                    .appendQueryParameter("count", Integer.toString(limit));
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority(Endpoints.BASE_URL)
+                .appendPath(Endpoints.SPOTS_PATH)
+                .appendPath(Endpoints.RETRIEVE_NEAREST)
+                .appendQueryParameter("lat", Double.toString(center.latitude))
+                .appendQueryParameter("long", Double.toString(center.longitude))
+                .appendQueryParameter("count", Integer.toString(limit));
 
-            String url = builder.build().toString();
-            Log.i(TAG, "Query nearest : ");
+        String url = builder.build().toString();
+        Log.i(TAG, "Query nearest : ");
 
-            return parseResult(query(url));
+        return parseResult(query(url));
     }
 
 

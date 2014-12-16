@@ -1,5 +1,7 @@
 package com.bahpps.cahue.spots.query;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -40,14 +42,12 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     }
 
 
+    private Context context;
     protected ParkingSpotsUpdateListener listener;
-    /**
-     * Was there an error in the execution?
-     */
-    protected boolean error = false;
 
 
-    public ParkingSpotsQuery(ParkingSpotsUpdateListener listener) {
+    public ParkingSpotsQuery(Context context, ParkingSpotsUpdateListener listener) {
+        this.context = context;
         this.listener = listener;
     }
 
@@ -58,9 +58,6 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
     @Override
     protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
-
-        if (error)
-            listener.onSpotsUpdateError(this);
 
         Log.d("ParkingSpotsQuery", parkingSpots.toString());
         super.onPostExecute(parkingSpots);
@@ -88,6 +85,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
             } else {
                 //Closes the connection.
                 response.getEntity().getContent().close();
+                listener.onServerError(statusLine.getStatusCode(), statusLine.getReasonPhrase());
                 throw new IOException(statusLine.getReasonPhrase());
             }
 
@@ -96,6 +94,16 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
+
+            // now this is ugly
+            if (context instanceof Activity) {
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onIOError();
+                    }
+                });
+            }
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -140,6 +148,8 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     public interface ParkingSpotsUpdateListener {
         void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots);
 
-        void onSpotsUpdateError(ParkingSpotsQuery query);
+        void onServerError(int statusCode, String reasonPhrase);
+
+        void onIOError();
     }
 }

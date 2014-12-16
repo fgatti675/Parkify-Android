@@ -1,5 +1,6 @@
 package com.bahpps.cahue.spots.query;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -18,8 +19,8 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
 
     protected LatLngBounds latLngBounds;
 
-    public AreaSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
-        super(listener);
+    public AreaSpotsQuery(Context context,LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
+        super(context, listener);
         this.latLngBounds = latLngBounds;
     }
 

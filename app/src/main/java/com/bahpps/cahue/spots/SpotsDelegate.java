@@ -149,7 +149,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
 
-    public void init(Context context,  SpotSelectedListener spotSelectedListener) {
+    public void init(Context context, SpotSelectedListener spotSelectedListener) {
 
         this.mContext = context;
         this.spotSelectedListener = spotSelectedListener;
@@ -209,7 +209,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             return false;
         }
 
-        nearbyQuery = new NearestSpotsQuery(userLocation, CLOSEST_LOCATIONS, this);
+        nearbyQuery = new NearestSpotsQuery(mContext, userLocation, CLOSEST_LOCATIONS, this);
 
         Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
         nearbyQuery.execute();
@@ -254,7 +254,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        ParkingSpotsQuery areaQuery = new AreaSpotsQuery(extendedViewBounds, this);
+        ParkingSpotsQuery areaQuery = new AreaSpotsQuery(mContext, extendedViewBounds, this);
 
         Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.execute();
@@ -301,10 +301,17 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     /**
      * On getting an error when retrieving spots
+     *
+     * @param statusCode
+     * @param reasonPhrase
      */
     @Override
-    public void onSpotsUpdateError(ParkingSpotsQuery query) {
-        // do something if there is an error
+    public void onServerError(int statusCode, String reasonPhrase) {
+        Toast.makeText(mContext, "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onIOError() {
         Toast.makeText(mContext, "Check internet connection", Toast.LENGTH_SHORT).show();
     }
 

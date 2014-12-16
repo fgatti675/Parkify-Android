@@ -1,5 +1,6 @@
 package com.bahpps.cahue.spots.query;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.bahpps.cahue.spots.ParkingSpot;
@@ -50,8 +51,8 @@ public class FusionParkingSpotsQuery extends ParkingSpotsQuery {
      * @param latLngBounds
      * @param listener
      */
-    public FusionParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
-        super(listener);
+    public FusionParkingSpotsQuery(Context context, LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
+        super(context, listener);
         this.latLngBounds = latLngBounds;
 
         HttpTransport httpTransport = new NetHttpTransport();

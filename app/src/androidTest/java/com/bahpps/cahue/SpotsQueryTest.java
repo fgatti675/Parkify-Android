@@ -53,6 +53,7 @@ public class SpotsQueryTest extends ActivityTestCase {
         final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
         final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(
+                null,
                 latLngBounds,
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
 
@@ -63,7 +64,12 @@ public class SpotsQueryTest extends ActivityTestCase {
                     }
 
                     @Override
-                    public void onSpotsUpdateError(ParkingSpotsQuery query) {
+                    public void onServerError(int statusCode, String reasonPhrase) {
+
+                    }
+
+                    @Override
+                    public void onIOError() {
 
                     }
                 });

@@ -32,12 +32,11 @@
     <string name="donation_2">2 euros</string>
     <string name="donation_5">5 euros</string>
     <string name="thanks">Thanks for your support! :)</string>
-
     <string name="pick_account">You must select an account in order to use this application</string>
-
     <string name="name_stub" translatable="false">NAME</string>
     <string name="time_stub" translatable="false">TIME</string>
     <string name="distance_stub" translatable="false">DISTANCE</string>
     <string name="other">Other</string>
+    <string name="title_activity_google_play_services">GooglePlayServicesActivity</string>
 
 </resources>

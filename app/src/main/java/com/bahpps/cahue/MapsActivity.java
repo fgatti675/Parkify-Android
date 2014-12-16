@@ -63,13 +63,15 @@ public class MapsActivity extends BaseActivity
         SpotsDelegate.SpotSelectedListener,
         ParkedCarDelegate.CarSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
-        CameraUpdateListener, OnMapReadyCallback {
+        CameraUpdateListener,
+        OnMapReadyCallback {
 
     protected static final String TAG = "Maps";
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
+    private static final float INITIAL_ZOOM = 10F;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -264,34 +266,8 @@ public class MapsActivity extends BaseActivity
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onMapReady(mMap);
         }
-    }
 
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            Log.d(TAG, "Map was set up");
-
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            setUpMap();
-        }
+        setInitialCamera();
     }
 
     /**
@@ -362,6 +338,7 @@ public class MapsActivity extends BaseActivity
         if (!detailsDisplayed) return;
 
         detailsDisplayed = false;
+        detailsContainer.removeAllViews();
 
         setMapPadding(0);
 
@@ -378,7 +355,6 @@ public class MapsActivity extends BaseActivity
             @Override
             public void onAnimationEnd(Animation animation) {
                 detailsContainer.setVisibility(View.INVISIBLE);
-                detailsContainer.removeAllViews();
             }
 
             @Override
@@ -574,7 +550,7 @@ public class MapsActivity extends BaseActivity
 
             CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
-                    .zoom(SpotsDelegate.MAX_ZOOM)
+                    .zoom(INITIAL_ZOOM)
                     .build());
             mMap.moveCamera(update);
 

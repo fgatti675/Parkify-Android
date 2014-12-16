@@ -26,6 +26,7 @@ import com.google.android.gms.plus.model.people.Person;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 
 /**
@@ -91,7 +92,19 @@ public abstract class BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(savedInstanceState != null) {
+            mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
+        }
         Log.d(TAG, "mGoogleApiClient initialized");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putBoolean("mIntentInProgress", mIntentInProgress);
+
     }
 
     private void setUpLocationClientIfNeeded() {
@@ -123,16 +136,18 @@ public abstract class BaseActivity
 
     }
 
-    protected void onResume() {
-        super.onResume();
+    @Override
+    protected void onStart() {
+        super.onStart();
         setUpLocationClientIfNeeded();
         Log.d(TAG, "mGoogleApiClient connecting");
         mGoogleApiClient.connect();
     }
 
 
-    protected void onPause() {
-        super.onPause();
+    @Override
+    protected void onStop() {
+        super.onStop();
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
@@ -209,15 +224,15 @@ public abstract class BaseActivity
     @Override
     public void onConnectionFailed(ConnectionResult result) {
 
-        if (result.getErrorCode() == ConnectionResult.SIGN_IN_REQUIRED) {
-            onSignInRequired();
-        }
-
         if (!result.hasResolution()) {
             GooglePlayServicesUtil
                     .getErrorDialog(result.getErrorCode(), this, 0)
                     .show();
             return;
+        }
+
+        if (result.getErrorCode() == ConnectionResult.SIGN_IN_REQUIRED) {
+            onSignInRequired();
         }
 
         if (!mIntentInProgress) {
