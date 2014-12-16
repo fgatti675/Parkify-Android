@@ -338,7 +338,6 @@ public class MapsActivity extends BaseActivity
         if (!detailsDisplayed) return;
 
         detailsDisplayed = false;
-        detailsContainer.removeAllViews();
 
         setMapPadding(0);
 
@@ -355,6 +354,7 @@ public class MapsActivity extends BaseActivity
             @Override
             public void onAnimationEnd(Animation animation) {
                 detailsContainer.setVisibility(View.INVISIBLE);
+                detailsContainer.removeAllViews();
             }
 
             @Override
