@@ -33,6 +33,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-plus:6.5.+'
     compile 'com.google.android.gms:play-services-maps:6.5.+'
     compile 'com.google.android.gms:play-services-location:6.5.+'
+    compile 'com.google.android.gms:play-services-wallet:6.5.+'
     compile 'com.android.support:support-v13:21.0.3'
     compile 'com.google.apis:google-api-services-fusiontables:v1-rev56-1.19.0'
     compile 'com.android.support:appcompat-v7:21.0.3'
