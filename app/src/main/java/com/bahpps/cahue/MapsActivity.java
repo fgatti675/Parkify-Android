@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -39,7 +40,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -71,7 +71,7 @@ public class MapsActivity extends BaseActivity
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
-    private static final float INITIAL_ZOOM = 10F;
+    private static final float INITIAL_ZOOM = 12F;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -92,6 +92,7 @@ public class MapsActivity extends BaseActivity
     private DetailsFragment detailsFragment;
     private boolean detailsDisplayed = false;
 
+    private IInAppBillingService iInAppBillingService;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -108,8 +109,6 @@ public class MapsActivity extends BaseActivity
 
         }
     };
-
-    private IInAppBillingService iInAppBillingService;
 
     private ServiceConnection mServiceConn = new ServiceConnection() {
         @Override
@@ -130,7 +129,7 @@ public class MapsActivity extends BaseActivity
                 this);
 
         // call convenience method that zooms map on our location only on starting the app
-        setInitialCamera();
+//        setInitialCamera();
 
     }
 
@@ -191,7 +190,7 @@ public class MapsActivity extends BaseActivity
 
             spotsDelegate = new SpotsDelegate();
 
-            List<Car> cars = CarLocationManager.getAvailableCars(this);
+            List<Car> cars = CarLocationManager.getAvailableCars(this, false);
             for (Car car : cars) {
                 ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate();
                 parkedCarDelegateMap.put(car, parkedCarDelegate);
@@ -214,6 +213,7 @@ public class MapsActivity extends BaseActivity
             }
 
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
+            mapInitialised = savedInstanceState.getBoolean("mapInitialised");
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
 
         }
@@ -236,27 +236,29 @@ public class MapsActivity extends BaseActivity
 
         bindBillingService();
 
-        /**
-         * Create delegates
-         */
-        delegates.add(spotsDelegate);
-        spotsDelegate.init(this, this);
-
-        for (Car car : parkedCarDelegateMap.keySet()) {
-            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-            parkedCarDelegate.init(this, this, car, null, this);
-            delegates.add(parkedCarDelegate);
-        }
-
     }
+
+    private boolean mapInitialised = false;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+        Log.d(TAG, "onMapReady");
 
         mMap = googleMap;
 
         setUpMap();
         setUpMapListeners();
+
+        /**
+         * Initial zoom
+         */
+        if (!mapInitialised) {
+            CameraUpdate update = Util.getLastCameraPosition(this);
+            if (update != null)
+                mMap.moveCamera(update);
+            mapInitialised = true;
+        }
 
         /**
          * Do everything again
@@ -267,8 +269,12 @@ public class MapsActivity extends BaseActivity
             delegate.onMapReady(mMap);
         }
 
-        setInitialCamera();
+
+        if (detailsDisplayed) showDetails();
+        else hideDetails();
+
     }
+
 
     /**
      * @param car
@@ -279,7 +285,7 @@ public class MapsActivity extends BaseActivity
         if (parkedCarDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
             parkedCarDelegate = new ParkedCarDelegate();
-            parkedCarDelegate.init(this, this, car, null, this);
+            parkedCarDelegate.init(this, this, car, this);
             parkedCarDelegate.onMapReady(mMap);
             parkedCarDelegateMap.put(car, parkedCarDelegate);
         }
@@ -294,7 +300,7 @@ public class MapsActivity extends BaseActivity
             @Override
             public void onGlobalLayout() {
 
-                final int height = detailsContainer.getHeight();
+                final int height = detailsContainer.getMeasuredHeight();
 
                 if (detailsDisplayed) {
                     setMapPadding(height);
@@ -322,6 +328,7 @@ public class MapsActivity extends BaseActivity
                     detailsContainer.startAnimation(animation);
                     myLocationButton.startAnimation(animation);
                 }
+
                 detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
@@ -355,6 +362,13 @@ public class MapsActivity extends BaseActivity
             public void onAnimationEnd(Animation animation) {
                 detailsContainer.setVisibility(View.INVISIBLE);
                 detailsContainer.removeAllViews();
+
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) detailsContainer.getLayoutParams();
+//                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+//                params.addRule(RelativeLayout.LEFT_OF, R.id.id_to_be_left_of);
+
+                detailsContainer.setLayoutParams(params); //causes layout update
+
             }
 
             @Override
@@ -383,12 +397,25 @@ public class MapsActivity extends BaseActivity
 
         super.onResume();
 
-        for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onResume();
+        /**
+         * Init delegates
+         */
+        delegates.add(spotsDelegate);
+        spotsDelegate.init(this, this);
+
+        for (Car car : parkedCarDelegateMap.keySet()) {
+            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
+            parkedCarDelegate.init(this, this, car, this);
+            delegates.add(parkedCarDelegate);
         }
 
         // when our activity resumes, we want to register for location updates
         registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
+
+        setInitialCamera();
+
+        int height = detailsContainer.getHeight();
+        Log.d(TAG, "HEIGHT : " + height);
 
     }
 
@@ -437,6 +464,13 @@ public class MapsActivity extends BaseActivity
         if (iInAppBillingService != null) {
             unbindService(mServiceConn);
         }
+        saveMapCameraPosition();
+    }
+
+    private void saveMapCameraPosition() {
+        if (mMap != null) {
+            Util.saveCameraPosition(this, mMap.getCameraPosition());
+        }
     }
 
     @Override
@@ -447,6 +481,7 @@ public class MapsActivity extends BaseActivity
         savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
         savedInstanceState.putParcelableArrayList("parkedCarDelegates", new ArrayList(parkedCarDelegateMap.values()));
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
+        savedInstanceState.putBoolean("mapInitialised", mapInitialised);
         savedInstanceState.putBoolean("detailsDisplayed", detailsDisplayed);
 
     }
@@ -479,8 +514,6 @@ public class MapsActivity extends BaseActivity
 
         unregisterReceiver(carPosReceiver);
     }
-
-
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
@@ -525,6 +558,8 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onLocationChanged(Location location) {
 
+        if (mMap == null) return;
+
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onLocationChanged(location);
         }
@@ -546,7 +581,7 @@ public class MapsActivity extends BaseActivity
         if (initialCameraSet) return;
 
         LatLng userPosition = getUserLatLng();
-        if (userPosition != null && !initialCameraSet) {
+        if (userPosition != null) {
 
             CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                     .target(userPosition)
@@ -554,10 +589,26 @@ public class MapsActivity extends BaseActivity
                     .build());
             mMap.moveCamera(update);
 
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                    .target(userPosition)
-                    .zoom(15.5F)
-                    .build()));
+            final List<Car> parkedCars = CarLocationManager.getAvailableCars(this, true);
+
+            // One parked car
+            if (parkedCars.size() == 1) {
+
+                Car car = parkedCars.get(0);
+                onCarClicked(car);
+                ParkedCarDelegate parkedCarDelegate = getParkedCarDelegate(car);
+                parkedCarDelegate.onLocationChanged(getUserLocation());
+                parkedCarDelegate.setFollowing(true);
+
+            }
+
+            // zoom to user otherwise
+            else {
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                        .target(userPosition)
+                        .zoom(15.5F)
+                        .build()));
+            }
 
             initialCameraSet = true;
         }
@@ -593,11 +644,14 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
+
+        if (mMap == null) return;
+
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onCameraChange(cameraPosition, justFinishedAnimating);
         }
 
-        if (detailsFragment != null)
+        if (detailsFragment != null && detailsFragment.isResumed())
             detailsFragment.onCameraUpdate(justFinishedAnimating);
 
         justFinishedAnimating = false;
@@ -701,6 +755,9 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onCameraUpdateRequest(CameraUpdate cameraUpdate) {
+
+        if (mMap == null) return;
+
         mMap.animateCamera(cameraUpdate, new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish() {

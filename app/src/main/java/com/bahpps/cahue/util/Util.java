@@ -12,6 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bahpps.cahue.R;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,8 +26,10 @@ public class Util {
      * Shared preferences constants
      */
     public static final String PREF_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
-
     public static final String PREF_OAUTH_TOKEN = "PREF_OAUTH_TOKEN";
+    public static final String PREF_CAMERA_ZOOM = "PREF_CAMERA_ZOOM";
+    public static final String PREF_CAMERA_LAT = "PREF_CAMERA_LAT";
+    public static final String PREF_CAMERA_LONG = "PREF_CAMERA_LONG";
 
     public static final String TAPPED_PROVIDER = "Tapped";
 
@@ -86,24 +92,51 @@ public class Util {
         prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
     }
 
-    public static void saveOAuthToken(Context context, String token){
+    public static void saveOAuthToken(Context context, String token) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         prefs.edit().putString(PREF_OAUTH_TOKEN, token).apply();
     }
 
-    public static String getOauthToken(Context context){
+    public static String getOauthToken(Context context) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         return prefs.getString(PREF_OAUTH_TOKEN, null);
     }
 
-    public static boolean isDialogShown(Context context){
+    public static boolean isDialogShown(Context context) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         return prefs.getBoolean(PREF_DIALOG_SHOWN, false);
     }
 
-    public static void setDialogShown(Context context, boolean shown){
+    public static void setDialogShown(Context context, boolean shown) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         prefs.edit().putBoolean(PREF_DIALOG_SHOWN, shown).apply();
     }
+
+    public static void saveCameraPosition(Context context, CameraPosition cameraPosition) {
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        prefs.edit()
+                .putFloat(PREF_CAMERA_ZOOM, cameraPosition.zoom)
+                .putInt(PREF_CAMERA_LAT, (int) (cameraPosition.target.latitude * 10E6))
+                .putInt(PREF_CAMERA_LONG, (int) (cameraPosition.target.longitude * 10E6))
+                .apply();
+    }
+
+    public static CameraUpdate getLastCameraPosition(Context context) {
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+
+        if(!prefs.contains(PREF_CAMERA_LAT) || !prefs.contains(PREF_CAMERA_LONG))
+            return null;
+
+        LatLng latLng = new LatLng(
+                (double) prefs.getInt(PREF_CAMERA_LAT, 0) / 10E6,
+                (double) prefs.getInt(PREF_CAMERA_LONG, 0) / 10E6);
+        CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                .target(latLng)
+                .zoom(prefs.getFloat(PREF_CAMERA_ZOOM, 12))
+                .build());
+
+        return update;
+    }
+
 
 }

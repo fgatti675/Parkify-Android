@@ -34,6 +34,8 @@ public abstract class LocationPollerService extends Service implements
      */
     public static final String EXTRA_BT_ID = "extra_bt_id";
 
+    public static final String EXTRA_BT_NAME = "extra_bt_name";
+
     /**
      * Timeout after we consider the location may have changed too much
      */
@@ -53,6 +55,8 @@ public abstract class LocationPollerService extends Service implements
     // BT address used as an ID for cars
     private String id;
 
+    private String name;
+
     private Location bestAccuracyLocation;
 
 
@@ -68,6 +72,7 @@ public abstract class LocationPollerService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         id = intent.getExtras().getString(EXTRA_BT_ID);
+        name = intent.getExtras().getString(EXTRA_BT_NAME);
         start();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -136,10 +141,10 @@ public abstract class LocationPollerService extends Service implements
         extras.putSerializable(EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
-        onLocationPolled(this, location, id);
+        onLocationPolled(this, location, id, name);
         mGoogleApiClient.disconnect();
         stopSelf();
     }
 
-    public abstract void onLocationPolled(Context context, Location location, String id);
+    public abstract void onLocationPolled(Context context, Location location, String id, String name);
 }

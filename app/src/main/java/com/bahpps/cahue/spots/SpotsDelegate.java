@@ -158,6 +158,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         spotMarkersMap = new HashMap<>();
         markerSpotsMap = new HashMap<>();
 
+        setUpResetTask();
 
     }
 
@@ -193,7 +194,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         }
         queriedBounds.clear();
         spots.clear();
-        spotMarkersMap.clear();
         markerSpotsMap.clear();
     }
 
@@ -420,10 +420,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         doDraw();
     }
 
-    @Override
-    public void onResume() {
-        setUpResetTask();
-    }
 
     @Override
     public void onPause() {

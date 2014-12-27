@@ -54,8 +54,9 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onLocationPolled(Context context, final Location location, final String id) {
+    public void onLocationPolled(Context context, final Location location, final String id, String name) {
         postSpotLocation(location, id, POST_RETRIES);
+        CarLocationManager.removeStoredLocation(context, id);
     }
 
     protected void onLocationPost(HttpPost post){

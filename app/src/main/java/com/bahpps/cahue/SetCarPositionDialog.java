@@ -61,7 +61,11 @@ public class SetCarPositionDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        final List<Car> cars = CarLocationManager.getAvailableCars(getActivity());
+        final List<Car> cars = CarLocationManager.getAvailableCars(getActivity(), false);
+
+        // there has to be a default car
+        if (cars.isEmpty())
+            throw new IllegalStateException("CarLocationManager.getAvailableCars needs to return always a default car at least");
 
         // fill option names
         ArrayList<String> options = new ArrayList();
@@ -71,7 +75,6 @@ public class SetCarPositionDialog extends DialogFragment {
         String[] optionsArray = new String[options.size()];
         optionsArray = options.toArray(optionsArray);
 
-        // TODO can crash if no devices linked
         selected = cars.get(0);
 
         // Use the Builder class for convenient dialog construction

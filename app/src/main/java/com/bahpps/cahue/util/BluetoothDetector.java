@@ -28,6 +28,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
         String address = device.getAddress();
+        String name = device.getName();
 
         Log.d("Bluetooth", "Bluetooth: " + intent.getAction());
         Log.d("Bluetooth", device.getName() + " " + address);
@@ -42,14 +43,14 @@ public class BluetoothDetector extends BroadcastReceiver {
             Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
             if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                onBtDisconnected(context, address);
+                onBtDisconnected(context, address, name);
             } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-                onBtConnected(context, address);
+                onBtConnected(context, address, name);
             }
         }
     }
 
-    public void onBtConnected(Context context, String address) {
+    public void onBtConnected(Context context, String address, String name) {
 
         Log.d("Bluetooth", "onBtConnected");
 
@@ -57,11 +58,12 @@ public class BluetoothDetector extends BroadcastReceiver {
         Intent intent = new Intent();
         intent.setClass(context, CarMovedService.class);
         intent.putExtra(LocationPollerService.EXTRA_BT_ID, address);
+        intent.putExtra(LocationPollerService.EXTRA_BT_NAME, name);
         context.startService(intent);
 
     }
 
-    public void onBtDisconnected(Context context, String address) {
+    public void onBtDisconnected(Context context, String address, String name) {
 
         Log.d("Bluetooth", "onBtDisconnected");
 
@@ -69,6 +71,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         Intent intent = new Intent();
         intent.setClass(context, ParkedCarService.class);
         intent.putExtra(LocationPollerService.EXTRA_BT_ID, address);
+        intent.putExtra(LocationPollerService.EXTRA_BT_NAME, name);
         context.startService(intent);
 
     }

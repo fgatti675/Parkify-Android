@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,7 +19,6 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/spot_image"
         android:id="@+id/linearLayout">
@@ -29,36 +28,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            tools:text="@string/name_stub" />
+            android:text="@string/name_stub" />
 
         <TextView
             android:id="@+id/time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="@string/time_stub" />
+            android:text="@string/time_stub" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="@string/distance_stub" />
+            android:text="@string/distance_stub"/>
 
     </LinearLayout>
 
-    <ImageButton
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:cahue="http://schemas.android.com/apk/res-auto"
+        cahue:theme="@style/ActionBar.Details"
+        cahue:popupTheme="@style/ActionBar.DetailsPopupThemeOverlay"
+        android:id="@+id/car_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/follow"
-        android:layout_centerVertical="true"
-        android:layout_toStartOf="@+id/clear"
-        android:src="@drawable/ic_action_maps_navigation"/>
-
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/clear"
         android:layout_centerVertical="true"
         android:layout_alignEnd="@+id/linearLayout"
-        android:src="@drawable/ic_action_navigation_close"/>
+        android:gravity="right">
+    </android.support.v7.widget.Toolbar>
 
-</LinearLayout>
+</RelativeLayout>

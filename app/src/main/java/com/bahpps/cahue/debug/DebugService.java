@@ -8,7 +8,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.bahpps.cahue.locationServices.CarMovedService;
-import com.bahpps.cahue.locationServices.LocationPollerService;
 
 import org.apache.http.client.methods.HttpPost;
 
@@ -22,8 +21,8 @@ public class DebugService extends CarMovedService {
     ServiceListener serviceListener;
 
     @Override
-    public void onLocationPolled(Context context, Location location, String id) {
-        super.onLocationPolled(context,location,id);
+    public void onLocationPolled(Context context, Location location, String id, String name) {
+        super.onLocationPolled(context,location,id, name);
         serviceListener.onNewLocation(location);
     }
 

@@ -38,5 +38,6 @@
     <string name="pick_account">Devi selezionare una account</string>
     <string name="other">Altro</string>
     <string name="select_device">Selezionare i dispositivi</string>
+    <string name="remove">Elimina macchina</string>
 
 </resources>

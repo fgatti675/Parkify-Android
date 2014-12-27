@@ -69,7 +69,7 @@ public class CarLocationManager {
      * @param context
      * @return
      */
-    public static List<Car> getAvailableCars(Context context) {
+    public static List<Car> getAvailableCars(Context context, boolean onlyParked) {
 
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -80,13 +80,16 @@ public class CarLocationManager {
         List<Car> cars = new ArrayList<Car>();
         for (String id : pairedDevices) {
             Car storedCar = getStoredBTCar(context, id, bondedBTDevices);
-            if (storedCar != null)
-                cars.add(storedCar);
+            if (storedCar != null) {
+                if (!onlyParked || storedCar.location != null)
+                    cars.add(storedCar);
+            }
         }
 
         // add a default car, mainly if the user wants to store the location of a non paired device
         Car defaultCar = getStoredBTCar(context, "", bondedBTDevices);
-        cars.add(defaultCar);
+        if (!onlyParked || defaultCar.location != null)
+            cars.add(defaultCar);
 
         return cars;
     }

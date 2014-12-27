@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -25,7 +27,7 @@ import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
  * Use the {@link CarDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CarDetailsFragment extends DetailsFragment {
+public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMenuItemClickListener {
 
     // the fragment initialization parameter
     private static final String ARG_CAR = "car";
@@ -41,7 +43,7 @@ public class CarDetailsFragment extends DetailsFragment {
     TextView time;
     TextView distance;
 
-    private ImageButton follow;
+    Toolbar toolbar;
 
     /**
      * Use this factory method to create a new instance of
@@ -103,43 +105,31 @@ public class CarDetailsFragment extends DetailsFragment {
         Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
         view.startAnimation(fadeInAnimation);
 
-        ImageButton clear = (ImageButton) view.findViewById(R.id.clear);
-        clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(R.string.remove_car)
-                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if (mListener != null) {
-                                    parkedCarDelegate.removeCar();
-                                    mListener.onCarPositionDeleted(car);
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
-                // Create the AlertDialog object and return it
-                builder.create().show();
+        toolbar = (Toolbar) view.findViewById(R.id.car_toolbar);
 
-            }
-        });
-
-        follow = (ImageButton) view.findViewById(R.id.follow);
-        follow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mListener != null) {
-                    parkedCarDelegate.setFollowing();
-                    updateFollowButtonState();
-                }
-
-            }
-        });
+        toolbar.inflateMenu(R.menu.parked_car_menu);
+        toolbar.setOnMenuItemClickListener(this);
         return view;
+    }
+
+    private void showClearDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.remove_car)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (mListener != null) {
+                            parkedCarDelegate.removeCar();
+                            mListener.onCarPositionDeleted(car);
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+        // Create the AlertDialog object and return it
+        builder.create().show();
     }
 
     private void updateTimeTextView() {
@@ -186,11 +176,29 @@ public class CarDetailsFragment extends DetailsFragment {
     }
 
     private void updateFollowButtonState() {
-        boolean selected = parkedCarDelegate.getMode() == ParkedCarDelegate.Mode.FOLLOWING;
-        if (selected)
-            follow.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_maps_navigation_accent));
-        else
-            follow.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_maps_navigation));
+        boolean selected = parkedCarDelegate.isFollowing();
+
+        MenuItem item = toolbar.getMenu().findItem(R.id.action_follow);
+        item.setIcon(getResources().getDrawable(
+                selected
+                        ? R.drawable.ic_action_maps_navigation_accent
+                        : R.drawable.ic_action_maps_navigation));
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        // Handle presses on the action bar items
+        switch (menuItem.getItemId()) {
+            case R.id.action_follow:
+                parkedCarDelegate.setFollowing(true);
+                updateFollowButtonState();
+                return true;
+            case R.id.action_clear:
+                showClearDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(menuItem);
+        }
     }
 
     /**

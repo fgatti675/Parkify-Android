@@ -56,5 +56,15 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="ActionBar.Details" parent="AppTheme">
+        <!--<item name="android:minWidth">0dp</item>-->
+        <item name="android:paddingLeft">@dimen/default_padding</item>
+        <!--<item name="android:scaleType">centerInside</item>-->
+    </style>
+
+    <style name="ActionBar.DetailsPopupThemeOverlay" parent="ThemeOverlay.AppCompat">
+        <item name="android:padding">0dp</item>
+    </style>
+
 
 </resources>

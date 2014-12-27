@@ -25,12 +25,13 @@ public class ParkedCarService extends LocationPollerService {
     }
 
     @Override
-    public void onLocationPolled(Context context, Location location, String id) {
+    public void onLocationPolled(Context context, Location location, String id, String name) {
         Log.i(TAG, "Received : " + location);
         Car car = new Car();
         car.location = location;
         car.id = id;
         car.time = new Date();
+        car.name = name;
         CarLocationManager.saveCar(context, car);
     }
 

@@ -38,5 +38,6 @@
     <string name="distance_stub" translatable="false">DISTANCE</string>
     <string name="other">Other</string>
     <string name="title_activity_google_play_services">GooglePlayServicesActivity</string>
+    <string name="remove">Clear car</string>
 
 </resources>

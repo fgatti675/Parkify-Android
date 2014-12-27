@@ -39,6 +39,6 @@
         android:src="@drawable/ic_action_device_gps_fixed"
         cahue:floatingActionButtonColor="@color/background_material_light"
         android:layout_above="@+id/marker_details_container"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"/>
 
 </RelativeLayout>

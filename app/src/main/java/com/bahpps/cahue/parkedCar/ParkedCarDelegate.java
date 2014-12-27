@@ -47,20 +47,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     private Car car;
 
-    /**
-     * Camera mode
-     */
-    public enum Mode {
-        FREE, FOLLOWING
-    }
-
-    private Mode mode = Mode.FREE;
+    private boolean following = false;
 
     private IconGenerator iconFactory;
 
     private CameraUpdateListener cameraUpdateListener;
     private GoogleMap mMap;
-    private ImageButton carButton;
     private CarSelectedListener carSelectedListener;
 
     private Location userLocation;
@@ -103,7 +95,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);
-        parcel.writeSerializable(mode);
+        parcel.writeByte((byte) (following ? 1 : 0));
         parcel.writeParcelable(car, i);
         parcel.writeParcelable(userLocation, i);
         parcel.writeTypedList(directionPoints);
@@ -116,7 +108,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public ParkedCarDelegate(Parcel parcel) {
         super(parcel);
-        mode = (Mode) parcel.readSerializable();
+        following = parcel.readByte() > 0;
         car = parcel.readParcelable(Car.class.getClassLoader());
         userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
         directionPoints = new ArrayList();
@@ -124,18 +116,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         lastDirectionsUpdate = (Date) parcel.readSerializable();
     }
 
-    public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, ImageButton carButton, CarSelectedListener carSelectedListener) {
+    public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, CarSelectedListener carSelectedListener) {
 
         mContext = context;
 
         this.cameraUpdateListener = cameraUpdateListener;
         this.car = car;
-        this.carButton = carButton;
         this.carSelectedListener = carSelectedListener;
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
 
-        buttonUpdate();
     }
 
     public void setCarLocation(Car car) {
@@ -177,7 +167,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     @Override
     public void onZoomToMyLocation() {
-        setMode(Mode.FREE);
+        setFollowing(false);
     }
 
     /**
@@ -303,36 +293,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         return new LatLng(car.location.getLatitude(), car.location.getLongitude());
     }
 
-    public void changeMode() {
-        if (mode == null || mode == Mode.FREE) setMode(Mode.FOLLOWING);
-        else if (mode == Mode.FOLLOWING) setMode(Mode.FREE);
-    }
 
-    public void setFollowing() {
-        setMode(Mode.FOLLOWING);
-    }
+    public void setFollowing(boolean following) {
 
-    private void setMode(Mode mode) {
+        if (this.following != following)
+            Log.i(TAG, "Setting camera following mode to " + following);
 
-        if (this.mode != mode)
-            Log.i(TAG, "Setting camera mode to " + mode);
-
-        this.mode = mode;
+        this.following = following;
 
         updateCameraIfFollowing();
 
-        buttonUpdate();
-
-    }
-
-    private void buttonUpdate() {
-        if (carButton == null)
-            return;
-        if (mode == Mode.FOLLOWING) {
-            carButton.setImageResource(R.drawable.ic_icon_car_red);
-        } else if (mode == Mode.FREE) {
-            carButton.setImageResource(R.drawable.ic_icon_car);
-        }
     }
 
 
@@ -344,7 +314,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public boolean updateCameraIfFollowing() {
 
-        if (mode == Mode.FOLLOWING) {
+        if (following) {
             return zoomToSeeBoth();
         }
         return false;
@@ -369,7 +339,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         for (LatLng latLng : directionPoints)
             builder.include(latLng);
 
-        cameraUpdateListener.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+        cameraUpdateListener.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
 
         return true;
     }
@@ -397,12 +367,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating) {
         if (!justFinishedAnimating)
-            setMode(Mode.FREE);
+            following = false;
     }
 
-    public Mode getMode() {
-        return mode;
-    }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -415,6 +382,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public boolean isFollowing() {
+        return following;
     }
 
     public interface CarSelectedListener {
