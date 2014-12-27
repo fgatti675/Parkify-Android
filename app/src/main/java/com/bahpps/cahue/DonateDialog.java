@@ -20,6 +20,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.google.android.gms.wallet.Wallet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +40,11 @@ public class DonateDialog extends DialogFragment {
     private static String PRODUCT_DONATION_1 = "donate_1";
     private static String PRODUCT_DONATION_2 = "donate_2";
     private static String PRODUCT_DONATION_5 = "donate_5";
+
+
+    private static String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
+    private static String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
+    private static String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
 
     private final static String TAG = "DonateDialog";
 
