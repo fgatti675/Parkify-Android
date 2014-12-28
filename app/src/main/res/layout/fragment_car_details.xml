@@ -28,19 +28,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/name_stub" />
+            tools:text="NAME" />
 
         <TextView
             android:id="@+id/time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/time_stub" />
+            tools:text="TIME" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/distance_stub"/>
+            tools:text="DISTANCE"/>
 
     </LinearLayout>
 

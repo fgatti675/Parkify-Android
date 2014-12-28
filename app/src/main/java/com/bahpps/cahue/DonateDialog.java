@@ -18,8 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.bahpps.cahue.util.Util;
 import com.google.android.gms.wallet.Wallet;
 
 import org.json.JSONException;
@@ -56,10 +58,10 @@ public class DonateDialog extends DialogFragment {
 
         try {
             ArrayList<String> skuList = new ArrayList<String>();
-//            skuList.add("android.test.purchased");
-            skuList.add(PRODUCT_DONATION_1);
-            skuList.add(PRODUCT_DONATION_2);
-            skuList.add(PRODUCT_DONATION_5);
+            skuList.add("android.test.purchased");
+            skuList.add(PRODUCT_DONATION_1_ADMINISTERED);
+            skuList.add(PRODUCT_DONATION_2_ADMINISTERED);
+            skuList.add(PRODUCT_DONATION_5_ADMINISTERED);
             Bundle querySkus = new Bundle();
             querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
             return mService.getSkuDetails(3, getActivity().getPackageName(), "inapp", querySkus);
@@ -157,17 +159,11 @@ public class DonateDialog extends DialogFragment {
                             JSONObject object = null;
                             object = new JSONObject(thisResponse);
                             String sku = object.getString("productId");
+                            String title = object.getString("title");
                             String price = object.getString("price");
 
                             RadioButton radioButton = new RadioButton(getActivity());
-                            if (PRODUCT_DONATION_1.equals(sku))
-                                radioButton.setText(R.string.donation_1);
-                            else if (PRODUCT_DONATION_2.equals(sku))
-                                radioButton.setText(R.string.donation_2);
-                            else if (PRODUCT_DONATION_5.equals(sku))
-                                radioButton.setText(R.string.donation_5);
-                            else
-                                radioButton.setText(sku);
+                            radioButton.setText(title);
 
                             radioButton.setTag(sku);
 
@@ -191,7 +187,7 @@ public class DonateDialog extends DialogFragment {
         return dialog;
     }
 
-    private void doPurchase(String sku){
+    private void doPurchase(String sku) {
         try {
 
             Bundle buyIntentBundle = mService.getBuyIntent(3,
@@ -200,11 +196,14 @@ public class DonateDialog extends DialogFragment {
                     "inapp",
                     UUID.randomUUID().toString());
 
-
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-            getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
-                    1001, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
-                    Integer.valueOf(0));
+            if (pendingIntent == null) {
+                Util.createUpperToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
+            } else {
+                getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
+                        1001, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
+                        Integer.valueOf(0));
+            }
 
         } catch (RemoteException e) {
             e.printStackTrace();

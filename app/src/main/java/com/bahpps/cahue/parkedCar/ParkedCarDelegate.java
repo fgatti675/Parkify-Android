@@ -47,6 +47,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     private Car car;
 
+    // too far from the car to calculate directions
+    private boolean tooFar = false;
+
     private boolean following = false;
 
     private IconGenerator iconFactory;
@@ -96,6 +99,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);
         parcel.writeByte((byte) (following ? 1 : 0));
+        parcel.writeByte((byte) (tooFar ? 1 : 0));
         parcel.writeParcelable(car, i);
         parcel.writeParcelable(userLocation, i);
         parcel.writeTypedList(directionPoints);
@@ -109,6 +113,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public ParkedCarDelegate(Parcel parcel) {
         super(parcel);
         following = parcel.readByte() > 0;
+        tooFar = parcel.readByte() > 0;
         car = parcel.readParcelable(Car.class.getClassLoader());
         userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
         directionPoints = new ArrayList();
@@ -233,6 +238,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     }
 
+
     private void fetchDirections(boolean restart) {
 
         final LatLng carPosition = getCarLatLng();
@@ -244,17 +250,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
             return;
         }
 
+        updateTooFar(carPosition, userPosition);
+
         // don't set if they are too far
-        float distances[] = new float[3];
-        Location.distanceBetween(
-                carPosition.latitude,
-                carPosition.longitude,
-                userPosition.latitude,
-                userPosition.longitude,
-                distances);
-        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
-            return;
-        }
+        if (isTooFar()) return;
 
         /**
          * Cancel if something is going on
@@ -286,6 +285,21 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         };
         directionsAsyncTask.execute();
+    }
+
+    private void updateTooFar(LatLng carPosition, LatLng userPosition) {
+        float distances[] = new float[3];
+        Location.distanceBetween(
+                carPosition.latitude,
+                carPosition.longitude,
+                userPosition.latitude,
+                userPosition.longitude,
+                distances);
+        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
+            tooFar = true;
+        }
+
+        tooFar = false;
     }
 
     private LatLng getCarLatLng() {
@@ -376,7 +390,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         if (marker.equals(carMarker)) {
             carSelectedListener.onCarClicked(car);
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -386,6 +400,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public boolean isFollowing() {
         return following;
+    }
+
+    public boolean isTooFar() {
+        return tooFar;
     }
 
     public interface CarSelectedListener {

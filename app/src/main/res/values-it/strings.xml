@@ -6,8 +6,8 @@
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
     <string name="select_device_long">Selezionare i dispositivi BT delle auto da collegare.</string>
-    <string name="none_paired">No devices have been paired</string>
-    <string name="none_found">Nessun dispositivo associato</string>
+    <string name="none_paired">Nessun dispositivo associato</string>
+    <string name="none_found">Nessun dispositivo trovato</string>
     <string name="button_scan">Cerca dispositivi</string>
     <string name="remove_link">Rimuovi collegamento</string>
     <string name="link_device">Collega dispositivo</string>
@@ -39,5 +39,6 @@
     <string name="other">Altro</string>
     <string name="select_device">Selezionare i dispositivi</string>
     <string name="remove">Elimina macchina</string>
+    <string name="purchase_account_error">Serve una account </string>
 
 </resources>

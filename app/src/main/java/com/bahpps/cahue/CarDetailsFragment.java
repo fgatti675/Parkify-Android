@@ -32,6 +32,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     // the fragment initialization parameter
     private static final String ARG_CAR = "car";
     private static final String ARG_CAR_DELEGATE = "car_delegate";
+    private static final String ARG_INITIALLY_FOLLOWING = "initially_following";
 
     private Location userLocation;
     private Car car;
@@ -51,11 +52,12 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
-    public static CarDetailsFragment newInstance(Car car, ParkedCarDelegate parkedCarDelegate) {
+    public static CarDetailsFragment newInstance(Car car, ParkedCarDelegate parkedCarDelegate, boolean initiallyFollowing) {
         CarDetailsFragment fragment = new CarDetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_CAR, car);
         args.putParcelable(ARG_CAR_DELEGATE, parkedCarDelegate);
+        args.putBoolean(ARG_INITIALLY_FOLLOWING, initiallyFollowing);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,6 +72,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         if (getArguments() != null) {
             car = getArguments().getParcelable(ARG_CAR);
             parkedCarDelegate = getArguments().getParcelable(ARG_CAR_DELEGATE);
+            parkedCarDelegate.setFollowing(getArguments().getBoolean(ARG_INITIALLY_FOLLOWING));
         }
     }
 
@@ -86,6 +89,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         updateFollowButtonState();
 
     }
+
+
 
 
     @Override

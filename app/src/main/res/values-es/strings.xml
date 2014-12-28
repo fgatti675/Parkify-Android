@@ -39,4 +39,5 @@
     <string name="pick_account">Debes seleccionar una cuenta para utilizar esta aplicación</string>
     <string name="other">Otro</string>
     <string name="select_device">Selecciona dispositivos</string>
+    <string name="purchase_account_error">Necesitas una cuenta asociada al telefono</string>
 </resources>

@@ -169,7 +169,7 @@ public class MapsActivity extends BaseActivity
         myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                zoomToMyLocation();
+                zoomToMyLocation(false);
             }
         });
 
@@ -302,32 +302,31 @@ public class MapsActivity extends BaseActivity
 
                 final int height = detailsContainer.getMeasuredHeight();
 
-                if (detailsDisplayed) {
-                    setMapPadding(height);
-                } else {
-                    detailsDisplayed = true;
-                    TranslateAnimation animation = new TranslateAnimation(0, 0, height, 0);
-                    int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-                    animation.setDuration(mediumAnimTime);
-                    animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
-                    animation.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                        }
+                TranslateAnimation animation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
+                int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                animation.setDuration(mediumAnimTime);
+                animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
+                        params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        myLocationButton.setLayoutParams(params); //causes layout update
+                    }
 
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            setMapPadding(height);
-                        }
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        setMapPadding(height);
+                    }
 
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
 
-                        }
-                    });
-                    detailsContainer.startAnimation(animation);
-                    myLocationButton.startAnimation(animation);
-                }
+                    }
+                });
+                detailsContainer.startAnimation(animation);
+                myLocationButton.startAnimation(animation);
+                detailsDisplayed = true;
 
                 detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
@@ -363,11 +362,9 @@ public class MapsActivity extends BaseActivity
                 detailsContainer.setVisibility(View.INVISIBLE);
                 detailsContainer.removeAllViews();
 
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) detailsContainer.getLayoutParams();
-//                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-//                params.addRule(RelativeLayout.LEFT_OF, R.id.id_to_be_left_of);
-
-                detailsContainer.setLayoutParams(params); //causes layout update
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                myLocationButton.setLayoutParams(params); //causes layout update
 
             }
 
@@ -595,19 +592,18 @@ public class MapsActivity extends BaseActivity
             if (parkedCars.size() == 1) {
 
                 Car car = parkedCars.get(0);
-                onCarClicked(car);
                 ParkedCarDelegate parkedCarDelegate = getParkedCarDelegate(car);
                 parkedCarDelegate.onLocationChanged(getUserLocation());
-                parkedCarDelegate.setFollowing(true);
+                if (!parkedCarDelegate.isTooFar())
+                    onCarClicked(car);
+                else
+                    zoomToMyLocation(true);
 
             }
 
             // zoom to user otherwise
             else {
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .target(userPosition)
-                        .zoom(15.5F)
-                        .build()));
+                zoomToMyLocation(true);
             }
 
             initialCameraSet = true;
@@ -747,7 +743,7 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onCarClicked(Car car) {
-        setDetailsFragment(CarDetailsFragment.newInstance(car, getParkedCarDelegate(car)));
+        setDetailsFragment(CarDetailsFragment.newInstance(car, getParkedCarDelegate(car), true));
     }
 
 
@@ -770,7 +766,7 @@ public class MapsActivity extends BaseActivity
         });
     }
 
-    private void zoomToMyLocation() {
+    private void zoomToMyLocation(boolean resetZoom) {
 
         Log.d(TAG, "zoomToMyLocation");
 
@@ -780,8 +776,13 @@ public class MapsActivity extends BaseActivity
 
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
+
+        float zoom = 15.5F;
+        if(!resetZoom)
+            zoom = Math.max(mMap.getCameraPosition().zoom, 14);
+
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .zoom(Math.max(mMap.getCameraPosition().zoom, 14))
+                        .zoom(zoom)
                         .target(userPosition)
                         .build()),
                 new GoogleMap.CancelableCallback() {
