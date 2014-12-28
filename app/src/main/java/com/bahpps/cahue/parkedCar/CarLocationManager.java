@@ -28,6 +28,7 @@ public class CarLocationManager {
     public static final String PREF_CAR_LONGITUDE = "PREF_CAR_LONGITUDE";
     public static final String PREF_CAR_ACCURACY = "PREF_CAR_ACCURACY";
     public static final String PREF_CAR_PROVIDER = "PREF_CAR_PROVIDER";
+    public static final String PREF_LAST_CAR_SAVED = "PREF_LAST_CAR_SAVED";
     public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
 
     private final static String TAG = "CarLocationManager";
@@ -53,6 +54,7 @@ public class CarLocationManager {
         editor.putInt(PREF_CAR_ACCURACY + id, (int) (loc.getAccuracy() * 1E6));
         editor.putString(PREF_CAR_PROVIDER + id, loc.getProvider());
         editor.putLong(PREF_CAR_TIME + id, car.time.getTime());
+        editor.putString(PREF_LAST_CAR_SAVED, id);
 
         editor.apply();
 
@@ -61,6 +63,11 @@ public class CarLocationManager {
         Intent intent = new Intent(INTENT);
         intent.putExtra(INTENT_POSITION, car);
         context.sendBroadcast(intent);
+    }
+
+    public static String getLastCarSavedId(Context context){
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getString(PREF_LAST_CAR_SAVED, null);
     }
 
     /**

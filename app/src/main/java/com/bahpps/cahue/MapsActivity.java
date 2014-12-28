@@ -580,12 +580,6 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {
 
-            CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                    .target(userPosition)
-                    .zoom(INITIAL_ZOOM)
-                    .build());
-            mMap.moveCamera(update);
-
             final List<Car> parkedCars = CarLocationManager.getAvailableCars(this, true);
 
             // One parked car
@@ -777,7 +771,7 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
 
-        float zoom = 15.5F;
+        float zoom = 17F;
         if(!resetZoom)
             zoom = Math.max(mMap.getCameraPosition().zoom, 14);
 

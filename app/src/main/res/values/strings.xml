@@ -36,5 +36,11 @@
     <string name="pick_account">You must select an account in order to use this application</string>
     <string name="other">Other</string>
     <string name="remove">Clear car</string>
+    <string name="title_activity_tutorial">TutorialActivity</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

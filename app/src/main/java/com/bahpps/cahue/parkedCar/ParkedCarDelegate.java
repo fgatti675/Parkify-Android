@@ -295,11 +295,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
                 userPosition.latitude,
                 userPosition.longitude,
                 distances);
-        if (distances[0] > MAX_DIRECTIONS_DISTANCE) {
-            tooFar = true;
-        }
 
-        tooFar = false;
+        tooFar = distances[0] > MAX_DIRECTIONS_DISTANCE;
     }
 
     private LatLng getCarLatLng() {

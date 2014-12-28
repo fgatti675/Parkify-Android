@@ -1,32 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar_actionbar" />
+    <include layout="@layout/toolbar_actionbar"
+        android:id="@+id/toolbar_actionbar"/>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/large_padding">
+    <fragment
+        android:layout_below="@id/toolbar_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/map"
+        class="com.bahpps.cahue.DeviceSelectionFragment"
+        tools:layout="@layout/fragment_device_list" />
 
-        <TextView
-            android:id="@+id/title_dialog"
-            android:padding="@dimen/large_padding"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/select_device_long" />
-
-        <ListView
-            android:id="@+id/paired_devices"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:stackFromBottom="true" />
-
-    </LinearLayout>
-</LinearLayout>
+</RelativeLayout>
 
