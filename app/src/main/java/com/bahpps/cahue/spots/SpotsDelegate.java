@@ -48,7 +48,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     // Earth’s radius, sphere
     private final static double EARTH_RADIUS = 6378137;
-    private final static long TIMEOUT_MS = 60000;
+    private final static long TIMEOUT_MS = 10000;
 
     // number of spots being retrieved on nearby spots query
     private final static int CLOSEST_LOCATIONS = 200;
@@ -195,6 +195,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         queriedBounds.clear();
         spots.clear();
         markerSpotsMap.clear();
+        spotMarkersMap.clear();
     }
 
     private boolean repeatLastQuery() {
@@ -226,6 +227,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private synchronized boolean queryCameraView() {
 
         // What the user is actually seeing right now
+
         setUpViewBounds();
 
         if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
@@ -319,6 +321,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     public void doDraw() {
 
+        Log.d(TAG, "Drawing spots");
+
+        setUpViewBounds();
+
         // hideMarkers first
         hideMarkers();
 
@@ -326,10 +332,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             Log.d(TAG, "Abort drawing spots. Markers are hidden");
             return;
         }
-
-        Log.d(TAG, "Drawing spots");
-
-        setUpViewBounds();
 
         for (final ParkingSpot parkingSpot : spots) {
 
@@ -367,13 +369,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         displayedMarkers = 0;
 
         for (final Marker marker : markerSpotsMap.keySet()) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
-                        marker.setVisible(false);
-                }
-            });
+            if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
+                marker.setVisible(false);
         }
     }
 
@@ -488,10 +485,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     public void onLocationChanged(Location location) {
         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
-        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
-            queryClosestSpots(userLocation);
-        else
-            Log.v(TAG, "No need to query for closest points again");
+//        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
+//            queryClosestSpots(userLocation);
+//        else
+//            Log.v(TAG, "No need to query for closest points again");
 
     }
 

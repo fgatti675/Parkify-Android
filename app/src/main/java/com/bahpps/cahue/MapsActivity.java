@@ -104,7 +104,7 @@ public class MapsActivity extends BaseActivity
             Car car = (Car) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (car != null) {
                 Log.i(TAG, "Location received: " + car);
-                getParkedCarDelegate(car).setCarLocation(car);
+                getParkedCarDelegate(car).updateCarLocation(car);
             }
 
         }
@@ -192,7 +192,7 @@ public class MapsActivity extends BaseActivity
 
             List<Car> cars = CarLocationManager.getAvailableCars(this, false);
             for (Car car : cars) {
-                ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate();
+                ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate(car);
                 parkedCarDelegateMap.put(car, parkedCarDelegate);
             }
         }
@@ -235,6 +235,15 @@ public class MapsActivity extends BaseActivity
         }
 
         bindBillingService();
+
+        /**
+         * Add delegates
+         */
+        delegates.add(spotsDelegate);
+
+        for (ParkedCarDelegate parkedCarDelegate : parkedCarDelegateMap.values()) {
+            delegates.add(parkedCarDelegate);
+        }
 
     }
 
@@ -284,8 +293,8 @@ public class MapsActivity extends BaseActivity
         ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
         if (parkedCarDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
-            parkedCarDelegate = new ParkedCarDelegate();
-            parkedCarDelegate.init(this, this, car, this);
+            parkedCarDelegate = new ParkedCarDelegate(car);
+            parkedCarDelegate.init(this, this, this);
             parkedCarDelegate.onMapReady(mMap);
             parkedCarDelegateMap.put(car, parkedCarDelegate);
         }
@@ -397,13 +406,10 @@ public class MapsActivity extends BaseActivity
         /**
          * Init delegates
          */
-        delegates.add(spotsDelegate);
         spotsDelegate.init(this, this);
 
-        for (Car car : parkedCarDelegateMap.keySet()) {
-            ParkedCarDelegate parkedCarDelegate = parkedCarDelegateMap.get(car);
-            parkedCarDelegate.init(this, this, car, this);
-            delegates.add(parkedCarDelegate);
+        for (ParkedCarDelegate parkedCarDelegate : parkedCarDelegateMap.values()) {
+            parkedCarDelegate.init(this, this, this);
         }
 
         // when our activity resumes, we want to register for location updates
@@ -411,8 +417,6 @@ public class MapsActivity extends BaseActivity
 
         setInitialCamera();
 
-        int height = detailsContainer.getHeight();
-        Log.d(TAG, "HEIGHT : " + height);
 
     }
 
@@ -635,7 +639,7 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-        if (mMap == null) return;
+        if (mMap == null || !initialCameraSet) return;
 
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onCameraChange(cameraPosition, justFinishedAnimating);

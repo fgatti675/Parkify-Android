@@ -106,7 +106,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         parcel.writeSerializable(lastDirectionsUpdate);
     }
 
-    public ParkedCarDelegate() {
+    public ParkedCarDelegate(Car car) {
+        this.car = car;
         directionPoints = new ArrayList<LatLng>();
     }
 
@@ -121,19 +122,18 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         lastDirectionsUpdate = (Date) parcel.readSerializable();
     }
 
-    public void init(Context context, CameraUpdateListener cameraUpdateListener, Car car, CarSelectedListener carSelectedListener) {
+    public void init(Context context, CameraUpdateListener cameraUpdateListener, CarSelectedListener carSelectedListener) {
 
         mContext = context;
 
         this.cameraUpdateListener = cameraUpdateListener;
-        this.car = car;
         this.carSelectedListener = carSelectedListener;
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
 
     }
 
-    public void setCarLocation(Car car) {
+    public void updateCarLocation(Car car) {
         this.car = car;
         directionPoints.clear();
         fetchDirections(true);
@@ -386,8 +386,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
             carSelectedListener.onCarClicked(car);
+        } else{
+            setFollowing(false);
         }
-        return true;
+        return false;
     }
 
     @Override
