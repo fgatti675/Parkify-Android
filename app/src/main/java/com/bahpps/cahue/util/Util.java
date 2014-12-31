@@ -25,6 +25,7 @@ public class Util {
     /*
      * Shared preferences constants
      */
+    public static final String PREF_LOGGED_IN = "PREF_LOGGED_IN";
     public static final String PREF_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
     public static final String PREF_OAUTH_TOKEN = "PREF_OAUTH_TOKEN";
     public static final String PREF_CAMERA_ZOOM = "PREF_CAMERA_ZOOM";
@@ -102,12 +103,22 @@ public class Util {
         return prefs.getString(PREF_OAUTH_TOKEN, null);
     }
 
-    public static boolean isDialogShown(Context context) {
+    public static boolean isLoggedIn(Context context) {
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        return prefs.getBoolean(PREF_LOGGED_IN, false);
+    }
+
+    public static void setIsLoggedIn(Context context, boolean loggedIn) {
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_LOGGED_IN, loggedIn).apply();
+    }
+
+    public static boolean isTutorialShown(Context context) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         return prefs.getBoolean(PREF_DIALOG_SHOWN, false);
     }
 
-    public static void setDialogShown(Context context, boolean shown) {
+    public static void setTutorialShown(Context context, boolean shown) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
         prefs.edit().putBoolean(PREF_DIALOG_SHOWN, shown).apply();
     }

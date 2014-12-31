@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -17,12 +16,19 @@ import android.widget.ProgressBar;
 import com.bahpps.cahue.DeviceSelectionFragment;
 import com.bahpps.cahue.R;
 
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class TutorialActivity extends ActionBarActivity
         implements DeviceSelectionFragment.DeviceSelectionLoadingListener, ViewPager.OnPageChangeListener {
 
+    // TODO: not used, but it should
+    private static final Map<Integer, Class> positionFragmentMap = new HashMap() {{
+        put(0, TutorialWelcomeFragment.class);
+        put(1, TutorialInstructionsFragment.class);
+        put(2, DeviceSelectionFragment.class);
+    }};
 
     private static final int TOTAL_NUMBER_PAGES = 3;
     private static final String TAG = TutorialActivity.class.getSimpleName();
@@ -83,10 +89,11 @@ public class TutorialActivity extends ActionBarActivity
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                finish();
             }
         });
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         final LayerDrawable background = (LayerDrawable) mViewPager.getBackground();
 
@@ -119,6 +126,7 @@ public class TutorialActivity extends ActionBarActivity
 
     @Override
     public void devicesBeingLoaded(boolean loading) {
+        Log.d(TAG, "Devices being loaded: " + loading);
         progressBar.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -144,6 +152,8 @@ public class TutorialActivity extends ActionBarActivity
             next.setVisibility(View.VISIBLE);
             ok.setVisibility(View.GONE);
         }
+
+        findViewById(R.id.progress_wrapper).setVisibility(position == TOTAL_NUMBER_PAGES - 1 ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override

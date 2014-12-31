@@ -24,8 +24,7 @@
             android:layout_height="wrap_content"
             android:text="@string/activate_bluetooth"
             android:theme="@style/CahueTheme.ButtonAccent"
-            android:visibility="gone"
-            android:id="@+id/button"
+            android:id="@+id/enable_bt"
             android:layout_gravity="center_horizontal" />
 
         <ListView

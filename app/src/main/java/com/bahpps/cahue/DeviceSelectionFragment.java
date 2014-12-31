@@ -10,12 +10,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 
@@ -38,6 +40,9 @@ public class DeviceSelectionFragment extends Fragment {
     private BluetoothAdapter mBtAdapter;
     private DeviceListAdapter mDevicesArrayAdapter;
 
+    private Button enableBTButton;
+    private ListView pairedListView;
+
     private Set<String> selectedDeviceAddresses;
 
     private DeviceSelectionLoadingListener mListener;
@@ -56,19 +61,30 @@ public class DeviceSelectionFragment extends Fragment {
         return fragment;
     }
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_device_list, container, false);
 
+        enableBTButton = (Button) view.findViewById(R.id.enable_bt);
+        enableBTButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+            }
+        });
+
         // Initialize array adapter
         mDevicesArrayAdapter = new DeviceListAdapter();
 
         // Find and set up the ListView for paired devices
-        ListView pairedListView = (ListView) view.findViewById(R.id.paired_devices);
+        pairedListView = (ListView) view.findViewById(R.id.paired_devices);
         pairedListView.setAdapter(mDevicesArrayAdapter);
 
+        return view;
+    }
+
+    private void setBondedDevices() {
         // Get a set of currently paired devices
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
 
@@ -77,13 +93,18 @@ public class DeviceSelectionFragment extends Fragment {
             mDevicesArrayAdapter.setDevices(pairedDevices);
             mDevicesArrayAdapter.notifyDataSetChanged();
         }
-
-        return view;
     }
 
     private void updateUI() {
-
+        if (mBtAdapter.isEnabled()) {
+            enableBTButton.setVisibility(View.GONE);
+            pairedListView.setVisibility(View.VISIBLE);
+        } else {
+            enableBTButton.setVisibility(View.VISIBLE);
+            pairedListView.setVisibility(View.GONE);
+        }
     }
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -109,7 +130,6 @@ public class DeviceSelectionFragment extends Fragment {
 
         selectedDeviceAddresses = Util.getPairedDevices(getActivity());
 
-
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         getActivity().registerReceiver(mReceiver, filter);
@@ -130,7 +150,17 @@ public class DeviceSelectionFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        doDiscovery();
+        updateUIAndDoDiscovery();
+    }
+
+    private void updateUIAndDoDiscovery() {
+        updateUI();
+
+        setBondedDevices();
+
+        if(mBtAdapter.isEnabled()){
+            doDiscovery();
+        }
     }
 
     @Override
@@ -154,18 +184,21 @@ public class DeviceSelectionFragment extends Fragment {
      * Start device discover with the BluetoothAdapter
      */
     private void doDiscovery() {
-        Log.d(TAG, "doDiscovery");
 
-        // Indicate scanning in the title
-        mListener.devicesBeingLoaded(true);
+        if (mBtAdapter.isEnabled()) {
+            Log.d(TAG, "doDiscovery");
 
-        // If we're already discovering, stop it
-        if (mBtAdapter.isDiscovering()) {
-            mBtAdapter.cancelDiscovery();
+            // Indicate scanning in the title
+            mListener.devicesBeingLoaded(true);
+
+            // If we're already discovering, stop it
+            if (mBtAdapter.isDiscovering()) {
+                mBtAdapter.cancelDiscovery();
+            }
+
+            // Request discover from BluetoothAdapter
+            mBtAdapter.startDiscovery();
         }
-
-        // Request discover from BluetoothAdapter
-        mBtAdapter.startDiscovery();
     }
 
 
@@ -199,6 +232,13 @@ public class DeviceSelectionFragment extends Fragment {
                     // R.string.none_found).toString();
                     // mNewDevicesArrayAdapter.add(noDevices);
                 }
+            }
+
+            // Update UI and discovery if BT state changed
+            else if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+
+                updateUIAndDoDiscovery();
+
             }
         }
     };
@@ -238,8 +278,8 @@ public class DeviceSelectionFragment extends Fragment {
 
             // Code for recycling views
             if (convertView == null) {
-                LayoutInflater inflator = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflator.inflate(R.layout.list_device_checkbox, null);
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.list_device_checkbox, null);
             } else {
                 view = convertView;
             }
@@ -250,6 +290,16 @@ public class DeviceSelectionFragment extends Fragment {
             final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
             boolean contains = selectedDeviceAddresses.contains(device.getAddress());
             checkBox.setChecked(contains);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    checkBox.callOnClick();
+
+                }
+            });
+
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

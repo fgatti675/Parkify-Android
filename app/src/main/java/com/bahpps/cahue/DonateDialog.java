@@ -22,7 +22,6 @@ import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.util.Util;
-import com.google.android.gms.wallet.Wallet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -131,7 +130,7 @@ public class DonateDialog extends DialogFragment {
             }
         });
 
-        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
         final TextView errorTextView = (TextView) view.findViewById(R.id.error_text);
 
         /**

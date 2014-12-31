@@ -31,6 +31,7 @@ import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.SpotsDelegate;
+import com.bahpps.cahue.tutorial.TutorialActivity;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -140,6 +141,7 @@ public class MapsActivity extends BaseActivity
 
     private void goToLogin() {
         if (!isFinishing()) {
+            Util.setIsLoggedIn(this, false);
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -156,6 +158,16 @@ public class MapsActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        if (!Util.isLoggedIn(this)) {
+            goToLogin();
+            return;
+        }
+
+        // show help dialog only on first run of the app
+        if (!Util.isTutorialShown(this)) {
+            goToTutorial();
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -228,11 +240,6 @@ public class MapsActivity extends BaseActivity
 
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-
-        // show help dialog only on first run of the app
-        if (!Util.isDialogShown(this)) {
-            showHelpDialog();
-        }
 
         bindBillingService();
 
@@ -499,10 +506,9 @@ public class MapsActivity extends BaseActivity
         return false;
     }
 
-    private void showHelpDialog() {
-        InfoDialog dialog = new InfoDialog();
-        dialog.show(getFragmentManager(), "InfoDialogFragment");
-        Util.setDialogShown(this, true);
+    private void goToTutorial() {
+        startActivity(new Intent(this, TutorialActivity.class));
+        Util.setTutorialShown(this, true);
     }
 
     @Override
@@ -676,7 +682,7 @@ public class MapsActivity extends BaseActivity
                 startDeviceSelection();
                 return true;
             case R.id.action_display_help:
-                showHelpDialog();
+                goToTutorial();
                 return true;
             case R.id.action_donate:
                 openDonationDialog();

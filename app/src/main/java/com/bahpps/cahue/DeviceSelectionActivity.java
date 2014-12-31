@@ -1,32 +1,12 @@
 package com.bahpps.cahue;
 
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.ListView;
 import android.widget.ProgressBar;
-
-import com.bahpps.cahue.util.Util;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and devices detected in the area after discovery. When
@@ -52,7 +32,7 @@ public class DeviceSelectionActivity extends ActionBarActivity implements Device
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
         setSupportActionBar(toolbar);
 
-        progressBar = (ProgressBar) toolbar.findViewById(R.id.progressBar);
+        progressBar = (ProgressBar) toolbar.findViewById(R.id.progress_bar);
 
 // FRAGMENT
         // animation

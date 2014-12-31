@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
@@ -87,6 +88,7 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
+        Util.setIsLoggedIn(this, true);
         startActivity(new Intent(this, MapsActivity.class));
         finish();
     }
