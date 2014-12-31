@@ -579,7 +579,7 @@ public class MapsActivity extends BaseActivity
 
     private void setInitialCamera() {
 
-        if (initialCameraSet) return;
+        if (initialCameraSet || isFinishing()) return;
 
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {

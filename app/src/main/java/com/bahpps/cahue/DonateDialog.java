@@ -39,10 +39,12 @@ import java.util.UUID;
  */
 public class DonateDialog extends DialogFragment {
 
+    @Deprecated
     private static String PRODUCT_DONATION_1 = "donate_1";
+    @Deprecated
     private static String PRODUCT_DONATION_2 = "donate_2";
+    @Deprecated
     private static String PRODUCT_DONATION_5 = "donate_5";
-
 
     private static String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
     private static String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
@@ -58,7 +60,7 @@ public class DonateDialog extends DialogFragment {
 
         try {
             ArrayList<String> skuList = new ArrayList<String>();
-            skuList.add("android.test.purchased");
+//            skuList.add("android.test.purchased");
             skuList.add(PRODUCT_DONATION_1_ADMINISTERED);
             skuList.add(PRODUCT_DONATION_2_ADMINISTERED);
             skuList.add(PRODUCT_DONATION_5_ADMINISTERED);

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="welcome">Welcome</string>
+    <string name="info_text">This app will automatically record your car\'s position when you walk away from it.\n\nIf you want to set your car\'s position manually, you can long press in the map.</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+</resources>

@@ -110,9 +110,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
 
     public SpotsDelegate() {
+
         queriedBounds = new ArrayList<>();
         spots = new HashSet<>();
         lastResetTaskRequestTime = new Date();
+
+        initMarkerMaps();
+
     }
 
     public SpotsDelegate(Parcel parcel) {
@@ -130,6 +134,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         shouldBeReset = parcel.readByte() != 0;
         lastResetTaskRequestTime = (Date) parcel.readSerializable();
         selectedSpot = parcel.readParcelable(ParkingSpot.class.getClassLoader());
+
+        initMarkerMaps();
+
     }
 
     @Override
@@ -151,15 +158,19 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     public void init(Context context, SpotSelectedListener spotSelectedListener) {
 
+        Log.d(TAG, "init");
+
         this.mContext = context;
         this.spotSelectedListener = spotSelectedListener;
 
+        setUpResetTask();
+
+    }
+
+    private void initMarkerMaps() {
         // we can rebuild this map because markers are removed on init
         spotMarkersMap = new HashMap<>();
         markerSpotsMap = new HashMap<>();
-
-        setUpResetTask();
-
     }
 
     public void setUpResetTask() {
@@ -187,13 +198,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     }
 
-    private void reset() {
+    private void reset(boolean clearSpots) {
         Log.d(TAG, "Spots reset");
         for (Marker marker : markerSpotsMap.keySet()) {
             marker.remove();
         }
         queriedBounds.clear();
-        spots.clear();
+        if (clearSpots) spots.clear();
         markerSpotsMap.clear();
         spotMarkersMap.clear();
     }
@@ -281,7 +292,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             lastNearbyQuery = new Date();
 
         if (shouldBeReset) {
-            reset();
+            reset(true);
             shouldBeReset = false;
         }
 
@@ -308,8 +319,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      * @param reasonPhrase
      */
     @Override
-    public void onServerError(int statusCode, String reasonPhrase) {
+    public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
         Toast.makeText(mContext, "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
+        repeatLastQuery();
     }
 
     @Override
@@ -414,6 +426,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         this.mMap = map;
         spotMarkersMap.clear();
         markerSpotsMap.clear();
+
+        reset(false);
         doDraw();
     }
 

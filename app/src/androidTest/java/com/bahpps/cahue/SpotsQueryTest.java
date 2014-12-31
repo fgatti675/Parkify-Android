@@ -64,7 +64,7 @@ public class SpotsQueryTest extends ActivityTestCase {
                     }
 
                     @Override
-                    public void onServerError(int statusCode, String reasonPhrase) {
+                    public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
 
                     }
 

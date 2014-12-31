@@ -4,7 +4,7 @@
     <string name="app_name">Cahue</string>
     <string name="scanning">Scanning for devices...</string>
     <string name="select_device">Select devices</string>
-    <string name="select_device_long">Select devices found in cars to be linked to the app</string>
+    <string name="select_device_long">All you have to do is select which is the Bluetooth device installed in your car and forget about where you parked.\n\nYou will need to keep your Bluetooth activated and at least one of GPS or WIFI.</string>
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">No devices found</string>
     <string name="button_scan">Scan for devices</string>
@@ -23,7 +23,6 @@
     <string name="car">Car</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="info_text">Welcome to %1$s!\n\nThis app will automatically record your car\'s position when you walk away from it.\n\nAll you have to do is select which is the Bluetooth device installed in your car and forget about where you parked. You will need to keep your Bluetooth activated and at least one of GPS or WIFI.\n\nIf you want to set your car\'s position manually, you can long press in the map.\n\nPlease note that there are no ads. So any donations will be highly appreciated.</string>
     <string name="poll_location_debug" translatable="false">Poll location</string>
 
     <!-- Donations -->
@@ -36,11 +35,7 @@
     <string name="pick_account">You must select an account in order to use this application</string>
     <string name="other">Other</string>
     <string name="remove">Clear car</string>
-    <string name="title_activity_tutorial">TutorialActivity</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="activate_bluetooth">Activate Bluetooth</string>
+
 
 </resources>

@@ -5,7 +5,7 @@
 
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
-    <string name="select_device_long">Selezionare i dispositivi BT delle auto da collegare.</string>
+    <string name="select_device_long">Tutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\n</string>
     <string name="none_paired">Nessun dispositivo associato</string>
     <string name="none_found">Nessun dispositivo trovato</string>
     <string name="button_scan">Cerca dispositivi</string>
@@ -26,7 +26,6 @@
     <string name="car_dialog_text">Ti piacerebbe impostare la posizione della macchina qui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancella</string>
-    <string name="info_text">Benvenuto a %1$s!\n\nQuesta applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nTutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.\n\nQuesta app non ha la pubblicità. Le donazioni sono benvenute! </string>
 
     <!-- Donations -->
     <string name="donation_intro">Questa applicazione è sostenuta da donazioni solo</string>
@@ -40,5 +39,6 @@
     <string name="select_device">Selezionare i dispositivi</string>
     <string name="remove">Elimina macchina</string>
     <string name="purchase_account_error">Serve una account </string>
+    <string name="activate_bluetooth">Attiva Bluetooth</string>
 
 </resources>

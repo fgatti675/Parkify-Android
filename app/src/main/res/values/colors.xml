@@ -37,12 +37,14 @@
 
     <color name="theme_accent_2">#ff8f75</color>
 
-    <color name="marker_red">#ffff6031</color>
-    <color name="marker_orange">#ffffcf49</color>
-    <color name="marker_yellow">#ffe6ff1d</color>
+    <color name="marker_red">#640b2d38</color>
+    <color name="marker_orange">#8b2d8767</color>
+    <color name="marker_yellow">#c442bb97</color>
     <color name="marker_green">#02edaf</color>
 
     <color name="translucent_actionbar_background">#d3116071</color>
+
+    <color name="background_translucent">#640b2d38</color>
 
     <!--<color name="all_track_color">#ff222222</color>-->
     <!--<color name="home_pane_header">#99000000</color>-->

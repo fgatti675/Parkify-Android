@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="welcome">Bienvenido</string>
+    <string name="info_text">Esta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\nSi quieres establecer la posicion de tu coche manualmente, puedes hacer click largo en cualquier punto del mapa.</string>
+    <string name="next">Siguiente</string>
+    <string name="previous">Previo</string>
+
+</resources>

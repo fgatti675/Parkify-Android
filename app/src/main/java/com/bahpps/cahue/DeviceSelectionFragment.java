@@ -11,8 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,10 +18,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
-import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
@@ -86,6 +81,10 @@ public class DeviceSelectionFragment extends Fragment {
         return view;
     }
 
+    private void updateUI() {
+
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -110,12 +109,17 @@ public class DeviceSelectionFragment extends Fragment {
 
         selectedDeviceAddresses = Util.getPairedDevices(getActivity());
 
+
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         getActivity().registerReceiver(mReceiver, filter);
 
         // Register for broadcasts when discovery has finished
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        getActivity().registerReceiver(mReceiver, filter);
+
+        // Register for broadcasts when bt has been disconnected or disconnected
+        filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         getActivity().registerReceiver(mReceiver, filter);
 
         // Get the local Bluetooth adapter
@@ -126,18 +130,21 @@ public class DeviceSelectionFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         doDiscovery();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Make sure we're not doing discovery anymore
+        if (mBtAdapter != null) {
+            mBtAdapter.cancelDiscovery();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        // Make sure we're not doing discovery anymore
-        if (mBtAdapter != null) {
-            mBtAdapter.cancelDiscovery();
-        }
 
         // Unregister broadcast listeners
         getActivity().unregisterReceiver(mReceiver);
@@ -232,7 +239,7 @@ public class DeviceSelectionFragment extends Fragment {
             // Code for recycling views
             if (convertView == null) {
                 LayoutInflater inflator = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflator.inflate(R.layout.device_name, null);
+                view = inflator.inflate(R.layout.list_device_checkbox, null);
             } else {
                 view = convertView;
             }
@@ -269,7 +276,7 @@ public class DeviceSelectionFragment extends Fragment {
         }
     }
 
-    public interface DeviceSelectionLoadingListener{
+    public interface DeviceSelectionLoadingListener {
 
         public void devicesBeingLoaded(boolean loading);
 

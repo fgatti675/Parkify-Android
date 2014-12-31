@@ -85,7 +85,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
             } else {
                 //Closes the connection.
                 response.getEntity().getContent().close();
-                listener.onServerError(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+                listener.onServerError(this, statusLine.getStatusCode(), statusLine.getReasonPhrase());
                 throw new IOException(statusLine.getReasonPhrase());
             }
 
@@ -148,7 +148,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     public interface ParkingSpotsUpdateListener {
         void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots);
 
-        void onServerError(int statusCode, String reasonPhrase);
+        void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
 
         void onIOError();
     }
