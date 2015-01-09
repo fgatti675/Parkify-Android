@@ -41,7 +41,7 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
                 .appendQueryParameter("neLong", Double.toString(latLngBounds.northeast.longitude));
 
         String url = builder.build().toString();
-        Log.i(TAG, "Query area : ");
+        Log.i(TAG, "Query area : " +  url);
 
         return parseResult(query(url));
     }

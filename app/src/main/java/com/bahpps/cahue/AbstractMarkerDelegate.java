@@ -56,7 +56,6 @@ public abstract class AbstractMarkerDelegate implements Parcelable {
 
     }
 
-
     /**
      * Should be called on the onPause cycle.
      */

@@ -131,19 +131,26 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         iconFactory = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
 
+        updateCarLocation();
+
     }
 
-    public void updateCarLocation(Car car) {
-        this.car = car;
+    public void updateCarLocation() {
         directionPoints.clear();
+        this.car = CarLocationManager.getStoredCar(mContext, this.car.id);
+        if (car == null || car.location == null) {
+            return;
+        }
         fetchDirections(true);
         doDraw();
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
+
         this.mMap = map;
-        doDraw();
+
+        updateCarLocation();
     }
 
     public void onLocationChanged(Location userLocation) {
@@ -157,6 +164,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public void doDraw() {
+        if(mMap == null) return;
         Log.i(TAG, "Drawing parked car components");
         clear();
         drawCar();
@@ -225,6 +233,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private void drawDirections() {
+
+        if (car == null || car.location == null) {
+            return;
+        }
 
         Log.d(TAG, "Drawing directions");
 
@@ -386,7 +398,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
             carSelectedListener.onCarClicked(car);
-        } else{
+        } else {
             setFollowing(false);
         }
         return false;

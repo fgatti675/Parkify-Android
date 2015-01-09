@@ -105,7 +105,7 @@ public class MapsActivity extends BaseActivity
             Car car = (Car) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
             if (car != null) {
                 Log.i(TAG, "Location received: " + car);
-                getParkedCarDelegate(car).updateCarLocation(car);
+                getParkedCarDelegate(car).updateCarLocation();
             }
 
         }
@@ -239,7 +239,6 @@ public class MapsActivity extends BaseActivity
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
 
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
-
 
         bindBillingService();
 
@@ -645,7 +644,7 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
-        if (mMap == null || !initialCameraSet) return;
+        if (mMap == null) return;
 
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onCameraChange(cameraPosition, justFinishedAnimating);

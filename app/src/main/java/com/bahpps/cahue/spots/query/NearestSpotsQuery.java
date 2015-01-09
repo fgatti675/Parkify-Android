@@ -44,7 +44,7 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
                 .appendQueryParameter("count", Integer.toString(limit));
 
         String url = builder.build().toString();
-        Log.i(TAG, "Query nearest : ");
+        Log.i(TAG, "Query nearest : " + url);
 
         return parseResult(query(url));
     }

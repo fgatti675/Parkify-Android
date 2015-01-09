@@ -45,7 +45,7 @@ public abstract class BaseActivity
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private static final int OUR_REQUEST_CODE = 49404;
 
-    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login";
 
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
@@ -92,7 +92,7 @@ public abstract class BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
         }
         Log.d(TAG, "mGoogleApiClient initialized");
@@ -172,6 +172,8 @@ public abstract class BaseActivity
             Log.v(TAG, "Sign out successful!");
         }
 
+        Util.saveOAuthToken(BaseActivity.this, null);
+
         onConnectingStatusChange(false);
         onPlusClientSignOut();
     }
@@ -211,7 +213,6 @@ public abstract class BaseActivity
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "onConnectionSuspended");
     }
-
 
 
     /**
