@@ -67,6 +67,11 @@ public class MapsActivity extends BaseActivity
         CameraUpdateListener,
         OnMapReadyCallback {
 
+    /**
+     * If this is set to true, all the features related only to Cahue and not WIMC are disabled
+     */
+    public static final boolean ALL_CAHUE_FEATURES_ENABLED = false;
+
     protected static final String TAG = "Maps";
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
@@ -200,7 +205,8 @@ public class MapsActivity extends BaseActivity
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
 
-            spotsDelegate = new SpotsDelegate();
+            if (ALL_CAHUE_FEATURES_ENABLED)
+                spotsDelegate = new SpotsDelegate();
 
             List<Car> cars = CarLocationManager.getAvailableCars(this, false);
             for (Car car : cars) {
@@ -214,8 +220,11 @@ public class MapsActivity extends BaseActivity
          */
         else {
 
-            spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
-            spotsDelegate.markAsDirty();
+
+            if (ALL_CAHUE_FEATURES_ENABLED) {
+                spotsDelegate = savedInstanceState.getParcelable("spotsDelegate");
+                spotsDelegate.markAsDirty();
+            }
 
             List<ParkedCarDelegate> parkedCarDelegates = savedInstanceState.getParcelableArrayList("parkedCarDelegates");
             for (Parcelable parcelable : parkedCarDelegates) {
@@ -245,7 +254,9 @@ public class MapsActivity extends BaseActivity
         /**
          * Add delegates
          */
-        delegates.add(spotsDelegate);
+
+        if (ALL_CAHUE_FEATURES_ENABLED)
+            delegates.add(spotsDelegate);
 
         for (ParkedCarDelegate parkedCarDelegate : parkedCarDelegateMap.values()) {
             delegates.add(parkedCarDelegate);
@@ -412,7 +423,8 @@ public class MapsActivity extends BaseActivity
         /**
          * Init delegates
          */
-        spotsDelegate.init(this, this);
+        if (ALL_CAHUE_FEATURES_ENABLED)
+            spotsDelegate.init(this, this);
 
         for (ParkedCarDelegate parkedCarDelegate : parkedCarDelegateMap.values()) {
             parkedCarDelegate.init(this, this, this);
@@ -485,7 +497,8 @@ public class MapsActivity extends BaseActivity
 
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
+        if (ALL_CAHUE_FEATURES_ENABLED)
+            savedInstanceState.putParcelable("spotsDelegate", spotsDelegate);
         savedInstanceState.putParcelableArrayList("parkedCarDelegates", new ArrayList(parkedCarDelegateMap.values()));
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
         savedInstanceState.putBoolean("mapInitialised", mapInitialised);
@@ -781,7 +794,7 @@ public class MapsActivity extends BaseActivity
         if (userPosition == null) return;
 
         float zoom = 17F;
-        if(!resetZoom)
+        if (!resetZoom)
             zoom = Math.max(mMap.getCameraPosition().zoom, 14);
 
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
