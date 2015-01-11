@@ -39,12 +39,12 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Timeout after we consider the location may have changed too much
      */
-    private final static int TIMEOUT_MS = 22500;
+    private final static int TIMEOUT_MS = 18500;
 
     /**
      * Minimum desired accuracy
      */
-    private final static int ACCURACY_THRESHOLD_M = 10;
+    private final static int ACCURACY_THRESHOLD_M = 16;
 
     private final static String TAG = "LocationPoller";
 
