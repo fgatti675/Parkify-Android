@@ -28,7 +28,7 @@ public class MarkerFactory {
 
         BitmapDescriptor descriptor = typeBitmapDescriptorMap.get(spot.getMarkerType());
         if (descriptor == null) {
-            descriptor = createMarkerBitmap(context, spot.getMarkerType().colorId, false);
+            descriptor = createMarkerBitmap(context, spot.getMarkerType(), false);
             typeBitmapDescriptorMap.put(spot.getMarkerType(), descriptor);
         }
         return descriptor;
@@ -38,23 +38,23 @@ public class MarkerFactory {
     private static BitmapDescriptor getSelectedMarkerBitmap(ParkingSpot spot, Context context) {
         BitmapDescriptor descriptor = selectedTypeBitmapDescriptorMap.get(spot.getMarkerType());
         if (descriptor == null) {
-            descriptor = createMarkerBitmap(context, spot.getMarkerType().colorId, true);
+            descriptor = createMarkerBitmap(context, spot.getMarkerType(), true);
             selectedTypeBitmapDescriptorMap.put(spot.getMarkerType(), descriptor);
         }
         return descriptor;
 
     }
 
-    private static BitmapDescriptor createMarkerBitmap(Context context, int colorId, boolean selected) {
+    private static BitmapDescriptor createMarkerBitmap(Context context, ParkingSpot.Type type, boolean selected) {
 
-        int diameter = context.getResources().getDimensionPixelSize(selected ? R.dimen.marker_diameter_selected : R.dimen.marker_diameter);
+        int diameter = context.getResources().getDimensionPixelSize(selected ? R.dimen.marker_diameter_selected : type.diameterId);
         Bitmap mDotMarkerBitmap = Bitmap.createBitmap(diameter, diameter, Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(mDotMarkerBitmap);
 
         GradientDrawable drawable = (GradientDrawable) context.getResources().getDrawable(selected ? R.drawable.marker_selected : R.drawable.marker);
         drawable.setBounds(0, 0, mDotMarkerBitmap.getWidth(), mDotMarkerBitmap.getHeight());
-        drawable.setColor(context.getResources().getColor(colorId));
+        drawable.setColor(context.getResources().getColor(type.colorId));
         drawable.draw(canvas);
 
         return BitmapDescriptorFactory.fromBitmap(mDotMarkerBitmap);

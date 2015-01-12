@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.bahpps.cahue.R;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.Date;
 
@@ -116,10 +115,10 @@ public class ParkingSpot implements Parcelable {
      */
     public static enum Type {
 
-        red(0.02F, R.color.marker_red),
-        orange(0.04F, R.color.marker_orange),
-        yellow(0.03F, R.color.marker_yellow),
-        green(0.06F, R.color.marker_green);
+        red(0.02F, R.color.marker_red, R.dimen.marker_diameter_red),
+        orange(0.04F, R.color.marker_orange, R.dimen.marker_diameter_orange),
+        yellow(0.03F, R.color.marker_yellow, R.dimen.marker_diameter_yellow),
+        green(0.06F, R.color.marker_green, R.dimen.marker_diameter_green);
 
         /**
          * Difference in alpha values per frame when the marker is included in the map
@@ -131,9 +130,15 @@ public class ParkingSpot implements Parcelable {
          */
         public final int colorId;
 
-        Type(float dAlpha, int colorId) {
+        /**
+         * Resource id indicating the dimension of the spot marker
+         */
+        public final int diameterId;
+
+        Type(float dAlpha, int colorId, int diameterId) {
             this.dAlpha = dAlpha;
             this.colorId = colorId;
+            this.diameterId = diameterId;
         }
 
     }

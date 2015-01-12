@@ -74,6 +74,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/CahueTheme.Dark" >
         </activity>
+
+
+        <service android:name=".activityRecognition.ActivityRecognitionIntentService"></service>
     </application>
 
 </manifest>

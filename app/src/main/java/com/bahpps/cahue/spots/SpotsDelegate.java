@@ -164,6 +164,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         this.spotSelectedListener = spotSelectedListener;
 
         setUpResetTask();
+        if (mMap != null)
+            doDraw();
 
     }
 
@@ -357,12 +359,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
             Marker marker = spotMarkersMap.get(parkingSpot);
 
             if (marker == null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
-                marker = mMap.addMarker(new MarkerOptions().flat(true).icon(markerBitmap).position(spotPosition).anchor(0.5f, 0.5f));
+                marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).anchor(0.5f, 0.5f));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);
             }
+
+            BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
+            marker.setIcon(markerBitmap);
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
                 makeMarkerVisible(marker, parkingSpot);
