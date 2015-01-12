@@ -75,8 +75,8 @@
             android:theme="@style/CahueTheme.Dark" >
         </activity>
 
+        <service android:name=".activityRecognition.ActivityRecognitionService" />
 
-        <service android:name=".activityRecognition.ActivityRecognitionIntentService"></service>
     </application>
 
 </manifest>

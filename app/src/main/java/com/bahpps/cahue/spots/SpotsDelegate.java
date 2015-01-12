@@ -66,6 +66,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
     private Map<Marker, ParkingSpot> markerSpotsMap;
+    private Map<Marker, ParkingSpot.Type> markerTypeMap;
 
     private GoogleMap mMap;
 
@@ -93,7 +94,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private ParkingSpotsQuery nearbyQuery;
 
     private ParkingSpot selectedSpot;
-
 
     public static final Parcelable.Creator<SpotsDelegate> CREATOR =
             new Parcelable.Creator<SpotsDelegate>() {
@@ -170,9 +170,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     }
 
     private void initMarkerMaps() {
-        // we can rebuild this map because markers are removed on init
+        // we can rebuild this maps because markers are removed on init
         spotMarkersMap = new HashMap<>();
         markerSpotsMap = new HashMap<>();
+        markerTypeMap = new HashMap<>();
     }
 
     public void setUpResetTask() {
@@ -209,6 +210,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         if (clearSpots) spots.clear();
         markerSpotsMap.clear();
         spotMarkersMap.clear();
+        markerTypeMap.clear();
     }
 
     private boolean repeatLastQuery() {
@@ -358,15 +360,24 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             Marker marker = spotMarkersMap.get(parkingSpot);
 
+            ParkingSpot.Type type = parkingSpot.getMarkerType();
+
+            // if there is no marker we create it
             if (marker == null) {
-                marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).anchor(0.5f, 0.5f));
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, mContext, parkingSpot.equals(selectedSpot));
+                marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).icon(markerBitmap).anchor(0.5f, 0.5f));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);
+                markerTypeMap.put(marker, parkingSpot.getMarkerType());
             }
 
-            BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(parkingSpot, mContext, parkingSpot.equals(selectedSpot));
-            marker.setIcon(markerBitmap);
+            // else we may need to update it
+            else if (type != markerTypeMap.get(marker)) {
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, mContext, parkingSpot.equals(selectedSpot));
+                marker.setIcon(markerBitmap);
+            }
+
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
                 makeMarkerVisible(marker, parkingSpot);
@@ -399,7 +410,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         selectedSpot = markerSpotsMap.get(marker);
         if (selectedSpot != null) {
             Marker selectedMarker = spotMarkersMap.get(selectedSpot);
-            selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot, mContext, true));
+            selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), mContext, true));
             selectedMarker.showInfoWindow();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
@@ -417,7 +428,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             // we may have restored the selected spot but it may not have been drawn (like on device rotation)
             if (previousMarker != null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(selectedSpot, mContext, false);
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), mContext, false);
                 previousMarker.setIcon(markerBitmap);
             }
         }
@@ -428,9 +439,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     public void onMapReady(GoogleMap map) {
         Log.d(TAG, "onMapReady");
         this.mMap = map;
-        spotMarkersMap.clear();
-        markerSpotsMap.clear();
-
         reset(false);
         doDraw();
     }

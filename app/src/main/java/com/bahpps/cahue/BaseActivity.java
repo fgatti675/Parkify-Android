@@ -19,6 +19,7 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.PlusClient;
@@ -116,6 +117,7 @@ public abstract class BaseActivity
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(Plus.API)
                     .addApi(LocationServices.API)
+                    .addApi(ActivityRecognition.API)
                     .addScope(Plus.SCOPE_PLUS_LOGIN)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)

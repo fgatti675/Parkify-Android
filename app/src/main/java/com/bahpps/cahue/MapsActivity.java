@@ -1,6 +1,7 @@
 package com.bahpps.cahue;
 
 import android.app.FragmentTransaction;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
@@ -33,6 +35,8 @@ import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.tutorial.TutorialActivity;
 import com.bahpps.cahue.util.Util;
+import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.ActivityRecognitionApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -123,6 +127,7 @@ public class MapsActivity extends BaseActivity
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
+    private PendingIntent pIntent;
 
     @Override
     protected void onPlusClientSignIn() {
@@ -130,8 +135,11 @@ public class MapsActivity extends BaseActivity
                 REQUEST,
                 this);
 
-        // call convenience method that zooms map on our location only on starting the app
-//        setInitialCamera();
+        Intent intent = new Intent(this, ActivityRecognitionService.class);
+        pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 2000, pIntent);
+
 
     }
 
@@ -473,6 +481,12 @@ public class MapsActivity extends BaseActivity
         if (iInAppBillingService != null) {
             unbindService(mServiceConn);
         }
+
+        if (getGoogleApiClient().isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
+            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pIntent);
+        }
+
         saveMapCameraPosition();
     }
 

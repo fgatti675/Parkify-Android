@@ -21,25 +21,25 @@ public class MarkerFactory {
     private static Map<ParkingSpot.Type, BitmapDescriptor> typeBitmapDescriptorMap = new HashMap<ParkingSpot.Type, BitmapDescriptor>();
     private static Map<ParkingSpot.Type, BitmapDescriptor> selectedTypeBitmapDescriptorMap = new HashMap<ParkingSpot.Type, BitmapDescriptor>();
 
-    public static BitmapDescriptor getMarkerBitmap(ParkingSpot spot, Context context, boolean selected) {
+    public static BitmapDescriptor getMarkerBitmap(ParkingSpot.Type type, Context context, boolean selected) {
 
         if(selected)
-            return getSelectedMarkerBitmap(spot, context);
+            return getSelectedMarkerBitmap(type, context);
 
-        BitmapDescriptor descriptor = typeBitmapDescriptorMap.get(spot.getMarkerType());
+        BitmapDescriptor descriptor = typeBitmapDescriptorMap.get(type);
         if (descriptor == null) {
-            descriptor = createMarkerBitmap(context, spot.getMarkerType(), false);
-            typeBitmapDescriptorMap.put(spot.getMarkerType(), descriptor);
+            descriptor = createMarkerBitmap(context, type, false);
+            typeBitmapDescriptorMap.put(type, descriptor);
         }
         return descriptor;
 
     }
 
-    private static BitmapDescriptor getSelectedMarkerBitmap(ParkingSpot spot, Context context) {
-        BitmapDescriptor descriptor = selectedTypeBitmapDescriptorMap.get(spot.getMarkerType());
+    private static BitmapDescriptor getSelectedMarkerBitmap(ParkingSpot.Type type, Context context) {
+        BitmapDescriptor descriptor = selectedTypeBitmapDescriptorMap.get(type);
         if (descriptor == null) {
-            descriptor = createMarkerBitmap(context, spot.getMarkerType(), true);
-            selectedTypeBitmapDescriptorMap.put(spot.getMarkerType(), descriptor);
+            descriptor = createMarkerBitmap(context, type, true);
+            selectedTypeBitmapDescriptorMap.put(type, descriptor);
         }
         return descriptor;
 
