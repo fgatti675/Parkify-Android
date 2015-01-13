@@ -138,7 +138,7 @@ public class MapsActivity extends BaseActivity
         Intent intent = new Intent(this, ActivityRecognitionService.class);
         pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 2000, pIntent);
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
 
 
     }

@@ -28,6 +28,7 @@ public class CarLocationManager {
     public static final String PREF_CAR_LONGITUDE = "PREF_CAR_LONGITUDE";
     public static final String PREF_CAR_ACCURACY = "PREF_CAR_ACCURACY";
     public static final String PREF_CAR_PROVIDER = "PREF_CAR_PROVIDER";
+    public static final String PREF_CAR_LAST_KNOWN_NAME = "PREF_CAR_LAST_KNOWN_NAME";
     public static final String PREF_LAST_CAR_SAVED = "PREF_LAST_CAR_SAVED";
     public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
 
@@ -53,6 +54,7 @@ public class CarLocationManager {
         editor.putInt(PREF_CAR_LONGITUDE + id, (int) (loc.getLongitude() * 1E6));
         editor.putInt(PREF_CAR_ACCURACY + id, (int) (loc.getAccuracy() * 1E6));
         editor.putString(PREF_CAR_PROVIDER + id, loc.getProvider());
+        editor.putString(PREF_CAR_LAST_KNOWN_NAME + id, car.name);
         editor.putLong(PREF_CAR_TIME + id, car.time.getTime());
         editor.putString(PREF_LAST_CAR_SAVED, id);
 
@@ -119,6 +121,7 @@ public class CarLocationManager {
 
         Car car = new Car();
         car.id = id;
+        car.name = prefs.getString(PREF_CAR_LAST_KNOWN_NAME + id, null);
 
         // name
         for (BluetoothDevice device : bondedBTDevices) {
