@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.deviceSelection;
 
 
 import android.app.Activity;
@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +20,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 
+import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;

@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
-import com.bahpps.cahue.DeviceSelectionFragment;
+import com.bahpps.cahue.deviceSelection.DeviceSelectionFragment;
 import com.bahpps.cahue.R;
 
 import java.util.HashMap;
@@ -122,6 +122,17 @@ public class TutorialActivity extends ActionBarActivity
         mViewPager.setOffscreenPageLimit(TOTAL_NUMBER_PAGES - 1);
         mViewPager.setOnPageChangeListener(this);
 
+        // animation
+        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //closing transition animations
+        overridePendingTransition(R.anim.activity_open_scale, R.anim.activity_close_translate);
     }
 
     @Override

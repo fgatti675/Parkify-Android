@@ -45,7 +45,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DeviceSelectionActivity"
+            android:name=".deviceSelection.DeviceSelectionActivity"
             android:parentActivityName=".MapsActivity" />
 
         <service android:name=".locationServices.ParkedCarService" />

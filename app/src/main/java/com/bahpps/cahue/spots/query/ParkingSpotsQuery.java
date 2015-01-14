@@ -73,8 +73,8 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
             Log.i(TAG, "Getting\n" + url);
 
-            HttpResponse response = httpclient.execute(httpGet);
-            StatusLine statusLine = response.getStatusLine();
+            final HttpResponse response = httpclient.execute(httpGet);
+            final StatusLine statusLine = response.getStatusLine();
 
             Log.i(TAG, "Query result: " + statusLine.getStatusCode());
             if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
@@ -83,10 +83,16 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
                 JSONObject json = new JSONObject(result);
                 return json;
             } else {
-                //Closes the connection.
-                response.getEntity().getContent().close();
-                listener.onServerError(this, statusLine.getStatusCode(), statusLine.getReasonPhrase());
-                throw new IOException(statusLine.getReasonPhrase());
+                if(context instanceof Activity){
+                    response.getEntity().getContent().close();
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Closes the connection.
+                            listener.onServerError(ParkingSpotsQuery.this, statusLine.getStatusCode(), statusLine.getReasonPhrase());
+                        }
+                    });
+                }
             }
 
         } catch (UnsupportedEncodingException e) {

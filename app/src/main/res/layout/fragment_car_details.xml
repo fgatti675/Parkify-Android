@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:padding="@dimen/large_padding"
     android:background="@color/background_material_light"
-    tools:context="com.bahpps.cahue.SpotDetailsFragment">
+    tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
 
     <ImageView
         android:id="@+id/spot_image"

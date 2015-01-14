@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.parkedCar;
 
 
 import android.app.Activity;
@@ -15,11 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
+import com.bahpps.cahue.DetailsFragment;
+import com.bahpps.cahue.R;
 
 
 /**

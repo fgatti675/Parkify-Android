@@ -22,14 +22,13 @@ public class ActivityRecognitionService extends IntentService {
     public static final String CONFIDENCE = "Confidence";
     private static final String LAST_ACTIVITY_TYPE = "LAST_ACTIVITY_TYPE";
 
-    int id = 0;
-
     private String TAG = this.getClass().getSimpleName();
 
     public ActivityRecognitionService() {
         super("My Activity Recognition Service");
     }
 
+    private static int count = 0;
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -62,11 +61,12 @@ public class ActivityRecognitionService extends IntentService {
                         new Notification.Builder(this)
                                 .setVibrate(pattern)
                                 .setSmallIcon(R.drawable.ic_navigation_cancel)
-                                .setContentTitle(typeString)
-                                .setContentText(result.getMostProbableActivity().getConfidence() + "");
+                                .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
+                                .setContentText("Previous: " + getType(previousType))
+                                .setNumber(++count);
 
-                mNotifyMgr.notify(id, mBuilder.build());
-                id++;
+                int id = (int) Math.random();
+                mNotifyMgr.notify("" + id, id, mBuilder.build());
 
                 prefs.edit().putInt(LAST_ACTIVITY_TYPE, type).apply();
 

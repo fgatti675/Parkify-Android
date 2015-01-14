@@ -1,9 +1,7 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.spots;
 
-import android.app.Activity;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.format.DateUtils;
@@ -15,7 +13,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bahpps.cahue.spots.ParkingSpot;
+import com.bahpps.cahue.DetailsFragment;
+import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.Util;
 
 

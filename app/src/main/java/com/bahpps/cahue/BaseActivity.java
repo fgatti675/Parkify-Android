@@ -19,6 +19,7 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
@@ -46,7 +47,7 @@ public abstract class BaseActivity
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private static final int OUR_REQUEST_CODE = 49404;
 
-    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login";
+    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
@@ -119,9 +120,12 @@ public abstract class BaseActivity
                     .addApi(LocationServices.API)
                     .addApi(ActivityRecognition.API)
                     .addScope(Plus.SCOPE_PLUS_LOGIN)
+                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"))
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
+
+
         }
     }
 
