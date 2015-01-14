@@ -9,7 +9,7 @@ import android.util.Log;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
-import com.bahpps.cahue.util.Util;
+import com.bahpps.cahue.util.CommUtil;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -78,16 +78,8 @@ public class CarMovedService extends LocationPollerService {
                             .authority(Endpoints.BASE_URL)
                             .appendPath(Endpoints.SPOTS_PATH);
 
-
                     HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost(builder.build().toString());
-                    httpPost.setHeader("Accept", "application/json");
-                    httpPost.setHeader("Content-type", "application/json");
-                    httpPost.setHeader("ID", id);
-
-                    String oauthToken = Util.getOauthToken(CarMovedService.this);
-                    if (oauthToken != null)
-                        httpPost.setHeader("Authorization", "Bearer  " + oauthToken);
+                    HttpPost httpPost = CommUtil.createHttpPost(CarMovedService.this, builder.build().toString());
 
                     String json = getJSON(location);
                     Log.i(TAG, "Posting\n" + json);
@@ -129,6 +121,8 @@ public class CarMovedService extends LocationPollerService {
             }
         }.execute();
     }
+
+
 
 
     private static String getJSON(Location location) {
