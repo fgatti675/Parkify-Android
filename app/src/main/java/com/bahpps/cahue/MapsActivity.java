@@ -485,7 +485,7 @@ public class MapsActivity extends BaseActivity
             unbindService(mServiceConn);
         }
 
-        if (getGoogleApiClient().isConnected()) {
+        if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pIntent);
         }

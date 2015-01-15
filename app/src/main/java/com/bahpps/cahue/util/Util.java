@@ -82,49 +82,49 @@ public class Util {
     public static final String PREF_BT_DEVICE_ADDRESSES = "PREF_BT_DEVICE_ADDRESSES";
 
     public static Set<String> getPairedDevices(Context context) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         HashSet result = new HashSet();
         result.addAll(prefs.getStringSet(PREF_BT_DEVICE_ADDRESSES, new HashSet<String>()));
         return result;
     }
 
     public static void setPairedDevices(Context context, Set<String> selectedDeviceAddresses) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
     }
 
     public static void saveOAuthToken(Context context, String token) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         prefs.edit().putString(PREF_OAUTH_TOKEN, token).apply();
     }
 
     public static String getOauthToken(Context context) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         return prefs.getString(PREF_OAUTH_TOKEN, null);
     }
 
     public static boolean isLoggedIn(Context context) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         return prefs.getBoolean(PREF_LOGGED_IN, false);
     }
 
     public static void setIsLoggedIn(Context context, boolean loggedIn) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         prefs.edit().putBoolean(PREF_LOGGED_IN, loggedIn).apply();
     }
 
     public static boolean isTutorialShown(Context context) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         return prefs.getBoolean(PREF_DIALOG_SHOWN, false);
     }
 
     public static void setTutorialShown(Context context, boolean shown) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         prefs.edit().putBoolean(PREF_DIALOG_SHOWN, shown).apply();
     }
 
     public static void saveCameraPosition(Context context, CameraPosition cameraPosition) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
         prefs.edit()
                 .putFloat(PREF_CAMERA_ZOOM, cameraPosition.zoom)
                 .putInt(PREF_CAMERA_LAT, (int) (cameraPosition.target.latitude * 10E6))
@@ -133,7 +133,7 @@ public class Util {
     }
 
     public static CameraUpdate getLastCameraPosition(Context context) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = getSharedPreferences(context);
 
         if(!prefs.contains(PREF_CAMERA_LAT) || !prefs.contains(PREF_CAMERA_LONG))
             return null;

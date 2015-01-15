@@ -8,12 +8,14 @@ import com.google.android.gms.location.DetectedActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Date;
+import java.util.LinkedList;
 
 public class ActivityRecognitionService extends IntentService {
 
@@ -39,6 +41,7 @@ public class ActivityRecognitionService extends IntentService {
 
             int type = result.getMostProbableActivity().getType();
 
+
             if (!isMovementRelated(type)) return;
 
             SharedPreferences prefs = Util.getSharedPreferences(this);
@@ -55,6 +58,11 @@ public class ActivityRecognitionService extends IntentService {
                 i.putExtra(CONFIDENCE, result.getMostProbableActivity().getConfidence());
                 sendBroadcast(i);
 
+                StringBuilder stringBuilder = new StringBuilder();
+                for(DetectedActivity detectedActivity:result.getProbableActivities()) {
+                    stringBuilder.append(getType(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+                }
+
                 long[] pattern = {0, 100, 1000};
                 NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 Notification.Builder mBuilder =
@@ -62,6 +70,7 @@ public class ActivityRecognitionService extends IntentService {
                                 .setVibrate(pattern)
                                 .setSmallIcon(R.drawable.ic_navigation_cancel)
                                 .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
+                                .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
                                 .setContentText("Previous: " + getType(previousType))
                                 .setNumber(++count);
 
@@ -99,6 +108,30 @@ public class ActivityRecognitionService extends IntentService {
                 return true;
         }
         return false;
+    }
+
+    private static final String LAST_ACTIVITIES_COUNT_KEY = "LAST_ACTIVITIES_COUNT";
+    private static final String LAST_ACTIVITIES_KEY_PREFIX = "LAST_ACTIVITIES_";
+    private static final int LAST_ACTIVITIES_MAX_COUNT = 20;
+
+    private LinkedList<Integer> getLastActivities(SharedPreferences prefs) {
+        LinkedList<Integer> list = new LinkedList<>();
+        int count = prefs.getInt(LAST_ACTIVITIES_COUNT_KEY, 0);
+        for (int i = 0; i < count; i++) {
+            list.add(prefs.getInt(LAST_ACTIVITIES_KEY_PREFIX + i, i));
+        }
+        return list;
+    }
+
+    private void putLastActivities(SharedPreferences prefs, LinkedList<Integer> list) {
+
+        int i = 0;
+        for (Integer value : list) {
+            prefs.edit().putInt(LAST_ACTIVITIES_KEY_PREFIX + i, value);
+            i++;
+        }
+        prefs.edit().putInt(LAST_ACTIVITIES_COUNT_KEY, list.size());
+        prefs.edit().apply();
     }
 
 }
