@@ -34,7 +34,6 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
         builder.scheme("https")
                 .authority(Endpoints.BASE_URL)
                 .appendPath(Endpoints.SPOTS_PATH)
-                .appendPath(Endpoints.RETRIEVE_AREA)
                 .appendQueryParameter("swLat", Double.toString(latLngBounds.southwest.latitude))
                 .appendQueryParameter("swLong", Double.toString(latLngBounds.southwest.longitude))
                 .appendQueryParameter("neLat", Double.toString(latLngBounds.northeast.latitude))

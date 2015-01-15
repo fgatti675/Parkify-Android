@@ -7,7 +7,6 @@ import android.util.Log;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.Set;
 
@@ -38,7 +37,7 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
         builder.scheme("https")
                 .authority(Endpoints.BASE_URL)
                 .appendPath(Endpoints.SPOTS_PATH)
-                .appendPath(Endpoints.RETRIEVE_NEAREST)
+                .appendPath(Endpoints.SPOTS_RETRIEVE_NEAREST)
                 .appendQueryParameter("lat", Double.toString(center.latitude))
                 .appendQueryParameter("long", Double.toString(center.longitude))
                 .appendQueryParameter("count", Integer.toString(limit));

@@ -96,6 +96,10 @@ public class ActivityRecognitionService extends IntentService {
             return "Still";
         else if (type == DetectedActivity.TILTING)
             return "Tilting";
+        else if (type == DetectedActivity.WALKING)
+            return "Tilting";
+        else if (type == DetectedActivity.RUNNING)
+            return "Tilting";
         else
             return "";
     }
@@ -105,6 +109,8 @@ public class ActivityRecognitionService extends IntentService {
             case DetectedActivity.IN_VEHICLE:
             case DetectedActivity.ON_FOOT:
             case DetectedActivity.STILL:
+            case DetectedActivity.WALKING:
+            case DetectedActivity.RUNNING:
                 return true;
         }
         return false;

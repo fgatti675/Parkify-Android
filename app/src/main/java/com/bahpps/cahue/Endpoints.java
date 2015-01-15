@@ -10,7 +10,10 @@ public class Endpoints {
 
     public final static String SPOTS_PATH = "spots";
 
-    public final static String RETRIEVE_NEAREST = "nearest";
+    public final static String SPOTS_RETRIEVE_NEAREST = "nearest";
 
-    public final static String RETRIEVE_AREA = "area";
+
+    public final static String USERS_PATH = "users";
+
+    public final static String CREATE_USER_GOOGLE_PATH = "createGoogle";
 }

@@ -4,18 +4,36 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 
+import android.content.Context;
 import android.content.Intent;
 
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.bahpps.cahue.spots.ParkingSpot;
+import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
+import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.Set;
 
 
 /**
@@ -121,6 +139,52 @@ public class LoginActivity extends BaseActivity {
                 ConnectionResult.SUCCESS;
     }
 
+
+    public class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
+
+
+        private Context context;
+
+        public LoginAsyncTask(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+
+            try {
+                Uri.Builder builder = new Uri.Builder();
+                builder.scheme("https")
+                        .authority(Endpoints.BASE_URL)
+                        .appendPath(Endpoints.USERS_PATH)
+                        .appendPath(Endpoints.CREATE_USER_GOOGLE_PATH);
+
+                HttpPost httpPost = CommUtil.createHttpPost(context, builder.build().toString());
+
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpResponse response = httpclient.execute(httpPost);
+                StatusLine statusLine = response.getStatusLine();
+
+                Log.i(TAG, "Post result: " + statusLine.getStatusCode());
+                if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                    Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
+                } else {
+                    //Closes the connection.
+                    if (response != null && response.getEntity() != null) {
+                        response.getEntity().getContent().close();
+                        Log.e(TAG, statusLine.getReasonPhrase());
+                    }
+                }
+
+                return statusLine.getStatusCode();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return -1;
+        }
+
+
+    }
 }
 
 
