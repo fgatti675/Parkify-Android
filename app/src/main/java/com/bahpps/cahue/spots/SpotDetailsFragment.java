@@ -32,6 +32,7 @@ public class SpotDetailsFragment extends DetailsFragment {
     private Location userLocation;
     private ParkingSpot spot;
 
+    private TextView timeAgo;
     private TextView distance;
     private ImageView rectangleImage;
 
@@ -71,8 +72,8 @@ public class SpotDetailsFragment extends DetailsFragment {
         if (spot != null) {
 
             // Set time ago
-            TextView timeAgo = (TextView) view.findViewById(R.id.time);
-            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
+            timeAgo = (TextView) view.findViewById(R.id.time);
+            updateTimeAgo();
 
             // Update distance
             distance = (TextView) view.findViewById(R.id.distance);
@@ -86,11 +87,14 @@ public class SpotDetailsFragment extends DetailsFragment {
         return view;
     }
 
+
+
     @Override
     public void onResume() {
         super.onResume();
         updateDistance();
         updateRectangle();
+        updateTimeAgo();
     }
 
     @Override
@@ -101,6 +105,7 @@ public class SpotDetailsFragment extends DetailsFragment {
             updateDistance();
         }
     }
+
     private void updateRectangle() {
         GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
         gradientDrawable.setStroke((int) Util.dpToPx(getActivity(), 8), getResources().getColor(spot.getMarkerType().colorId));
@@ -116,5 +121,8 @@ public class SpotDetailsFragment extends DetailsFragment {
         }
     }
 
+    private void updateTimeAgo() {
+        timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
+    }
 
 }

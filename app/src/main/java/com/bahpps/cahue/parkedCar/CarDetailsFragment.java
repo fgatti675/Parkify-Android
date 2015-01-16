@@ -76,8 +76,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
 
         // update time ago
         updateTimeTextView();
@@ -88,9 +88,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         updateFollowButtonState();
 
     }
-
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

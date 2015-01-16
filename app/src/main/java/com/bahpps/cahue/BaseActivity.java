@@ -29,7 +29,6 @@ import com.google.android.gms.plus.model.people.Person;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 
 /**
@@ -40,15 +39,17 @@ public abstract class BaseActivity
         implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String TAG = BaseActivity.class.getSimpleName();
+    private final static String TAG = BaseActivity.class.getSimpleName();
 
     // Profile pic image size in pixels
-    private static final int PROFILE_PIC_SIZE = 400;
+    private final static int PROFILE_PIC_SIZE = 400;
 
     // A magic number we will use to know that our sign-in error resolution activity has completed
-    private static final int OUR_REQUEST_CODE = 49404;
+    private final static int OUR_REQUEST_CODE = 49404;
 
-    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
@@ -91,14 +92,35 @@ public abstract class BaseActivity
      */
     protected abstract void onSignInRequired();
 
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    protected boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        if(checkPlayServices()) {
+            super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
+            if (savedInstanceState != null) {
+                mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
+            }
+            Log.d(TAG, "mGoogleApiClient initialized");
         }
-        Log.d(TAG, "mGoogleApiClient initialized");
     }
 
     @Override

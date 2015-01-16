@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.deviceSelection.DeviceSelectionActivity;
+import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
 import com.bahpps.cahue.parkedCar.CarLocationManager;
@@ -338,7 +339,12 @@ public class MapsActivity extends BaseActivity
                     @Override
                     public void onAnimationStart(Animation animation) {
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
-                        params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+//                        if (currentApiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1){
+//                            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+//                        } else{
+                            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+//                        }
                         myLocationButton.setLayoutParams(params); //causes layout update
                     }
 

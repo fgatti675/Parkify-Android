@@ -1,28 +1,27 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.login;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 
 import android.content.Context;
 import android.content.Intent;
 
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-import com.bahpps.cahue.spots.ParkingSpot;
-import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
+import com.bahpps.cahue.BaseActivity;
+import com.bahpps.cahue.Endpoints;
+import com.bahpps.cahue.MapsActivity;
+import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -33,7 +32,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.util.Set;
 
 
 /**
