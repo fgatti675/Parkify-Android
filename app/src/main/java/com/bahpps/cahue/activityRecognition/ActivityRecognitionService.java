@@ -97,9 +97,9 @@ public class ActivityRecognitionService extends IntentService {
         else if (type == DetectedActivity.TILTING)
             return "Tilting";
         else if (type == DetectedActivity.WALKING)
-            return "Tilting";
+            return "Walking";
         else if (type == DetectedActivity.RUNNING)
-            return "Tilting";
+            return "Running";
         else
             return "";
     }
