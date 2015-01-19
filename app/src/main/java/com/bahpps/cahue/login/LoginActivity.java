@@ -92,7 +92,12 @@ public class LoginActivity extends BaseActivity {
 
     }
 
-    private String getGCMRegId(){
+    @Override
+    protected void onAuthTokenSet(String authToken) {
+        new LoginAsyncTask(this).execute();
+    }
+
+    private String getGCMRegId() {
 
         gcm = GoogleCloudMessaging.getInstance(this);
 
@@ -146,9 +151,6 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
-
-        new LoginAsyncTask(this).execute();
-
     }
 
     @Override
@@ -168,7 +170,7 @@ public class LoginActivity extends BaseActivity {
         Log.d(TAG, "onDestroy");
     }
 
-    public class LoginAsyncTask extends AsyncTask<Void, Void, Integer> {
+    public class LoginAsyncTask extends AsyncTask<Void, Void, HttpResponse> {
 
         private Context context;
 
@@ -177,7 +179,9 @@ public class LoginActivity extends BaseActivity {
         }
 
         @Override
-        protected Integer doInBackground(Void... voids) {
+        protected HttpResponse doInBackground(Void... voids) {
+
+            HttpResponse response = null;
 
             try {
 
@@ -193,13 +197,12 @@ public class LoginActivity extends BaseActivity {
                 HttpPost httpPost = CommUtil.createHttpPost(context, builder.build().toString());
                 httpPost.setEntity(new StringEntity(getJSON(registrationId)));
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpResponse response = httpclient.execute(httpPost);
+
+                response = httpclient.execute(httpPost);
                 StatusLine statusLine = response.getStatusLine();
 
-                Log.i(TAG, "Post result: " + statusLine.getStatusCode());
                 if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 
-                    Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
 
                 } else {
 
@@ -210,20 +213,34 @@ public class LoginActivity extends BaseActivity {
                     }
                 }
 
-                return statusLine.getStatusCode();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return -1;
+            return response;
         }
 
         @Override
-        protected void onPostExecute(Integer httpResult) {
-            if(httpResult == HttpStatus.SC_OK){
-                onBackEndLogin();
-            } else{
+        protected void onPostExecute(HttpResponse response) {
+
+            if (response == null) {
+                // error
+                showProgress(false);
+                return;
             }
-            showProgress(false);
+
+            StatusLine statusLine = response.getStatusLine();
+            Log.i(TAG, "Post result: " + statusLine.getStatusCode());
+            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+                onBackEndLogin();
+                try {
+                    Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // error
+                showProgress(false);
+            }
         }
     }
 

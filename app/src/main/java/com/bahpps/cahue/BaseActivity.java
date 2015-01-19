@@ -115,10 +115,9 @@ public abstract class BaseActivity
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if(checkPlayServices()) {
+        if (checkPlayServices()) {
             super.onCreate(savedInstanceState);
 
             if (savedInstanceState != null) {
@@ -307,9 +306,10 @@ public abstract class BaseActivity
 
         Log.i(TAG, "requestOauthToken");
 
-        new AsyncTask() {
+        new AsyncTask<Void, Void, String>() {
+
             @Override
-            protected Object doInBackground(Object[] objects) {
+            protected String doInBackground(Void[] objects) {
                 try {
                     mAuthToken = GoogleAuthUtil.getToken(BaseActivity.this, mLoggedEmail, SCOPE);
                     if (mAuthToken != null)
@@ -324,9 +324,20 @@ public abstract class BaseActivity
                     e.printStackTrace();
                 }
                 Log.d(TAG, "Auth token: " + mAuthToken);
-                return null;
+                return mAuthToken;
             }
+
+            @Override
+            protected void onPostExecute(String authToken) {
+                onAuthTokenSet(authToken);
+            }
+
         }.execute();
+
+
+    }
+
+    protected void onAuthTokenSet(String authToken) {
 
     }
 
