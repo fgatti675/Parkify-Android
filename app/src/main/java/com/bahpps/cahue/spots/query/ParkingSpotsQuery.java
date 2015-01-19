@@ -57,11 +57,18 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     }
 
     @Override
-    protected void onPostExecute(Set<ParkingSpot> parkingSpots) {
+    protected void onPostExecute(final Set<ParkingSpot> parkingSpots) {
 
         Log.d("ParkingSpotsQuery", parkingSpots.toString());
         super.onPostExecute(parkingSpots);
-        listener.onSpotsUpdate(this, parkingSpots);
+        if(context instanceof Activity){
+            ((Activity) context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    listener.onSpotsUpdate(ParkingSpotsQuery.this, parkingSpots);
+                }
+            });
+        }
     }
 
     protected JSONObject query(String url) {

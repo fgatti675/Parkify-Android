@@ -1,5 +1,6 @@
 package com.bahpps.cahue.spots;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -48,7 +49,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     // Earth’s radius, sphere
     private final static double EARTH_RADIUS = 6378137;
-    private final static long TIMEOUT_MS = 10000;
+
+    // time after we consider the query is outdated and need to repeat
+    private final static long TIMEOUT_MS = 60000;
 
     // number of spots being retrieved on nearby spots query
     private final static int CLOSEST_LOCATIONS = 200;
@@ -90,8 +93,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     private boolean markersDisplayed = false;
 
     // location used as a center fos nearby spots query
-    private LatLng userQueryLocation;
-    private ParkingSpotsQuery nearbyQuery;
+//    private LatLng userQueryLocation;
+//    private ParkingSpotsQuery nearbyQuery;
+
+//    private Date lastNearbyQuery;
 
     private ParkingSpot selectedSpot;
 
@@ -184,15 +189,23 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         long nextTimeOut = TIMEOUT_MS - timeFromLastTimeout;
         if (nextTimeOut < 0) nextTimeOut = 0;
 
-        Log.v(TAG, "Next time out (ms): " + nextTimeOut);
+        Log.d(TAG, "Next time out (ms): " + nextTimeOut);
 
         scheduledResetTask = scheduledExecutorService.scheduleAtFixedRate(
                 new Runnable() {
+
                     public void run() {
-                        Log.d(TAG, "scheduledResetTask run");
-                        lastResetTaskRequestTime = new Date();
-                        shouldBeReset = true;
-                        repeatLastQuery();
+                        if (mContext instanceof Activity) {
+                            ((Activity) mContext).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.d(TAG, "scheduledResetTask run");
+                                    lastResetTaskRequestTime = new Date();
+                                    shouldBeReset = true;
+                                    repeatLastQuery();
+                                }
+                            });
+                        }
                     }
                 },
                 nextTimeOut,
@@ -217,21 +230,21 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         return queryCameraView();
     }
 
-    private synchronized boolean queryClosestSpots(LatLng userLocation) {
-
-        this.userQueryLocation = userLocation;
-
-        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING) {
-            return false;
-        }
-
-        nearbyQuery = new NearestSpotsQuery(mContext, userLocation, CLOSEST_LOCATIONS, this);
-
-        Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
-        nearbyQuery.execute();
-
-        return true;
-    }
+//    private synchronized boolean queryClosestSpots(LatLng userLocation) {
+//
+//        this.userQueryLocation = userLocation;
+//
+//        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING) {
+//            return false;
+//        }
+//
+//        nearbyQuery = new NearestSpotsQuery(mContext, userLocation, CLOSEST_LOCATIONS, this);
+//
+//        Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
+//        nearbyQuery.execute();
+//
+//        return true;
+//    }
 
     /**
      * Set the bounds where the camera is currently looking.
@@ -241,14 +254,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      */
     private synchronized boolean queryCameraView() {
 
+
         // What the user is actually seeing right now
 
         setUpViewBounds();
 
-        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
-            Log.d(QUERY_TAG, "Abort camera query because view contains user");
-            return false;
-        }
+//        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
+//            Log.d(QUERY_TAG, "Abort camera query because view contains user");
+//            return false;
+//        }
 
         // A broader space we want to query so that data is there when we move the camera
         this.extendedViewBounds = LatLngBounds.builder()
@@ -292,8 +306,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     @Override
     public synchronized void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots) {
 
-        if (query == nearbyQuery)
-            lastNearbyQuery = new Date();
+//        if (query == nearbyQuery)
+//            lastNearbyQuery = new Date();
 
         if (shouldBeReset) {
             reset(true);
@@ -504,8 +518,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         doDraw();
 
     }
-
-    private Date lastNearbyQuery;
 
     @Override
     public void onLocationChanged(Location location) {
