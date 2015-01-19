@@ -8,13 +8,10 @@ import com.google.android.gms.location.DetectedActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import java.util.Date;
 import java.util.LinkedList;
 
 public class ActivityRecognitionService extends IntentService {
@@ -23,6 +20,7 @@ public class ActivityRecognitionService extends IntentService {
     public static final String ACTIVITY_TYPE = "Activity";
     public static final String CONFIDENCE = "Confidence";
     private static final String LAST_ACTIVITY_TYPE = "LAST_ACTIVITY_TYPE";
+    private static final String LAST_ACTIVITY_CONFIDENCE = "LAST_ACTIVITY_CONFIDENCE";
 
     private String TAG = this.getClass().getSimpleName();
 
@@ -40,13 +38,14 @@ public class ActivityRecognitionService extends IntentService {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
             int type = result.getMostProbableActivity().getType();
-
+            int confidence = result.getMostProbableActivity().getConfidence();
 
             if (!isMovementRelated(type)) return;
 
             SharedPreferences prefs = Util.getSharedPreferences(this);
 
             int previousType = prefs.getInt(LAST_ACTIVITY_TYPE, -1);
+            int previousConfidence = prefs.getInt(LAST_ACTIVITY_CONFIDENCE, -1);
 
             if (type != previousType) {
 
@@ -58,7 +57,9 @@ public class ActivityRecognitionService extends IntentService {
                 i.putExtra(CONFIDENCE, result.getMostProbableActivity().getConfidence());
                 sendBroadcast(i);
 
-                StringBuilder stringBuilder = new StringBuilder();
+                String previousText = "Previous: " + getType(previousType) + " (" + previousConfidence + "%)\n";
+
+                StringBuilder stringBuilder = new StringBuilder(previousText);
                 for(DetectedActivity detectedActivity:result.getProbableActivities()) {
                     stringBuilder.append(getType(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
                 }
@@ -71,13 +72,16 @@ public class ActivityRecognitionService extends IntentService {
                                 .setSmallIcon(R.drawable.ic_navigation_cancel)
                                 .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
                                 .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
-                                .setContentText("Previous: " + getType(previousType))
+                                .setContentText(previousText)
                                 .setNumber(++count);
 
                 int id = (int) Math.random();
                 mNotifyMgr.notify("" + id, id, mBuilder.build());
 
-                prefs.edit().putInt(LAST_ACTIVITY_TYPE, type).apply();
+                prefs.edit()
+                        .putInt(LAST_ACTIVITY_TYPE, type)
+                        .putInt(LAST_ACTIVITY_CONFIDENCE, confidence)
+                        .apply();
 
             }
         }
@@ -107,6 +111,7 @@ public class ActivityRecognitionService extends IntentService {
     private boolean isMovementRelated(int type) {
         switch (type) {
             case DetectedActivity.IN_VEHICLE:
+            case DetectedActivity.ON_BICYCLE:
             case DetectedActivity.ON_FOOT:
             case DetectedActivity.STILL:
             case DetectedActivity.WALKING:

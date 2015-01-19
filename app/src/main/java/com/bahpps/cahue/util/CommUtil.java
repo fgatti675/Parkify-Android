@@ -10,6 +10,8 @@ import org.apache.http.client.methods.HttpPost;
  */
 public class CommUtil {
 
+    public static final String GOOGLE_AUTH_HEADER = "GoogleAuth";
+
     public static HttpPost createHttpPost(Context context, String url) {
 
         HttpPost httpPost = new HttpPost(url);
@@ -18,7 +20,7 @@ public class CommUtil {
 
         String oauthToken = Util.getOauthToken(context);
         if (oauthToken != null)
-            httpPost.setHeader("GoogleAuth", oauthToken);
+            httpPost.setHeader(GOOGLE_AUTH_HEADER, oauthToken);
 
         return httpPost;
     }
