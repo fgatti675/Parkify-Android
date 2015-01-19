@@ -287,7 +287,7 @@ public abstract class BaseActivity
      * Method to resolve any signin errors
      */
     private void resolveSignInError() {
-        if (mConnectionResult.hasResolution()) {
+        if (mConnectionResult != null && mConnectionResult.hasResolution()) {
             try {
                 mIntentInProgress = true;
                 mConnectionResult.startResolutionForResult(this, OUR_REQUEST_CODE);
