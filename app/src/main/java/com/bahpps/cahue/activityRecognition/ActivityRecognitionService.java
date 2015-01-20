@@ -17,10 +17,11 @@ import java.util.LinkedList;
 public class ActivityRecognitionService extends IntentService {
 
     public static final String INTENT_ACTIVITY_RECOGNIZED = "INTENT_ACTIVITY_RECOGNIZED";
-    public static final String ACTIVITY_TYPE = "Activity";
-    public static final String CONFIDENCE = "Confidence";
-    private static final String LAST_ACTIVITY_TYPE = "LAST_ACTIVITY_TYPE";
-    private static final String LAST_ACTIVITY_CONFIDENCE = "LAST_ACTIVITY_CONFIDENCE";
+
+    // activity we are sure the user is doing (or almost)
+    private static final String SURE_ACTIVITY_TYPE = "SURE_ACTIVITY_TYPE";
+    private static final String SURE_ACTIVITY_CONFIDENCE = "SURE_ACTIVITY_CONFIDENCE";
+
 
     private String TAG = this.getClass().getSimpleName();
 
@@ -28,7 +29,7 @@ public class ActivityRecognitionService extends IntentService {
         super("My Activity Recognition Service");
     }
 
-    private static int count = 0;
+    private static int lastActivityType = -1;
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -44,20 +45,14 @@ public class ActivityRecognitionService extends IntentService {
 
             SharedPreferences prefs = Util.getSharedPreferences(this);
 
-            int previousType = prefs.getInt(LAST_ACTIVITY_TYPE, -1);
-            int previousConfidence = prefs.getInt(LAST_ACTIVITY_CONFIDENCE, -1);
 
-            if (type != previousType) {
+            if (type == lastActivityType && confidence > 85) {
 
                 String typeString = getType(type);
 
-                Log.i(TAG, typeString + "\t" + result.getMostProbableActivity().getConfidence());
-                Intent i = new Intent(INTENT_ACTIVITY_RECOGNIZED);
-                i.putExtra(ACTIVITY_TYPE, type);
-                i.putExtra(CONFIDENCE, result.getMostProbableActivity().getConfidence());
-                sendBroadcast(i);
-
-                String previousText = "Previous: " + getType(previousType) + " (" + previousConfidence + "%)\n";
+                int lastAssuredType = prefs.getInt(SURE_ACTIVITY_TYPE, -1);
+                int lastAssuredConfidence = prefs.getInt(SURE_ACTIVITY_CONFIDENCE, -1);
+                String previousText = "Previous: " + getType(lastAssuredType) + " (" + lastAssuredConfidence + "%)\n";
 
                 StringBuilder stringBuilder = new StringBuilder(previousText);
                 for(DetectedActivity detectedActivity:result.getProbableActivities()) {
@@ -72,19 +67,31 @@ public class ActivityRecognitionService extends IntentService {
                                 .setSmallIcon(R.drawable.ic_navigation_cancel)
                                 .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
                                 .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
-                                .setContentText(previousText)
-                                .setNumber(++count);
+                                .setContentText(previousText);
 
                 int id = (int) Math.random();
                 mNotifyMgr.notify("" + id, id, mBuilder.build());
 
-                prefs.edit()
-                        .putInt(LAST_ACTIVITY_TYPE, type)
-                        .putInt(LAST_ACTIVITY_CONFIDENCE, confidence)
-                        .apply();
+                sureActivity(prefs, type, confidence);
 
             }
+
+            lastActivityType = type;
         }
+    }
+
+    private void sureActivity(SharedPreferences prefs, int activityType, int confidence) {
+
+        Intent intent = new Intent(INTENT_ACTIVITY_RECOGNIZED);
+        intent.putExtra(SURE_ACTIVITY_TYPE, activityType);
+        intent.putExtra(SURE_ACTIVITY_CONFIDENCE, confidence);
+        sendBroadcast(intent);
+
+        prefs.edit()
+                .putInt(SURE_ACTIVITY_TYPE, activityType)
+                .putInt(SURE_ACTIVITY_CONFIDENCE, confidence)
+                .apply();
+
     }
 
     private String getType(int type) {

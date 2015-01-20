@@ -341,6 +341,10 @@ public abstract class BaseActivity
 
     }
 
+    public String getAuthToken() {
+        return mAuthToken;
+    }
+
     /**
      * Fetching user's information name, mLoggedEmail, profile pic
      */

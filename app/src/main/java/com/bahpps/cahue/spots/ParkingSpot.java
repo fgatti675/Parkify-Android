@@ -14,8 +14,8 @@ import java.util.Date;
 public class ParkingSpot implements Parcelable {
 
     private static long GREEN_TIME_THRESHOLD_MS = 10 * 60 * 1000;
-    private static long YELLOW_TIME_THRESHOLD_MS = 45 * 60 * 1000;
-    private static long ORANGE_TIME_THRESHOLD_MS = 120 * 60 * 1000;
+    private static long YELLOW_TIME_THRESHOLD_MS = 20 * 60 * 1000;
+    private static long ORANGE_TIME_THRESHOLD_MS = 40 * 60 * 1000;
 
     public final Long id;
 
