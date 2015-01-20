@@ -187,6 +187,11 @@ public class LoginActivity extends BaseActivity {
 
                 // set up a device registration ID
                 String registrationId = getGCMRegId();
+                String authToken = getAuthToken();
+
+                if(registrationId == null && authToken == null) {
+                    throw new IllegalStateException("No device registration ID or OAuth token while trying to register");
+                }
 
                 Uri.Builder builder = new Uri.Builder();
                 builder.scheme("https")
@@ -195,7 +200,9 @@ public class LoginActivity extends BaseActivity {
                         .appendPath(Endpoints.CREATE_USER_GOOGLE_PATH);
 
                 HttpPost httpPost = CommUtil.createHttpPost(context, builder.build().toString());
-                httpPost.setEntity(new StringEntity(getJSON(registrationId)));
+                String json = getJSON(registrationId, authToken);
+                Log.d(TAG, json);
+                httpPost.setEntity(new StringEntity(json));
                 HttpClient httpclient = new DefaultHttpClient();
 
                 response = httpclient.execute(httpPost);
@@ -250,10 +257,11 @@ public class LoginActivity extends BaseActivity {
         finish();
     }
 
-    private static String getJSON(String regId) {
+    private static String getJSON(String regId, String authToken) {
         try {
             JSONObject obj = new JSONObject();
             obj.put("deviceRegId", regId);
+            obj.put("authToken", authToken);
             return obj.toString();
         } catch (JSONException e) {
             e.printStackTrace();
