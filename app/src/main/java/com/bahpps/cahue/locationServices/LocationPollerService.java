@@ -71,10 +71,12 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        id = intent.getExtras().getString(EXTRA_BT_ID);
-        name = intent.getExtras().getString(EXTRA_BT_NAME);
-        start();
-        return super.onStartCommand(intent, flags, startId);
+        if(intent != null) {
+            id = intent.getExtras().getString(EXTRA_BT_ID);
+            name = intent.getExtras().getString(EXTRA_BT_NAME);
+            start();
+        }
+        return START_STICKY_COMPATIBILITY;
     }
 
     protected void start() {
