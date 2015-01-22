@@ -56,8 +56,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
     // number of spots being retrieved on nearby spots query
     private final static int CLOSEST_LOCATIONS = 200;
 
-    // max number of spots displayed at once
-    private static final int MARKERS_LIMIT = 50;
+    // max number of spots displayed at once.
+    private static final int MARKERS_LIMIT = 100;
+
+    // distance we are adding to the bounds query on each one of the 4 sides to get also results outside the screen
+    public static final int OFFSET_METERS = 2000;
 
     private final Handler handler = new Handler();
 
@@ -266,8 +269,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
         // A broader space we want to query so that data is there when we move the camera
         this.extendedViewBounds = LatLngBounds.builder()
-                .include(getOffsetLatLng(viewBounds.northeast, 500, 500))
-                .include(getOffsetLatLng(viewBounds.southwest, -500, -500))
+                .include(getOffsetLatLng(viewBounds.northeast, OFFSET_METERS, OFFSET_METERS))
+                .include(getOffsetLatLng(viewBounds.southwest, -OFFSET_METERS, -OFFSET_METERS))
                 .build();
 
         /**

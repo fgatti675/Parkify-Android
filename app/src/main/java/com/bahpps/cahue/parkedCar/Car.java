@@ -4,8 +4,6 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.Date;
 
 /**
@@ -14,6 +12,8 @@ import java.util.Date;
 public class Car implements Parcelable{
 
     public String id;
+
+    public String btAddress;
 
     public String name;
 
@@ -36,6 +36,7 @@ public class Car implements Parcelable{
 
     public Car(Parcel parcel) {
         id = parcel.readString();
+        btAddress = parcel.readString();
         name = parcel.readString();
         location = parcel.readParcelable(Location.class.getClassLoader());
         time = (Date) parcel.readSerializable();
@@ -53,6 +54,7 @@ public class Car implements Parcelable{
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
+        parcel.writeString(btAddress);
         parcel.writeString(name);
         parcel.writeParcelable(location, i);
         parcel.writeSerializable(time);
@@ -79,6 +81,7 @@ public class Car implements Parcelable{
     public String toString() {
         return "Car{" +
                 "id='" + id + '\'' +
+                ", btAddress='" + btAddress + '\'' +
                 ", name='" + name + '\'' +
                 ", location=" + location +
                 ", time=" + time +

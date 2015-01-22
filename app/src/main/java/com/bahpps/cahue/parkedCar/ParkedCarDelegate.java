@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import android.widget.ImageButton;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
 import com.bahpps.cahue.CameraUpdateListener;
@@ -137,7 +136,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public void updateCarLocation() {
         directionPoints.clear();
-        this.car = CarLocationManager.getStoredCar(mContext, this.car.id);
+        this.car = CarLocationManager.getStoredCar(mContext, this.car.btAddress);
         if (car == null || car.location == null) {
             return;
         }
@@ -227,7 +226,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public void removeCar() {
-        CarLocationManager.removeStoredLocation(mContext, car.id);
+        CarLocationManager.removeStoredLocation(mContext, car.btAddress);
         car.location = null;
         clear();
     }
