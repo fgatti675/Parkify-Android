@@ -3,13 +3,24 @@ package com.bahpps.cahue.parkedCar;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.BaseColumns;
 
 import java.util.Date;
 
 /**
  * Created by francesco on 28.11.2014.
  */
-public class Car implements Parcelable{
+public class Car implements Parcelable, BaseColumns {
+
+    public static final String TABLE_NAME = "cars";
+
+    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_BT_ADDRESS = "bt_address";
+    public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_LATITUDE = "latitude";
+    public static final String COLUMN_LONGITUDE = "longitude";
+    public static final String COLUMN_ACCURACY = "accuracy";
+    public static final String COLUMN_CAR_TIME = "time";
 
     public String id;
 

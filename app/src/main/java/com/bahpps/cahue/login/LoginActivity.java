@@ -27,15 +27,6 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
-
-    /**
-     * Substitute you own sender ID here. This is the project number you got
-     * from the API Console, as described in "Getting Started."
-     */
-    static final String SENDER_ID = "582791978228";
 
     // UI references.
     private View mProgressView;
@@ -91,7 +82,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         if (regId.isEmpty()) {
 
             try {
-                regId = gcm.register(SENDER_ID);
+                regId = gcm.register(GCMUtil.SENDER_ID);
             } catch (IOException e) {
                 e.printStackTrace();
             }

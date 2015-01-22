@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.locationServices.LocationPollerService;
+import com.bahpps.cahue.parkedCar.Car;
 
 import org.apache.http.client.methods.HttpPost;
 
@@ -50,7 +51,9 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
     private void pollLocation(){
         Log.d("debug", "Debug poll location ");
         Intent intent = new Intent(this, DebugService.class);
-        intent.putExtra(LocationPollerService.EXTRA_BT_ID, "DEBUG");
+        Car car = new Car();
+        car.btAddress = "DEBUG";
+        intent.putExtra(LocationPollerService.EXTRA_BT_CAR, car);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         locationTextView.setText("Polling...");
     }

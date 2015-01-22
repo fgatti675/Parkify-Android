@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  * Created by francesco on 16.09.2014.
  */
-public class CarLocationManager {
+public class CarManager {
 
     public final static String INTENT = "CAR_MOVED_INTENT";
     public final static String INTENT_POSITION = "CAR_MOVED_INTENT_POSITION";
@@ -31,7 +31,7 @@ public class CarLocationManager {
     public static final String PREF_LAST_CAR_SAVED = "PREF_LAST_CAR_SAVED";
     public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
 
-    private final static String TAG = CarLocationManager.class.getSimpleName();
+    private final static String TAG = CarManager.class.getSimpleName();
 
     /**
      * Persist the location of the car in the shared preferences
@@ -61,6 +61,9 @@ public class CarLocationManager {
 
         Log.i(TAG, "Stored new location: " + loc);
 
+        /**
+         * Tell every one else
+         */
         Intent intent = new Intent(INTENT);
         intent.putExtra(INTENT_POSITION, car);
         context.sendBroadcast(intent);
@@ -103,14 +106,14 @@ public class CarLocationManager {
     }
 
 
-    public static Car getStoredCar(Context context, String id) {
+    public static Car findByBTAddress(Context context, String btAddress) {
 
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // bonded BT devices to the phone
         Set<BluetoothDevice> bondedBTDevices = mBtAdapter.getBondedDevices();
 
-        return getStoredBTCar(context, id, bondedBTDevices);
+        return getStoredBTCar(context, btAddress, bondedBTDevices);
     }
 
 
@@ -144,7 +147,7 @@ public class CarLocationManager {
             lastLocation.setLongitude(lastLongitude / 1E6);
             lastLocation.setAccuracy((float) (lastAccuracy / 1E6));
 
-            Date date = new Date(prefs.getLong(CarLocationManager.PREF_CAR_TIME + btAddress, 0));
+            Date date = new Date(prefs.getLong(CarManager.PREF_CAR_TIME + btAddress, 0));
             car.location = lastLocation;
             car.time = date;
 
@@ -156,10 +159,12 @@ public class CarLocationManager {
 
     }
 
-    public static void removeStoredLocation(Context context, String id) {
+    public static void removeStoredLocation(Context context, Car car) {
         SharedPreferences prefs = Util.getSharedPreferences(context);
 
         SharedPreferences.Editor editor = prefs.edit();
+
+        String id = car.id;
 
         // We store the result
         editor.remove(PREF_CAR_LATITUDE + id);

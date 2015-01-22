@@ -58,7 +58,7 @@ public class SetCarPositionDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        final List<Car> cars = CarLocationManager.getAvailableCars(getActivity(), false);
+        final List<Car> cars = CarManager.getAvailableCars(getActivity(), false);
 
         // there has to be a default car
         if (cars.isEmpty())
@@ -74,7 +74,7 @@ public class SetCarPositionDialog extends DialogFragment {
 
         selected = cars.get(0);
 
-        String lastSavedId = CarLocationManager.getLastCarSavedId(getActivity());
+        String lastSavedId = CarManager.getLastCarSavedId(getActivity());
 
         int itemIndex = 0;
         boolean lastSelected = false;
@@ -105,7 +105,7 @@ public class SetCarPositionDialog extends DialogFragment {
 
                         Log.w(TAG, selected.toString());
                         // If ok, we just send and intent and leave the location receivers to do all the work
-                        CarLocationManager.saveCar(getActivity(), selected);
+                        CarManager.saveCar(getActivity(), selected);
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);

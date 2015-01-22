@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.CarLocationManager;
+import com.bahpps.cahue.parkedCar.CarManager;
 import com.bahpps.cahue.util.CommUtil;
 
 import org.apache.http.HttpResponse;
@@ -45,25 +45,24 @@ public class CarMovedService extends LocationPollerService {
     private static final int POST_RETRIES = 3;
 
     @Override
-    protected boolean checkPreconditions(String id) {
+    protected boolean checkPreconditions(Car car) {
         long now = Calendar.getInstance().getTimeInMillis();
-        Car storedCar = CarLocationManager.getStoredCar(this, id);
-        if (storedCar.time == null) return true;
-        long parkingTime = storedCar.time.getTime();
+        if (car.time == null) return true;
+        long parkingTime = car.time.getTime();
         return now - parkingTime > MINIMUM_STAY_MS;
     }
 
     @Override
-    public void onLocationPolled(Context context, final Location location, final String id, String name) {
-        postSpotLocation(location, id, POST_RETRIES);
-        CarLocationManager.removeStoredLocation(context, id);
+    public void onLocationPolled(Context context, final Location location,Car car) {
+        postSpotLocation(location, car, POST_RETRIES);
+        CarManager.removeStoredLocation(context, car);
     }
 
     protected void onLocationPost(HttpPost post){
 
     }
 
-    private void postSpotLocation(final Location location, final String id, final int retries) {
+    private void postSpotLocation(final Location location, final Car car, final int retries) {
 
         new AsyncTask <Void, Void, HttpPost>() {
 
@@ -100,7 +99,7 @@ public class CarMovedService extends LocationPollerService {
                             Log.e(TAG, statusLine.getReasonPhrase());
                         }
                         if (retries > 0)
-                            postSpotLocation(location, id, retries - 1);
+                            postSpotLocation(location, car, retries - 1);
                     }
                     return httpPost;
 

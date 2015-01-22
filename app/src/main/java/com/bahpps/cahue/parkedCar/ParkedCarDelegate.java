@@ -136,7 +136,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public void updateCarLocation() {
         directionPoints.clear();
-        this.car = CarLocationManager.getStoredCar(mContext, this.car.btAddress);
+        this.car = CarManager.findByBTAddress(mContext, this.car.btAddress);
         if (car == null || car.location == null) {
             return;
         }
@@ -226,7 +226,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public void removeCar() {
-        CarLocationManager.removeStoredLocation(mContext, car.btAddress);
+        CarManager.removeStoredLocation(mContext, car);
         car.location = null;
         clear();
     }

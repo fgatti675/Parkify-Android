@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.bahpps.cahue.locationServices.CarMovedService;
+import com.bahpps.cahue.parkedCar.Car;
 
 import org.apache.http.client.methods.HttpPost;
 
@@ -21,8 +22,8 @@ public class DebugService extends CarMovedService {
     ServiceListener serviceListener;
 
     @Override
-    public void onLocationPolled(Context context, Location location, String id, String name) {
-        super.onLocationPolled(context,location,id, name);
+    public void onLocationPolled(Context context, Location location, Car car) {
+        super.onLocationPolled(context,location, car);
         serviceListener.onNewLocation(location);
     }
 
@@ -49,7 +50,7 @@ public class DebugService extends CarMovedService {
     }
 
     @Override
-    protected boolean checkPreconditions(String id) {
+    protected boolean checkPreconditions(Car car) {
         return true;
     }
 

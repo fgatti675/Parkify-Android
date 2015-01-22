@@ -5,7 +5,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.CarLocationManager;
+import com.bahpps.cahue.parkedCar.CarManager;
 
 import java.util.Date;
 
@@ -20,19 +20,16 @@ public class ParkedCarService extends LocationPollerService {
     private final static String TAG = "ParkedCarService";
 
     @Override
-    protected boolean checkPreconditions(String id) {
+    protected boolean checkPreconditions(Car car) {
         return true;
     }
 
     @Override
-    public void onLocationPolled(Context context, Location location, String id, String name) {
+    public void onLocationPolled(Context context, Location location, Car car) {
         Log.i(TAG, "Received : " + location);
-        Car car = new Car();
         car.location = location;
-        car.btAddress = id;
         car.time = new Date();
-        car.name = name;
-        CarLocationManager.saveCar(context, car);
+        CarManager.saveCar(context, car);
     }
 
 

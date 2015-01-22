@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.bahpps.cahue.parkedCar.Car;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -32,9 +33,7 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Receive the address of the BT device
      */
-    public static final String EXTRA_BT_ID = "extra_bt_id";
-
-    public static final String EXTRA_BT_NAME = "extra_bt_name";
+    public static final String EXTRA_BT_CAR = "extra_bt_car";
 
     /**
      * Timeout after we consider the location may have changed too much
@@ -52,10 +51,8 @@ public abstract class LocationPollerService extends Service implements
 
     private Date startTime;
 
-    // BT address used as an ID for cars
-    private String id;
-
-    private String name;
+    // Car related to this service
+    private Car car;
 
     private Location bestAccuracyLocation;
 
@@ -72,15 +69,14 @@ public abstract class LocationPollerService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent != null) {
-            id = intent.getExtras().getString(EXTRA_BT_ID);
-            name = intent.getExtras().getString(EXTRA_BT_NAME);
+            car = intent.getExtras().getParcelable(EXTRA_BT_CAR);
             start();
         }
         return START_STICKY_COMPATIBILITY;
     }
 
     protected void start() {
-        if (checkPreconditions(id)) {
+        if (checkPreconditions(car)) {
             startTime = new Date();
             mGoogleApiClient.connect();
         } else{
@@ -136,17 +132,17 @@ public abstract class LocationPollerService extends Service implements
 
     }
 
-    protected abstract boolean checkPreconditions(String id);
+    protected abstract boolean checkPreconditions(Car car);
 
     private void notifyLocation(Location location) {
         Bundle extras = new Bundle();
         extras.putSerializable(EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
-        onLocationPolled(this, location, id, name);
+        onLocationPolled(this, location, car);
         mGoogleApiClient.disconnect();
         stopSelf();
     }
 
-    public abstract void onLocationPolled(Context context, Location location, String id, String name);
+    public abstract void onLocationPolled(Context context, Location location, Car car);
 }

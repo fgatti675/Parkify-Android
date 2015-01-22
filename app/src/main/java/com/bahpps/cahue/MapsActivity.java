@@ -32,7 +32,7 @@ import com.bahpps.cahue.deviceSelection.DeviceSelectionActivity;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.parkedCar.Car;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
-import com.bahpps.cahue.parkedCar.CarLocationManager;
+import com.bahpps.cahue.parkedCar.CarManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
 import com.bahpps.cahue.spots.ParkingSpot;
@@ -41,6 +41,7 @@ import com.bahpps.cahue.spots.SpotsDelegate;
 import com.bahpps.cahue.tutorial.TutorialActivity;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -105,13 +106,30 @@ public class MapsActivity extends BaseActivity
     private IInAppBillingService iInAppBillingService;
 
     /**
+     * Currently recognized activity type (what the user is doing)
+     */
+    private int activityType = DetectedActivity.UNKNOWN;
+
+    /**
+     * If we get a new car position while we are using the app, we update the map
+     */
+    private final BroadcastReceiver activityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            activityType = (int) intent.getExtras().get(ActivityRecognitionService.SURE_ACTIVITY_TYPE);
+
+        }
+    };
+
+    /**
      * If we get a new car position while we are using the app, we update the map
      */
     private final BroadcastReceiver carPosReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Car car = (Car) intent.getExtras().get(CarLocationManager.INTENT_POSITION);
+            Car car = (Car) intent.getExtras().get(CarManager.INTENT_POSITION);
             if (car != null) {
                 Log.i(TAG, "Location received: " + car);
                 getParkedCarDelegate(car).updateCarLocation();
@@ -215,7 +233,7 @@ public class MapsActivity extends BaseActivity
 
             spotsDelegate = new SpotsDelegate();
 
-            List<Car> cars = CarLocationManager.getAvailableCars(this, false);
+            List<Car> cars = CarManager.getAvailableCars(this, false);
             for (Car car : cars) {
                 ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate(car);
                 parkedCarDelegateMap.put(car, parkedCarDelegate);
@@ -343,7 +361,7 @@ public class MapsActivity extends BaseActivity
 //                        if (currentApiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1){
 //                            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 //                        } else{
-                            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
 //                        }
                         myLocationButton.setLayoutParams(params); //causes layout update
                     }
@@ -438,7 +456,7 @@ public class MapsActivity extends BaseActivity
         }
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(CarLocationManager.INTENT));
+        registerReceiver(carPosReceiver, new IntentFilter(CarManager.INTENT));
 
         setInitialCamera();
 
@@ -614,7 +632,7 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {
 
-            final List<Car> parkedCars = CarLocationManager.getAvailableCars(this, true);
+            final List<Car> parkedCars = CarManager.getAvailableCars(this, true);
 
             // One parked car
             if (parkedCars.size() == 1) {
