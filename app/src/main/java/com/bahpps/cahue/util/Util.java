@@ -19,8 +19,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class Util {
 
@@ -35,6 +37,12 @@ public class Util {
     public static final String PREF_CAMERA_LONG = "PREF_CAMERA_LONG";
 
     public static final String TAPPED_PROVIDER = "Tapped";
+
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+    static {
+        Util.DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
 
     /**

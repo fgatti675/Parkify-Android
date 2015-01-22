@@ -80,7 +80,7 @@ public class SetCarPositionDialog extends DialogFragment {
         boolean lastSelected = false;
         if(lastSavedId != null){
             for(Car car:cars){
-                if(car.id.equals(lastSavedId)){
+                if(car.btAddress.equals(lastSavedId)){
                     selected = car;
                     lastSelected = true;
                     break;

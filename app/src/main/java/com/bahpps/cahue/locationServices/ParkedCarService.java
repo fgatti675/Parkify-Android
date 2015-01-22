@@ -29,7 +29,7 @@ public class ParkedCarService extends LocationPollerService {
         Log.i(TAG, "Received : " + location);
         Car car = new Car();
         car.location = location;
-        car.id = id;
+        car.btAddress = id;
         car.time = new Date();
         car.name = name;
         CarLocationManager.saveCar(context, car);

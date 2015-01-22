@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bahpps.cahue.spots.ParkingSpot;
+import com.bahpps.cahue.util.Util;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.http.HttpResponse;
@@ -34,13 +35,7 @@ import java.util.TimeZone;
 public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<ParkingSpot>> {
 
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     private static final String TAG = NearestSpotsQuery.class.getSimpleName();
-
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
 
     private Context context;
     protected ParkingSpotsUpdateListener listener;
@@ -139,7 +134,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
                     ParkingSpot spot = new ParkingSpot(
                             entry.getLong("id"),
                             new LatLng(entry.getDouble("latitude"), entry.getDouble("longitude")),
-                            dateFormat.parse(entry.getString("time"))
+                            Util.DATE_FORMAT.parse(entry.getString("time"))
                     );
                     spots.add(spot);
                 }
@@ -159,10 +154,12 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
      * parking locations
      */
     public interface ParkingSpotsUpdateListener {
+
         void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots);
 
         void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
 
         void onIOError();
+
     }
 }

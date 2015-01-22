@@ -11,7 +11,6 @@ import android.util.Log;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +31,7 @@ public class CarLocationManager {
     public static final String PREF_LAST_CAR_SAVED = "PREF_LAST_CAR_SAVED";
     public static final String PREF_CAR_TIME = "PREF_CAR_TIME";
 
-    private final static String TAG = "CarLocationManager";
+    private final static String TAG = CarLocationManager.class.getSimpleName();
 
     /**
      * Persist the location of the car in the shared preferences
@@ -44,7 +43,7 @@ public class CarLocationManager {
 
         SharedPreferences.Editor editor = prefs.edit();
 
-        String id = car.id;
+        String id = car.btAddress;
         Location loc = car.location;
 
         car.time = new Date();
@@ -115,17 +114,17 @@ public class CarLocationManager {
     }
 
 
-    private static Car getStoredBTCar(Context context, String id, Set<BluetoothDevice> bondedBTDevices) {
+    private static Car getStoredBTCar(Context context, String btAddress, Set<BluetoothDevice> bondedBTDevices) {
 
         SharedPreferences prefs = Util.getSharedPreferences(context);
 
         Car car = new Car();
-        car.id = id;
-        car.name = prefs.getString(PREF_CAR_LAST_KNOWN_NAME + id, null);
+        car.btAddress = btAddress;
+        car.name = prefs.getString(PREF_CAR_LAST_KNOWN_NAME + btAddress, null);
 
         // name
         for (BluetoothDevice device : bondedBTDevices) {
-            if (id.equals(device.getAddress())) {
+            if (btAddress.equals(device.getAddress())) {
                 car.name = device.getName();
             }
         }
@@ -133,19 +132,19 @@ public class CarLocationManager {
         /**
          * If location is set
          */
-        if (prefs.contains(PREF_CAR_LATITUDE + id) && prefs.contains(PREF_CAR_LONGITUDE + id)) {
+        if (prefs.contains(PREF_CAR_LATITUDE + btAddress) && prefs.contains(PREF_CAR_LONGITUDE + btAddress)) {
 
             // Details of the last location fix
-            int lastLatitude = prefs.getInt(PREF_CAR_LATITUDE + id, 0);
-            int lastLongitude = prefs.getInt(PREF_CAR_LONGITUDE + id, 0);
-            int lastAccuracy = prefs.getInt(PREF_CAR_ACCURACY + id, 0);
+            int lastLatitude = prefs.getInt(PREF_CAR_LATITUDE + btAddress, 0);
+            int lastLongitude = prefs.getInt(PREF_CAR_LONGITUDE + btAddress, 0);
+            int lastAccuracy = prefs.getInt(PREF_CAR_ACCURACY + btAddress, 0);
 
-            Location lastLocation = new Location(prefs.getString(PREF_CAR_PROVIDER + id, ""));
+            Location lastLocation = new Location(prefs.getString(PREF_CAR_PROVIDER + btAddress, ""));
             lastLocation.setLatitude(lastLatitude / 1E6);
             lastLocation.setLongitude(lastLongitude / 1E6);
             lastLocation.setAccuracy((float) (lastAccuracy / 1E6));
 
-            Date date = new Date(prefs.getLong(CarLocationManager.PREF_CAR_TIME + id, 0));
+            Date date = new Date(prefs.getLong(CarLocationManager.PREF_CAR_TIME + btAddress, 0));
             car.location = lastLocation;
             car.time = date;
 
