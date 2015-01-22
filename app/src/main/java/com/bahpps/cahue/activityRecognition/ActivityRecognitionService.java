@@ -19,8 +19,8 @@ public class ActivityRecognitionService extends IntentService {
     public static final String INTENT_ACTIVITY_RECOGNIZED = "INTENT_ACTIVITY_RECOGNIZED";
 
     // activity we are sure the user is doing (or almost)
-    private static final String SURE_ACTIVITY_TYPE = "SURE_ACTIVITY_TYPE";
-    private static final String SURE_ACTIVITY_CONFIDENCE = "SURE_ACTIVITY_CONFIDENCE";
+    public static final String SURE_ACTIVITY_TYPE = "SURE_ACTIVITY_TYPE";
+    public static final String SURE_ACTIVITY_CONFIDENCE = "SURE_ACTIVITY_CONFIDENCE";
 
 
     private String TAG = this.getClass().getSimpleName();
@@ -45,13 +45,14 @@ public class ActivityRecognitionService extends IntentService {
 
             SharedPreferences prefs = Util.getSharedPreferences(this);
 
+            int lastAssuredType = prefs.getInt(SURE_ACTIVITY_TYPE, -1);
+            int lastAssuredConfidence = prefs.getInt(SURE_ACTIVITY_CONFIDENCE, -1);
 
-            if (type == lastActivityType && confidence > 85) {
+
+            if (type == lastActivityType && type != lastAssuredType && confidence > 85) {
 
                 String typeString = getType(type);
 
-                int lastAssuredType = prefs.getInt(SURE_ACTIVITY_TYPE, -1);
-                int lastAssuredConfidence = prefs.getInt(SURE_ACTIVITY_CONFIDENCE, -1);
                 String previousText = "Previous: " + getType(lastAssuredType) + " (" + lastAssuredConfidence + "%)\n";
 
                 StringBuilder stringBuilder = new StringBuilder(previousText);
