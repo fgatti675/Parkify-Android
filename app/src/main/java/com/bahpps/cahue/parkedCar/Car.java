@@ -10,14 +10,13 @@ import java.util.Date;
 /**
  * Created by francesco on 28.11.2014.
  */
-public class Car implements Parcelable, BaseColumns {
+public class Car implements Parcelable {
 
     public static final String TABLE_NAME = "cars";
 
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_BT_ADDRESS = "bt_address";
-    public static final String COLUMN_BT_NAME = "bt_name";
     public static final String COLUMN_LATITUDE = "latitude";
     public static final String COLUMN_LONGITUDE = "longitude";
     public static final String COLUMN_ACCURACY = "accuracy";
@@ -28,8 +27,6 @@ public class Car implements Parcelable, BaseColumns {
     public String name;
 
     public String btAddress;
-
-    public String btName;
 
     public Location location;
 
@@ -52,7 +49,6 @@ public class Car implements Parcelable, BaseColumns {
         id = parcel.readString();
         name = parcel.readString();
         btAddress = parcel.readString();
-        btName = parcel.readString();
         location = parcel.readParcelable(Location.class.getClassLoader());
         time = (Date) parcel.readSerializable();
     }
@@ -71,7 +67,6 @@ public class Car implements Parcelable, BaseColumns {
         parcel.writeString(id);
         parcel.writeString(name);
         parcel.writeString(btAddress);
-        parcel.writeString(btName);
         parcel.writeParcelable(location, i);
         parcel.writeSerializable(time);
     }
