@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.parkedCar.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarManager;
 
 import java.util.Date;
@@ -29,7 +30,9 @@ public class ParkedCarService extends LocationPollerService {
         Log.i(TAG, "Received : " + location);
         car.location = location;
         car.time = new Date();
-        CarManager.saveCar(context, car);
+
+        CarDatabase carDatabase = new CarDatabase(context);
+        carDatabase.saveCar(car);
     }
 
 

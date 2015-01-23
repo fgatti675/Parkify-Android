@@ -136,7 +136,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public void updateCarLocation() {
         directionPoints.clear();
-        this.car = CarManager.findByBTAddress(mContext, this.car.btAddress);
+
+        // TODO: not necessary to create a new instance of this
+        CarDatabase carDatabase = new CarDatabase(mContext);
+
+        this.car = carDatabase.findByBTAddress(this.car.btAddress);
+
         if (car == null || car.location == null) {
             return;
         }
@@ -226,7 +231,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public void removeCar() {
-        CarManager.removeStoredLocation(mContext, car);
+
+        // TODO: not necessary to create a new instance of this
+        CarDatabase carDatabase = new CarDatabase(mContext);
+        carDatabase.removeStoredLocation(car);
         car.location = null;
         clear();
     }

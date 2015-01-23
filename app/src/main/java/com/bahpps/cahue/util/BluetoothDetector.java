@@ -10,6 +10,7 @@ import com.bahpps.cahue.locationServices.CarMovedService;
 import com.bahpps.cahue.locationServices.LocationPollerService;
 import com.bahpps.cahue.locationServices.ParkedCarService;
 import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.parkedCar.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarManager;
 
 import java.util.Set;
@@ -41,7 +42,9 @@ public class BluetoothDetector extends BroadcastReceiver {
 
             Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
-            Car car = CarManager.findByBTAddress(context, address);
+            // TODO: not necessary to create a new instance of this
+            CarDatabase carDatabase = new CarDatabase(context);
+            Car car = carDatabase.findByBTAddress(address);
 
             if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 onBtDisconnected(context, car);

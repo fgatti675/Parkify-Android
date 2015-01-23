@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.parkedCar.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarManager;
 import com.bahpps.cahue.util.CommUtil;
 
@@ -53,18 +54,21 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onLocationPolled(Context context, final Location location,Car car) {
+    public void onLocationPolled(Context context, final Location location, Car car) {
         postSpotLocation(location, car, POST_RETRIES);
-        CarManager.removeStoredLocation(context, car);
+
+        // TODO: not necessary to create a new instance of this
+        CarDatabase carDatabase = new CarDatabase(context);
+        carDatabase.removeStoredLocation(car);
     }
 
-    protected void onLocationPost(HttpPost post){
+    protected void onLocationPost(HttpPost post) {
 
     }
 
     private void postSpotLocation(final Location location, final Car car, final int retries) {
 
-        new AsyncTask <Void, Void, HttpPost>() {
+        new AsyncTask<Void, Void, HttpPost>() {
 
             @Override
             protected HttpPost doInBackground(Void[] objects) {
@@ -120,8 +124,6 @@ public class CarMovedService extends LocationPollerService {
             }
         }.execute();
     }
-
-
 
 
     private static String getJSON(Location location) {

@@ -31,6 +31,7 @@ import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.deviceSelection.DeviceSelectionActivity;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.parkedCar.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
 import com.bahpps.cahue.parkedCar.CarManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
@@ -97,6 +98,7 @@ public class MapsActivity extends BaseActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
+    private CarDatabase carDatabase;
 
     private View myLocationButton;
     private ScrollView detailsContainer;
@@ -216,6 +218,8 @@ public class MapsActivity extends BaseActivity
             }
         });
 
+        carDatabase = new CarDatabase(this);
+
         /**
          * Try to reuse map
          */
@@ -233,7 +237,7 @@ public class MapsActivity extends BaseActivity
 
             spotsDelegate = new SpotsDelegate();
 
-            List<Car> cars = CarManager.getAvailableCars(this, false);
+            List<Car> cars = carDatabase.retrieveCars(false);
             for (Car car : cars) {
                 ParkedCarDelegate parkedCarDelegate = new ParkedCarDelegate(car);
                 parkedCarDelegateMap.put(car, parkedCarDelegate);
@@ -632,7 +636,7 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {
 
-            final List<Car> parkedCars = CarManager.getAvailableCars(this, true);
+            final List<Car> parkedCars = carDatabase.retrieveCars(true);
 
             // One parked car
             if (parkedCars.size() == 1) {
