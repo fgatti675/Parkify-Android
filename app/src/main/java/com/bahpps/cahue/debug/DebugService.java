@@ -8,7 +8,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.bahpps.cahue.locationServices.CarMovedService;
-import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.cars.Car;
 
 import org.apache.http.client.methods.HttpPost;
 

@@ -7,9 +7,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bahpps.cahue.Endpoints;
-import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.CarDatabase;
-import com.bahpps.cahue.parkedCar.CarManager;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarDatabase;
 import com.bahpps.cahue.util.CommUtil;
 
 import org.apache.http.HttpResponse;

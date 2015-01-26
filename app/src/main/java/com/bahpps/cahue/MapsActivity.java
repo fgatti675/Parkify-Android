@@ -28,10 +28,11 @@ import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
+import com.bahpps.cahue.cars.CarManagerActivity;
 import com.bahpps.cahue.deviceSelection.DeviceSelectionActivity;
 import com.bahpps.cahue.login.LoginActivity;
-import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.CarDatabase;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
 import com.bahpps.cahue.parkedCar.CarManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
@@ -602,7 +603,7 @@ public class MapsActivity extends BaseActivity
      * Method used to start the pairing activity
      */
     protected void startDeviceSelection() {
-        startActivityForResult(new Intent(MapsActivity.this, DeviceSelectionActivity.class), 0);
+        startActivityForResult(new Intent(MapsActivity.this, CarManagerActivity.class), 0);
     }
 
     /**

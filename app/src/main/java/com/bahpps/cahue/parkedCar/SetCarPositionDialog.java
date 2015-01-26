@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,9 +9,8 @@ import android.util.Log;
 import com.bahpps.cahue.locationServices.CarMovedService;
 import com.bahpps.cahue.locationServices.LocationPollerService;
 import com.bahpps.cahue.locationServices.ParkedCarService;
-import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.CarDatabase;
-import com.bahpps.cahue.parkedCar.CarManager;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarDatabase;
 
 import java.util.Set;
 

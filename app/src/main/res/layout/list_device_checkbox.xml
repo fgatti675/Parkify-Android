@@ -22,13 +22,13 @@
     android:layout_width="match_parent"
     android:background="@color/transparent">
 
-    <CheckBox
+    <Button
         android:focusable="false"
         android:id="@+id/device"
         android:paddingTop="@dimen/large_padding"
         android:paddingBottom="@dimen/large_padding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="Device name"/>
+        tools:text="Add car" />
 
 </RelativeLayout>

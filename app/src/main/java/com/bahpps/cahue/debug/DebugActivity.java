@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.locationServices.LocationPollerService;
-import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.cars.Car;
 
 import org.apache.http.client.methods.HttpPost;
 

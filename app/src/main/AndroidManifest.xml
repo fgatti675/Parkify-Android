@@ -44,10 +44,10 @@
         <activity android:name=".MapsActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".deviceSelection.DeviceSelectionActivity"
             android:parentActivityName=".MapsActivity" />
@@ -88,11 +88,21 @@
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="com.bahpps.cahue" />
             </intent-filter>
         </receiver>
+
         <service android:name=".GcmIntentService" />
 
+        <activity
+            android:name=".cars.CarManagerActivity"
+            android:label="@string/title_activity_car_manager"
+            android:parentActivityName=".MapsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bahpps.cahue.MapsActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package com.bahpps.cahue.parkedCar;
+package com.bahpps.cahue.cars;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
+import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;

@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.cars.Car;
 
 
 /**

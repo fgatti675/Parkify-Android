@@ -36,6 +36,7 @@
     <string name="other">Other</string>
     <string name="remove">Clear car</string>
     <string name="activate_bluetooth">Activate Bluetooth</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_activity_car_manager">CarManagerActivity</string>
 
 </resources>

@@ -1,6 +1,6 @@
 package com.bahpps.cahue.login;
 
-import com.bahpps.cahue.parkedCar.Car;
+import com.bahpps.cahue.cars.Car;
 
 import java.util.Date;
 import java.util.HashSet;

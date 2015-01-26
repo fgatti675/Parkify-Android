@@ -14,8 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/map"
-        class="com.bahpps.cahue.deviceSelection.DeviceSelectionFragment"
-        tools:layout="@layout/fragment_device_list" />
+        class="com.bahpps.cahue.cars.CarManagerFragment"
+        tools:layout="@layout/fragment_car_manager" />
 
 </RelativeLayout>
 

@@ -4,9 +4,8 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
-import com.bahpps.cahue.parkedCar.Car;
-import com.bahpps.cahue.parkedCar.CarDatabase;
-import com.bahpps.cahue.parkedCar.CarManager;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarDatabase;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package com.bahpps.cahue.deviceSelection;
+package com.bahpps.cahue.cars;
 
 
 import android.app.Activity;
@@ -11,39 +11,52 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and devices detected in the area after discovery. When
  * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
  * Intent.
  */
-public class DeviceSelectionFragment extends Fragment {
+public class CarManagerFragment extends Fragment {
 
     // Debugging
-    private static final String TAG = DeviceSelectionFragment.class.getSimpleName();
+    private static final String TAG = CarManagerFragment.class.getSimpleName();
 
     // Member fields
     private BluetoothAdapter mBtAdapter;
+
+    private CarDatabase carDatabase;
+
+    private List<Car> cars;
+
+    private CarListAdapter mCarListAdapter;
+
     private DeviceListAdapter mDevicesArrayAdapter;
 
     private Button enableBTButton;
-    private ListView pairedListView;
 
     private Set<String> selectedDeviceAddresses;
+
+    private ListView carsListView;
+    private ListView devicesListView;
 
     private DeviceSelectionLoadingListener mListener;
 
@@ -54,8 +67,8 @@ public class DeviceSelectionFragment extends Fragment {
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
-    public static DeviceSelectionFragment newInstance() {
-        DeviceSelectionFragment fragment = new DeviceSelectionFragment();
+    public static CarManagerFragment newInstance() {
+        CarManagerFragment fragment = new CarManagerFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -76,10 +89,15 @@ public class DeviceSelectionFragment extends Fragment {
 
         // Initialize array adapter
         mDevicesArrayAdapter = new DeviceListAdapter();
+        mCarListAdapter = new CarListAdapter();
 
-        // Find and set up the ListView for paired devices
-        pairedListView = (ListView) view.findViewById(R.id.devices);
-        pairedListView.setAdapter(mDevicesArrayAdapter);
+        // Find and set up the ListView for cars
+        carsListView = (ListView) view.findViewById(R.id.cars);
+        devicesListView.setAdapter(mDevicesArrayAdapter);
+
+        // Find and set up the ListView for  devices
+        devicesListView = (ListView) view.findViewById(R.id.devices);
+        devicesListView.setAdapter(mDevicesArrayAdapter);
 
         return view;
     }
@@ -98,10 +116,10 @@ public class DeviceSelectionFragment extends Fragment {
     private void updateUI() {
         if (mBtAdapter.isEnabled()) {
             enableBTButton.setVisibility(View.GONE);
-            pairedListView.setVisibility(View.VISIBLE);
+            devicesListView.setVisibility(View.VISIBLE);
         } else {
             enableBTButton.setVisibility(View.VISIBLE);
-            pairedListView.setVisibility(View.GONE);
+            devicesListView.setVisibility(View.GONE);
         }
     }
 
@@ -128,7 +146,11 @@ public class DeviceSelectionFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        selectedDeviceAddresses = Util.getPairedDevices(getActivity());
+        cars = carDatabase.retrieveCars(false);
+
+        selectedDeviceAddresses = new HashSet<>();
+        for (Car car : cars) selectedDeviceAddresses.add(car.btAddress);
+
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -158,7 +180,7 @@ public class DeviceSelectionFragment extends Fragment {
 
         setBondedDevices();
 
-        if(mBtAdapter.isEnabled()){
+        if (mBtAdapter.isEnabled()) {
             doDiscovery();
         }
     }
@@ -243,6 +265,48 @@ public class DeviceSelectionFragment extends Fragment {
         }
     };
 
+    private class CarListAdapter extends BaseAdapter {
+
+        public void add(Car car) {
+            cars.add(car);
+        }
+
+        public int getCount() {
+            return cars.size();
+        }
+
+        public Car getItem(int position) {
+            return cars.get(position);
+        }
+
+        public long getItemId(int arg0) {
+            return arg0;
+        }
+
+        public View getView(final int position, View convertView, ViewGroup parent) {
+
+            final View view;
+
+            // Code for recycling views
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.fragment_car_details, null);
+            } else {
+                view = convertView;
+            }
+
+            final Car car = getItem(position);
+
+            final TextView name = (TextView) view.findViewById(R.id.name);
+            name.setText(car.name);
+
+            final TextView time = (TextView) view.findViewById(R.id.time);
+            time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+
+            return view;
+        }
+    }
+
 
     private class DeviceListAdapter extends BaseAdapter {
 
@@ -253,11 +317,13 @@ public class DeviceSelectionFragment extends Fragment {
         }
 
         public void setDevices(Set<BluetoothDevice> devices) {
-            mDevices = new ArrayList<BluetoothDevice>(devices);
+            for (BluetoothDevice device : devices)
+                add(device);
         }
 
         public void add(BluetoothDevice device) {
-            mDevices.add(device);
+            if (selectedDeviceAddresses.contains(device.getAddress()))
+                mDevices.add(device);
         }
 
         public int getCount() {
@@ -287,43 +353,44 @@ public class DeviceSelectionFragment extends Fragment {
             final BluetoothDevice device = mDevices.get(position);
 
             // We set the visibility of the check image
-            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
-            boolean contains = selectedDeviceAddresses.contains(device.getAddress());
-            checkBox.setChecked(contains);
+            final Button button = (Button) view.findViewById(R.id.device);
+            button.setText(device.getName());
 
-            view.setOnClickListener(new View.OnClickListener() {
+
+
+            button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    checkBox.callOnClick();
+                    Car car = new Car();
+                    car.id = UUID.randomUUID().toString();
+                    car.name = device.getName();
+                    car.btAddress = device.getAddress();
+
+                    mDevices.remove(device);
+
+                    onCarAdded(car);
+
+//                    if (button.isChecked()) {
+//                        selectedDeviceAddresses.add(address);
+//                        Log.d(TAG, "Added: " + name + " " + address);
+//                    } else {
+//                        selectedDeviceAddresses.remove(address);
+//                        Log.d(TAG, "Removed: " + name + " " + address);
+//                    }
+//
+//                    Util.setPairedDevices(getActivity(), selectedDeviceAddresses);
 
                 }
             });
 
-            checkBox.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    String name = device.getName();
-                    String address = device.getAddress();
-
-                    if (checkBox.isChecked()) {
-                        selectedDeviceAddresses.add(address);
-                        Log.d(TAG, "Added: " + name + " " + address);
-                    } else {
-                        selectedDeviceAddresses.remove(address);
-                        Log.d(TAG, "Removed: " + name + " " + address);
-                    }
-
-                    Util.setPairedDevices(getActivity(), selectedDeviceAddresses);
-
-                }
-            });
-
-            checkBox.setText(device.getName());
 
             return view;
         }
+    }
+
+    private void onCarAdded(Car car) {
+
     }
 
     public interface DeviceSelectionLoadingListener {

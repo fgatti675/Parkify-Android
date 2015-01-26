@@ -1,9 +1,8 @@
-package com.bahpps.cahue.parkedCar;
+package com.bahpps.cahue.cars;
 
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.BaseColumns;
 
 import java.util.Date;
 
