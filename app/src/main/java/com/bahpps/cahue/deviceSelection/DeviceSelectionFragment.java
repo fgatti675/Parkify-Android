@@ -287,40 +287,40 @@ public class DeviceSelectionFragment extends Fragment {
             final BluetoothDevice device = mDevices.get(position);
 
             // We set the visibility of the check image
-            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
-            boolean contains = selectedDeviceAddresses.contains(device.getAddress());
-            checkBox.setChecked(contains);
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    checkBox.callOnClick();
-
-                }
-            });
-
-            checkBox.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    String name = device.getName();
-                    String address = device.getAddress();
-
-                    if (checkBox.isChecked()) {
-                        selectedDeviceAddresses.add(address);
-                        Log.d(TAG, "Added: " + name + " " + address);
-                    } else {
-                        selectedDeviceAddresses.remove(address);
-                        Log.d(TAG, "Removed: " + name + " " + address);
-                    }
-
-                    Util.setPairedDevices(getActivity(), selectedDeviceAddresses);
-
-                }
-            });
-
-            checkBox.setText(device.getName());
+//            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
+//            boolean contains = selectedDeviceAddresses.contains(device.getAddress());
+//            checkBox.setChecked(contains);
+//
+//            view.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//
+//                    checkBox.callOnClick();
+//
+//                }
+//            });
+//
+//            checkBox.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//
+//                    String name = device.getName();
+//                    String address = device.getAddress();
+//
+//                    if (checkBox.isChecked()) {
+//                        selectedDeviceAddresses.add(address);
+//                        Log.d(TAG, "Added: " + name + " " + address);
+//                    } else {
+//                        selectedDeviceAddresses.remove(address);
+//                        Log.d(TAG, "Removed: " + name + " " + address);
+//                    }
+//
+//                    Util.setPairedDevices(getActivity(), selectedDeviceAddresses);
+//
+//                }
+//            });
+//
+//            checkBox.setText(device.getName());
 
             return view;
         }

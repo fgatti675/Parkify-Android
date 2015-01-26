@@ -11,6 +11,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +25,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
-import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,18 +49,17 @@ public class CarManagerFragment extends Fragment {
 
     private List<Car> cars;
 
-    private CarListAdapter mCarListAdapter;
-
     private DeviceListAdapter mDevicesArrayAdapter;
 
     private Button enableBTButton;
 
     private Set<String> selectedDeviceAddresses;
 
-    private ListView carsListView;
     private ListView devicesListView;
 
     private DeviceSelectionLoadingListener mListener;
+
+    private RecyclerViewCarsAdapter adapter;
 
 
     /**
@@ -89,13 +90,33 @@ public class CarManagerFragment extends Fragment {
 
         // Initialize array adapter
         mDevicesArrayAdapter = new DeviceListAdapter();
-        mCarListAdapter = new CarListAdapter();
+
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.cardList);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+//        layoutManager.scrollToPosition(currPos);
+        recyclerView.setLayoutManager(layoutManager);
+
+        cars = carDatabase.retrieveCars(false);
+
+        adapter = new RecyclerViewCarsAdapter(cars);
+
+        recyclerView.setAdapter(adapter);
+
+//        RecyclerView.ItemDecoration itemDecoration =
+//                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST);
+//        recyclerView.addItemDecoration(itemDecoration);
+
+// this is the default;
+// this call is actually only necessary with custom ItemAnimators
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+//        recyclerView.addOnItemTouchListener(this);
 
         // Find and set up the ListView for cars
-        carsListView = (ListView) view.findViewById(R.id.cars);
-        devicesListView.setAdapter(mDevicesArrayAdapter);
 
-        // Find and set up the ListView for  devices
+        // Find and set up the ListView for devices
         devicesListView = (ListView) view.findViewById(R.id.devices);
         devicesListView.setAdapter(mDevicesArrayAdapter);
 
@@ -146,11 +167,7 @@ public class CarManagerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        cars = carDatabase.retrieveCars(false);
-
-        selectedDeviceAddresses = new HashSet<>();
-        for (Car car : cars) selectedDeviceAddresses.add(car.btAddress);
-
+        carDatabase = new CarDatabase(getActivity());
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -172,7 +189,12 @@ public class CarManagerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        selectedDeviceAddresses = new HashSet<>();
+        for (Car car : cars) selectedDeviceAddresses.add(car.btAddress);
+
         updateUIAndDoDiscovery();
+
     }
 
     private void updateUIAndDoDiscovery() {
@@ -265,45 +287,55 @@ public class CarManagerFragment extends Fragment {
         }
     };
 
-    private class CarListAdapter extends BaseAdapter {
+    public final static class CarViewHolder extends RecyclerView.ViewHolder {
+        private TextView name;
+        private TextView time;
 
-        public void add(Car car) {
-            cars.add(car);
+        public CarViewHolder(View itemView) {
+            super(itemView);
+
+            name = (TextView) itemView.findViewById(R.id.name);
+            time = (TextView) itemView.findViewById(R.id.time);
         }
+    }
 
-        public int getCount() {
-            return cars.size();
-        }
+    public class RecyclerViewCarsAdapter extends
+            RecyclerView.Adapter<CarViewHolder> {
 
-        public Car getItem(int position) {
-            return cars.get(position);
-        }
+        private List<Car> items;
 
-        public long getItemId(int arg0) {
-            return arg0;
-        }
-
-        public View getView(final int position, View convertView, ViewGroup parent) {
-
-            final View view;
-
-            // Code for recycling views
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflater.inflate(R.layout.fragment_car_details, null);
-            } else {
-                view = convertView;
+        RecyclerViewCarsAdapter(List<Car> modelData) {
+            if (modelData == null) {
+                throw new IllegalArgumentException(
+                        "modelData must not be null");
             }
+            this.items = modelData;
+        }
 
-            final Car car = getItem(position);
+        @Override
+        public CarViewHolder onCreateViewHolder(
+                ViewGroup viewGroup, int viewType) {
+            View itemView = LayoutInflater.
+                    from(viewGroup.getContext()).
+                    inflate(R.layout.fragment_car_details,
+                            viewGroup,
+                            false);
+            return new CarViewHolder(itemView);
+        }
 
-            final TextView name = (TextView) view.findViewById(R.id.name);
-            name.setText(car.name);
+        @Override
+        public void onBindViewHolder(CarViewHolder viewHolder, int position) {
 
-            final TextView time = (TextView) view.findViewById(R.id.time);
-            time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+            Car car = items.get(position);
 
-            return view;
+            viewHolder.name.setText(car.name);
+            if (car.time != null)
+                viewHolder.time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
         }
     }
 
@@ -313,7 +345,7 @@ public class CarManagerFragment extends Fragment {
         ArrayList<BluetoothDevice> mDevices;
 
         DeviceListAdapter() {
-            mDevices = new ArrayList<BluetoothDevice>();
+            mDevices = new ArrayList<>();
         }
 
         public void setDevices(Set<BluetoothDevice> devices) {
@@ -322,7 +354,7 @@ public class CarManagerFragment extends Fragment {
         }
 
         public void add(BluetoothDevice device) {
-            if (selectedDeviceAddresses.contains(device.getAddress()))
+            if (!selectedDeviceAddresses.contains(device.getAddress()))
                 mDevices.add(device);
         }
 
@@ -357,7 +389,6 @@ public class CarManagerFragment extends Fragment {
             button.setText(device.getName());
 
 
-
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -390,7 +421,9 @@ public class CarManagerFragment extends Fragment {
     }
 
     private void onCarAdded(Car car) {
-
+        cars.add(car);
+        adapter.notifyDataSetChanged();
+        mDevicesArrayAdapter.notifyDataSetChanged();
     }
 
     public interface DeviceSelectionLoadingListener {

@@ -77,7 +77,7 @@ public class Car implements Parcelable {
 
         Car car = (Car) o;
 
-        if (!id.equals(car.id)) return false;
+        if (!btAddress.equals(car.btAddress)) return false;
 
         return true;
     }
