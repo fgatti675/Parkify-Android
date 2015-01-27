@@ -1,4 +1,4 @@
-package com.bahpps.cahue.deviceSelection;
+package com.bahpps.cahue.cars;
 
 
 import android.app.Activity;
@@ -11,6 +11,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,9 +23,11 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.util.DividerItemDecoration;
 import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,12 +40,14 @@ public class DeviceSelectionFragment extends Fragment {
     // Debugging
     private static final String TAG = DeviceSelectionFragment.class.getSimpleName();
 
+    private CarDatabase carDatabase;
+
     // Member fields
     private BluetoothAdapter mBtAdapter;
     private DeviceListAdapter mDevicesArrayAdapter;
 
     private Button enableBTButton;
-    private ListView pairedListView;
+    private RecyclerView pairedListView;
 
     private Set<String> selectedDeviceAddresses;
 
@@ -63,7 +70,7 @@ public class DeviceSelectionFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_car_manager, container, false);
+        View view = inflater.inflate(R.layout.fragment_device_selection, container, false);
 
         enableBTButton = (Button) view.findViewById(R.id.enable_bt);
         enableBTButton.setOnClickListener(new View.OnClickListener() {
@@ -77,8 +84,12 @@ public class DeviceSelectionFragment extends Fragment {
         mDevicesArrayAdapter = new DeviceListAdapter();
 
         // Find and set up the ListView for paired devices
-        pairedListView = (ListView) view.findViewById(R.id.devices);
+        pairedListView = (RecyclerView) view.findViewById(R.id.devices);
         pairedListView.setAdapter(mDevicesArrayAdapter);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        pairedListView.setLayoutManager(layoutManager);
 
         return view;
     }
@@ -89,8 +100,7 @@ public class DeviceSelectionFragment extends Fragment {
 
         // If there are paired devices, add each one to the ArrayAdapter
         if (!pairedDevices.isEmpty()) {
-            mDevicesArrayAdapter.setDevices(pairedDevices);
-            mDevicesArrayAdapter.notifyDataSetChanged();
+            mDevicesArrayAdapter.setDevices(new ArrayList<BluetoothDevice>(pairedDevices));
         }
     }
 
@@ -127,7 +137,8 @@ public class DeviceSelectionFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        selectedDeviceAddresses = Util.getPairedDevices(getActivity());
+        carDatabase = new CarDatabase(getActivity());
+        selectedDeviceAddresses = carDatabase.getPairedBTAddresses();
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -157,7 +168,7 @@ public class DeviceSelectionFragment extends Fragment {
 
         setBondedDevices();
 
-        if(mBtAdapter.isEnabled()){
+        if (mBtAdapter.isEnabled()) {
             doDiscovery();
         }
     }
@@ -226,11 +237,6 @@ public class DeviceSelectionFragment extends Fragment {
 
                 mListener.devicesBeingLoaded(false);
 
-                if (mDevicesArrayAdapter.getCount() == 0) {
-                    // String noDevices = getResources().getText(
-                    // R.string.none_found).toString();
-                    // mNewDevicesArrayAdapter.add(noDevices);
-                }
             }
 
             // Update UI and discovery if BT state changed
@@ -242,86 +248,62 @@ public class DeviceSelectionFragment extends Fragment {
         }
     };
 
+    private class DeviceViewHolder extends RecyclerView.ViewHolder {
 
-    private class DeviceListAdapter extends BaseAdapter {
+        Button button;
 
-        ArrayList<BluetoothDevice> mDevices;
+        public DeviceViewHolder(View itemView) {
+            super(itemView);
+            button = (Button) itemView.findViewById(R.id.device);
+        }
+    }
+
+    private class DeviceListAdapter extends RecyclerView.Adapter<DeviceViewHolder> {
+
+        List<BluetoothDevice> mDevices;
 
         DeviceListAdapter() {
             mDevices = new ArrayList<BluetoothDevice>();
         }
 
-        public void setDevices(Set<BluetoothDevice> devices) {
-            mDevices = new ArrayList<BluetoothDevice>(devices);
+        @Override
+        public DeviceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext()).
+                    inflate(R.layout.list_device_item,
+                            parent,
+                            false);
+
+            return new DeviceViewHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(DeviceViewHolder holder, int position) {
+            BluetoothDevice device = mDevices.get(position);
+            holder.button.setText(device.getName());
+            holder.button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO
+                }
+            });
+
         }
 
         public void add(BluetoothDevice device) {
-            mDevices.add(device);
+            if (!selectedDeviceAddresses.contains(device.getAddress()))
+                mDevices.add(device);
+            notifyItemInserted(mDevices.size());
         }
 
-        public int getCount() {
+
+        @Override
+        public int getItemCount() {
             return mDevices.size();
         }
 
-        public BluetoothDevice getItem(int position) {
-            return mDevices.get(position);
-        }
-
-        public long getItemId(int arg0) {
-            return arg0;
-        }
-
-        public View getView(final int position, View convertView, ViewGroup parent) {
-
-            final View view;
-
-            // Code for recycling views
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflater.inflate(R.layout.list_device_item, null);
-            } else {
-                view = convertView;
-            }
-
-            final BluetoothDevice device = mDevices.get(position);
-
-            // We set the visibility of the check image
-//            final CheckBox checkBox = (CheckBox) view.findViewById(R.id.device);
-//            boolean contains = selectedDeviceAddresses.contains(device.getAddress());
-//            checkBox.setChecked(contains);
-//
-//            view.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                    checkBox.callOnClick();
-//
-//                }
-//            });
-//
-//            checkBox.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                    String name = device.getName();
-//                    String address = device.getAddress();
-//
-//                    if (checkBox.isChecked()) {
-//                        selectedDeviceAddresses.add(address);
-//                        Log.d(TAG, "Added: " + name + " " + address);
-//                    } else {
-//                        selectedDeviceAddresses.remove(address);
-//                        Log.d(TAG, "Removed: " + name + " " + address);
-//                    }
-//
-//                    Util.setPairedDevices(getActivity(), selectedDeviceAddresses);
-//
-//                }
-//            });
-//
-//            checkBox.setText(device.getName());
-
-            return view;
+        public void setDevices(List<BluetoothDevice> devices) {
+            this.mDevices = devices;
+            notifyDataSetChanged();
         }
     }
 

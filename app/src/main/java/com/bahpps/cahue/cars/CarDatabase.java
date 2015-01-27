@@ -10,6 +10,7 @@ import android.location.Location;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ public class CarDatabase extends SQLiteOpenHelper {
      */
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + Car.TABLE_NAME + " (" +
-                    Car.COLUMN_ID + TYPE_TEXT +  " PRIMARY KEY" + COMMA_SEP +
+                    Car.COLUMN_ID + TYPE_TEXT + " PRIMARY KEY" + COMMA_SEP +
                     Car.COLUMN_NAME + TYPE_TEXT + COMMA_SEP +
                     Car.COLUMN_BT_ADDRESS + TYPE_TEXT + COMMA_SEP +
                     Car.COLUMN_LATITUDE + TYPE_REAL + COMMA_SEP +
@@ -100,6 +101,23 @@ public class CarDatabase extends SQLiteOpenHelper {
         database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
         database.endTransaction();
 
+    }
+
+
+    public Set<String> getPairedBTAddresses() {
+        Set<String> addresses = new HashSet<>();
+
+        Cursor cursor = getReadableDatabase().query(true,
+                Car.TABLE_NAME,
+                new String[]{Car.COLUMN_BT_ADDRESS},
+                Car.COLUMN_BT_ADDRESS + " IS NOT NULL",
+                null, null, null, null, null);
+
+        while (cursor.moveToNext()) {
+            addresses.add(cursor.getString(0));
+        }
+
+        return addresses;
     }
 
     /**

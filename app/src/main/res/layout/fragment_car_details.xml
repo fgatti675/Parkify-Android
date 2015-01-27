@@ -1,61 +1,72 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_gravity="center"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="@dimen/large_padding"
-    android:background="@color/background_material_light"
-    tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
+    card_view:cardCornerRadius="4dp">
 
-    <ImageView
-        android:id="@+id/spot_image"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_icon_car_red"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"/>
-
-    <LinearLayout
-        android:paddingLeft="@dimen/large_padding"
-        android:orientation="vertical"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/spot_image"
-        android:layout_toRightOf="@+id/spot_image"
-        android:id="@+id/linearLayout">
+        android:padding="@dimen/large_padding"
+        android:background="@color/background_material_light"
+        tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
 
-        <TextView
-            android:id="@+id/name"
+        <ImageView
+            android:id="@+id/spot_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_icon_car_red"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true" />
+
+        <LinearLayout
+            android:paddingLeft="@dimen/large_padding"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            tools:text="NAME" />
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/spot_image"
+            android:layout_toRightOf="@+id/spot_image"
+            android:id="@+id/linearLayout">
 
-        <TextView
-            android:id="@+id/time"
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                tools:text="NAME" />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="TIME" />
+
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="DISTANCE" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:cahue="http://schemas.android.com/apk/res-auto"
+            cahue:theme="@style/ActionBar.Details"
+            cahue:popupTheme="@style/ActionBar.DetailsPopupThemeOverlay"
+            android:id="@+id/car_toolbar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="TIME" />
+            android:layout_centerVertical="true"
+            android:layout_alignEnd="@+id/linearLayout"
+            android:layout_alignRight="@+id/linearLayout"
+            android:gravity="right">
 
-        <TextView
-            android:id="@+id/distance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:text="DISTANCE"/>
+        </android.support.v7.widget.Toolbar>
 
-    </LinearLayout>
-
-    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:cahue="http://schemas.android.com/apk/res-auto"
-        cahue:theme="@style/ActionBar.Details"
-        cahue:popupTheme="@style/ActionBar.DetailsPopupThemeOverlay"
-        android:id="@+id/car_toolbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignEnd="@+id/linearLayout"
-        android:gravity="right">
-    </android.support.v7.widget.Toolbar>
-
-</RelativeLayout>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

@@ -1,47 +1,13 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
+    android:orientation="vertical"
     android:gravity="center">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/transparent"
-        android:gravity="center"
-        android:padding="@dimen/large_padding">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/cardList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/title_dialog"
-            android:background="@color/transparent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/select_device_long" />
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/activate_bluetooth"
-            android:theme="@style/CahueTheme.ButtonAccent"
-            android:id="@+id/enable_bt"
-            android:layout_gravity="center_horizontal" />
-
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/cardList"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
-
-        <ListView
-            android:id="@+id/devices"
-            android:background="@color/transparent"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>
