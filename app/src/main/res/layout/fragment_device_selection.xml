@@ -12,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
         android:padding="@dimen/large_padding">
 
         <TextView
@@ -28,12 +27,6 @@
             android:text="@string/activate_bluetooth"
             android:theme="@style/CahueTheme.ButtonAccent"
             android:layout_gravity="center_horizontal" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/devices"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

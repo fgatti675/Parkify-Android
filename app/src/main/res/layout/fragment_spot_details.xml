@@ -1,43 +1,54 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_gravity="center"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="@dimen/large_padding"
-    android:background="@color/background_material_light"
-    tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
+    card_view:cardCornerRadius="4dp">
 
-    <ImageView
-        android:id="@+id/spot_image"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:src="@drawable/spot_rectangle"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
-
-    <LinearLayout
-        android:paddingLeft="@dimen/large_padding"
-        android:orientation="vertical"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/spot_image">
+        android:padding="@dimen/large_padding"
+        tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
 
-        <TextView
-            android:id="@+id/time"
+        <ImageView
+            android:id="@+id/spot_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:src="@drawable/spot_rectangle"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true" />
+
+        <LinearLayout
+            android:paddingLeft="@dimen/large_padding"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            tools:text="@string/time_stub" />
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/spot_image"
+            android:layout_toRightOf="@+id/spot_image">
 
-        <TextView
-            android:id="@+id/distance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:text="@string/distance_stub"/>
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                tools:text="TIME" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="DISTANCE" />
 
-</RelativeLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
 

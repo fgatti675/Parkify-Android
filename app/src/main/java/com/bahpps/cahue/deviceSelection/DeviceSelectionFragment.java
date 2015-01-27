@@ -77,7 +77,7 @@ public class DeviceSelectionFragment extends Fragment {
         mDevicesArrayAdapter = new DeviceListAdapter();
 
         // Find and set up the ListView for paired devices
-        pairedListView = (ListView) view.findViewById(R.id.devices);
+//        pairedListView = (ListView) view.findViewById(R.id.devices);
         pairedListView.setAdapter(mDevicesArrayAdapter);
 
         return view;

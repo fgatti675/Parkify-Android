@@ -15,7 +15,7 @@ import com.bahpps.cahue.R;
  * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
  * Intent.
  */
-public class CarManagerActivity extends ActionBarActivity implements DeviceSelectionFragment.DeviceSelectionLoadingListener {
+public class CarManagerActivity extends ActionBarActivity  {
 
     // Debugging
     private static final String TAG = CarManagerActivity.class.getSimpleName();
@@ -48,8 +48,4 @@ public class CarManagerActivity extends ActionBarActivity implements DeviceSelec
     }
 
 
-    @Override
-    public void devicesBeingLoaded(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
-    }
 }

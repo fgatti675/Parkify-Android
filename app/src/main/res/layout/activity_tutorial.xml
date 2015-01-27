@@ -26,7 +26,8 @@
         android:text="@string/next"
         android:id="@+id/next"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -37,7 +38,8 @@
         android:visibility="gone"
         android:id="@+id/ok"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
 
     <FrameLayout
         android:id="@+id/progress_wrapper"
