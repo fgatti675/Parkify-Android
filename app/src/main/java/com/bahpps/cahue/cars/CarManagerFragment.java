@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
@@ -61,6 +62,7 @@ public class CarManagerFragment extends Fragment {
     private Set<String> selectedDeviceAddresses;
 
     private DeviceSelectionLoadingListener mListener;
+    private RecyclerView recyclerView;
 
     /**
      * Use this factory method to create a new instance of
@@ -89,7 +91,7 @@ public class CarManagerFragment extends Fragment {
         /**
          * RecyclerView
          */
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.cardList);
+        recyclerView = (RecyclerView) view.findViewById(R.id.cardList);
 
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -297,7 +299,7 @@ public class CarManagerFragment extends Fragment {
                         Car car = new Car();
                         car.id = UUID.randomUUID().toString();
                         car.btAddress = device.getAddress();
-                        car.name = device.getName();
+//                        car.name = device.getName();
                         addCar(car, device);
                     }
                 });
@@ -384,9 +386,9 @@ public class CarManagerFragment extends Fragment {
         cars.add(car);
         int position = cars.size() - 1;
         adapter.notifyItemInserted(position);
-        int i = devices.indexOf(bluetoothDevice);
-        devices.remove(i);
-        adapter.notifyItemRemoved(cars.size() + 1 + i);
+        int deviceIndex = devices.indexOf(bluetoothDevice);
+        devices.remove(deviceIndex);
+        adapter.notifyItemRemoved(cars.size() + 1 + deviceIndex);
         layoutManager.scrollToPosition(position);
     }
 
@@ -398,24 +400,24 @@ public class CarManagerFragment extends Fragment {
         }
     }
 
-
     public interface DeviceSelectionLoadingListener {
 
         public void devicesBeingLoaded(boolean loading);
 
     }
 
-
     public final static class CarViewHolder extends RecyclerView.ViewHolder {
 
         private TextView name;
         private TextView time;
+        private EditText nameEdit;
 
         public CarViewHolder(View itemView) {
             super(itemView);
 
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
+            nameEdit = (EditText) itemView.findViewById(R.id.name_edit);
         }
 
     }

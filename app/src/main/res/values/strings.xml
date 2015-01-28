@@ -37,4 +37,6 @@
     <string name="remove">Clear car</string>
     <string name="activate_bluetooth">Activate Bluetooth</string>
 
+    <string name="car_name_select">Car name</string>
+
 </resources>

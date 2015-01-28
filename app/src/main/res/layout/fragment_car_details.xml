@@ -22,36 +22,49 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true" />
 
-        <LinearLayout
-            android:paddingLeft="@dimen/large_padding"
-            android:orientation="vertical"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_toEndOf="@+id/spot_image"
             android:layout_toRightOf="@+id/spot_image"
-            android:id="@+id/linearLayout">
+            android:id="@+id/contentLayout"
+            android:layout_centerVertical="true">
 
-            <TextView
-                android:id="@+id/name"
+            <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                tools:text="NAME" />
+                android:visibility="gone"
+                android:hint="@string/car_name_select"
+                android:id="@+id/name_edit" />
 
-            <TextView
-                android:id="@+id/time"
+            <LinearLayout
+                android:paddingLeft="@dimen/large_padding"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="TIME" />
+                android:id="@+id/infoLayout">
 
-            <TextView
-                android:id="@+id/distance"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="DISTANCE" />
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    tools:text="NAME" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="TIME" />
+
+                <TextView
+                    android:id="@+id/distance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="DISTANCE" />
+
+            </LinearLayout>
+        </RelativeLayout>
 
         <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:cahue="http://schemas.android.com/apk/res-auto"
@@ -61,8 +74,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_alignEnd="@+id/linearLayout"
-            android:layout_alignRight="@+id/linearLayout"
+            android:layout_alignEnd="@+id/contentLayout"
+            android:layout_alignRight="@+id/contentLayout"
             android:gravity="right">
 
         </android.support.v7.widget.Toolbar>

@@ -40,5 +40,6 @@
     <string name="cars">Coches</string>
     <string name="purchase_account_error">Necesitas una cuenta asociada al telefono</string>
     <string name="activate_bluetooth">Activar Bluetooth</string>
+    <string name="car_name_select">Nombre del coche</string>
 
 </resources>
