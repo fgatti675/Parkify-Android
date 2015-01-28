@@ -48,9 +48,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".deviceSelection.DeviceSelectionActivity"
-            android:parentActivityName=".MapsActivity" />
 
         <service android:name=".locationServices.ParkedCarService" />
         <service android:name=".locationServices.CarMovedService" />
@@ -97,7 +94,6 @@
 
         <activity
             android:name=".cars.CarManagerActivity"
-            android:label="@string/title_activity_car_manager"
             android:parentActivityName=".MapsActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

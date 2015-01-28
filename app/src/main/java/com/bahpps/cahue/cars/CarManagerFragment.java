@@ -1,16 +1,22 @@
 package com.bahpps.cahue.cars;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +48,7 @@ public class CarManagerFragment extends Fragment {
 
     private List<BluetoothDevice> devices;
 
+    private LinearLayoutManager layoutManager;
     private RecyclerViewCarsAdapter adapter;
 
     /**
@@ -52,6 +59,8 @@ public class CarManagerFragment extends Fragment {
     private Button enableBTButton;
 
     private Set<String> selectedDeviceAddresses;
+
+    private DeviceSelectionLoadingListener mListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -67,6 +76,12 @@ public class CarManagerFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_car_manager, container, false);
@@ -76,12 +91,9 @@ public class CarManagerFragment extends Fragment {
          */
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.cardList);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-
-        devices = new ArrayList<>();
-        cars = carDatabase.retrieveCars(false);
 
         adapter = new RecyclerViewCarsAdapter();
 
@@ -101,11 +113,6 @@ public class CarManagerFragment extends Fragment {
 
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         carDatabase = new CarDatabase(getActivity());
@@ -114,12 +121,81 @@ public class CarManagerFragment extends Fragment {
 
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        devices = new ArrayList<>();
+        cars = carDatabase.retrieveCars(false);
+
+        setBondedDevices();
+
     }
 
-
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
+        // Make sure we're not doing discovery anymore
+        if (mBtAdapter != null) {
+            mBtAdapter.cancelDiscovery();
+        }
+
+    }
+
+    // The BroadcastReceiver that listens for discovered devices and
+    // changes the title when discovery is finished
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                // If it's already paired, skip it, because it's been listed
+                // already
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    addDevice(device);
+                }
+
+            }
+
+            // When discovery is finished, remove progress bar
+            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                mListener.devicesBeingLoaded(false);
+
+            }
+
+            // Update UI and discovery if BT state changed
+            else if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+
+                updateEnableBTButton();
+                setBondedDevices();
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+                if (state == BluetoothAdapter.STATE_ON) {
+                    doDiscovery();
+                }
+
+            }
+        }
+    };
+
+    /**
+     * Start device discover with the BluetoothAdapter
+     */
+    private void doDiscovery() {
+
+        if (mBtAdapter.isEnabled() && !mBtAdapter.isDiscovering()) {
+            Log.d(TAG, "doDiscovery");
+
+            // Indicate scanning in the title
+            mListener.devicesBeingLoaded(true);
+
+            // Request discover from BluetoothAdapter
+            mBtAdapter.startDiscovery();
+        }
+    }
+
+    public boolean areDevicesBeingLoaded() {
+        return mBtAdapter != null && mBtAdapter.isDiscovering();
     }
 
     public class RecyclerViewCarsAdapter extends
@@ -168,8 +244,6 @@ public class CarManagerFragment extends Fragment {
                         startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
                     }
                 });
-
-                // Find and set up the ListView for paired devices
                 updateEnableBTButton();
 
                 return new SimpleViewHolder(itemView);
@@ -214,8 +288,8 @@ public class CarManagerFragment extends Fragment {
 
                 DeviceViewHolder deviceViewHolder = (DeviceViewHolder) viewHolder;
                 final BluetoothDevice device = devices.get(position - cars.size() - 1);
-                deviceViewHolder.button.setText(device.getName());
-                deviceViewHolder.button.setOnClickListener(new View.OnClickListener() {
+                deviceViewHolder.title.setText(device.getName());
+                deviceViewHolder.layout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
@@ -239,6 +313,12 @@ public class CarManagerFragment extends Fragment {
 
 
     private void setBondedDevices() {
+
+        if (!devices.isEmpty()) {
+            devices.clear();
+            adapter.notifyDataSetChanged();
+        }
+
         // Get a set of currently paired devices
         Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
         devices.addAll(bondedDevices);
@@ -261,18 +341,63 @@ public class CarManagerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        setBondedDevices();
+
+        doDiscovery();
         updateEnableBTButton();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (DeviceSelectionLoadingListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement DeviceSelectionLoadingListener");
+        }
+
+        // Register for broadcasts when a device is discovered
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        activity.registerReceiver(mReceiver, filter);
+
+        // Register for broadcasts when discovery has finished
+        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        activity.registerReceiver(mReceiver, filter);
+
+        // Register for broadcasts when bt has been disconnected or disconnected
+        filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        activity.registerReceiver(mReceiver, filter);
+
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+
+        // Unregister broadcast listeners
+        getActivity().unregisterReceiver(mReceiver);
     }
 
 
     private void addCar(Car car, BluetoothDevice bluetoothDevice) {
         cars.add(car);
-        adapter.notifyItemInserted(cars.size() - 1);
+        int position = cars.size() - 1;
+        adapter.notifyItemInserted(position);
         int i = devices.indexOf(bluetoothDevice);
         devices.remove(i);
         adapter.notifyItemRemoved(cars.size() + 1 + i);
+        layoutManager.scrollToPosition(position);
     }
+
+
+    private void addDevice(BluetoothDevice device) {
+        if(!devices.contains(device)) {
+            devices.add(device);
+            adapter.notifyItemInserted(cars.size() + devices.size());
+        }
+    }
+
 
     public interface DeviceSelectionLoadingListener {
 
@@ -282,6 +407,7 @@ public class CarManagerFragment extends Fragment {
 
 
     public final static class CarViewHolder extends RecyclerView.ViewHolder {
+
         private TextView name;
         private TextView time;
 
@@ -291,14 +417,18 @@ public class CarManagerFragment extends Fragment {
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
         }
+
     }
 
     public final static class DeviceViewHolder extends RecyclerView.ViewHolder {
-        private Button button;
+
+        private View layout;
+        private TextView title;
 
         public DeviceViewHolder(View view) {
             super(view);
-            button = (Button) view.findViewById(R.id.device);
+            layout = view.findViewById(R.id.device_item);
+            title = (TextView) view.findViewById(R.id.device);
         }
     }
 

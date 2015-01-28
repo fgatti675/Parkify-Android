@@ -17,7 +17,6 @@ import com.bahpps.cahue.R;
  */
 public class DeviceSelectionActivity extends ActionBarActivity implements DeviceSelectionFragment.DeviceSelectionLoadingListener {
 
-    // Debugging
     private static final String TAG = DeviceSelectionActivity.class.getSimpleName();
 
     private ProgressBar progressBar;
@@ -30,7 +29,7 @@ public class DeviceSelectionActivity extends ActionBarActivity implements Device
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 5);
-        toolbar.setTitle(R.string.select_device);
+        toolbar.setTitle(R.string.cars);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
         setSupportActionBar(toolbar);
 
