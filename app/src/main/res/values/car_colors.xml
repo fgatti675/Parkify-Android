@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <array name="rainbow_colors">
+        <item>@color/car_white</item>
+        <item>@color/car_black</item>
+        <item>@color/car_silver</item>
+        <item>@color/car_gray</item>
+        <item>@color/car_red</item>
+        <item>@color/car_blue</item>
+        <item>@color/car_brown</item>
+        <item>@color/car_green</item>
+        <item>@color/car_yellow</item>
+        <item>@color/car_gold</item>
+        <item>@color/car_orange</item>
+        <item>@color/car_pink</item>
+    </array>
+
+    <array name="rainbow_names">
+        <item>@string/car_white</item>
+        <item>@string/car_black</item>
+        <item>@string/car_silver</item>
+        <item>@string/car_gray</item>
+        <item>@string/car_red</item>
+        <item>@string/car_blue</item>
+        <item>@string/car_brown</item>
+        <item>@string/car_green</item>
+        <item>@string/car_yellow</item>
+        <item>@string/car_gold</item>
+        <item>@string/car_orange</item>
+        <item>@string/car_pink</item>
+    </array>
+
+    <string name="car_white">White</string>
+    <string name="car_black">Black</string>
+    <string name="car_silver">Silver</string>
+    <string name="car_gray">Gray</string>
+    <string name="car_red">Red</string>
+    <string name="car_blue">Blue</string>
+    <string name="car_brown">Brown</string>
+    <string name="car_green">Green</string>
+    <string name="car_yellow">Yellow</string>
+    <string name="car_gold">Gol</string>
+    <string name="car_orange">Orange</string>
+    <string name="car_pink">Pink</string>
+
+</resources>

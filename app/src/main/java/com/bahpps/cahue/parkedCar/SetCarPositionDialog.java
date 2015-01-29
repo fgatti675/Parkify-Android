@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.util.Log;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.CarManagerActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ import java.util.List;
  */
 public class SetCarPositionDialog extends DialogFragment {
 
-    private final static String TAG = "SetCarPositionDialog";
+    private final static String TAG = SetCarPositionDialog.class.getSimpleName();
     private static final String ARG_LOCATION = "arg_location";
 
     private Location location;
@@ -65,8 +67,9 @@ public class SetCarPositionDialog extends DialogFragment {
         final List<Car> cars = carDatabase.retrieveCars(false);
 
         // there has to be a default car
-        if (cars.isEmpty())
-            throw new IllegalStateException("CarLocationManager.getAvailableCars needs to return always a default car at least");
+        if (cars.isEmpty()) {
+            return getEmptyDialog();
+        }
 
         // fill option names
         ArrayList<String> options = new ArrayList();
@@ -82,9 +85,9 @@ public class SetCarPositionDialog extends DialogFragment {
 
         int itemIndex = 0;
         boolean lastSelected = false;
-        if(lastSavedId != null){
-            for(Car car:cars){
-                if(car.btAddress.equals(lastSavedId)){
+        if (lastSavedId != null) {
+            for (Car car : cars) {
+                if (car.btAddress.equals(lastSavedId)) {
                     selected = car;
                     lastSelected = true;
                     break;
@@ -122,4 +125,18 @@ public class SetCarPositionDialog extends DialogFragment {
     }
 
 
+    public Dialog getEmptyDialog() {
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder
+                .setTitle(R.string.no_cars)
+                .setMessage(R.string.no_cars_long)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int i) {
+                        getActivity().startActivity(new Intent(getActivity(), CarManagerActivity.class));
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null);
+        return  builder.create();
+    }
 }

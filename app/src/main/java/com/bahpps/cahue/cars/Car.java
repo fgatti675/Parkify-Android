@@ -20,6 +20,7 @@ public class Car implements Parcelable {
     public static final String COLUMN_LONGITUDE = "longitude";
     public static final String COLUMN_ACCURACY = "accuracy";
     public static final String COLUMN_TIME = "time";
+    public static final String COLUMN_COLOR = "color";
 
     public String id;
 
@@ -30,6 +31,8 @@ public class Car implements Parcelable {
     public Location location;
 
     public Date time;
+
+    public int color;
 
 
     public static final Parcelable.Creator<Car> CREATOR =
@@ -51,6 +54,7 @@ public class Car implements Parcelable {
         btAddress = parcel.readString();
         location = parcel.readParcelable(Location.class.getClassLoader());
         time = (Date) parcel.readSerializable();
+        color = parcel.readInt();
     }
 
     public Car() {
@@ -69,6 +73,7 @@ public class Car implements Parcelable {
         parcel.writeString(btAddress);
         parcel.writeParcelable(location, i);
         parcel.writeSerializable(time);
+        parcel.writeInt(color);
     }
 
     @Override

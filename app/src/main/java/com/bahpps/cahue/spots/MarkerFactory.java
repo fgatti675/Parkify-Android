@@ -1,4 +1,4 @@
-package com.bahpps.cahue.util;
+package com.bahpps.cahue.spots;
 
 import android.content.Context;
 import android.graphics.Bitmap;

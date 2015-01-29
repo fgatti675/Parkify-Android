@@ -20,6 +20,8 @@
     <string name="bt_linked_to">Car location will be stored on disconnection from %1$s</string>
     <string name="car_was_here">Car was here %s</string>
     <string name="car_dialog_text">Would you like to set the car position here?</string>
+    <string name="no_cars">No cars!</string>
+    <string name="no_cars_long">You didn\'t set up any cars. Create one now\?</string>
     <string name="car">Car</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

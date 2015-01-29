@@ -22,7 +22,7 @@ public class CarDatabase extends SQLiteOpenHelper {
     /**
      * Schema version.
      */
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     /**
      * Filename for SQLite file.
@@ -42,6 +42,7 @@ public class CarDatabase extends SQLiteOpenHelper {
                     Car.COLUMN_ID + TYPE_TEXT + " PRIMARY KEY" + COMMA_SEP +
                     Car.COLUMN_NAME + TYPE_TEXT + COMMA_SEP +
                     Car.COLUMN_BT_ADDRESS + TYPE_TEXT + COMMA_SEP +
+                    Car.COLUMN_COLOR + TYPE_INTEGER + COMMA_SEP +
                     Car.COLUMN_LATITUDE + TYPE_REAL + COMMA_SEP +
                     Car.COLUMN_LONGITUDE + TYPE_REAL + COMMA_SEP +
                     Car.COLUMN_ACCURACY + TYPE_REAL + COMMA_SEP +
@@ -56,10 +57,11 @@ public class CarDatabase extends SQLiteOpenHelper {
             Car.COLUMN_ID,
             Car.COLUMN_NAME,
             Car.COLUMN_BT_ADDRESS,
+            Car.COLUMN_COLOR,
             Car.COLUMN_LATITUDE,
             Car.COLUMN_LONGITUDE,
             Car.COLUMN_ACCURACY,
-            Car.COLUMN_TIME,
+            Car.COLUMN_TIME
     };
 
     public CarDatabase(Context context) {
@@ -73,8 +75,8 @@ public class CarDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        db.execSQL(SQL_DELETE_ENTRIES);
-//        onCreate(db);
+        db.execSQL(SQL_DELETE_ENTRIES);
+        onCreate(db);
     }
 
     /**
@@ -90,6 +92,7 @@ public class CarDatabase extends SQLiteOpenHelper {
         values.put(Car.COLUMN_ID, car.id);
         values.put(Car.COLUMN_NAME, car.name);
         values.put(Car.COLUMN_BT_ADDRESS, car.btAddress);
+        values.put(Car.COLUMN_COLOR, car.color);
 
         if (car.location != null) {
             values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
@@ -163,22 +166,15 @@ public class CarDatabase extends SQLiteOpenHelper {
 
     }
 
-
-    private Car setBTName(String btAddress, Set<BluetoothDevice> bondedBTDevices) {
-        Car car = new Car();
-
-        return car;
-    }
-
     public void removeStoredLocation(Car car) {
         SQLiteDatabase database = getWritableDatabase();
         database.beginTransaction();
 
         ContentValues values = new ContentValues();
-        values.put(Car.COLUMN_LATITUDE, -1);
-        values.put(Car.COLUMN_LONGITUDE, -1);
-        values.put(Car.COLUMN_ACCURACY, -1);
-        values.put(Car.COLUMN_TIME, -1);
+        values.put(Car.COLUMN_LATITUDE, (Double) null);
+        values.put(Car.COLUMN_LONGITUDE, (Double) null);
+        values.put(Car.COLUMN_ACCURACY, (Double) null);
+        values.put(Car.COLUMN_TIME, (Long) null);
 
         database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = ?s", new String[]{car.id});
 
@@ -191,17 +187,19 @@ public class CarDatabase extends SQLiteOpenHelper {
         car.id = cursor.getString(0);
         car.name = cursor.getString(1);
         car.btAddress = cursor.getString(2);
+        car.color = cursor.getInt(3);
 
-        double latitude = cursor.getDouble(3);
-        double longitude = cursor.getDouble(4);
-        float accuracy = (float) cursor.getDouble(5);
+        double latitude = cursor.getDouble(4);
+        double longitude = cursor.getDouble(5);
+        float accuracy = cursor.getFloat(6);
+
         if (latitude > 0 && longitude > 0) {
             Location location = new Location("db");
             location.setLatitude(latitude);
             location.setLongitude(longitude);
             location.setAccuracy(accuracy);
             car.location = location;
-            car.time = new Date(cursor.getLong(6));
+            car.time = new Date(cursor.getLong(7));
         }
 
         return car;

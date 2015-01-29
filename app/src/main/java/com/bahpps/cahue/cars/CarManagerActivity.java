@@ -16,11 +16,14 @@ import com.bahpps.cahue.R;
  * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
  * Intent.
  */
-public class CarManagerActivity extends ActionBarActivity implements CarManagerFragment.DeviceSelectionLoadingListener {
+public class CarManagerActivity extends ActionBarActivity
+        implements CarManagerFragment.DeviceSelectionLoadingListener,
+        EditCarDialog.CarEditedListener {
 
     private static final String TAG = CarManagerActivity.class.getSimpleName();
 
     private ProgressBar progressBar;
+    private CarManagerFragment carFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +34,7 @@ public class CarManagerActivity extends ActionBarActivity implements CarManagerF
         /**
          * Get an instance of the fragment
          */
-        CarManagerFragment carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
+        carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
 //
 //        /**
 //         * There is no saved instance so we create a few things
@@ -71,5 +74,10 @@ public class CarManagerActivity extends ActionBarActivity implements CarManagerF
     @Override
     public void devicesBeingLoaded(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onCarEdited(Car car, boolean newCar) {
+        carFragment.onCarEdited(car, newCar);
     }
 }

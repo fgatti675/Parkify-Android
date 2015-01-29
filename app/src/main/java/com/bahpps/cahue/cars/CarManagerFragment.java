@@ -40,7 +40,7 @@ import java.util.UUID;
  * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
  * Intent.
  */
-public class CarManagerFragment extends Fragment {
+public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener {
 
     // Debugging
     private static final String TAG = CarManagerFragment.class.getSimpleName();
@@ -67,10 +67,6 @@ public class CarManagerFragment extends Fragment {
     private DeviceSelectionLoadingListener mListener;
     private RecyclerView recyclerView;
 
-    /**
-     * Cars that are being edited
-     */
-    private Set<Car> carsBeingEdited;
 
     /**
      * Use this factory method to create a new instance of
@@ -134,7 +130,6 @@ public class CarManagerFragment extends Fragment {
 
         devices = new ArrayList<>();
         cars = carDatabase.retrieveCars(false);
-        carsBeingEdited = new HashSet<>();
 
         setBondedDevices();
 
@@ -207,6 +202,39 @@ public class CarManagerFragment extends Fragment {
 
     public boolean areDevicesBeingLoaded() {
         return mBtAdapter != null && mBtAdapter.isDiscovering();
+    }
+
+    @Override
+    public void onCarEdited(Car car, boolean newCar) {
+
+        cars.add(car);
+
+        /**
+         * Car's position is simple
+         */
+        int position = cars.size() - 1;
+        adapter.notifyItemInserted(position);
+
+        /**
+         * Find device with the same address as the car
+         */
+        BluetoothDevice device = null;
+        for (BluetoothDevice d : devices) {
+            if (d.getAddress().equals(car.btAddress)) {
+                device = d;
+                break;
+            }
+        }
+
+        /**
+         * The device with the address of the car should not be listed anymore
+         */
+        if (device != null) {
+            int deviceIndex = devices.indexOf(device);
+            devices.remove(deviceIndex);
+            adapter.notifyItemRemoved(cars.size() + 1 + deviceIndex);
+            layoutManager.scrollToPosition(position);
+        }
     }
 
     public class RecyclerViewCarsAdapter extends
@@ -286,7 +314,7 @@ public class CarManagerFragment extends Fragment {
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
                 Car car = cars.get(position);
-                carViewHolder.bind(car, carsBeingEdited.contains(car));
+                carViewHolder.bind(car);
 
             }
 
@@ -393,19 +421,8 @@ public class CarManagerFragment extends Fragment {
         car.btAddress = device.getAddress();
         car.name = device.getName();
 
-        carsBeingEdited.add(car);
+        EditCarDialog.newInstance(car, true).show(getFragmentManager(), "EditCarDialog");
 
-        cars.add(car);
-
-        /**
-         * Car's position is simple
-         */
-        int position = cars.size() - 1;
-        adapter.notifyItemInserted(position);
-        int deviceIndex = devices.indexOf(device);
-        devices.remove(deviceIndex);
-        adapter.notifyItemRemoved(cars.size() + 1 + deviceIndex);
-        layoutManager.scrollToPosition(position);
     }
 
 
@@ -424,82 +441,38 @@ public class CarManagerFragment extends Fragment {
 
     public final static class CarViewHolder extends RecyclerView.ViewHolder {
 
-        private Car car;
 
         private Toolbar toolbar;
-        private LinearLayout infoLayout;
         private TextView name;
         private TextView time;
-        private EditText nameEdit;
 
         public CarViewHolder(View itemView) {
             super(itemView);
 
             toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
-            infoLayout = (LinearLayout) itemView.findViewById(R.id.infoLayout);
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
-            nameEdit = (EditText) itemView.findViewById(R.id.name_edit);
         }
 
-        public void bind(final Car car, final boolean editMode) {
+        public void bind(final Car car) {
 
-            this.car = car;
+            name.setText(car.name);
+            if (car.time != null)
+                time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
 
-            /**
-             * Is this car being edited
-             */
-            if (editMode) {
-
-                infoLayout.setVisibility(View.GONE);
-                nameEdit.setVisibility(View.VISIBLE);
-                nameEdit.setText(car.name);
-                nameEdit.requestFocus();
-
-                toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.car_edit_menu);
-                toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        switch (menuItem.getItemId()) {
-                            case R.id.action_clear:
-                                bind(car, false);
-                                return true;
-                            case R.id.action_save:
-                                car.name = nameEdit.getText().toString();
-                                bind(car, false);
-                                return true;
-                        }
-                        return false;
+            toolbar.getMenu().clear();
+            toolbar.inflateMenu(R.menu.car_list_menu);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_edit:
+                            bind(car);
+                            return true;
                     }
-                });
-            }
-
-            /**
-             * Otherwise just show info
-             */
-            else {
-                infoLayout.setVisibility(View.VISIBLE);
-                nameEdit.setVisibility(View.GONE);
-
-                name.setText(car.name);
-                if (car.time != null)
-                    time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
-
-                toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.car_list_menu);
-                toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        switch (menuItem.getItemId()) {
-                            case R.id.action_edit:
-                                bind(car, true);
-                                return true;
-                        }
-                        return false;
-                    }
-                });
-            }
+                    return false;
+                }
+            });
 
         }
     }

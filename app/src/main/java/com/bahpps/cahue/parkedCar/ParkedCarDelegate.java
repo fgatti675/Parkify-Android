@@ -53,7 +53,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     private boolean following = false;
 
-    private IconGenerator iconFactory;
+    private IconGenerator iconGenerator;
 
     private CameraUpdateListener cameraUpdateListener;
     private GoogleMap mMap;
@@ -129,7 +129,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         this.cameraUpdateListener = cameraUpdateListener;
         this.carSelectedListener = carSelectedListener;
-        iconFactory = new IconGenerator(context);
+        iconGenerator = new IconGenerator(context);
         directionsDelegate = new GMapV2Direction();
 
         updateCarLocation();
@@ -200,8 +200,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         Log.i(TAG, "Setting car in map: " + car);
 
-        iconFactory.setContentRotation(-90);
-        iconFactory.setStyle(IconGenerator.STYLE_RED);
+        iconGenerator.setContentRotation(-90);
+        iconGenerator.setColor(IconGenerator.STYLE_RED);
+
+        iconGenerator.setColor(0xff0099cc); // TODO: check color can be changed like this
 
         // Uses a colored icon.
         LatLng carLatLng = getCarLatLng();
@@ -213,8 +215,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         carMarker = mMap.addMarker(new MarkerOptions()
                 .position(carLatLng)
                 .snippet("")
-                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name.toUpperCase())))
-                .anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()));
+                .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(name.toUpperCase())))
+                .anchor(iconGenerator.getAnchorU(), iconGenerator.getAnchorV()));
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(carLatLng)   //set center

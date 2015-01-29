@@ -3,7 +3,6 @@ package com.bahpps.cahue.spots;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -12,9 +11,7 @@ import android.widget.Toast;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
 import com.bahpps.cahue.spots.query.AreaSpotsQuery;
-import com.bahpps.cahue.spots.query.NearestSpotsQuery;
 import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
-import com.bahpps.cahue.util.MarkerFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.CameraPosition;
