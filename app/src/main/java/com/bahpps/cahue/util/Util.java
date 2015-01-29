@@ -69,7 +69,7 @@ public class Util {
      */
     public static void createUpperToast(Context context, String string, int length) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.custom_toast, null);
+        View layout = inflater.inflate(R.layout.toast_custom, null);
         TextView text = (TextView) layout.findViewById(R.id.error_text);
         text.setText(string);
 

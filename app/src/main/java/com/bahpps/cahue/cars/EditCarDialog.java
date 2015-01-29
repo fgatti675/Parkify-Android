@@ -75,10 +75,21 @@ public class EditCarDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+        /**
+         * Get fields
+         */
         View view = View.inflate(getActivity(), R.layout.fragment_car_edit, null);
         final EditText name = (EditText) view.findViewById(R.id.name_edit);
         final Spinner spinner = (Spinner) view.findViewById(R.id.color_spinner);
-        spinner.setAdapter(new ColorSpinnerAdapter(getActivity()));
+        final ColorSpinnerAdapter spinnerAdapter = new ColorSpinnerAdapter(getActivity());
+        spinner.setAdapter(spinnerAdapter);
+
+        /**
+         * Bind values
+         */
+        name.setText(car.name);
+
+        spinner.setSelection(spinnerAdapter.getColorInPosition(car.color));
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -88,7 +99,7 @@ public class EditCarDialog extends DialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
                         car.name = name.getText().toString();
-                        Object o = spinner.getSelectedItem();
+                        car.color = spinnerAdapter.getColorInPosition(spinner.getSelectedItemPosition());
                         mListener.onCarEdited(car, newCar);
                     }
                 })

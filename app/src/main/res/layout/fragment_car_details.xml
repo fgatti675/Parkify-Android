@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view"
     android:layout_gravity="center"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     cahue:cardCornerRadius="4dp"
     tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">

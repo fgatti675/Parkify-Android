@@ -60,7 +60,8 @@
     <color name="car_red">#B52026</color>
     <color name="car_blue">#396E8E</color>
     <color name="car_brown">#8A6632</color>
-    <color name="car_green">#58652D</color>
+    <color name="car_olive">#58652D</color>
+    <color name="car_green">#ff63a037</color>
     <color name="car_yellow">#fff0f12b</color>
     <color name="car_gold">#CBB677</color>
     <color name="car_orange">#F89021</color>

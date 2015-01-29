@@ -15,6 +15,7 @@ public enum CarColor {
     BLUE(R.string.car_blue, R.color.car_blue),
     BROWN(R.string.car_brown, R.color.car_brown),
     GREEN(R.string.car_green, R.color.car_green),
+    OLIVE(R.string.car_olive, R.color.car_olive),
     YELLOW(R.string.car_yellow, R.color.car_yellow),
     GOLD(R.string.car_gold, R.color.car_gold),
     ORANGE(R.string.car_orange, R.color.car_orange),
