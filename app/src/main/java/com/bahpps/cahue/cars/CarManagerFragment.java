@@ -14,20 +14,23 @@ import android.provider.Settings;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.util.DividerItemDecoration;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -63,6 +66,11 @@ public class CarManagerFragment extends Fragment {
 
     private DeviceSelectionLoadingListener mListener;
     private RecyclerView recyclerView;
+
+    /**
+     * Cars that are being edited
+     */
+    private Set<Car> carsBeingEdited;
 
     /**
      * Use this factory method to create a new instance of
@@ -126,6 +134,7 @@ public class CarManagerFragment extends Fragment {
 
         devices = new ArrayList<>();
         cars = carDatabase.retrieveCars(false);
+        carsBeingEdited = new HashSet<>();
 
         setBondedDevices();
 
@@ -277,10 +286,8 @@ public class CarManagerFragment extends Fragment {
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
                 Car car = cars.get(position);
+                carViewHolder.bind(car, carsBeingEdited.contains(car));
 
-                carViewHolder.name.setText(car.name);
-                if (car.time != null)
-                    carViewHolder.time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
             }
 
             /**
@@ -294,13 +301,7 @@ public class CarManagerFragment extends Fragment {
                 deviceViewHolder.layout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                        // TODO
-                        Car car = new Car();
-                        car.id = UUID.randomUUID().toString();
-                        car.btAddress = device.getAddress();
-//                        car.name = device.getName();
-                        addCar(car, device);
+                        onDeviceSelected(device);
                     }
                 });
 
@@ -382,11 +383,26 @@ public class CarManagerFragment extends Fragment {
     }
 
 
-    private void addCar(Car car, BluetoothDevice bluetoothDevice) {
+    private void onDeviceSelected(BluetoothDevice device) {
+
+        /**
+         * Create a car
+         */
+        Car car = new Car();
+        car.id = UUID.randomUUID().toString();
+        car.btAddress = device.getAddress();
+        car.name = device.getName();
+
+        carsBeingEdited.add(car);
+
         cars.add(car);
+
+        /**
+         * Car's position is simple
+         */
         int position = cars.size() - 1;
         adapter.notifyItemInserted(position);
-        int deviceIndex = devices.indexOf(bluetoothDevice);
+        int deviceIndex = devices.indexOf(device);
         devices.remove(deviceIndex);
         adapter.notifyItemRemoved(cars.size() + 1 + deviceIndex);
         layoutManager.scrollToPosition(position);
@@ -394,7 +410,7 @@ public class CarManagerFragment extends Fragment {
 
 
     private void addDevice(BluetoothDevice device) {
-        if(!devices.contains(device)) {
+        if (!devices.contains(device)) {
             devices.add(device);
             adapter.notifyItemInserted(cars.size() + devices.size());
         }
@@ -408,6 +424,10 @@ public class CarManagerFragment extends Fragment {
 
     public final static class CarViewHolder extends RecyclerView.ViewHolder {
 
+        private Car car;
+
+        private Toolbar toolbar;
+        private LinearLayout infoLayout;
         private TextView name;
         private TextView time;
         private EditText nameEdit;
@@ -415,11 +435,73 @@ public class CarManagerFragment extends Fragment {
         public CarViewHolder(View itemView) {
             super(itemView);
 
+            toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
+            infoLayout = (LinearLayout) itemView.findViewById(R.id.infoLayout);
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
             nameEdit = (EditText) itemView.findViewById(R.id.name_edit);
         }
 
+        public void bind(final Car car, final boolean editMode) {
+
+            this.car = car;
+
+            /**
+             * Is this car being edited
+             */
+            if (editMode) {
+
+                infoLayout.setVisibility(View.GONE);
+                nameEdit.setVisibility(View.VISIBLE);
+                nameEdit.setText(car.name);
+                nameEdit.requestFocus();
+
+                toolbar.getMenu().clear();
+                toolbar.inflateMenu(R.menu.car_edit_menu);
+                toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.action_clear:
+                                bind(car, false);
+                                return true;
+                            case R.id.action_save:
+                                car.name = nameEdit.getText().toString();
+                                bind(car, false);
+                                return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+
+            /**
+             * Otherwise just show info
+             */
+            else {
+                infoLayout.setVisibility(View.VISIBLE);
+                nameEdit.setVisibility(View.GONE);
+
+                name.setText(car.name);
+                if (car.time != null)
+                    time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+
+                toolbar.getMenu().clear();
+                toolbar.inflateMenu(R.menu.car_list_menu);
+                toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.action_edit:
+                                bind(car, true);
+                                return true;
+                        }
+                        return false;
+                    }
+                });
+            }
+
+        }
     }
 
     public final static class DeviceViewHolder extends RecyclerView.ViewHolder {

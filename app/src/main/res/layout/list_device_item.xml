@@ -26,5 +26,4 @@
         android:layout_toRightOf="@+id/add_icon"
         tools:text="Add car" />
 
-
 </RelativeLayout>

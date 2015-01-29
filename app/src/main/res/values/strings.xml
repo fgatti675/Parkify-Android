@@ -38,5 +38,6 @@
     <string name="activate_bluetooth">Activate Bluetooth</string>
 
     <string name="car_name_select">Car name</string>
+    <string name="edit">Edit</string>
 
 </resources>

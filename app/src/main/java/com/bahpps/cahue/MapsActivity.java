@@ -29,7 +29,6 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.cars.CarManagerActivity;
-import com.bahpps.cahue.deviceSelection.DeviceSelectionActivity;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;

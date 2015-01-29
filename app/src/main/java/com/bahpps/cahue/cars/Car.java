@@ -31,6 +31,7 @@ public class Car implements Parcelable {
 
     public Date time;
 
+
     public static final Parcelable.Creator<Car> CREATOR =
             new Parcelable.Creator<Car>() {
                 @Override

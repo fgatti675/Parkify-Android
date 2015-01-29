@@ -41,5 +41,6 @@
     <string name="purchase_account_error">Serve una account </string>
     <string name="activate_bluetooth">Attiva Bluetooth</string>
     <string name="car_name_select">Nome della macchina</string>
+    <string name="edit">Cambia</string>
 
 </resources>

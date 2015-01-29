@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
-import com.bahpps.cahue.deviceSelection.DeviceSelectionFragment;
+import com.bahpps.cahue.cars.CarManagerFragment;
 import com.bahpps.cahue.R;
 
 import java.util.HashMap;
@@ -21,13 +21,13 @@ import java.util.Map;
 
 
 public class TutorialActivity extends ActionBarActivity
-        implements DeviceSelectionFragment.DeviceSelectionLoadingListener, ViewPager.OnPageChangeListener {
+        implements CarManagerFragment.DeviceSelectionLoadingListener, ViewPager.OnPageChangeListener {
 
     // TODO: not used, but it should
     private static final Map<Integer, Class> positionFragmentMap = new HashMap() {{
         put(0, TutorialWelcomeFragment.class);
         put(1, TutorialInstructionsFragment.class);
-        put(2, DeviceSelectionFragment.class);
+        put(2, CarManagerFragment.class);
     }};
 
     private static final int TOTAL_NUMBER_PAGES = 3;
@@ -194,7 +194,7 @@ public class TutorialActivity extends ActionBarActivity
                 case 1:
                     return TutorialInstructionsFragment.newInstance();
                 case 2:
-                    return DeviceSelectionFragment.newInstance();
+                    return CarManagerFragment.newInstance();
             }
             return null;
         }
@@ -212,7 +212,7 @@ public class TutorialActivity extends ActionBarActivity
             if (object instanceof TutorialInstructionsFragment) {
                 view.setTag(1);
             }
-            if (object instanceof DeviceSelectionFragment) {
+            if (object instanceof CarManagerFragment) {
                 view.setTag(2);
             }
             return super.isViewFromObject(view, object);
