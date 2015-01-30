@@ -238,7 +238,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         // TODO: not necessary to create a new instance of this
         CarDatabase carDatabase = new CarDatabase(mContext);
-        carDatabase.removeStoredLocation(car);
+        carDatabase.clearLocation(car);
         car.location = null;
         clear();
     }

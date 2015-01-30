@@ -5,6 +5,7 @@
     android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_padding"
     cahue:cardCornerRadius="4dp"
     tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
 

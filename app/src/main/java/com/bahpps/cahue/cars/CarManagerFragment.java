@@ -62,10 +62,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     private Button enableBTButton;
 
-    private Set<String> selectedDeviceAddresses;
-
     private DeviceSelectionLoadingListener mListener;
     private RecyclerView recyclerView;
+    private Set<String> selectedDeviceAddresses;
 
 
     /**
@@ -113,6 +112,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
 //        recyclerView.addOnItemTouchListener(this);
 
+        setBondedDevices();
 
         return view;
     }
@@ -123,15 +123,11 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         super.onCreate(savedInstanceState);
         carDatabase = new CarDatabase(getActivity());
 
-        selectedDeviceAddresses = carDatabase.getPairedBTAddresses();
-
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         devices = new ArrayList<>();
         cars = carDatabase.retrieveCars(false);
-
-        setBondedDevices();
 
     }
 
@@ -167,7 +163,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             // When discovery is finished, remove progress bar
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 mListener.devicesBeingLoaded(false);
-
             }
 
             // Update UI and discovery if BT state changed
@@ -207,13 +202,23 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     @Override
     public void onCarEdited(Car car, boolean newCar) {
 
-        cars.add(car);
+        int carPosition = 0;
+        if (newCar) {
+            cars.add(car);
+            selectedDeviceAddresses.add(car.btAddress);
 
-        /**
-         * Car's position is simple
-         */
-        int position = cars.size() - 1;
-        adapter.notifyItemInserted(position);
+            /**
+             * Car's carPosition is simple
+             */
+            carPosition = cars.size() - 1;
+            adapter.notifyItemInserted(carPosition);
+        } else {
+            for (Car existingCar : cars) {
+                if (car == existingCar) break;
+                carPosition++;
+            }
+            adapter.notifyItemChanged(carPosition);
+        }
 
         /**
          * Find device with the same address as the car
@@ -233,8 +238,13 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             int deviceIndex = devices.indexOf(device);
             devices.remove(deviceIndex);
             adapter.notifyItemRemoved(cars.size() + 1 + deviceIndex);
-            layoutManager.scrollToPosition(position);
+            layoutManager.scrollToPosition(carPosition);
         }
+
+        /**
+         * DB and server update
+         */
+        updateCar(car);
     }
 
     public class RecyclerViewCarsAdapter extends
@@ -350,9 +360,12 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             adapter.notifyDataSetChanged();
         }
 
+        selectedDeviceAddresses = carDatabase.getPairedBTAddresses();
+
         // Get a set of currently paired devices
         Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
-        devices.addAll(bondedDevices);
+        for (BluetoothDevice bluetoothDevice : bondedDevices)
+                addDevice(bluetoothDevice);
     }
 
     private void updateEnableBTButton() {
@@ -368,6 +381,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
     }
 
+    private void updateCar(Car car) {
+        carDatabase.saveCar(car);
+    }
 
     @Override
     public void onResume() {
@@ -421,13 +437,16 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         car.btAddress = device.getAddress();
         car.name = device.getName();
 
-        EditCarDialog.newInstance(car, true).show(getFragmentManager(), "EditCarDialog");
+        editCar(car, true);
+    }
 
+    private void editCar(Car car, boolean newCar) {
+        EditCarDialog.newInstance(car, newCar).show(getFragmentManager(), "EditCarDialog");
     }
 
 
     private void addDevice(BluetoothDevice device) {
-        if (!devices.contains(device)) {
+        if (!devices.contains(device) && selectedDeviceAddresses.contains(device)) {
             devices.add(device);
             adapter.notifyItemInserted(cars.size() + devices.size());
         }
@@ -439,8 +458,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     }
 
-    public final static class CarViewHolder extends RecyclerView.ViewHolder {
-
+    public final class CarViewHolder extends RecyclerView.ViewHolder {
 
         private Toolbar toolbar;
         private TextView name;
@@ -467,7 +485,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 public boolean onMenuItemClick(MenuItem menuItem) {
                     switch (menuItem.getItemId()) {
                         case R.id.action_edit:
-                            bind(car);
+                            editCar(car, false);
                             return true;
                     }
                     return false;

@@ -15,6 +15,7 @@ import com.bahpps.cahue.cars.CarDatabase;
 import com.bahpps.cahue.cars.CarManagerActivity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -109,6 +110,7 @@ public class SetCarPositionDialog extends DialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
                         selected.location = location;
+                        selected.time = new Date();
 
                         Log.w(TAG, selected.toString());
                         // If ok, we just send and intent and leave the location receivers to do all the work

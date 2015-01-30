@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,6 +65,8 @@ public class CarDatabase extends SQLiteOpenHelper {
             Car.COLUMN_TIME
     };
 
+    private static final String TAG = CarDatabase.class.getSimpleName();
+
     public CarDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -86,7 +89,6 @@ public class CarDatabase extends SQLiteOpenHelper {
      */
     public void saveCar(Car car) {
         SQLiteDatabase database = getWritableDatabase();
-        database.beginTransaction();
 
         ContentValues values = new ContentValues();
         values.put(Car.COLUMN_ID, car.id);
@@ -102,8 +104,7 @@ public class CarDatabase extends SQLiteOpenHelper {
         }
 
         database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
-        database.endTransaction();
-
+        database.close();
     }
 
 
@@ -116,9 +117,13 @@ public class CarDatabase extends SQLiteOpenHelper {
                 Car.COLUMN_BT_ADDRESS + " IS NOT NULL",
                 null, null, null, null, null);
 
+        Log.d(TAG, "Paired BT addresses: ");
         while (cursor.moveToNext()) {
-            addresses.add(cursor.getString(0));
+            String address = cursor.getString(0);
+            Log.d(TAG, "\t" + address);
+            addresses.add(address);
         }
+
 
         return addresses;
     }
@@ -141,6 +146,8 @@ public class CarDatabase extends SQLiteOpenHelper {
             cars.add(cursorToCar(cursor));
         }
 
+        Log.d(TAG, "Retrieved cars from DB: " + cars);
+
         return cars;
     }
 
@@ -149,26 +156,24 @@ public class CarDatabase extends SQLiteOpenHelper {
 
         Cursor cursor = getReadableDatabase().query(Car.TABLE_NAME,
                 PROJECTION,
-                Car.COLUMN_BT_ADDRESS + " = ?s",
-                new String[]{btAddress},
-                null, null, null);
+                Car.COLUMN_BT_ADDRESS + " = '" + btAddress + "'",
+                null, null, null, null);
 
         if (cursor.getCount() == 0) return null;
 
         if (cursor.getCount() > 1)
             throw new IllegalStateException("Can't have more than 1 car with the same BT address");
 
-
         cursor.moveToFirst();
         Car car = cursorToCar(cursor);
 
+        Log.d(TAG, "Retrieved car by BT address: " + car);
         return car;
 
     }
 
-    public void removeStoredLocation(Car car) {
+    public void clearLocation(Car car) {
         SQLiteDatabase database = getWritableDatabase();
-        database.beginTransaction();
 
         ContentValues values = new ContentValues();
         values.put(Car.COLUMN_LATITUDE, (Double) null);
@@ -178,7 +183,7 @@ public class CarDatabase extends SQLiteOpenHelper {
 
         database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = ?s", new String[]{car.id});
 
-        database.endTransaction();
+        database.close();
     }
 
 

@@ -58,7 +58,7 @@ public class CarMovedService extends LocationPollerService {
 
         // TODO: not necessary to create a new instance of this
         CarDatabase carDatabase = new CarDatabase(context);
-        carDatabase.removeStoredLocation(car);
+        carDatabase.clearLocation(car);
     }
 
     protected void onLocationPost(HttpPost post) {
