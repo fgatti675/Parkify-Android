@@ -42,6 +42,13 @@ import java.util.UUID;
  */
 public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener {
 
+
+    public interface DeviceSelectionLoadingListener {
+
+        public void devicesBeingLoaded(boolean loading);
+
+    }
+
     // Debugging
     private static final String TAG = CarManagerFragment.class.getSimpleName();
 
@@ -450,12 +457,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             devices.add(device);
             adapter.notifyItemInserted(cars.size() + devices.size());
         }
-    }
-
-    public interface DeviceSelectionLoadingListener {
-
-        public void devicesBeingLoaded(boolean loading);
-
     }
 
     public final class CarViewHolder extends RecyclerView.ViewHolder {

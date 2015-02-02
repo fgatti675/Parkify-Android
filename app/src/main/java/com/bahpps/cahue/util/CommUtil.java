@@ -3,6 +3,8 @@ package com.bahpps.cahue.util;
 import android.content.Context;
 import android.net.Uri;
 
+import com.bahpps.cahue.login.AuthUtils;
+
 import org.apache.http.client.methods.HttpPost;
 
 /**
@@ -18,7 +20,7 @@ public class CommUtil {
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
 
-        String oauthToken = Util.getOauthToken(context);
+        String oauthToken = AuthUtils.getOauthToken(context);
         if (oauthToken != null)
             httpPost.setHeader(GOOGLE_AUTH_HEADER, oauthToken);
 

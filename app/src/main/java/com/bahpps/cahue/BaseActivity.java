@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.util.Util;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -44,15 +45,11 @@ public abstract class BaseActivity
 
     private final static String TAG = BaseActivity.class.getSimpleName();
 
-    // Profile pic image size in pixels
-    private final static int PROFILE_PIC_SIZE = 400;
 
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private final static int OUR_REQUEST_CODE = 49404;
 
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
-    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
@@ -69,9 +66,6 @@ public abstract class BaseActivity
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
-
-    private String mLoggedEmail;
-    private String mAuthToken;
 
     /**
      * Called when the PlusClient is successfully connected.
@@ -204,7 +198,10 @@ public abstract class BaseActivity
             Log.v(TAG, "Sign out successful!");
         }
 
-        Util.saveOAuthToken(BaseActivity.this, null);
+        /**
+         * Clean saved token
+         */
+        AuthUtils.saveOAuthToken(BaseActivity.this, null);
 
         onConnectingStatusChange(false);
         onPlusClientSignOut();
@@ -236,8 +233,6 @@ public abstract class BaseActivity
         Log.d(TAG, "onConnected");
         mSigningIn = false;
         onPlusClientSignIn();
-        getProfileInformation();
-        requestOauthToken();
         onConnectingStatusChange(false);
     }
 
@@ -302,86 +297,7 @@ public abstract class BaseActivity
         return mGoogleApiClient;
     }
 
-    private void requestOauthToken() {
 
-        Log.i(TAG, "requestOauthToken");
-
-        new AsyncTask<Void, Void, String>() {
-
-            @Override
-            protected String doInBackground(Void[] objects) {
-                try {
-                    mAuthToken = GoogleAuthUtil.getToken(BaseActivity.this, mLoggedEmail, SCOPE);
-                    if (mAuthToken != null)
-                        Util.saveOAuthToken(BaseActivity.this, mAuthToken);
-                } catch (UserRecoverableAuthException userRecoverableException) {
-                    // GooglePlayServices.apk is either old, disabled, or not present
-                    // so we need to show the user some UI in the activity to recover.
-                    onSignInRequired();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (GoogleAuthException e) {
-                    e.printStackTrace();
-                }
-                Log.d(TAG, "Auth token: " + mAuthToken);
-                return mAuthToken;
-            }
-
-            @Override
-            protected void onPostExecute(String authToken) {
-                onAuthTokenSet(authToken);
-            }
-
-        }.execute();
-
-
-    }
-
-    protected void onAuthTokenSet(String authToken) {
-
-    }
-
-    public String getAuthToken() {
-        return mAuthToken;
-    }
-
-    /**
-     * Fetching user's information name, mLoggedEmail, profile pic
-     */
-    private void getProfileInformation() {
-        try {
-            if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
-                Person currentPerson = Plus.PeopleApi
-                        .getCurrentPerson(mGoogleApiClient);
-                String personName = currentPerson.getDisplayName();
-                String personPhotoUrl = currentPerson.getImage().getUrl();
-                String personGooglePlusProfile = currentPerson.getUrl();
-                mLoggedEmail = Plus.AccountApi.getAccountName(mGoogleApiClient);
-
-                Log.e(TAG, "Name: " + personName + ", plusProfile: "
-                        + personGooglePlusProfile + ", mLoggedEmail: " + mLoggedEmail
-                        + ", Image: " + personPhotoUrl);
-
-//                txtName.setText(personName);
-//                txtEmail.setText(mLoggedEmail);
-
-                // by default the profile url gives 50x50 px image only
-                // we can replace the value with whatever dimension we want by
-                // replacing sz=X
-                personPhotoUrl = personPhotoUrl.substring(0,
-                        personPhotoUrl.length() - 2)
-                        + PROFILE_PIC_SIZE;
-
-//                new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
-
-            } else {
-                Toast.makeText(getApplicationContext(),
-                        "Person information is null", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Background Async task to load user profile picture from url

@@ -29,9 +29,7 @@ public class Util {
     /*
      * Shared preferences constants
      */
-    public static final String PREF_LOGGED_IN = "PREF_LOGGED_IN";
     public static final String PREF_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
-    public static final String PREF_OAUTH_TOKEN = "PREF_OAUTH_TOKEN";
     public static final String PREF_CAMERA_ZOOM = "PREF_CAMERA_ZOOM";
     public static final String PREF_CAMERA_LAT = "PREF_CAMERA_LAT";
     public static final String PREF_CAMERA_LONG = "PREF_CAMERA_LONG";
@@ -117,26 +115,6 @@ public class Util {
     public static void setPairedDevices(Context context, Set<String> selectedDeviceAddresses) {
         SharedPreferences prefs = getSharedPreferences(context);
         prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
-    }
-
-    public static void saveOAuthToken(Context context, String token) {
-        SharedPreferences prefs = getSharedPreferences(context);
-        prefs.edit().putString(PREF_OAUTH_TOKEN, token).apply();
-    }
-
-    public static String getOauthToken(Context context) {
-        SharedPreferences prefs = getSharedPreferences(context);
-        return prefs.getString(PREF_OAUTH_TOKEN, null);
-    }
-
-    public static boolean isLoggedIn(Context context) {
-        SharedPreferences prefs = getSharedPreferences(context);
-        return prefs.getBoolean(PREF_LOGGED_IN, false);
-    }
-
-    public static void setIsLoggedIn(Context context, boolean loggedIn) {
-        SharedPreferences prefs = getSharedPreferences(context);
-        prefs.edit().putBoolean(PREF_LOGGED_IN, loggedIn).apply();
     }
 
     public static boolean isTutorialShown(Context context) {

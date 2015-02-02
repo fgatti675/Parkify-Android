@@ -4,12 +4,44 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.bahpps.cahue.util.Util;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
 import java.util.Date;
 
 /**
  * Created by francesco on 28.11.2014.
  */
 public class Car implements Parcelable {
+
+
+    public static Car fromJSON(JSONObject carJSON) {
+        try {
+            Car car = new Car();
+            car.id = carJSON.getString("id");
+            car.name = carJSON.getString("name");
+            car.btAddress = carJSON.getString("btAddress");
+            car.color = carJSON.optInt("color", -1);
+            if(carJSON.has("latitude") && carJSON.has("longitude")) {
+                Location location = new Location("JSON");
+                location.setLatitude(carJSON.getDouble("latitude"));
+                location.setLongitude(carJSON.getDouble("longitude"));
+                location.setAccuracy((float) carJSON.getDouble("accuracy"));
+                car.location = location;
+                if(carJSON.has("time")){
+                    car.time = Util.DATE_FORMAT.parse(carJSON.getString("time"));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public static final String TABLE_NAME = "cars";
 
@@ -32,7 +64,7 @@ public class Car implements Parcelable {
 
     public Date time;
 
-    public int color;
+    public Integer color;
 
 
     public static final Parcelable.Creator<Car> CREATOR =
@@ -54,7 +86,7 @@ public class Car implements Parcelable {
         btAddress = parcel.readString();
         location = parcel.readParcelable(Location.class.getClassLoader());
         time = (Date) parcel.readSerializable();
-        color = parcel.readInt();
+        color = (Integer) parcel.readValue(Integer.class.getClassLoader());
     }
 
     public Car() {
@@ -73,7 +105,7 @@ public class Car implements Parcelable {
         parcel.writeString(btAddress);
         parcel.writeParcelable(location, i);
         parcel.writeSerializable(time);
-        parcel.writeInt(color);
+        parcel.writeValue(color);
     }
 
     @Override

@@ -41,7 +41,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     private static final String TAG = "ParkedCarDelegate";
 
-    private static final int LIGHT_RED = Color.argb(85, 242, 69, 54);
 
     private static final int MAX_DIRECTIONS_DISTANCE = 5000;
     private static final int DIRECTIONS_EXPIRY = 30000;
@@ -170,7 +169,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     public void doDraw() {
-        if(mMap == null) return;
+        if (mMap == null) return;
         Log.i(TAG, "Drawing parked car components");
         clear();
         drawCar();
@@ -201,9 +200,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         Log.i(TAG, "Setting car in map: " + car);
 
         iconGenerator.setContentRotation(-90);
-        iconGenerator.setColor(IconGenerator.STYLE_RED);
 
-        iconGenerator.setColor(0xff0099cc); // TODO: check color can be changed like this
+        if (car.color == null) {
+            iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
+        }else {
+            iconGenerator.setColor(car.color);
+            iconGenerator.setTextAppearance(mContext,
+                    isBrightColor(car.color) ?
+                            com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
+                            com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+        }
 
         // Uses a colored icon.
         LatLng carLatLng = getCarLatLng();
@@ -211,6 +217,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         String name = car.name;
         if (name == null)
             name = mContext.getResources().getText(R.string.car).toString();
+
+        int lightColor = getSemiTransparent(car.color);
 
         carMarker = mMap.addMarker(new MarkerOptions()
                 .position(carLatLng)
@@ -221,12 +229,35 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         CircleOptions circleOptions = new CircleOptions()
                 .center(carLatLng)   //set center
                 .radius(car.location.getAccuracy())   //set radius in meters
-                .fillColor(LIGHT_RED)
-                .strokeColor(LIGHT_RED)
+                .fillColor(lightColor)
+                .strokeColor(lightColor)
                 .strokeWidth(0);
 
         accuracyCircle = mMap.addCircle(circleOptions);
 
+    }
+
+    private int getSemiTransparent(int color) {
+        return Color.argb(100, Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    public static boolean isBrightColor(int color) {
+        if (android.R.color.transparent == color)
+            return true;
+
+        boolean rtnValue = false;
+
+        int[] rgb = {Color.red(color), Color.green(color), Color.blue(color)};
+
+        int brightness = (int) Math.sqrt(rgb[0] * rgb[0] * .241 + rgb[1]
+                * rgb[1] * .691 + rgb[2] * rgb[2] * .068);
+
+        // color is light
+        if (brightness >= 200) {
+            rtnValue = true;
+        }
+
+        return rtnValue;
     }
 
 
@@ -251,7 +282,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         Log.d(TAG, "Drawing directions");
 
-        PolylineOptions rectLine = new PolylineOptions().width(10).color(LIGHT_RED);
+        int color;
+        if (car.color != null)
+            color = getSemiTransparent(car.color);
+        else
+            color = getSemiTransparent(mContext.getResources().getColor(R.color.car_white));
+        PolylineOptions rectLine = new PolylineOptions().width(10).color(color);
 
         for (int i = 0; i < directionPoints.size(); i++) {
             rectLine.add(directionPoints.get(i));
@@ -358,6 +394,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
      * This method zooms to see both user and the car.
      */
     protected boolean zoomToSeeBoth() {
+
+        if(cameraUpdateListener == null)
+            return false;
 
         Log.v(TAG, "zoomToSeeBoth");
 

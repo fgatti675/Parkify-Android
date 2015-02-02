@@ -1,6 +1,5 @@
 package com.bahpps.cahue.cars;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -10,6 +9,7 @@ import android.location.Location;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -85,11 +85,34 @@ public class CarDatabase extends SQLiteOpenHelper {
     /**
      * Persist the location of the car in the shared preferences
      *
+     * @param cars
+     */
+    public void saveCars(Collection<Car> cars) {
+        SQLiteDatabase database = getWritableDatabase();
+
+        for (Car car : cars) {
+            ContentValues values = getCarContentValues(car);
+            database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+
+        database.close();
+    }
+
+    /**
+     * Persist date about a car, location included
+     *
      * @param car
      */
     public void saveCar(Car car) {
         SQLiteDatabase database = getWritableDatabase();
 
+        ContentValues values = getCarContentValues(car);
+        database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+        database.close();
+    }
+
+    private ContentValues getCarContentValues(Car car) {
         ContentValues values = new ContentValues();
         values.put(Car.COLUMN_ID, car.id);
         values.put(Car.COLUMN_NAME, car.name);
@@ -99,12 +122,10 @@ public class CarDatabase extends SQLiteOpenHelper {
         if (car.location != null) {
             values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
             values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
-            values.put(Car.COLUMN_ACCURACY, (double) car.location.getAccuracy());
+            values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
             values.put(Car.COLUMN_TIME, car.time.getTime());
         }
-
-        database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
-        database.close();
+        return values;
     }
 
 
@@ -181,7 +202,7 @@ public class CarDatabase extends SQLiteOpenHelper {
         values.put(Car.COLUMN_ACCURACY, (Double) null);
         values.put(Car.COLUMN_TIME, (Long) null);
 
-        database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = ?s", new String[]{car.id});
+        database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = " + car.id, null);
 
         database.close();
     }

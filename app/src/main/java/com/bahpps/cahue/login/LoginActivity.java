@@ -5,17 +5,24 @@ import android.animation.AnimatorListenerAdapter;
 
 import android.content.Intent;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 import com.bahpps.cahue.BaseActivity;
 import com.bahpps.cahue.MapsActivity;
 import com.bahpps.cahue.R;
-import com.bahpps.cahue.util.Util;
+import com.bahpps.cahue.cars.CarDatabase;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
 
 import java.io.IOException;
 
@@ -27,17 +34,23 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
+    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
     // UI references.
     private View mProgressView;
     private SignInButton mPlusSignInButton;
 
+    private String mLoggedEmail;
+
     private GoogleCloudMessaging gcm;
+    private CarDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        database = new CarDatabase(this);
 
         // Find the Google+ sign in button.
         mPlusSignInButton = (SignInButton) findViewById(R.id.plus_sign_in_button);
@@ -66,8 +79,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     }
 
-    @Override
-    protected void onAuthTokenSet(String authToken) {
+    protected void onGoogleAuthTokenSet(String authToken) {
         setLoading(true);
         String gcmRegId = getGCMRegId();
         new LoginAsyncTask(gcmRegId, authToken, this, this).execute();
@@ -120,9 +132,52 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
                 });
     }
 
+    private void requestOauthToken() {
+
+        Log.i(TAG, "requestOauthToken");
+
+        new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void[] objects) {
+                String mGoogleAuthToken = null;
+                try {
+                    mGoogleAuthToken = GoogleAuthUtil.getToken(LoginActivity.this, mLoggedEmail, SCOPE);
+                } catch (UserRecoverableAuthException userRecoverableException) {
+                    // GooglePlayServices.apk is either old, disabled, or not present
+                    // so we need to show the user some UI in the activity to recover.
+                    onSignInRequired();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "Google oAuth token: " + mGoogleAuthToken);
+                return mGoogleAuthToken;
+            }
+
+            @Override
+            protected void onPostExecute(String authToken) {
+                if (authToken == null) {
+                    // TODO: nicer
+                    Toast.makeText(LoginActivity.this, "Error with Google auth", Toast.LENGTH_SHORT).show();
+                } else {
+                    onGoogleAuthTokenSet(authToken);
+                }
+            }
+
+        }.execute();
+
+
+    }
+
+
     @Override
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
+
+        getProfileInformation();
+        requestOauthToken();
     }
 
     @Override
@@ -145,7 +200,13 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     public void onBackEndLogin(LoginResultBean loginResult) {
-        Util.setIsLoggedIn(this, true);
+
+        AuthUtils.setIsLoggedIn(this, true);
+        AuthUtils.saveOAuthToken(this, loginResult.authToken);
+
+        // TODO: save cars
+        database.saveCars(loginResult.cars);
+
         startActivity(new Intent(this, MapsActivity.class));
         finish();
     }
@@ -154,6 +215,49 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     public void onLoginError() {
         setLoading(false);
         // TODO: error toast
+        Toast.makeText(this, "Login error", Toast.LENGTH_SHORT).show();
+    }
+
+
+    // Profile pic image size in pixels
+    private final static int PROFILE_PIC_SIZE = 400;
+
+    /**
+     * Fetching user's information name, mLoggedEmail, profile pic
+     */
+    private void getProfileInformation() {
+        try {
+            if (Plus.PeopleApi.getCurrentPerson(getGoogleApiClient()) != null) {
+                Person currentPerson = Plus.PeopleApi
+                        .getCurrentPerson(getGoogleApiClient());
+                String personName = currentPerson.getDisplayName();
+                String personPhotoUrl = currentPerson.getImage().getUrl();
+                String personGooglePlusProfile = currentPerson.getUrl();
+                mLoggedEmail = Plus.AccountApi.getAccountName(getGoogleApiClient());
+
+                Log.e(TAG, "Name: " + personName + ", plusProfile: "
+                        + personGooglePlusProfile + ", mLoggedEmail: " + mLoggedEmail
+                        + ", Image: " + personPhotoUrl);
+
+//                txtName.setText(personName);
+//                txtEmail.setText(mLoggedEmail);
+
+                // by default the profile url gives 50x50 px image only
+                // we can replace the value with whatever dimension we want by
+                // replacing sz=X
+                personPhotoUrl = personPhotoUrl.substring(0,
+                        personPhotoUrl.length() - 2)
+                        + PROFILE_PIC_SIZE;
+
+//                new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
+
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "Person information is null", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 

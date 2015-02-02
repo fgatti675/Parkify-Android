@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.cars.CarManagerActivity;
+import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
@@ -174,7 +175,7 @@ public class MapsActivity extends BaseActivity
 
     private void goToLogin() {
         if (!isFinishing()) {
-            Util.setIsLoggedIn(this, false);
+            AuthUtils.setIsLoggedIn(this, false);
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -192,7 +193,7 @@ public class MapsActivity extends BaseActivity
 
         super.onCreate(savedInstanceState);
 
-        if (!Util.isLoggedIn(this)) {
+        if (!AuthUtils.isLoggedIn(this)) {
             goToLogin();
             return;
         }
@@ -638,6 +639,7 @@ public class MapsActivity extends BaseActivity
 
             final List<Car> parkedCars = carDatabase.retrieveCars(true);
 
+            // TODO: change this to find closest cars and not all
             // One parked car
             if (parkedCars.size() == 1) {
 

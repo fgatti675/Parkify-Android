@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,14 +20,18 @@ import java.util.List;
  */
 public class ColorSpinnerAdapter extends BaseAdapter {
 
-    private List<CarColor> colors;
 
     private Context context;
+    private final int[] colorsValues;
+    private final String[] colorNames;
 
     public ColorSpinnerAdapter(Context context) {
         this.context = context;
 
-        colors = Arrays.asList(CarColor.values());
+        int a = context.getResources().getColor(R.color.car_blue);
+
+        colorsValues = context.getResources().getIntArray(R.array.rainbow_colors);
+        colorNames = context.getResources().getStringArray(R.array.rainbow_names);
     }
 
     @Override
@@ -35,40 +40,38 @@ public class ColorSpinnerAdapter extends BaseAdapter {
         View row = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.spinner_color_item, parent, false);
 
-        if (position == 0) {
-            TextView textView = new TextView(context);
-            textView.setText(R.string.pick_color);
-            return textView;
-        }
-
         TextView name = (TextView) row.findViewById(R.id.name);
-        CarColor color = getItem(position);
-
         ImageView image = (ImageView) row.findViewById(R.id.image);
 
-        name.setText(context.getResources().getString(color.nameId));
+        if (position == 0) {
+            name.setText(R.string.pick_color);
+            GradientDrawable gradientDrawable = (GradientDrawable) image.getDrawable();
+            gradientDrawable.setColor(context.getResources().getColor(R.color.transparent));
+        } else {
 
-        GradientDrawable gradientDrawable = (GradientDrawable) image.getDrawable();
-        gradientDrawable.setColor(context.getResources().getColor(color.colorId));
+            name.setText(colorNames[position - 1]);
 
+            GradientDrawable gradientDrawable = (GradientDrawable) image.getDrawable();
+            gradientDrawable.setColor(colorsValues[position - 1]);
+        }
         return row;
     }
 
     @Override
     public int getCount() {
-        return colors.size() + 1;
+        return colorsValues.length + 1;
     }
 
     @Override
-    public CarColor getItem(int position) {
+    public Integer getItem(int position) {
 
         if (position == 0) return null;
-        return colors.get(position - 1);
+        return colorsValues[position-1];
     }
 
     @Override
     public long getItemId(int position) {
-        return context.getResources().getColor(colors.get(position).colorId);
+        return position;
     }
 
     @Override
@@ -81,16 +84,19 @@ public class ColorSpinnerAdapter extends BaseAdapter {
      *
      * @param color
      */
-    public int getColorInPosition(int color) {
-        int position = 1;
-        for (CarColor carColor : colors) {
+    public int getPositionOf(Integer color) {
 
-            if(color == context.getResources().getColor(carColor.colorId)){
+        if (color == null) return 0;
+
+        int position = 1;
+        for (int carColor : colorsValues) {
+
+            if (color == carColor) {
                 return position;
             }
 
             position++;
         }
-        return -1;
+        return 0;
     }
 }

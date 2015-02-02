@@ -21,6 +21,12 @@ import com.bahpps.cahue.R;
  */
 public class EditCarDialog extends DialogFragment {
 
+
+    public interface CarEditedListener {
+        void onCarEdited(Car car, boolean newCar);
+    }
+
+
     private final static String TAG = EditCarDialog.class.getSimpleName();
     private static final String ARG_CAR = "arg_car";
     private static final String ARG_NEW_CAR = "arg_new_car";
@@ -88,8 +94,8 @@ public class EditCarDialog extends DialogFragment {
          * Bind values
          */
         name.setText(car.name);
-
-        spinner.setSelection(spinnerAdapter.getColorInPosition(car.color));
+        int position = spinnerAdapter.getPositionOf(car.color);
+        spinner.setSelection(position);
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -99,7 +105,7 @@ public class EditCarDialog extends DialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
                         car.name = name.getText().toString();
-                        car.color = spinnerAdapter.getColorInPosition(spinner.getSelectedItemPosition());
+                        car.color = (Integer) spinner.getSelectedItem();
                         mListener.onCarEdited(car, newCar);
                     }
                 })
@@ -108,10 +114,6 @@ public class EditCarDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
-    }
-
-    public interface CarEditedListener {
-        void onCarEdited(Car car, boolean newCar);
     }
 
 }

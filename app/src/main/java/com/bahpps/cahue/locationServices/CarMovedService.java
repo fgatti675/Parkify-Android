@@ -37,6 +37,14 @@ public class CarMovedService extends LocationPollerService {
 
     private final static String TAG = "CarMovedPositionReceiver";
 
+    /**
+     * Minimum desired accuracy
+     */
+    private final static int ACCURACY_THRESHOLD_M = 25;
+
+    /**
+     * Only post locations if the car has stopped for at least a few minutes
+     */
     private static final long MINIMUM_STAY_MS = 180000;
 
     /**
@@ -54,7 +62,10 @@ public class CarMovedService extends LocationPollerService {
 
     @Override
     public void onLocationPolled(Context context, final Location location, Car car) {
-        postSpotLocation(location, car, POST_RETRIES);
+
+        // Don't post inaccurate locations
+        if (location.getAccuracy() < ACCURACY_THRESHOLD_M)
+            postSpotLocation(location, car, POST_RETRIES);
 
         // TODO: not necessary to create a new instance of this
         CarDatabase carDatabase = new CarDatabase(context);

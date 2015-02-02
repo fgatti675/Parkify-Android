@@ -52,18 +52,18 @@
     <color name="background_translucent">#640b2d38</color>
 
     <color name="car_white">#ffffffff</color>
-    <color name="car_silver">#ffa8a9ab</color>
+    <color name="car_silver">#a8a9ab</color>
     <color name="car_gray">#6A747D</color>
-    <color name="car_black">#ff000000</color>
-    <color name="car_brown">#ff8a6632</color>
-    <color name="car_olive">#ff58652d</color>
-    <color name="car_blue">#ff396e8e</color>
-    <color name="car_green">#ff63a037</color>
-    <color name="car_gold">#ffcbb677</color>
-    <color name="car_yellow">#fff0f12b</color>
-    <color name="car_orange">#fff89021</color>
-    <color name="car_red">#ffb52026</color>
-    <color name="car_pink">#ffff9db3</color>
+    <color name="car_black">#000000</color>
+    <color name="car_brown">#8a6632</color>
+    <color name="car_olive">#58652d</color>
+    <color name="car_blue">#396e8e</color>
+    <color name="car_green">#63a037</color>
+    <color name="car_gold">#cbb677</color>
+    <color name="car_yellow">#f0f12b</color>
+    <color name="car_orange">#f89021</color>
+    <color name="car_red">#b52026</color>
+    <color name="car_pink">#ff9db3</color>
 
     <!--<color name="all_track_color">#ff222222</color>-->
     <!--<color name="home_pane_header">#99000000</color>-->

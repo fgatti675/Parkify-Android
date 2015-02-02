@@ -15,8 +15,6 @@ public class LoginResultBean {
 
     String googleId;
 
-    Date creationDate;
-
     Set<Car> cars = new HashSet<>();
 
     String authToken;

@@ -6,8 +6,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bahpps.cahue.Endpoints;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Util;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -17,16 +20,26 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.text.ParseException;
 
 /**
  * Created by francesco on 22.01.2015.
  */
 public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
+
+    public interface LoginListener {
+
+        public void onBackEndLogin(LoginResultBean loginResult);
+
+        public void onLoginError();
+    }
+
 
     private static final String TAG = LoginAsyncTask.class.getSimpleName();
 
@@ -82,14 +95,21 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                     loginResultBean.authToken = jsonResult.getString("authToken");
                     loginResultBean.email = jsonResult.getString("email");
                     loginResultBean.googleId = jsonResult.getString("googleId");
-                    loginResultBean.creationDate = Util.DATE_FORMAT.parse(jsonResult.getString("time"));
+
+                    JSONArray carsArray = jsonResult.getJSONArray("cars");
+                    for (int i = 0; i < carsArray.length(); i++) {
+
+                        JSONObject carJSON = carsArray.getJSONObject(i);
+
+                        Car car = Car.fromJSON(carJSON);
+                        loginResultBean.cars.add(car);
+                    }
+                    //TODO: cars
 
                     Log.i(TAG, "Post result: " + jsonResult);
 
                     return loginResultBean;
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
@@ -116,10 +136,12 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
         if (error) {
             // error
+            Log.d(TAG, "Login error");
             loginResultListener.onLoginError();
             return;
         }
 
+        Log.d(TAG, "Login ok");
         loginResultListener.onBackEndLogin(response);
 
     }
@@ -134,12 +156,5 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public interface LoginListener {
-
-        public void onBackEndLogin(LoginResultBean loginResult);
-
-        public void onLoginError();
     }
 }

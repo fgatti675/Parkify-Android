@@ -43,7 +43,7 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Minimum desired accuracy
      */
-    private final static int ACCURACY_THRESHOLD_M = 16;
+    private final static int ACCURACY_THRESHOLD_M = 18;
 
     private final static String TAG = "LocationPoller";
 
