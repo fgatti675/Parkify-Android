@@ -28,7 +28,6 @@ import java.util.Map;
 
 
 /**
- * A simple {@link Fragment} subclass.
  * Use the {@link CarDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
@@ -36,12 +35,9 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     // the fragment initialization parameter
     private static final String ARG_CAR = "car";
-    private static final String ARG_CAR_DELEGATE = "car_delegate";
-    private static final String ARG_INITIALLY_FOLLOWING = "initially_following";
 
     private Location userLocation;
     private Car car;
-    private ParkedCarDelegate parkedCarDelegate;
 
     private OnCarPositionDeletedListener mListener;
 
@@ -52,18 +48,18 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     Toolbar toolbar;
     private ImageView image;
 
+    ParkedCarDelegate parkedCarDelegate;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
-    public static CarDetailsFragment newInstance(Car car, ParkedCarDelegate parkedCarDelegate, boolean initiallyFollowing) {
+    public static CarDetailsFragment newInstance(Car car) {
         CarDetailsFragment fragment = new CarDetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_CAR, car);
-        args.putParcelable(ARG_CAR_DELEGATE, parkedCarDelegate);
-        args.putBoolean(ARG_INITIALLY_FOLLOWING, initiallyFollowing);
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,11 +71,12 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
         if (getArguments() != null) {
             car = getArguments().getParcelable(ARG_CAR);
-            parkedCarDelegate = getArguments().getParcelable(ARG_CAR_DELEGATE);
-            parkedCarDelegate.setFollowing(getArguments().getBoolean(ARG_INITIALLY_FOLLOWING));
         }
+        parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id);
     }
 
     @Override
@@ -120,7 +117,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_car_details, container, false);
@@ -151,7 +149,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (mListener != null) {
-                            parkedCarDelegate.removeCar();
                             mListener.onCarPositionDeleted(car);
                         }
                     }

@@ -3,6 +3,7 @@ package com.bahpps.cahue.spots;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -10,6 +11,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
+import com.bahpps.cahue.CameraUpdateListener;
+import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.spots.query.AreaSpotsQuery;
 import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  * <p/>
  * Created by Francesco on 21/10/2014.
  */
-public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable, ParkingSpotsQuery.ParkingSpotsUpdateListener {
+public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpotsQuery.ParkingSpotsUpdateListener {
 
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
@@ -58,6 +61,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     // distance we are adding to the bounds query on each one of the 4 sides to get also results outside the screen
     public static final int OFFSET_METERS = 2000;
+    public static final String FRAGMENT_TAG = "SPOTS_DELEGATE";
 
     private final Handler handler = new Handler();
 
@@ -73,7 +77,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     private GoogleMap mMap;
 
-    private Context mContext;
     private SpotSelectedListener spotSelectedListener;
 
     // In the next spots update, clear the previous state
@@ -100,85 +103,51 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     private ParkingSpot selectedSpot;
 
-    public static final Parcelable.Creator<SpotsDelegate> CREATOR =
-            new Parcelable.Creator<SpotsDelegate>() {
-                @Override
-                public SpotsDelegate createFromParcel(Parcel parcel) {
-                    return new SpotsDelegate(parcel);
-                }
-
-                @Override
-                public SpotsDelegate[] newArray(int size) {
-                    return new SpotsDelegate[size];
-                }
-            };
-
-
-    public SpotsDelegate() {
-
-        queriedBounds = new ArrayList<>();
-        spots = new HashSet<>();
-        lastResetTaskRequestTime = new Date();
-
-        initMarkerMaps();
-
+    public static SpotsDelegate newInstance() {
+        SpotsDelegate fragment = new SpotsDelegate();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    public SpotsDelegate(Parcel parcel) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        super(parcel);
-        List<ParkingSpot> spotsList = new ArrayList<>();
-        parcel.readTypedList(spotsList, ParkingSpot.CREATOR);
-        for (ParkingSpot spot : spotsList) {
-            if (spot.id == null) Log.e(TAG, "Spot regenerated wrong:" + spot);
+        if (savedInstanceState == null) {
+
+            setRetainInstance(true);
+
+            queriedBounds = new ArrayList<>();
+            spots = new HashSet<>();
+            lastResetTaskRequestTime = new Date();
+
+            spotMarkersMap = new HashMap<>();
+            markerSpotsMap = new HashMap<>();
+            markerTypeMap = new HashMap<>();
         }
-        spots = new HashSet<>(spotsList);
-        queriedBounds = new ArrayList();
-        parcel.readTypedList(queriedBounds, LatLngBounds.CREATOR);
-        viewBounds = parcel.readParcelable(LatLngBounds.class.getClassLoader());
-        shouldBeReset = parcel.readByte() != 0;
-        lastResetTaskRequestTime = (Date) parcel.readSerializable();
-        selectedSpot = parcel.readParcelable(ParkingSpot.class.getClassLoader());
+    }
 
-        initMarkerMaps();
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            this.spotSelectedListener = (SpotSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement SpotSelectedListener");
+        }
     }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        super.writeToParcel(parcel, i);
-        parcel.writeTypedList(new ArrayList<Parcelable>(spots));
-        parcel.writeTypedList(queriedBounds);
-        parcel.writeParcelable(viewBounds, i);
-        parcel.writeByte((byte) (shouldBeReset ? 1 : i));
-        parcel.writeSerializable(lastResetTaskRequestTime);
-        parcel.writeParcelable(selectedSpot, i);
-    }
-
-
-    public void init(Context context, SpotSelectedListener spotSelectedListener) {
-
-        Log.d(TAG, "init");
-
-        this.mContext = context;
-        this.spotSelectedListener = spotSelectedListener;
+    public void onResume() {
+        super.onResume();
 
         setUpResetTask();
         if (mMap != null)
             doDraw();
-
-    }
-
-    private void initMarkerMaps() {
-        // we can rebuild this maps because markers are removed on init
-        spotMarkersMap = new HashMap<>();
-        markerSpotsMap = new HashMap<>();
-        markerTypeMap = new HashMap<>();
     }
 
     public void setUpResetTask() {
@@ -195,17 +164,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
                 new Runnable() {
 
                     public void run() {
-                        if (mContext instanceof Activity) {
-                            ((Activity) mContext).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.d(TAG, "scheduledResetTask run");
-                                    lastResetTaskRequestTime = new Date();
-                                    shouldBeReset = true;
-                                    repeatLastQuery();
-                                }
-                            });
-                        }
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d(TAG, "scheduledResetTask run");
+                                lastResetTaskRequestTime = new Date();
+                                shouldBeReset = true;
+                                repeatLastQuery();
+                            }
+                        });
                     }
                 },
                 nextTimeOut,
@@ -285,7 +252,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        ParkingSpotsQuery areaQuery = new AreaSpotsQuery(mContext, extendedViewBounds, this);
+        ParkingSpotsQuery areaQuery = new AreaSpotsQuery(getActivity(), extendedViewBounds, this);
 
         Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.execute();
@@ -338,13 +305,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
      */
     @Override
     public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
-        Toast.makeText(mContext, "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
         repeatLastQuery();
     }
 
     @Override
     public void onIOError() {
-        Toast.makeText(mContext, "Check internet connection", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Check internet connection", Toast.LENGTH_SHORT).show();
     }
 
     int displayedMarkers;
@@ -378,7 +345,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             // if there is no marker we create it
             if (marker == null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, mContext, parkingSpot.equals(selectedSpot));
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, getActivity(), parkingSpot.equals(selectedSpot));
                 marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).icon(markerBitmap).anchor(0.5f, 0.5f));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
@@ -388,7 +355,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             // else we may need to update it
             else if (type != markerTypeMap.get(marker)) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, mContext, parkingSpot.equals(selectedSpot));
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, getActivity(), parkingSpot.equals(selectedSpot));
                 marker.setIcon(markerBitmap);
             }
 
@@ -424,7 +391,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
         selectedSpot = markerSpotsMap.get(marker);
         if (selectedSpot != null) {
             Marker selectedMarker = spotMarkersMap.get(selectedSpot);
-            selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), mContext, true));
+            selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), getActivity(), true));
             selectedMarker.showInfoWindow();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
@@ -442,7 +409,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
             // we may have restored the selected spot but it may not have been drawn (like on device rotation)
             if (previousMarker != null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), mContext, false);
+                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), getActivity(), false);
                 previousMarker.setIcon(markerBitmap);
             }
         }
@@ -460,6 +427,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements Parcelable,
 
     @Override
     public void onPause() {
+        super.onPause();
         Log.d(TAG, "scheduledResetTask canceled");
         scheduledResetTask.cancel(true);
     }

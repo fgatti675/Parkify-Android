@@ -459,7 +459,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
 
     private void addDevice(BluetoothDevice device) {
-        if (!devices.contains(device) && !selectedDeviceAddresses.contains(device)) {
+        if (!devices.contains(device) && !selectedDeviceAddresses.contains(device.getAddress())) {
             devices.add(device);
             adapter.notifyItemInserted(cars.size() + devices.size());
         }

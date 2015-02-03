@@ -19,6 +19,7 @@ import java.util.Set;
 /**
  * Created by francesco on 16.09.2014.
  */
+@Deprecated
 public class CarManager {
 
     public final static String INTENT = "CAR_MOVED_INTENT";

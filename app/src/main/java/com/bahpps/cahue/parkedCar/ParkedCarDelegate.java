@@ -1,9 +1,11 @@
 package com.bahpps.cahue.parkedCar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -37,12 +39,20 @@ import java.util.List;
 /**
  * Created by francesco on 27.10.2014.
  */
-public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcelable {
+public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
-    private static final String TAG = "ParkedCarDelegate";
+    /**
+     * Interface for components listening for the marker click event in the map
+     */
+    public interface CarSelectedListener {
+        public void onCarClicked(Car car);
+    }
 
 
-    private static final int MAX_DIRECTIONS_DISTANCE = 5000;
+    private static final String TAG = ParkedCarDelegate.class.getSimpleName();
+
+    private static final String ARG_CAR = "car";
+    private static final int MAX_DIRECTIONS_DISTANCE = 2000;
     private static final int DIRECTIONS_EXPIRY = 30000;
 
     private Car car;
@@ -78,69 +88,68 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
      * Directions delegate
      */
     private GMapV2Direction directionsDelegate;
-    private Context mContext;
 
     private Date lastDirectionsUpdate;
+    private CarDatabase carDatabase;
 
-    public static final Parcelable.Creator<ParkedCarDelegate> CREATOR =
-            new Parcelable.Creator<ParkedCarDelegate>() {
-                @Override
-                public ParkedCarDelegate createFromParcel(Parcel parcel) {
-                    return new ParkedCarDelegate(parcel);
-                }
 
-                @Override
-                public ParkedCarDelegate[] newArray(int size) {
-                    return new ParkedCarDelegate[size];
-                }
-            };
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @return A new instance of fragment CarDetailsFragment.
+     */
+    public static ParkedCarDelegate newInstance(Car car) {
+        ParkedCarDelegate fragment = new ParkedCarDelegate();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_CAR, car);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        super.writeToParcel(parcel, i);
-        parcel.writeByte((byte) (following ? 1 : 0));
-        parcel.writeByte((byte) (tooFar ? 1 : 0));
-        parcel.writeParcelable(car, i);
-        parcel.writeParcelable(userLocation, i);
-        parcel.writeTypedList(directionPoints);
-        parcel.writeSerializable(lastDirectionsUpdate);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            this.cameraUpdateListener = (CameraUpdateListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement CameraUpdateListener");
+        }
+
+        try {
+            this.carSelectedListener = (CarSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement CarSelectedListener");
+        }
     }
 
-    public ParkedCarDelegate(Car car) {
-        this.car = car;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            car = getArguments().getParcelable(ARG_CAR);
+        }
         directionPoints = new ArrayList<LatLng>();
-    }
-
-    public ParkedCarDelegate(Parcel parcel) {
-        super(parcel);
-        following = parcel.readByte() > 0;
-        tooFar = parcel.readByte() > 0;
-        car = parcel.readParcelable(Car.class.getClassLoader());
-        userLocation = parcel.readParcelable(ParkedCarDelegate.class.getClassLoader());
-        directionPoints = new ArrayList();
-        parcel.readTypedList(directionPoints, LatLng.CREATOR);
-        lastDirectionsUpdate = (Date) parcel.readSerializable();
-    }
-
-    public void init(Context context, CameraUpdateListener cameraUpdateListener, CarSelectedListener carSelectedListener) {
-
-        mContext = context;
-
-        this.cameraUpdateListener = cameraUpdateListener;
-        this.carSelectedListener = carSelectedListener;
-        iconGenerator = new IconGenerator(context);
+        iconGenerator = new IconGenerator(getActivity());
         directionsDelegate = new GMapV2Direction();
 
+        carDatabase = new CarDatabase(getActivity());
         updateCarLocation();
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     public void updateCarLocation() {
         directionPoints.clear();
 
-        // TODO: not necessary to create a new instance of this
-        CarDatabase carDatabase = new CarDatabase(mContext);
-
+// TODO: move this away
         this.car = carDatabase.findByBTAddress(this.car.btAddress);
 
         if (car == null || car.location == null) {
@@ -203,9 +212,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         if (car.color == null) {
             iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
-        }else {
+        } else {
             iconGenerator.setColor(car.color);
-            iconGenerator.setTextAppearance(mContext,
+            iconGenerator.setTextAppearance(getActivity(),
                     isBrightColor(car.color) ?
                             com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
                             com.google.maps.android.R.style.Bubble_TextAppearance_Light);
@@ -216,7 +225,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
         String name = car.name;
         if (name == null)
-            name = mContext.getResources().getText(R.string.car).toString();
+            name = getActivity().getResources().getText(R.string.car).toString();
 
         int lightColor = getSemiTransparent(car.color);
 
@@ -267,8 +276,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
 
     public void removeCar() {
 
-        // TODO: not necessary to create a new instance of this
-        CarDatabase carDatabase = new CarDatabase(mContext);
         carDatabase.clearLocation(car);
         car.location = null;
         clear();
@@ -286,7 +293,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
         if (car.color != null)
             color = getSemiTransparent(car.color);
         else
-            color = getSemiTransparent(mContext.getResources().getColor(R.color.car_white));
+            color = getSemiTransparent(getActivity().getResources().getColor(R.color.car_white));
         PolylineOptions rectLine = new PolylineOptions().width(10).color(color);
 
         for (int i = 0; i < directionPoints.size(); i++) {
@@ -347,6 +354,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     }
 
     private void updateTooFar(LatLng carPosition, LatLng userPosition) {
+
+        if (carPosition == null || userPosition == null) {
+            return;
+        }
+
         float distances[] = new float[3];
         Location.distanceBetween(
                 carPosition.latitude,
@@ -395,7 +407,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
      */
     protected boolean zoomToSeeBoth() {
 
-        if(cameraUpdateListener == null)
+        if (cameraUpdateListener == null)
             return false;
 
         Log.v(TAG, "zoomToSeeBoth");
@@ -447,16 +459,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
+            setFollowing(true);
             carSelectedListener.onCarClicked(car);
         } else {
             setFollowing(false);
         }
         return false;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     public boolean isFollowing() {
@@ -466,9 +474,4 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements Parcela
     public boolean isTooFar() {
         return tooFar;
     }
-
-    public interface CarSelectedListener {
-        public void onCarClicked(Car car);
-    }
-
 }
