@@ -28,8 +28,6 @@ public class ColorSpinnerAdapter extends BaseAdapter {
     public ColorSpinnerAdapter(Context context) {
         this.context = context;
 
-        int a = context.getResources().getColor(R.color.car_blue);
-
         colorsValues = context.getResources().getIntArray(R.array.rainbow_colors);
         colorNames = context.getResources().getStringArray(R.array.rainbow_names);
     }

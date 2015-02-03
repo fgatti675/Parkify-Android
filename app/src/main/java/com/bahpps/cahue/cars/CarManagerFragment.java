@@ -111,13 +111,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         recyclerView.setAdapter(adapter);
 
-        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration();
-        recyclerView.addItemDecoration(itemDecoration);
-
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-//        recyclerView.addOnItemTouchListener(this);
 
         setBondedDevices();
 
@@ -254,6 +249,17 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         updateCar(car);
     }
 
+    //TODO
+    public void onCarRemoved(Car car) {
+        int i = 0;
+        for (Car c : cars) {
+            if (c.equals(car)) break;
+            i++;
+        }
+        cars.remove(i);
+        adapter.notifyItemRemoved(i);
+    }
+
     public class RecyclerViewCarsAdapter extends
             RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -372,7 +378,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         // Get a set of currently paired devices
         Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
         for (BluetoothDevice bluetoothDevice : bondedDevices)
-                addDevice(bluetoothDevice);
+            addDevice(bluetoothDevice);
     }
 
     private void updateEnableBTButton() {
@@ -453,7 +459,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
 
     private void addDevice(BluetoothDevice device) {
-        if (!devices.contains(device) && selectedDeviceAddresses.contains(device)) {
+        if (!devices.contains(device) && !selectedDeviceAddresses.contains(device)) {
             devices.add(device);
             adapter.notifyItemInserted(cars.size() + devices.size());
         }

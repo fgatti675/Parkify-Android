@@ -4,6 +4,7 @@ package com.bahpps.cahue.parkedCar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -15,11 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -45,6 +50,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     TextView distance;
 
     Toolbar toolbar;
+    private ImageView image;
 
     /**
      * Use this factory method to create a new instance of
@@ -80,6 +86,9 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     public void onResume() {
         super.onResume();
 
+        //update image
+        updateImage();
+
         // update time ago
         updateTimeTextView();
 
@@ -88,6 +97,26 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         updateFollowButtonState();
 
+    }
+
+    private static Map<Integer, Integer> colorImageMap;
+
+    private void updateImage() {
+        if (car.color != null) {
+            /**
+             * Build images map if not there
+             */
+            if (colorImageMap == null) {
+                colorImageMap = new HashMap<>();
+                int[] colors = getResources().getIntArray(R.array.rainbow_colors);
+                TypedArray carImages = getResources().obtainTypedArray(R.array.rainbow_cars);
+                for (int i = 0; i < colors.length; i++) {
+                    colorImageMap.put(colors[i], carImages.getResourceId(i, -1));
+                }
+            }
+
+            image.setImageResource(colorImageMap.get(car.color));
+        }
     }
 
     @Override
@@ -99,6 +128,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         // Set time ago
         name = (TextView) view.findViewById(R.id.name);
         name.setText(car.name != null ? car.name : getResources().getString(R.string.car));
+
+        image = (ImageView) view.findViewById(R.id.car_image);
 
         time = (TextView) view.findViewById(R.id.time);
 

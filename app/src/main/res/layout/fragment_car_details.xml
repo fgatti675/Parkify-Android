@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_padding"
-    cahue:cardCornerRadius="4dp"
-    tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
+    cahue:cardCornerRadius="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,10 +15,10 @@
         android:padding="@dimen/large_padding">
 
         <ImageView
-            android:id="@+id/spot_image"
+            android:id="@+id/car_image"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_icon_car_red"
+            android:src="@drawable/ic_car_silver"
             android:layout_centerVertical="true" />
 
 

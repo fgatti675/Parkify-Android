@@ -202,7 +202,7 @@ public class CarDatabase extends SQLiteOpenHelper {
         values.put(Car.COLUMN_ACCURACY, (Double) null);
         values.put(Car.COLUMN_TIME, (Long) null);
 
-        database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = " + car.id, null);
+        database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = '" + car.id + "'", null);
 
         database.close();
     }
