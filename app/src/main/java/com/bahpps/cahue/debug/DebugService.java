@@ -22,9 +22,9 @@ public class DebugService extends CarMovedService {
     ServiceListener serviceListener;
 
     @Override
-    public void onLocationPolled(Context context, Location location, Car car) {
-        super.onLocationPolled(context,location, car);
-        serviceListener.onNewLocation(location);
+    public void onLocationPolled(Context context, Location spotLocation, Car car) {
+        super.onLocationPolled(context, spotLocation, car);
+        serviceListener.onNewLocation(spotLocation);
     }
 
     /**

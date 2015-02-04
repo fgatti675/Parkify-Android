@@ -96,15 +96,16 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                     loginResultBean.email = jsonResult.getString("email");
                     loginResultBean.googleId = jsonResult.getString("googleId");
 
-                    JSONArray carsArray = jsonResult.getJSONArray("cars");
-                    for (int i = 0; i < carsArray.length(); i++) {
+                    if(jsonResult.has("cars")) {
+                        JSONArray carsArray = jsonResult.getJSONArray("cars");
+                        for (int i = 0; i < carsArray.length(); i++) {
 
-                        JSONObject carJSON = carsArray.getJSONObject(i);
+                            JSONObject carJSON = carsArray.getJSONObject(i);
 
-                        Car car = Car.fromJSON(carJSON);
-                        loginResultBean.cars.add(car);
+                            Car car = Car.fromJSON(carJSON);
+                            loginResultBean.cars.add(car);
+                        }
                     }
-                    //TODO: cars
 
                     Log.i(TAG, "Post result: " + jsonResult);
 

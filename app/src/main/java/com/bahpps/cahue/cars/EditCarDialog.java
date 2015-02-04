@@ -21,11 +21,9 @@ import com.bahpps.cahue.R;
  */
 public class EditCarDialog extends DialogFragment {
 
-
     public interface CarEditedListener {
         void onCarEdited(Car car, boolean newCar);
     }
-
 
     private final static String TAG = EditCarDialog.class.getSimpleName();
     private static final String ARG_CAR = "arg_car";

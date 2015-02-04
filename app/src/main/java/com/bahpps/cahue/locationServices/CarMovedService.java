@@ -61,18 +61,35 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onLocationPolled(Context context, final Location location, Car car) {
+    public void onLocationPolled(Context context, Location spotLocation, Car car) {
 
-        // Don't post inaccurate locations
-        if (location.getAccuracy() < ACCURACY_THRESHOLD_M)
-            postSpotLocation(location, car, POST_RETRIES);
-
-        // TODO: not necessary to create a new instance of this
         CarDatabase carDatabase = new CarDatabase(context);
+
+        /**
+         * If the accuracy is not good enough, we can check the previous location of the car
+         * and if it's close and more accurate, we use it.
+         */
+        if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
+            if(car.location.distanceTo(spotLocation) < ACCURACY_THRESHOLD_M)
+                spotLocation = car.location;
+        }
+
         carDatabase.clearLocation(car);
+
+        /**
+         * If it's still not accurate, we don't use it
+         */
+        if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
+            postSpotLocation(spotLocation, car, POST_RETRIES);
+        }
+
     }
 
     protected void onLocationPost(HttpPost post) {
+
+    }
+
+    private void doPostSpotLocation(Location location, Car car){
 
     }
 
@@ -84,7 +101,7 @@ public class CarMovedService extends LocationPollerService {
             protected HttpPost doInBackground(Void[] objects) {
                 try {
 
-                    Log.i(TAG, "Posting users location");
+                    Log.i(TAG, "Posting parking spot location");
 
                     Uri.Builder builder = new Uri.Builder();
                     builder.scheme("https")
@@ -94,7 +111,8 @@ public class CarMovedService extends LocationPollerService {
                     HttpClient httpclient = new DefaultHttpClient();
                     HttpPost httpPost = CommUtil.createHttpPost(CarMovedService.this, builder.build().toString());
 
-                    String json = getJSON(location);
+                    String json = getParkingSpotJSON(location, car);
+
                     Log.i(TAG, "Posting\n" + json);
                     httpPost.setEntity(new StringEntity(json));
 
@@ -136,9 +154,10 @@ public class CarMovedService extends LocationPollerService {
     }
 
 
-    private static String getJSON(Location location) {
+    private static String getParkingSpotJSON(Location location, Car car) {
         try {
             JSONObject obj = new JSONObject();
+            obj.put("car", car.toJSON());
             obj.put("latitude", location.getLatitude());
             obj.put("longitude", location.getLongitude());
             obj.put("accuracy", location.getAccuracy());

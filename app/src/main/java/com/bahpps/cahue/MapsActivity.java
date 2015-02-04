@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.cars.CarManagerActivity;
+import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
@@ -130,7 +131,7 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Car car = (Car) intent.getExtras().get(CarManager.INTENT_POSITION);
+            Car car = (Car) intent.getExtras().get(CarsSync.INTENT_POSITION);
             if (car != null) {
                 Log.i(TAG, "Location received: " + car);
                 getParkedCarDelegate(car).updateCarLocation();
@@ -445,10 +446,9 @@ public class MapsActivity extends BaseActivity
         super.onResume();
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(CarManager.INTENT));
+        registerReceiver(carPosReceiver, new IntentFilter(CarsSync.INTENT));
 
         setInitialCamera();
-
 
     }
 

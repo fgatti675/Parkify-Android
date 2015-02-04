@@ -13,6 +13,7 @@ import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
 import com.bahpps.cahue.cars.CarManagerActivity;
+import com.bahpps.cahue.cars.CarsSync;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -113,10 +114,11 @@ public class SetCarPositionDialog extends DialogFragment {
                         selected.time = new Date();
 
                         Log.w(TAG, selected.toString());
-                        // If ok, we just send and intent and leave the location receivers to do all the work
 
+                        // If ok, we just send and intent and leave the location receivers to do all the work
                         CarDatabase carDatabase = new CarDatabase(getActivity());
-                        carDatabase.saveCar(selected);
+                        CarsSync.storeCar(carDatabase, getActivity(), selected);
+
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);

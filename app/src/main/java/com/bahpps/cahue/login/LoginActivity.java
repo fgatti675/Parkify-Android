@@ -47,7 +47,9 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
 
         database = new CarDatabase(this);
@@ -202,9 +204,9 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     public void onBackEndLogin(LoginResultBean loginResult) {
 
         AuthUtils.setIsLoggedIn(this, true);
+
         AuthUtils.saveOAuthToken(this, loginResult.authToken);
 
-        // TODO: save cars
         database.saveCars(loginResult.cars);
 
         startActivity(new Intent(this, MapsActivity.class));

@@ -22,15 +22,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
-import com.bahpps.cahue.util.DividerItemDecoration;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -395,7 +391,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     private void updateCar(Car car) {
-        carDatabase.saveCar(car);
+        CarsSync.storeCar(carDatabase, getActivity(), car);
     }
 
     @Override

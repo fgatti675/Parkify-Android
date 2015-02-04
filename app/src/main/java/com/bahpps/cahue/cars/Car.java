@@ -24,7 +24,11 @@ public class Car implements Parcelable {
             car.id = carJSON.getString("id");
             car.name = carJSON.getString("name");
             car.btAddress = carJSON.getString("btAddress");
-            car.color = carJSON.optInt("color", -1);
+
+            if (carJSON.has("color")) {
+                car.color = carJSON.getInt("color");
+            }
+
             if(carJSON.has("latitude") && carJSON.has("longitude")) {
                 Location location = new Location("JSON");
                 location.setLatitude(carJSON.getDouble("latitude"));
@@ -41,6 +45,25 @@ public class Car implements Parcelable {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", id);
+            jsonObject.put("name", name);
+            if(btAddress != null) jsonObject.put("btAddress", btAddress);
+            if(color != null) jsonObject.put("color", color);
+            if(location != null){
+                jsonObject.put("latitude", location.getLatitude());
+                jsonObject.put("longitude", location.getLongitude());
+                jsonObject.put("accuracy", location.getAccuracy());
+                jsonObject.put("time", time);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
 
     public static final String TABLE_NAME = "cars";
@@ -65,7 +88,6 @@ public class Car implements Parcelable {
     public Date time;
 
     public Integer color;
-
 
     public static final Parcelable.Creator<Car> CREATOR =
             new Parcelable.Creator<Car>() {

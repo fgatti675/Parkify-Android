@@ -8,6 +8,8 @@ public class Endpoints {
 
     public final static String BASE_URL = "glossy-radio.appspot.com";
 
+    public final static String CARS_PATH = "cars";
+
     public final static String SPOTS_PATH = "spots";
 
     public final static String SPOTS_RETRIEVE_NEAREST = "nearest";
