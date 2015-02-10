@@ -8,4 +8,10 @@
         android:icon="@drawable/ic_action_action_settings_accent"
         cahue:showAsAction="always" />
 
+    <item
+        android:id="@+id/action_remove"
+        android:title="@string/edit"
+        android:icon="@drawable/ic_action_action_settings_accent"
+        cahue:showAsAction="always" />
+
 </menu>

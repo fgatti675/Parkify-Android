@@ -92,9 +92,11 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
                     JSONObject jsonResult = new JSONObject(EntityUtils.toString(response.getEntity()));
 
+                    loginResultBean.refreshToken = jsonResult.getString("refreshToken");
                     loginResultBean.authToken = jsonResult.getString("authToken");
-                    loginResultBean.email = jsonResult.getString("email");
-                    loginResultBean.googleId = jsonResult.getString("googleId");
+
+                    loginResultBean.email = jsonResult.getJSONObject("user").getJSONObject("googleUser").getString("email");
+                    loginResultBean.googleId = jsonResult.getJSONObject("user").getJSONObject("googleUser").getString("googleId");
 
                     if(jsonResult.has("cars")) {
                         JSONArray carsArray = jsonResult.getJSONArray("cars");

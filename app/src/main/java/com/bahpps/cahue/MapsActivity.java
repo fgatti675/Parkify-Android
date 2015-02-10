@@ -13,7 +13,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -35,7 +34,6 @@ import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
-import com.bahpps.cahue.parkedCar.CarManager;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
 import com.bahpps.cahue.spots.ParkingSpot;
@@ -61,9 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MapsActivity extends BaseActivity
         implements
@@ -96,7 +92,7 @@ public class MapsActivity extends BaseActivity
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(5000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
-            .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
     private CarDatabase carDatabase;
 
@@ -127,14 +123,14 @@ public class MapsActivity extends BaseActivity
     /**
      * If we get a new car position while we are using the app, we update the map
      */
-    private final BroadcastReceiver carPosReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver carUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             Car car = (Car) intent.getExtras().get(CarsSync.INTENT_POSITION);
             if (car != null) {
                 Log.i(TAG, "Location received: " + car);
-                getParkedCarDelegate(car).updateCarLocation();
+                getParkedCarDelegate(car).updateCar(car);
             }
 
         }
@@ -446,7 +442,7 @@ public class MapsActivity extends BaseActivity
         super.onResume();
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carPosReceiver, new IntentFilter(CarsSync.INTENT));
+        registerReceiver(carUpdateReceiver, new IntentFilter(CarsSync.INTENT));
 
         setInitialCamera();
 
@@ -548,7 +544,7 @@ public class MapsActivity extends BaseActivity
             delegate.onPause();
         }
 
-        unregisterReceiver(carPosReceiver);
+        unregisterReceiver(carUpdateReceiver);
     }
 
     /**
@@ -740,6 +736,10 @@ public class MapsActivity extends BaseActivity
      * @param fragment
      */
     private void setDetailsFragment(DetailsFragment fragment) {
+
+        if(isFinishing())
+            return;
+
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
         if (detailsFragment != null)
@@ -750,7 +750,7 @@ public class MapsActivity extends BaseActivity
         detailsFragment.setUserLocation(getUserLocation());
 
         fragTransaction.add(detailsContainer.getId(), detailsFragment, DETAILS_FRAGMENT_TAG);
-        fragTransaction.commit();
+        fragTransaction.commitAllowingStateLoss();
 
         showDetails();
     }
@@ -774,16 +774,17 @@ public class MapsActivity extends BaseActivity
 
         if (mMap == null) return;
 
-        mMap.animateCamera(cameraUpdate, new GoogleMap.CancelableCallback() {
-            @Override
-            public void onFinish() {
-                justFinishedAnimating = true;
-            }
+        mMap.animateCamera(cameraUpdate,
+                new GoogleMap.CancelableCallback() {
+                    @Override
+                    public void onFinish() {
+                        justFinishedAnimating = true;
+                    }
 
-            @Override
-            public void onCancel() {
-            }
-        });
+                    @Override
+                    public void onCancel() {
+                    }
+                });
     }
 
     private void zoomToMyLocation(boolean resetZoom) {
@@ -801,19 +802,12 @@ public class MapsActivity extends BaseActivity
         if (!resetZoom)
             zoom = Math.max(mMap.getCameraPosition().zoom, 14);
 
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                        .zoom(zoom)
-                        .target(userPosition)
-                        .build()),
-                new GoogleMap.CancelableCallback() {
-                    @Override
-                    public void onFinish() {
-                        justFinishedAnimating = true;
-                    }
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                .zoom(zoom)
+                .target(userPosition)
+                .build());
 
-                    @Override
-                    public void onCancel() {
-                    }
-                });
+        onCameraUpdateRequest(cameraUpdate);
     }
+
 }

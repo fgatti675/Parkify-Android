@@ -34,7 +34,8 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         // we need to get which BT device the user chose as the one of his car
 
-        Set<String> storedAddress = Util.getPairedDevices(context);
+        CarDatabase carDatabase = new CarDatabase(context);
+        Set<String> storedAddress = carDatabase.getPairedBTAddresses();
 
         // If the device we just disconnected from is our chosen one
         if (storedAddress.contains(address)) {
@@ -42,7 +43,6 @@ public class BluetoothDetector extends BroadcastReceiver {
             Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
             // TODO: not necessary to create a new instance of this
-            CarDatabase carDatabase = new CarDatabase(context);
             Car car = carDatabase.findByBTAddress(address);
 
             if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {

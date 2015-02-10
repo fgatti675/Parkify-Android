@@ -42,7 +42,6 @@
     <string name="activate_bluetooth">Attiva Bluetooth</string>
     <string name="car_name_select">Nome della macchina</string>
     <string name="edit">Cambia</string>
-    <string name="car_olive">Olive</string>
     <string name="pick_color">Pick car\'s color</string>
 
 </resources>

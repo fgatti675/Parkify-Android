@@ -6,10 +6,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
 import com.bahpps.cahue.util.CommUtil;
+import com.bahpps.cahue.util.Requests;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -70,7 +76,7 @@ public class CarMovedService extends LocationPollerService {
          * and if it's close and more accurate, we use it.
          */
         if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
-            if(car.location.distanceTo(spotLocation) < ACCURACY_THRESHOLD_M)
+            if (car.location.distanceTo(spotLocation) < ACCURACY_THRESHOLD_M)
                 spotLocation = car.location;
         }
 
@@ -80,25 +86,25 @@ public class CarMovedService extends LocationPollerService {
          * If it's still not accurate, we don't use it
          */
         if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
-            postSpotLocation(spotLocation, car, POST_RETRIES);
+            doPostSpotLocation(spotLocation, car);
         }
 
     }
 
-    protected void onLocationPost(HttpPost post) {
+    protected void onLocationPost() {
 
     }
 
-    private void doPostSpotLocation(Location location, Car car){
-
+    private void doPostSpotLocation(Location spotLocation, Car car) {
+        postSpotLocation(spotLocation, car, POST_RETRIES);
     }
 
-    private void postSpotLocation(final Location location, final Car car, final int retries) {
+    private void postSpotLocation2(final Location location, final Car car, final int retries) {
 
-        new AsyncTask<Void, Void, HttpPost>() {
+        new AsyncTask<Void, Void, Void>() {
 
             @Override
-            protected HttpPost doInBackground(Void[] objects) {
+            protected Void doInBackground(Void[] objects) {
                 try {
 
                     Log.i(TAG, "Posting parking spot location");
@@ -111,7 +117,7 @@ public class CarMovedService extends LocationPollerService {
                     HttpClient httpclient = new DefaultHttpClient();
                     HttpPost httpPost = CommUtil.createHttpPost(CarMovedService.this, builder.build().toString());
 
-                    String json = getParkingSpotJSON(location, car);
+                    String json = getParkingSpotJSON(location, car).toString();
 
                     Log.i(TAG, "Posting\n" + json);
                     httpPost.setEntity(new StringEntity(json));
@@ -123,6 +129,7 @@ public class CarMovedService extends LocationPollerService {
 
                     Log.i(TAG, "Post result: " + statusLine.getStatusCode());
                     if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+
                         Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
                     } else {
                         //Closes the connection.
@@ -133,7 +140,7 @@ public class CarMovedService extends LocationPollerService {
                         if (retries > 0)
                             postSpotLocation(location, car, retries - 1);
                     }
-                    return httpPost;
+                    return null;
 
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -147,21 +154,56 @@ public class CarMovedService extends LocationPollerService {
             }
 
             @Override
-            protected void onPostExecute(HttpPost post) {
-                onLocationPost(post);
+            protected void onPostExecute(Void v) {
+                onLocationPost();
             }
         }.execute();
     }
 
 
-    private static String getParkingSpotJSON(Location location, Car car) {
+    private void postSpotLocation(final Location location, final Car car, final int retries) {
+
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        Log.i(TAG, "Posting parking spot location");
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority(Endpoints.BASE_URL)
+                .appendPath(Endpoints.SPOTS_PATH);
+
+        // Send a JSON spot location.
+        JsonRequest stringRequest = new Requests.JsonPostRequest(
+                this,
+                builder.toString(),
+                getParkingSpotJSON(location, car),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i(TAG, "Post result: " + response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Network error : " + error.networkResponse.statusCode);
+                        if (retries > 0)
+                            postSpotLocation(location, car, retries - 1);
+                    }
+                });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
+    private static JSONObject getParkingSpotJSON(Location location, Car car) {
         try {
             JSONObject obj = new JSONObject();
             obj.put("car", car.toJSON());
             obj.put("latitude", location.getLatitude());
             obj.put("longitude", location.getLongitude());
             obj.put("accuracy", location.getAccuracy());
-            return obj.toString();
+            return obj;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

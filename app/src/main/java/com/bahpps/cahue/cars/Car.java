@@ -17,7 +17,6 @@ import java.util.Date;
  */
 public class Car implements Parcelable {
 
-
     public static Car fromJSON(JSONObject carJSON) {
         try {
             Car car = new Car();
@@ -58,8 +57,8 @@ public class Car implements Parcelable {
                 jsonObject.put("latitude", location.getLatitude());
                 jsonObject.put("longitude", location.getLongitude());
                 jsonObject.put("accuracy", location.getAccuracy());
-                jsonObject.put("time", time);
             }
+            jsonObject.put("time", Util.DATE_FORMAT.format(time));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -85,7 +84,7 @@ public class Car implements Parcelable {
 
     public Location location;
 
-    public Date time;
+    public Date time = new Date();
 
     public Integer color;
 

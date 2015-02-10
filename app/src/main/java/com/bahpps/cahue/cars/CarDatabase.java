@@ -123,8 +123,8 @@ public class CarDatabase extends SQLiteOpenHelper {
             values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
             values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
             values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
-            values.put(Car.COLUMN_TIME, car.time.getTime());
         }
+        values.put(Car.COLUMN_TIME, car.time.getTime());
         return values;
     }
 
@@ -132,7 +132,8 @@ public class CarDatabase extends SQLiteOpenHelper {
     public Set<String> getPairedBTAddresses() {
         Set<String> addresses = new HashSet<>();
 
-        Cursor cursor = getReadableDatabase().query(true,
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.query(true,
                 Car.TABLE_NAME,
                 new String[]{Car.COLUMN_BT_ADDRESS},
                 Car.COLUMN_BT_ADDRESS + " IS NOT NULL",
@@ -145,6 +146,7 @@ public class CarDatabase extends SQLiteOpenHelper {
             addresses.add(address);
         }
 
+        database.close();
 
         return addresses;
     }
@@ -158,7 +160,8 @@ public class CarDatabase extends SQLiteOpenHelper {
     public List<Car> retrieveCars(boolean onlyParked) {
         List<Car> cars = new ArrayList<>();
 
-        Cursor cursor = getReadableDatabase().query(Car.TABLE_NAME,
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.query(Car.TABLE_NAME,
                 PROJECTION,
                 onlyParked ? Car.COLUMN_LATITUDE + " > 0" : null,
                 null, null, null, null);
@@ -166,6 +169,8 @@ public class CarDatabase extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             cars.add(cursorToCar(cursor));
         }
+
+        database.close();
 
         Log.d(TAG, "Retrieved cars from DB: " + cars);
 
@@ -175,7 +180,8 @@ public class CarDatabase extends SQLiteOpenHelper {
 
     public Car findByBTAddress(String btAddress) {
 
-        Cursor cursor = getReadableDatabase().query(Car.TABLE_NAME,
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.query(Car.TABLE_NAME,
                 PROJECTION,
                 Car.COLUMN_BT_ADDRESS + " = '" + btAddress + "'",
                 null, null, null, null);
@@ -189,18 +195,24 @@ public class CarDatabase extends SQLiteOpenHelper {
         Car car = cursorToCar(cursor);
 
         Log.d(TAG, "Retrieved car by BT address: " + car);
+        database.close();
+
         return car;
 
     }
 
     public void clearLocation(Car car) {
+
+        // TODO: move to sync
+        car.time = new Date();
+
         SQLiteDatabase database = getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(Car.COLUMN_LATITUDE, (Double) null);
         values.put(Car.COLUMN_LONGITUDE, (Double) null);
         values.put(Car.COLUMN_ACCURACY, (Double) null);
-        values.put(Car.COLUMN_TIME, (Long) null);
+        values.put(Car.COLUMN_TIME, car.time.getTime());
 
         database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = '" + car.id + "'", null);
 
@@ -209,24 +221,26 @@ public class CarDatabase extends SQLiteOpenHelper {
 
 
     private Car cursorToCar(Cursor cursor) {
+
         Car car = new Car();
         car.id = cursor.getString(0);
         car.name = cursor.getString(1);
         car.btAddress = cursor.getString(2);
-        car.color = cursor.getInt(3);
+        car.color = cursor.isNull(3) ? null : cursor.getInt(3);
+        if (car.color == 0) car.color = null; // sanity check
 
-        double latitude = cursor.getDouble(4);
-        double longitude = cursor.getDouble(5);
-        float accuracy = cursor.getFloat(6);
-
-        if (latitude > 0 && longitude > 0) {
+        if (!cursor.isNull(4) && !cursor.isNull(5)) {
+            double latitude = cursor.getDouble(4);
+            double longitude = cursor.getDouble(5);
+            float accuracy = cursor.getFloat(6);
             Location location = new Location("db");
             location.setLatitude(latitude);
             location.setLongitude(longitude);
             location.setAccuracy(accuracy);
             car.location = location;
-            car.time = new Date(cursor.getLong(7));
         }
+
+        car.time = new Date(cursor.getLong(7));
 
         return car;
     }

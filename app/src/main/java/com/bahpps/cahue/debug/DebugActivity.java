@@ -99,9 +99,8 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
     }
 
     @Override
-    public void onLocationPost(HttpPost post) {
-        String string = post.toString();
-        Log.d("debug", "Debug new post " + string);
-        postTextView.setText(string);
+    public void onLocationPost() {
+        Log.d("debug", "Debug new post");
+        postTextView.setText("Posted");
     }
 }

@@ -17,6 +17,8 @@ public class LoginResultBean {
 
     Set<Car> cars = new HashSet<>();
 
+    String refreshToken;
+
     String authToken;
 
 }

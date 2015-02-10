@@ -13,6 +13,7 @@ import com.bahpps.cahue.util.Util;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -89,7 +90,7 @@ public class CarManager {
         // bonded BT devices to the phone
         Set<BluetoothDevice> bondedBTDevices = mBtAdapter.getBondedDevices();
 
-        Set<String> pairedDevices = Util.getPairedDevices(context);
+        Set<String> pairedDevices = getPairedDevices(context);
         List<Car> cars = new ArrayList<Car>();
         for (String id : pairedDevices) {
             Car storedCar = getStoredBTCar(context, id, bondedBTDevices);
@@ -107,6 +108,20 @@ public class CarManager {
         return cars;
     }
 
+
+    public static final String PREF_BT_DEVICE_ADDRESSES = "PREF_BT_DEVICE_ADDRESSES";
+
+    public static Set<String> getPairedDevices(Context context) {
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        HashSet result = new HashSet();
+        result.addAll(prefs.getStringSet(PREF_BT_DEVICE_ADDRESSES, new HashSet<String>()));
+        return result;
+    }
+
+    public static void setPairedDevices(Context context, Set<String> selectedDeviceAddresses) {
+        SharedPreferences prefs = Util.getSharedPreferences(context);
+        prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
+    }
 
     public static Car findByBTAddress(Context context, String btAddress) {
 

@@ -13,15 +13,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarManagerFragment;
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.cars.EditCarDialog;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class TutorialActivity extends ActionBarActivity
-        implements CarManagerFragment.DeviceSelectionLoadingListener, ViewPager.OnPageChangeListener {
+        implements CarManagerFragment.DeviceSelectionLoadingListener,
+        EditCarDialog.CarEditedListener,
+        ViewPager.OnPageChangeListener {
 
     // TODO: not used, but it should
     private static final Map<Integer, Class> positionFragmentMap = new HashMap() {{
@@ -182,6 +186,8 @@ public class TutorialActivity extends ActionBarActivity
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        CarManagerFragment carManagerFragment;
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -194,7 +200,9 @@ public class TutorialActivity extends ActionBarActivity
                 case 1:
                     return TutorialInstructionsFragment.newInstance();
                 case 2:
-                    return CarManagerFragment.newInstance();
+                    if(carManagerFragment == null)
+                        carManagerFragment = CarManagerFragment.newInstance();
+                    return carManagerFragment;
             }
             return null;
         }
@@ -209,15 +217,19 @@ public class TutorialActivity extends ActionBarActivity
             if (object instanceof TutorialWelcomeFragment) {
                 view.setTag(0);
             }
-            if (object instanceof TutorialInstructionsFragment) {
+            else if (object instanceof TutorialInstructionsFragment) {
                 view.setTag(1);
             }
-            if (object instanceof CarManagerFragment) {
+            else if (object instanceof CarManagerFragment) {
                 view.setTag(2);
             }
             return super.isViewFromObject(view, object);
         }
     }
 
+    @Override
+    public void onCarEdited(Car car, boolean newCar) {
+        ((CarManagerFragment) mSectionsPagerAdapter.getItem(2)).onCarEdited(car, newCar);
+    }
 
 }

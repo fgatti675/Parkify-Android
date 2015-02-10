@@ -103,20 +103,6 @@ public class Util {
     }
 
 
-    public static final String PREF_BT_DEVICE_ADDRESSES = "PREF_BT_DEVICE_ADDRESSES";
-
-    public static Set<String> getPairedDevices(Context context) {
-        SharedPreferences prefs = getSharedPreferences(context);
-        HashSet result = new HashSet();
-        result.addAll(prefs.getStringSet(PREF_BT_DEVICE_ADDRESSES, new HashSet<String>()));
-        return result;
-    }
-
-    public static void setPairedDevices(Context context, Set<String> selectedDeviceAddresses) {
-        SharedPreferences prefs = getSharedPreferences(context);
-        prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
-    }
-
     public static boolean isTutorialShown(Context context) {
         SharedPreferences prefs = getSharedPreferences(context);
         return prefs.getBoolean(PREF_DIALOG_SHOWN, false);

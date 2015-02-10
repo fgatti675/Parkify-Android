@@ -82,7 +82,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     }
 
     protected void onGoogleAuthTokenSet(String authToken) {
-        setLoading(true);
+        setLoading(false);
         String gcmRegId = getGCMRegId();
         new LoginAsyncTask(gcmRegId, authToken, this, this).execute();
     }

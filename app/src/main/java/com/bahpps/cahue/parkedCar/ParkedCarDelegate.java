@@ -1,13 +1,10 @@
 package com.bahpps.cahue.parkedCar;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
@@ -130,15 +127,13 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            car = getArguments().getParcelable(ARG_CAR);
-        }
+
         directionPoints = new ArrayList<LatLng>();
         iconGenerator = new IconGenerator(getActivity());
         directionsDelegate = new GMapV2Direction();
 
         carDatabase = new CarDatabase(getActivity());
-        updateCarLocation();
+        updateCar((Car) getArguments().getParcelable(ARG_CAR));
     }
 
     @Override
@@ -146,15 +141,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         super.onPause();
     }
 
-    public void updateCarLocation() {
-        directionPoints.clear();
+    public void updateCar(Car car) {
 
-// TODO: move this away
-        this.car = carDatabase.findByBTAddress(this.car.btAddress);
+        this.car = car;
+
+        directionPoints.clear();
 
         if (car == null || car.location == null) {
             return;
         }
+
         fetchDirections(true);
         doDraw();
     }
@@ -164,7 +160,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         this.mMap = map;
 
-        updateCarLocation();
+        updateCar(this.car);
     }
 
     public void onLocationChanged(Location userLocation) {
@@ -210,14 +206,18 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         iconGenerator.setContentRotation(-90);
 
+        int lightColor = getSemiTransparent(getResources().getColor(R.color.car_gray));
+
         if (car.color == null) {
             iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
         } else {
             iconGenerator.setColor(car.color);
+            boolean brightColor = isBrightColor(car.color);
             iconGenerator.setTextAppearance(getActivity(),
-                    isBrightColor(car.color) ?
+                    brightColor ?
                             com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
                             com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+            lightColor = brightColor ? car.color : getSemiTransparent(car.color);
         }
 
         // Uses a colored icon.
@@ -227,7 +227,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         if (name == null)
             name = getActivity().getResources().getText(R.string.car).toString();
 
-        int lightColor = getSemiTransparent(car.color);
 
         carMarker = mMap.addMarker(new MarkerOptions()
                 .position(carLatLng)
@@ -275,7 +274,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
     public void removeCar() {
-
         carDatabase.clearLocation(car);
         car.location = null;
         clear();
@@ -396,9 +394,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
     public boolean updateCameraIfFollowing() {
 
+        if (mMap == null) return false;
+
         if (following) {
             return zoomToSeeBoth();
         }
+
         return false;
     }
 

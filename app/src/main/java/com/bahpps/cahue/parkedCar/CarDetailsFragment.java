@@ -39,8 +39,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     private Location userLocation;
     private Car car;
 
-    private OnCarPositionDeletedListener mListener;
-
     TextView name;
     TextView time;
     TextView distance;
@@ -148,9 +146,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         builder.setMessage(R.string.remove_car)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        if (mListener != null) {
-                            mListener.onCarPositionDeleted(car);
-                        }
+                        parkedCarDelegate.removeCar();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -180,24 +176,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
             float distanceM = car.location.distanceTo(userLocation);
             distance.setText(String.format("%.1f km", distanceM / 1000));
         }
-    }
-
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnCarPositionDeletedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     @Override
@@ -231,17 +209,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     */
-    public interface OnCarPositionDeletedListener {
-
-        public void onCarPositionDeleted(Car car);
-
-    }
 
 
 }

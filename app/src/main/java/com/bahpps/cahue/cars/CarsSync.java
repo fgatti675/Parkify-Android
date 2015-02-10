@@ -8,8 +8,14 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.util.CommUtil;
+import com.bahpps.cahue.util.Requests;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -21,10 +27,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -71,7 +77,7 @@ public class CarsSync {
         prefs.edit().putBoolean(NEEDS_SYNC_PREF, isNeeded).apply();
     }
 
-    public static void postCars(final Context context, final List<Car> cars, final int retries) {
+    public static void postCars2(final Context context, final List<Car> cars, final int retries) {
 
         new AsyncTask<Void, Void, Void>() {
 
@@ -117,7 +123,7 @@ public class CarsSync {
                             Log.e(TAG, statusLine.getReasonPhrase());
                         }
                         if (retries > 0)
-                            postCars(context, cars, retries - 1);
+                            postCars2(context, cars, retries - 1);
                     }
 
                 } catch (UnsupportedEncodingException e) {
@@ -133,10 +139,49 @@ public class CarsSync {
         }.execute();
     }
 
+    public static void postCars(final Context context, final List<Car> cars, final int retries) {
+
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        Log.i(TAG, "Posting sars");
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority(Endpoints.BASE_URL)
+                .appendPath(Endpoints.CARS_PATH);
+
+        // Send a JSON spot location.
+        JsonRequest stringRequest = new Requests.JsonArrayPostRequest(
+                context,
+                builder.toString(),
+                getCarsJSON(cars),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i(TAG, "Post result: " + response.toString());
+                        setNeedsSyncPref(context, false);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        if (retries > 0)
+                            postCars(context, cars, retries - 1);
+                    }
+                });
+
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
     private static JSONArray getCarsJSON(List<Car> cars) {
         JSONArray carsArray = new JSONArray();
         for (Car car : cars)
             carsArray.put(car.toJSON());
+
+        Log.d(TAG, carsArray.toString());
         return carsArray;
     }
 }

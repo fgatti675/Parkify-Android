@@ -55,12 +55,12 @@ public class DebugService extends CarMovedService {
     }
 
     @Override
-    public void onLocationPost(HttpPost post){
-        serviceListener.onLocationPost(post);
+    public void onLocationPost(){
+        serviceListener.onLocationPost();
     }
 
     public interface ServiceListener{
         public void onNewLocation(Location location);
-        public void onLocationPost(HttpPost post);
+        public void onLocationPost();
     }
 }

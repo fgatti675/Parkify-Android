@@ -32,7 +32,6 @@ public class ParkedCarService extends LocationPollerService {
         car.time = new Date();
 
         CarDatabase carDatabase = new CarDatabase(context);
-
         CarsSync.storeCar(carDatabase, context, car);
     }
 

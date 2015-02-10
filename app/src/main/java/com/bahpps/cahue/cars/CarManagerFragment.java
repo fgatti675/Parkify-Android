@@ -478,7 +478,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         public void bind(final Car car) {
 
             name.setText(car.name);
-            if (car.time != null)
+            if (car.location != null && car.time != null)
                 time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
 
             toolbar.getMenu().clear();
