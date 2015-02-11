@@ -141,6 +141,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
             } catch (JSONException e) {
                 e.printStackTrace();
+                throw new RuntimeException("Error parsing spots result", e);
             } catch (ParseException e) {
                 e.printStackTrace();
             }

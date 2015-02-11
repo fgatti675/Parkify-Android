@@ -4,10 +4,8 @@ package com.bahpps.cahue.parkedCar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -22,9 +20,7 @@ import android.widget.TextView;
 import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.bahpps.cahue.util.CarImages;
 
 
 /**
@@ -38,6 +34,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private Location userLocation;
     private Car car;
+
+    private OnCarPositionDeletedListener mListener;
 
     TextView name;
     TextView time;
@@ -94,23 +92,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     }
 
-    private static Map<Integer, Integer> colorImageMap;
 
     private void updateImage() {
         if (car.color != null) {
-            /**
-             * Build images map if not there
-             */
-            if (colorImageMap == null) {
-                colorImageMap = new HashMap<>();
-                int[] colors = getResources().getIntArray(R.array.rainbow_colors);
-                TypedArray carImages = getResources().obtainTypedArray(R.array.rainbow_cars);
-                for (int i = 0; i < colors.length; i++) {
-                    colorImageMap.put(colors[i], carImages.getResourceId(i, -1));
-                }
-            }
-
-            image.setImageResource(colorImageMap.get(car.color));
+            image.setImageResource(CarImages.getImageResourceId(car.color, getActivity()));
         }
     }
 
@@ -143,9 +128,12 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private void showClearDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.remove_car)
+        builder.setMessage(R.string.remove_car_confirm)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        if (mListener != null) {
+                            mListener.onCarPositionDeleted(car);
+                        }
                         parkedCarDelegate.removeCar();
                     }
                 })
@@ -176,6 +164,24 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
             float distanceM = car.location.distanceTo(userLocation);
             distance.setText(String.format("%.1f km", distanceM / 1000));
         }
+    }
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnCarPositionDeletedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -209,6 +215,14 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
     }
 
+    /**
+     * Interface for telling the containing activity that the car position has been deleted
+     */
+    public interface OnCarPositionDeletedListener {
+
+        public void onCarPositionDeleted(Car car);
+
+    }
 
 
 }

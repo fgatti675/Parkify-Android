@@ -2,11 +2,13 @@ package com.bahpps.cahue.cars;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -22,9 +24,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.util.CarImages;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -245,7 +249,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         updateCar(car);
     }
 
-    //TODO
     public void onCarRemoved(Car car) {
         int i = 0;
         for (Car c : cars) {
@@ -276,6 +279,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+
+            /**
+             * Car
+             */
             if (viewType == CAR_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
                         inflate(R.layout.fragment_car_details,
@@ -435,6 +442,23 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         getActivity().unregisterReceiver(mReceiver);
     }
 
+    private void showClearDialog(final Car car) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.delete_car_confirmation)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        onCarRemoved(car);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+        // Create the AlertDialog object and return it
+        builder.create().show();
+    }
+
 
     private void onDeviceSelected(BluetoothDevice device) {
 
@@ -466,10 +490,12 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         private Toolbar toolbar;
         private TextView name;
         private TextView time;
+        private ImageView carImage;
 
         public CarViewHolder(View itemView) {
             super(itemView);
 
+            carImage = (ImageView) itemView.findViewById(R.id.car_image);
             toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
@@ -490,12 +516,20 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                         case R.id.action_edit:
                             editCar(car, false);
                             return true;
+                        case R.id.action_delete:
+                            showClearDialog(car);
+                            return true;
                     }
                     return false;
                 }
             });
 
+            if (car.color != null) {
+                carImage.setImageResource(CarImages.getImageResourceId(car.color, getActivity()));
+            }
+
         }
+
     }
 
     public final static class DeviceViewHolder extends RecyclerView.ViewHolder {

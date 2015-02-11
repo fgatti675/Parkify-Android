@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/action_clear"
-        android:title="@string/remove"
+        android:title="@string/remove_location"
         android:icon="@drawable/ic_action_navigation_close"
         cahue:showAsAction="never" />
 

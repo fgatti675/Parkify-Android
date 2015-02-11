@@ -13,7 +13,10 @@
     <string name="link_device">Link device</string>
     <string name="help">Help</string>
     <string name="donate">Donate</string>
-    <string name="remove_car">Remove car location?</string>
+    <string name="remove_location">Clear car location</string>
+    <string name="remove_car_confirm">Remove car location?</string>
+    <string name="delete_car">Delete car</string>
+    <string name="delete_car_confirmation">Are you sure you want to delete this car?</string>
     <string name="position_waiting">Waiting for user position</string>
     <string name="car_not_found">Car\'s position has not been established</string>
     <string name="bt_not_available">Bluetooth is not available</string>
@@ -36,7 +39,6 @@
     <string name="purchase_account_error">You need a user account associated</string>
     <string name="pick_account">You must select an account in order to use this application</string>
     <string name="other">Other</string>
-    <string name="remove">Clear car</string>
     <string name="activate_bluetooth">Activate Bluetooth</string>
 
     <string name="car_name_select">Car name</string>

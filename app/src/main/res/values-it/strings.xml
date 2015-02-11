@@ -14,7 +14,7 @@
     <string name="link_removed">Collegamento con dispositivo eliminato</string>
     <string name="help">Aiuto</string>
     <string name="donate">Donazione</string>
-    <string name="remove_car">Eliminare la posizione della macchina?</string>
+    <string name="remove_car_confirm">Eliminare la posizione della macchina?</string>
 
     <string name="car">Macchina</string>
 
@@ -37,7 +37,7 @@
     <string name="pick_account">Devi selezionare una account</string>
     <string name="other">Altro</string>
     <string name="cars">Macchine</string>
-    <string name="remove">Elimina macchina</string>
+    <string name="remove_location">Elimina macchina</string>
     <string name="purchase_account_error">Serve una account </string>
     <string name="activate_bluetooth">Attiva Bluetooth</string>
     <string name="car_name_select">Nome della macchina</string>

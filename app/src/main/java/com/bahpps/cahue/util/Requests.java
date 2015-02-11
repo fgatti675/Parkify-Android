@@ -45,13 +45,13 @@ public class Requests {
     }
 
     /**
-     * Post a JSONArray
+     * Post a JSONArray and receive an array too
      */
-    public static class JsonArrayPostRequest extends JsonRequest<JSONObject> {
+    public static class JsonArrayPostRequest extends JsonRequest<JSONArray> {
 
         private final Context context;
 
-        public JsonArrayPostRequest(Context context, String url, JSONArray jsonArray, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        public JsonArrayPostRequest(Context context, String url, JSONArray jsonArray, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
             super(Method.POST, url, jsonArray.toString(), listener, errorListener);
             this.context = context;
         }
@@ -63,11 +63,11 @@ public class Requests {
 
         // Need this cause we cant extend a standard class, because the cant get json arrays as a parameter
         @Override
-        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+        protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
             try {
                 String jsonString =
                         new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-                return Response.success(new JSONObject(jsonString),
+                return Response.success(new JSONArray(jsonString),
                         HttpHeaderParser.parseCacheHeaders(response));
             } catch (UnsupportedEncodingException e) {
                 return Response.error(new ParseError(e));

@@ -108,6 +108,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                             loginResultBean.cars.add(car);
                         }
                     }
+                    LoginResultBean loginResultBean = LoginResultBean.fromJSON(jsonResult);
 
                     Log.i(TAG, "Post result: " + jsonResult);
 

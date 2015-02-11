@@ -163,6 +163,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
                 if (authToken == null) {
                     // TODO: nicer
                     Toast.makeText(LoginActivity.this, "Error with Google auth", Toast.LENGTH_SHORT).show();
+                    setLoading(false);
                 } else {
                     onGoogleAuthTokenSet(authToken);
                 }

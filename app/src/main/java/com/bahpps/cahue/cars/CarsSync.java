@@ -4,33 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.Endpoints;
-import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Requests;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.JSONException;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -43,29 +31,27 @@ public class CarsSync {
     public static final int RETRIES = 3;
     public static final String NEEDS_SYNC_PREF = "NEEDS_SYNC";
 
-    public static final String INTENT = "CAR_MOVED_INTENT";
-    public static final String INTENT_POSITION = "CAR_MOVED_INTENT_POSITION";
+    public static final String INTENT_CAR_UPDATE = "CAR_UPDATED_INTENT";
+    public static final String INTENT_CAR_EXTRA = "CAR_EXTRA";
 
     public static void storeCar(CarDatabase carDatabase, final Context context, final Car car) {
 
         setNeedsSyncPref(context, true);
         carDatabase.saveCar(car);
-        postCars(context, carDatabase.retrieveCars(false), RETRIES);
+        postCars(context, carDatabase);
 
         /**
          * Tell everyone else
          */
-        Intent intent = new Intent(INTENT);
-        intent.putExtra(INTENT_POSITION, car);
+        Intent intent = new Intent(INTENT_CAR_UPDATE);
+        intent.putExtra(INTENT_CAR_EXTRA, car);
         context.sendBroadcast(intent);
 
     }
 
-//    public static void saveCars(CarDatabase carDatabase, final Context context, final List<Car> cars) {
-//        postCars(context, cars, RETRIES);
-//        setNeedsSyncPref(context, true);
-//        carDatabase.saveCars(cars);
-//    }
+    public static void deleteCar(CarDatabase carDatabase, final Context context, final Car car) {
+
+    }
 
     private static boolean isSyncNeeded(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -77,69 +63,15 @@ public class CarsSync {
         prefs.edit().putBoolean(NEEDS_SYNC_PREF, isNeeded).apply();
     }
 
-    public static void postCars2(final Context context, final List<Car> cars, final int retries) {
+    /**
+     * Post the current state of the cars database to the server
+     *
+     * @param context
+     * @param carDatabase
+     */
+    public static void postCars(final Context context, final CarDatabase carDatabase) {
 
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void[] objects) {
-                try {
-
-                    Log.i(TAG, "Posting users location");
-
-                    Uri.Builder builder = new Uri.Builder();
-                    builder.scheme("https")
-                            .authority(Endpoints.BASE_URL)
-                            .appendPath(Endpoints.CARS_PATH);
-
-                    HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httpPost = CommUtil.createHttpPost(context, builder.build().toString());
-
-                    String json = getCarsJSON(cars).toString();
-                    Log.i(TAG, "Posting\n" + json);
-                    httpPost.setEntity(new StringEntity(json));
-
-                    Log.d(TAG, httpPost.toString());
-
-                    HttpResponse response = httpclient.execute(httpPost);
-                    StatusLine statusLine = response.getStatusLine();
-
-                    Log.i(TAG, "Post result: " + statusLine.getStatusCode());
-
-                    /**
-                     * Everything cool
-                     */
-                    if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                        setNeedsSyncPref(context, false);
-                        Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
-                    }
-                    /**
-                     * Not so cool
-                     */
-                    else {
-                        //Closes the connection.
-                        if (response != null && response.getEntity() != null) {
-                            response.getEntity().getContent().close();
-                            Log.e(TAG, statusLine.getReasonPhrase());
-                        }
-                        if (retries > 0)
-                            postCars2(context, cars, retries - 1);
-                    }
-
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (ClientProtocolException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-        }.execute();
-    }
-
-    public static void postCars(final Context context, final List<Car> cars, final int retries) {
+        final List<Car> cars = carDatabase.retrieveCars(false);
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -151,15 +83,31 @@ public class CarsSync {
                 .authority(Endpoints.BASE_URL)
                 .appendPath(Endpoints.CARS_PATH);
 
-        // Send a JSON spot location.
-        JsonRequest stringRequest = new Requests.JsonArrayPostRequest(
+        /**
+         * Send a Json with the cars contained in this phone
+         */
+        JsonRequest carSyncRequest = new Requests.JsonArrayPostRequest(
                 context,
                 builder.toString(),
                 getCarsJSON(cars),
-                new Response.Listener<JSONObject>() {
+                new Response.Listener<JSONArray>() {
+                    /**
+                     * Here we are receiving cars that were modified by other clients and
+                     * their state is outdated here
+                     *
+                     * @param response
+                     */
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
                         Log.i(TAG, "Post result: " + response.toString());
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                Car car = Car.fromJSON(response.getJSONObject(i));
+                                carDatabase.saveCar(car);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         setNeedsSyncPref(context, false);
                     }
                 },
@@ -167,13 +115,16 @@ public class CarsSync {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        if (retries > 0)
-                            postCars(context, cars, retries - 1);
                     }
                 });
 
+        carSyncRequest.setRetryPolicy(new DefaultRetryPolicy(
+                DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
         // Add the request to the RequestQueue.
-        queue.add(stringRequest);
+        queue.add(carSyncRequest);
     }
 
     private static JSONArray getCarsJSON(List<Car> cars) {

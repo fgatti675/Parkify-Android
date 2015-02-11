@@ -201,6 +201,10 @@ public class CarDatabase extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Remove the stored location of a car
+     * @param car
+     */
     public void clearLocation(Car car) {
 
         // TODO: move to sync
@@ -243,5 +247,14 @@ public class CarDatabase extends SQLiteOpenHelper {
         car.time = new Date(cursor.getLong(7));
 
         return car;
+    }
+
+    /**
+     * Remove all the cars in the database
+     */
+    public void clearCars() {
+        SQLiteDatabase database = getWritableDatabase();
+        database.execSQL("delete from "+ Car.TABLE_NAME);
+        database.close();
     }
 }

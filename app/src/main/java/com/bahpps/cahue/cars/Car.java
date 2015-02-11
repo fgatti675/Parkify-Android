@@ -38,12 +38,14 @@ public class Car implements Parcelable {
                     car.time = Util.DATE_FORMAT.parse(carJSON.getString("time"));
                 }
             }
+            return car;
         } catch (JSONException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } catch (ParseException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public JSONObject toJSON() {

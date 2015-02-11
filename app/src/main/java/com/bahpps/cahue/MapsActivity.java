@@ -127,7 +127,7 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Car car = (Car) intent.getExtras().get(CarsSync.INTENT_POSITION);
+            Car car = (Car) intent.getExtras().get(CarsSync.INTENT_CAR_EXTRA);
             if (car != null) {
                 Log.i(TAG, "Location received: " + car);
                 getParkedCarDelegate(car).updateCar(car);
@@ -170,6 +170,7 @@ public class MapsActivity extends BaseActivity
 
     private void goToLogin() {
         if (!isFinishing()) {
+            carDatabase.clearCars();
             AuthUtils.setIsLoggedIn(this, false);
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
@@ -187,6 +188,8 @@ public class MapsActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        carDatabase = new CarDatabase(this);
 
         if (!AuthUtils.isLoggedIn(this)) {
             goToLogin();
@@ -214,14 +217,11 @@ public class MapsActivity extends BaseActivity
             }
         });
 
-        carDatabase = new CarDatabase(this);
-
         /**
          * Try to reuse map
          */
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
 
         /**
          * There is no saved instance so we create a few things
@@ -442,7 +442,7 @@ public class MapsActivity extends BaseActivity
         super.onResume();
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(CarsSync.INTENT));
+        registerReceiver(carUpdateReceiver, new IntentFilter(CarsSync.INTENT_CAR_UPDATE));
 
         setInitialCamera();
 
@@ -737,8 +737,7 @@ public class MapsActivity extends BaseActivity
      */
     private void setDetailsFragment(DetailsFragment fragment) {
 
-        if(isFinishing())
-            return;
+        if(isFinishing()) return;
 
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
