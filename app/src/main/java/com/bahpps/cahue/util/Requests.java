@@ -3,6 +3,7 @@ package com.bahpps.cahue.util;
 import android.content.Context;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Response;
@@ -10,6 +11,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.GCMUtil;
 
@@ -26,6 +28,10 @@ import java.util.Map;
  */
 public class Requests {
 
+    public static final int RETRIES = 5;
+    public static final int BACKOFF_MULTIPLIER = 2;
+
+
     /**
      * Post a JSONObject
      */
@@ -36,6 +42,10 @@ public class Requests {
         public JsonPostRequest(Context context, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
             super(url, jsonRequest, listener, errorListener);
             this.context = context;
+            setRetryPolicy(new DefaultRetryPolicy(
+                    DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                    RETRIES,
+                    BACKOFF_MULTIPLIER));
         }
 
         @Override
@@ -54,6 +64,10 @@ public class Requests {
         public JsonArrayPostRequest(Context context, String url, JSONArray jsonArray, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
             super(Method.POST, url, jsonArray.toString(), listener, errorListener);
             this.context = context;
+            setRetryPolicy(new DefaultRetryPolicy(
+                    DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                    RETRIES,
+                    BACKOFF_MULTIPLIER));
         }
 
         @Override
@@ -74,6 +88,26 @@ public class Requests {
             } catch (JSONException je) {
                 return Response.error(new ParseError(je));
             }
+        }
+    }
+
+    public static class DeleteRequest extends StringRequest {
+
+        private final Context context;
+
+        public DeleteRequest(Context context, String url, Response.Listener<String> listener,
+                             Response.ErrorListener errorListener) {
+            super(Method.DELETE, url, listener, errorListener);
+            this.context = context;
+            setRetryPolicy(new DefaultRetryPolicy(
+                    DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                    RETRIES,
+                    BACKOFF_MULTIPLIER));
+        }
+
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError {
+            return CommUtil.generateHeaders(context);
         }
     }
 

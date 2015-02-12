@@ -75,13 +75,12 @@ public class MapsActivity extends BaseActivity
         CameraUpdateListener,
         OnMapReadyCallback {
 
-
     protected static final String TAG = "Maps";
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
-    private static final float INITIAL_ZOOM = 12F;
+    static final int REQUEST_ON_CARS_MANAGER = 2424;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -129,7 +128,7 @@ public class MapsActivity extends BaseActivity
 
             Car car = (Car) intent.getExtras().get(CarsSync.INTENT_CAR_EXTRA);
             if (car != null) {
-                Log.i(TAG, "Location received: " + car);
+                Log.i(TAG, "Car update received: " + car);
                 getParkedCarDelegate(car).updateCar(car);
             }
 
@@ -189,7 +188,7 @@ public class MapsActivity extends BaseActivity
 
         super.onCreate(savedInstanceState);
 
-        carDatabase = new CarDatabase(this);
+        carDatabase = CarDatabase.getInstance(this);
 
         if (!AuthUtils.isLoggedIn(this)) {
             goToLogin();
@@ -482,7 +481,7 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onSignInRequired() {
         Log.d(TAG, "onSignInRequired");
-        goToLogin();
+        signIn();
     }
 
 
@@ -539,11 +538,6 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-
-        for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onPause();
-        }
-
         unregisterReceiver(carUpdateReceiver);
     }
 
@@ -581,7 +575,7 @@ public class MapsActivity extends BaseActivity
      * Method used to start the pairing activity
      */
     protected void startDeviceSelection() {
-        startActivityForResult(new Intent(MapsActivity.this, CarManagerActivity.class), 0);
+        startActivityForResult(new Intent(MapsActivity.this, CarManagerActivity.class), REQUEST_ON_CARS_MANAGER);
     }
 
     /**

@@ -95,7 +95,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private void updateImage() {
         if (car.color != null) {
-            image.setImageResource(CarImages.getImageResourceId(car.color, getActivity()));
+            image.setImageDrawable(getResources().getDrawable(CarImages.getImageResourceId(car.color, getActivity())));
         }
     }
 

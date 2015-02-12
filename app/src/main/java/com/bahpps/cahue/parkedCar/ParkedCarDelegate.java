@@ -12,6 +12,7 @@ import com.bahpps.cahue.CameraUpdateListener;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.util.GMapV2Direction;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -132,7 +133,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         iconGenerator = new IconGenerator(getActivity());
         directionsDelegate = new GMapV2Direction();
 
-        carDatabase = new CarDatabase(getActivity());
+        carDatabase = CarDatabase.getInstance(getActivity());
+
         updateCar((Car) getArguments().getParcelable(ARG_CAR));
     }
 
@@ -274,8 +276,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
     public void removeCar() {
-        carDatabase.clearLocation(car);
-        car.location = null;
+        CarsSync.clearLocation(carDatabase, car);
         clear();
     }
 

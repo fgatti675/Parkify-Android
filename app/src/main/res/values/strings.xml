@@ -44,5 +44,6 @@
     <string name="car_name_select">Car name</string>
     <string name="edit">Edit</string>
     <string name="pick_color">Pick car\'s color</string>
+    <string name="delete_error">Error while deleting car</string>
 
 </resources>

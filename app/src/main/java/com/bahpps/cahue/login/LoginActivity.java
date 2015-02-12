@@ -52,7 +52,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
         setContentView(R.layout.activity_login);
 
-        database = new CarDatabase(this);
+        database = CarDatabase.getInstance(this);
 
         // Find the Google+ sign in button.
         mPlusSignInButton = (SignInButton) findViewById(R.id.plus_sign_in_button);
@@ -205,8 +205,8 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     public void onBackEndLogin(LoginResultBean loginResult) {
 
         AuthUtils.setIsLoggedIn(this, true);
-
         AuthUtils.saveOAuthToken(this, loginResult.authToken);
+        AuthUtils.saveRefreshToken(this, loginResult.refreshToken);
 
         database.saveCars(loginResult.cars);
 

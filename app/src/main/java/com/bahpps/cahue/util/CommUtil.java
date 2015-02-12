@@ -1,9 +1,10 @@
 package com.bahpps.cahue.util;
 
 import android.content.Context;
-import android.net.Uri;
 
-import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.GCMUtil;
 
@@ -32,6 +33,36 @@ public class CommUtil {
         }
 
         return httpPost;
+    }
+
+    private static CommUtil mInstance;
+
+    private RequestQueue mRequestQueue;
+    private static Context mContext;
+
+    private CommUtil(Context context) {
+        mContext = context;
+        mRequestQueue = getRequestQueue();
+    }
+
+    public static synchronized CommUtil getInstance(Context context) {
+        if (mInstance == null) {
+            mInstance = new CommUtil(context);
+        }
+        return mInstance;
+    }
+
+    public RequestQueue getRequestQueue() {
+        if (mRequestQueue == null) {
+            // getApplicationContext() is key, it keeps you from leaking the
+            // Activity or BroadcastReceiver if someone passes one in.
+            mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
+        }
+        return mRequestQueue;
+    }
+
+    public <T> void addToRequestQueue(Request<T> req) {
+        getRequestQueue().add(req);
     }
 
 

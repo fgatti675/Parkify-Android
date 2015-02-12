@@ -6,66 +6,20 @@ import android.os.Parcelable;
 
 import com.bahpps.cahue.util.Util;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by francesco on 28.11.2014.
  */
 public class Car implements Parcelable {
-
-    public static Car fromJSON(JSONObject carJSON) {
-        try {
-            Car car = new Car();
-            car.id = carJSON.getString("id");
-            car.name = carJSON.getString("name");
-            car.btAddress = carJSON.getString("btAddress");
-
-            if (carJSON.has("color")) {
-                car.color = carJSON.getInt("color");
-            }
-
-            if(carJSON.has("latitude") && carJSON.has("longitude")) {
-                Location location = new Location("JSON");
-                location.setLatitude(carJSON.getDouble("latitude"));
-                location.setLongitude(carJSON.getDouble("longitude"));
-                location.setAccuracy((float) carJSON.getDouble("accuracy"));
-                car.location = location;
-                if(carJSON.has("time")){
-                    car.time = Util.DATE_FORMAT.parse(carJSON.getString("time"));
-                }
-            }
-            return car;
-        } catch (JSONException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    public JSONObject toJSON() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("id", id);
-            jsonObject.put("name", name);
-            if(btAddress != null) jsonObject.put("btAddress", btAddress);
-            if(color != null) jsonObject.put("color", color);
-            if(location != null){
-                jsonObject.put("latitude", location.getLatitude());
-                jsonObject.put("longitude", location.getLongitude());
-                jsonObject.put("accuracy", location.getAccuracy());
-            }
-            jsonObject.put("time", Util.DATE_FORMAT.format(time));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject;
-    }
 
     public static final String TABLE_NAME = "cars";
 
@@ -157,5 +111,69 @@ public class Car implements Parcelable {
                 ", location=" + location +
                 ", time=" + time +
                 '}';
+    }
+
+    public static Set<Car> fromJSONArray(JSONArray carsArray) {
+        try {
+            Set<Car> cars = new HashSet<>();
+            for (int i = 0; i < carsArray.length(); i++) {
+
+                JSONObject carJSON = carsArray.getJSONObject(i);
+
+                Car car = Car.fromJSON(carJSON);
+                cars.add(car);
+            }
+            return cars;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Car fromJSON(JSONObject carJSON) {
+        try {
+            Car car = new Car();
+            car.id = carJSON.getString("id");
+            car.name = carJSON.getString("name");
+            car.btAddress = carJSON.getString("btAddress");
+
+            if (carJSON.has("color")) {
+                car.color = carJSON.getInt("color");
+            }
+
+            if (carJSON.has("latitude") && carJSON.has("longitude")) {
+                Location location = new Location("JSON");
+                location.setLatitude(carJSON.getDouble("latitude"));
+                location.setLongitude(carJSON.getDouble("longitude"));
+                location.setAccuracy((float) carJSON.getDouble("accuracy"));
+                car.location = location;
+                if (carJSON.has("time")) {
+                    car.time = Util.DATE_FORMAT.parse(carJSON.getString("time"));
+                }
+            }
+            return car;
+        } catch (JSONException | ParseException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", id);
+            jsonObject.put("name", name);
+            if (btAddress != null) jsonObject.put("btAddress", btAddress);
+            if (color != null) jsonObject.put("color", color);
+            if (location != null) {
+                jsonObject.put("latitude", location.getLatitude());
+                jsonObject.put("longitude", location.getLongitude());
+                jsonObject.put("accuracy", location.getAccuracy());
+            }
+            jsonObject.put("time", Util.DATE_FORMAT.format(time));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
 }

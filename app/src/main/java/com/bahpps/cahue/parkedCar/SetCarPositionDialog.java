@@ -64,8 +64,7 @@ public class SetCarPositionDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        // TODO: not necessary to create a new instance of this
-        CarDatabase carDatabase = new CarDatabase(getActivity());
+        CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
         final List<Car> cars = carDatabase.retrieveCars(false);
 
         // there has to be a default car
@@ -116,7 +115,7 @@ public class SetCarPositionDialog extends DialogFragment {
                         Log.w(TAG, selected.toString());
 
                         // If ok, we just send and intent and leave the location receivers to do all the work
-                        CarDatabase carDatabase = new CarDatabase(getActivity());
+                        CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
                         CarsSync.storeCar(carDatabase, getActivity(), selected);
 
                     }
@@ -141,6 +140,6 @@ public class SetCarPositionDialog extends DialogFragment {
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);
-        return  builder.create();
+        return builder.create();
     }
 }

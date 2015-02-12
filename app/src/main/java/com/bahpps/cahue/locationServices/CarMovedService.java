@@ -10,10 +10,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Requests;
 
@@ -69,7 +69,7 @@ public class CarMovedService extends LocationPollerService {
     @Override
     public void onLocationPolled(Context context, Location spotLocation, Car car) {
 
-        CarDatabase carDatabase = new CarDatabase(context);
+        CarDatabase carDatabase = CarDatabase.getInstance(context);
 
         /**
          * If the accuracy is not good enough, we can check the previous location of the car
@@ -80,7 +80,7 @@ public class CarMovedService extends LocationPollerService {
                 spotLocation = car.location;
         }
 
-        carDatabase.clearLocation(car);
+        CarsSync.clearLocation(carDatabase, car);
 
         /**
          * If it's still not accurate, we don't use it
@@ -164,7 +164,7 @@ public class CarMovedService extends LocationPollerService {
     private void postSpotLocation(final Location location, final Car car, final int retries) {
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = CommUtil.getInstance(this).getRequestQueue();
 
         Log.i(TAG, "Posting parking spot location");
 

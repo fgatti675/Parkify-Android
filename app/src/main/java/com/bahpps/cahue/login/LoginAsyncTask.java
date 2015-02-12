@@ -88,26 +88,8 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
             if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 
                 try {
-                    LoginResultBean loginResultBean = new LoginResultBean();
 
                     JSONObject jsonResult = new JSONObject(EntityUtils.toString(response.getEntity()));
-
-                    loginResultBean.refreshToken = jsonResult.getString("refreshToken");
-                    loginResultBean.authToken = jsonResult.getString("authToken");
-
-                    loginResultBean.email = jsonResult.getJSONObject("user").getJSONObject("googleUser").getString("email");
-                    loginResultBean.googleId = jsonResult.getJSONObject("user").getJSONObject("googleUser").getString("googleId");
-
-                    if(jsonResult.has("cars")) {
-                        JSONArray carsArray = jsonResult.getJSONArray("cars");
-                        for (int i = 0; i < carsArray.length(); i++) {
-
-                            JSONObject carJSON = carsArray.getJSONObject(i);
-
-                            Car car = Car.fromJSON(carJSON);
-                            loginResultBean.cars.add(car);
-                        }
-                    }
                     LoginResultBean loginResultBean = LoginResultBean.fromJSON(jsonResult);
 
                     Log.i(TAG, "Post result: " + jsonResult);
@@ -119,7 +101,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
             } else {
 
-                //Closes the connection.
+                // Closes the connection.
                 if (response != null && response.getEntity() != null) {
                     response.getEntity().getContent().close();
                     Log.e(TAG, statusLine.getReasonPhrase());

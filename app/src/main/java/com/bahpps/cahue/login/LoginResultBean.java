@@ -33,18 +33,13 @@ public class LoginResultBean {
             LoginResultBean loginResultBean = new LoginResultBean();
 
             loginResultBean.authToken = json.getString("authToken");
-            loginResultBean.email = json.getString("email");
-            loginResultBean.googleId = json.getString("googleId");
+            loginResultBean.refreshToken = json.getString("refreshToken");
+            loginResultBean.email = json.getJSONObject("user").getJSONObject("googleUser").getString("email");
+            loginResultBean.googleId = json.getJSONObject("user").getJSONObject("googleUser").getString("googleId");
 
             if (json.has("cars")) {
                 JSONArray carsArray = json.getJSONArray("cars");
-                for (int i = 0; i < carsArray.length(); i++) {
-
-                    JSONObject carJSON = carsArray.getJSONObject(i);
-
-                    Car car = Car.fromJSON(carJSON);
-                    loginResultBean.cars.add(car);
-                }
+                loginResultBean.cars = Car.fromJSONArray(carsArray);
             }
 
             return loginResultBean;

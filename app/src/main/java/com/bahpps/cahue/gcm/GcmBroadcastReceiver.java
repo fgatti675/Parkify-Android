@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.gcm;
 
 import android.app.Activity;
 import android.content.ComponentName;

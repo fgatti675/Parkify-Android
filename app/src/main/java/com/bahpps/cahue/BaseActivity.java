@@ -279,7 +279,7 @@ public abstract class BaseActivity
     }
 
     /**
-     * Method to resolve any signin errors
+     * Method to resolve any sign in errors
      */
     private void resolveSignInError() {
         if (mConnectionResult != null && mConnectionResult.hasResolution()) {

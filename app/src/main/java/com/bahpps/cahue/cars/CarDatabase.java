@@ -20,6 +20,21 @@ import java.util.Set;
  */
 public class CarDatabase extends SQLiteOpenHelper {
 
+    private static CarDatabase mInstance;
+
+    public static CarDatabase getInstance(Context ctx) {
+        /**
+         * use the application context as suggested by CommonsWare.
+         * this will ensure that you dont accidentally leak an Activitys
+         * context (see this article for more information:
+         * http://android-developers.blogspot.nl/2009/01/avoiding-memory-leaks.html)
+         */
+        if (mInstance == null) {
+            mInstance = new CarDatabase(ctx.getApplicationContext());
+        }
+        return mInstance;
+    }
+
     /**
      * Schema version.
      */
@@ -67,7 +82,7 @@ public class CarDatabase extends SQLiteOpenHelper {
 
     private static final String TAG = CarDatabase.class.getSimpleName();
 
-    public CarDatabase(Context context) {
+    private CarDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -201,28 +216,6 @@ public class CarDatabase extends SQLiteOpenHelper {
 
     }
 
-    /**
-     * Remove the stored location of a car
-     * @param car
-     */
-    public void clearLocation(Car car) {
-
-        // TODO: move to sync
-        car.time = new Date();
-
-        SQLiteDatabase database = getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(Car.COLUMN_LATITUDE, (Double) null);
-        values.put(Car.COLUMN_LONGITUDE, (Double) null);
-        values.put(Car.COLUMN_ACCURACY, (Double) null);
-        values.put(Car.COLUMN_TIME, car.time.getTime());
-
-        database.update(Car.TABLE_NAME, values, Car.COLUMN_ID + " = '" + car.id + "'", null);
-
-        database.close();
-    }
-
 
     private Car cursorToCar(Cursor cursor) {
 
@@ -231,7 +224,6 @@ public class CarDatabase extends SQLiteOpenHelper {
         car.name = cursor.getString(1);
         car.btAddress = cursor.getString(2);
         car.color = cursor.isNull(3) ? null : cursor.getInt(3);
-        if (car.color == 0) car.color = null; // sanity check
 
         if (!cursor.isNull(4) && !cursor.isNull(5)) {
             double latitude = cursor.getDouble(4);
@@ -242,9 +234,8 @@ public class CarDatabase extends SQLiteOpenHelper {
             location.setLongitude(longitude);
             location.setAccuracy(accuracy);
             car.location = location;
+            car.time = new Date(cursor.getLong(7));
         }
-
-        car.time = new Date(cursor.getLong(7));
 
         return car;
     }
@@ -257,4 +248,11 @@ public class CarDatabase extends SQLiteOpenHelper {
         database.execSQL("delete from "+ Car.TABLE_NAME);
         database.close();
     }
+
+    public void delete(Car car){
+        SQLiteDatabase database = getWritableDatabase();
+        database.delete(Car.TABLE_NAME, "id = '" + car.id+ "'", null);
+        database.close();
+    }
+
 }

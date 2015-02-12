@@ -1,4 +1,4 @@
-package com.bahpps.cahue;
+package com.bahpps.cahue.gcm;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -10,14 +10,34 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.bahpps.cahue.MapsActivity;
+import com.bahpps.cahue.R;
+import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.CarsSync;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Francesco on 15/01/2015.
  */
 public class GcmIntentService extends IntentService {
 
-    public static final int NOTIFICATION_ID = 1;
+    /**
+     * Tell a Device that
+     */
+    public static final String CARS_UPDATE = "CARS_UPDATE";
+
+    /**
+     * Message parameters
+     */
+    public static final String CARS = "CARS";
+
     private static final String TAG = GcmIntentService.class.getSimpleName();
 
     private NotificationManager mNotificationManager;
@@ -44,25 +64,23 @@ public class GcmIntentService extends IntentService {
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 sendNotification("Send error: " + extras.toString());
-            }
-
-            else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 sendNotification("Deleted messages on server: " +
                         extras.toString());
                 // If it's a regular GCM message, do some work.
-            }
-
-            else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // This loop represents the service doing some work.
-                for (int i = 0; i < 5; i++) {
-                    Log.i(TAG, "Working... " + (i + 1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
+
+                try {
+
+                    String carsJson = extras.getString(CARS);
+                    saveCars(carsJson);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
                 // Post notification of received message.
                 sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
@@ -71,6 +89,22 @@ public class GcmIntentService extends IntentService {
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
+
+    private void saveCars(String carsJson) throws JSONException {
+        Set<Car> cars = Car.fromJSONArray(new JSONArray(carsJson));
+        CarDatabase.getInstance(this).saveCars(cars);
+
+        for (Car car : cars) {
+            /**
+             * Tell everyone else
+             */
+            Intent carUpdateIntent = new Intent(CarsSync.INTENT_CAR_UPDATE);
+            carUpdateIntent.putExtra(CarsSync.INTENT_CAR_EXTRA, car);
+            sendBroadcast(carUpdateIntent);
+        }
+    }
+
+    public static final int NOTIFICATION_ID = 1;
 
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with

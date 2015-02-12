@@ -123,7 +123,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        carDatabase = new CarDatabase(getActivity());
+
+        carDatabase = CarDatabase.getInstance(getActivity());
 
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -250,6 +251,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     public void onCarRemoved(Car car) {
+
+        CarsSync.remove(getActivity(), car, CarDatabase.getInstance(getActivity()));
+
         int i = 0;
         for (Car c : cars) {
             if (c.equals(car)) break;
@@ -257,6 +261,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
         cars.remove(i);
         adapter.notifyItemRemoved(i);
+
+        selectedDeviceAddresses.remove(car.btAddress);
+        setBondedDevices();
+        adapter.notifyDataSetChanged();
     }
 
     public class RecyclerViewCarsAdapter extends
@@ -525,7 +533,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             });
 
             if (car.color != null) {
-                carImage.setImageResource(CarImages.getImageResourceId(car.color, getActivity()));
+                carImage.setImageDrawable(getResources().getDrawable(CarImages.getImageResourceId(car.color, getActivity())));
             }
 
         }
