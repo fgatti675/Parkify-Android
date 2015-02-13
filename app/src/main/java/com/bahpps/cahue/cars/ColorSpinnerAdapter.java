@@ -11,9 +11,6 @@ import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by francesco on 29.01.2015.
@@ -44,7 +41,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
         if (position == 0) {
             name.setText(R.string.pick_color);
             GradientDrawable gradientDrawable = (GradientDrawable) image.getDrawable();
-            gradientDrawable.setColor(context.getResources().getColor(R.color.transparent));
+            gradientDrawable.setColor(context.getResources().getColor(android.R.color.transparent));
         } else {
 
             name.setText(colorNames[position - 1]);

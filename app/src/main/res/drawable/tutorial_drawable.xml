@@ -15,7 +15,7 @@
             android:src="@drawable/map_sample" />
     </item>
 
-    <item android:drawable="@color/transparent">
+    <item android:drawable="@android:color/transparent">
     </item>
 
 </layer-list>

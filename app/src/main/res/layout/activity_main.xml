@@ -37,7 +37,7 @@
         android:padding="0dp"
         android:layout_margin="@dimen/large_padding"
         android:src="@drawable/ic_action_device_gps_fixed"
-        cahue:floatingActionButtonColor="@color/background_material_light"
+        cahue:floatingActionButtonColor="@android:color/white"
         android:layout_above="@+id/marker_details_container"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"/>

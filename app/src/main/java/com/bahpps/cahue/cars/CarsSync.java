@@ -27,6 +27,7 @@ import org.json.JSONException;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Francesco on 04/02/2015.
@@ -42,8 +43,14 @@ public class CarsSync {
 
     public static void storeCar(CarDatabase carDatabase, final Context context, final Car car) {
 
-        carDatabase.saveCar(car);
         postCars(context, carDatabase);
+
+        saveAndBroadcast(carDatabase, context, car);
+
+    }
+
+    private static void saveAndBroadcast(CarDatabase carDatabase, Context context, Car car) {
+        carDatabase.saveCar(car);
 
         /**
          * Tell everyone else
@@ -51,7 +58,6 @@ public class CarsSync {
         Intent intent = new Intent(INTENT_CAR_UPDATE);
         intent.putExtra(INTENT_CAR_EXTRA, car);
         context.sendBroadcast(intent);
-
     }
 
     /**
@@ -112,7 +118,6 @@ public class CarsSync {
                      */
                     @Override
                     public void onResponse(String response) {
-                        database.delete(car);
                         Log.i(TAG, "Car deleted : " + response);
                     }
                 },
@@ -120,10 +125,12 @@ public class CarsSync {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
+                        saveAndBroadcast(database, context, car);
                         error.printStackTrace();
                     }
                 });
 
+        database.delete(car);
 
         // Add the request to the RequestQueue.
         queue.add(carSyncRequest);
@@ -166,14 +173,8 @@ public class CarsSync {
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.i(TAG, "Post result: " + response.toString());
-                        for (int i = 0; i < response.length(); i++) {
-                            try {
-                                Car car = Car.fromJSON(response.getJSONObject(i));
-                                carDatabase.saveCar(car);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        Set<Car> cars = Car.fromJSONArray(response);
+                        carDatabase.saveCars(cars);
                         setNeedsSyncPref(context, false);
                     }
                 },
