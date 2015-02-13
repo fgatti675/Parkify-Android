@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class CommUtil {
 
-    public static final String AUTH_HEADER = "Authentication";
+    public static final String AUTH_HEADER = "Authorization";
     public static final String DEVICE_HEADER = "Device";
 
 
