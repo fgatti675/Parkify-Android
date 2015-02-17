@@ -13,14 +13,13 @@ import android.util.Log;
 import com.bahpps.cahue.MapsActivity;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarsSync;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.util.List;
 import java.util.Set;
 
 /**

@@ -17,15 +17,13 @@ import com.bahpps.cahue.R;
 import com.bahpps.cahue.locationServices.LocationPollerService;
 import com.bahpps.cahue.cars.Car;
 
-import org.apache.http.client.methods.HttpPost;
-
 import java.util.Date;
 
 
-public class DebugActivity extends Activity implements DebugService.ServiceListener {
+public class DebugActivity extends Activity implements DebugCarMovedService.ServiceListener {
 
 
-    DebugService mService;
+    DebugCarMovedService mService;
     boolean mBound = false;
     TextView locationTextView;
     TextView postTextView;
@@ -50,9 +48,13 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
 
     private void pollLocation(){
         Log.d("debug", "Debug poll location ");
-        Intent intent = new Intent(this, DebugService.class);
+        Intent intent = new Intent(this, DebugCarMovedService.class);
+
+        // should implement a debug database instead of this
         Car car = new Car();
+        car.id = "Debug ID";
         car.btAddress = "DEBUG";
+
         intent.putExtra(LocationPollerService.EXTRA_BT_CAR, car);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         locationTextView.setText("Polling...");
@@ -76,7 +78,7 @@ public class DebugActivity extends Activity implements DebugService.ServiceListe
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            DebugService.LocalBinder binder = (DebugService.LocalBinder) service;
+            DebugCarMovedService.LocalBinder binder = (DebugCarMovedService.LocalBinder) service;
             mService = binder.getService();
             mService.setServiceListener(DebugActivity.this);
             mBound = true;

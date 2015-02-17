@@ -60,12 +60,14 @@
         </receiver>
 
         <!-- DEBUG -->
-        <activity android:name=".debug.DebugActivity">
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
+        <activity android:name=".debug.DebugActivity"
+            android:parentActivityName=".MapsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bahpps.cahue.MapsActivity" />
         </activity>
 
-        <service android:name=".debug.DebugService" />
+        <service android:name=".debug.DebugCarMovedService" />
 
         <activity
             android:name=".login.LoginActivity"

@@ -40,13 +40,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                tools:text="TIME" />
+                tools:text="TIME"
+                android:textColor="@color/abc_secondary_text_material_light" />
 
             <TextView
                 android:id="@+id/distance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="DISTANCE" />
+                tools:text="DISTANCE"
+                android:textColor="@color/abc_secondary_text_material_light"  />
 
         </LinearLayout>
 

@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarManagerActivity;
 import com.bahpps.cahue.cars.CarsSync;
 

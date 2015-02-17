@@ -29,10 +29,11 @@ import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.cars.CarManagerActivity;
 import com.bahpps.cahue.cars.CarsSync;
+import com.bahpps.cahue.debug.DebugActivity;
 import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
@@ -710,12 +711,18 @@ public class MapsActivity extends BaseActivity
             case R.id.action_disconnect:
                 signOut();
                 return true;
+            case R.id.action_debug:
+                goToDebug();
+                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
 
     }
 
+    private void goToDebug() {
+        startActivity(new Intent(this, DebugActivity.class));
+    }
 
 
     @Override

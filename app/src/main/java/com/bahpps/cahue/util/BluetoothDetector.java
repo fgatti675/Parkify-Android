@@ -10,7 +10,7 @@ import com.bahpps.cahue.locationServices.CarMovedService;
 import com.bahpps.cahue.locationServices.LocationPollerService;
 import com.bahpps.cahue.locationServices.ParkedCarService;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 
 import java.util.Set;
 

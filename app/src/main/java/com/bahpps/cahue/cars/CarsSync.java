@@ -1,29 +1,25 @@
 package com.bahpps.cahue.cars;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Requests;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.util.Date;
 import java.util.List;
@@ -43,9 +39,8 @@ public class CarsSync {
 
     public static void storeCar(CarDatabase carDatabase, final Context context, final Car car) {
 
-        postCars(context, carDatabase);
-
         saveAndBroadcast(carDatabase, context, car);
+        postCars(context, carDatabase);
 
     }
 

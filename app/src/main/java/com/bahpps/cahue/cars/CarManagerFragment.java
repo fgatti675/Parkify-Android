@@ -28,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.util.CarImages;
 
 import java.util.ArrayList;

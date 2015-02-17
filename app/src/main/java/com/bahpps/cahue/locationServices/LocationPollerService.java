@@ -54,6 +54,9 @@ public abstract class LocationPollerService extends Service implements
     // Car related to this service
     private Car car;
 
+    /**
+     * Best location polled so far
+     */
     private Location bestAccuracyLocation;
 
 
@@ -68,7 +71,7 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent != null) {
+        if (intent != null) {
             car = intent.getExtras().getParcelable(EXTRA_BT_CAR);
             start();
         }
@@ -79,7 +82,7 @@ public abstract class LocationPollerService extends Service implements
         if (checkPreconditions(car)) {
             startTime = new Date();
             mGoogleApiClient.connect();
-        } else{
+        } else {
             stopSelf();
         }
     }
@@ -135,13 +138,16 @@ public abstract class LocationPollerService extends Service implements
     protected abstract boolean checkPreconditions(Car car);
 
     private void notifyLocation(Location location) {
-        Bundle extras = new Bundle();
-        extras.putSerializable(EXTRA_START_TIME, startTime);
-        location.setExtras(extras);
-        Log.i(TAG, "Notifying location polled: " + location);
-        onLocationPolled(this, location, car);
-        mGoogleApiClient.disconnect();
-        stopSelf();
+        try {
+            Bundle extras = new Bundle();
+            extras.putSerializable(EXTRA_START_TIME, startTime);
+            location.setExtras(extras);
+            Log.i(TAG, "Notifying location polled: " + location);
+            onLocationPolled(this, location, car);
+        } finally {
+            mGoogleApiClient.disconnect();
+            stopSelf();
+        }
     }
 
     public abstract void onLocationPolled(Context context, Location location, Car car);

@@ -11,7 +11,7 @@ import com.bahpps.cahue.AbstractMarkerDelegate;
 import com.bahpps.cahue.CameraUpdateListener;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.util.GMapV2Direction;
 import com.google.android.gms.maps.CameraUpdateFactory;

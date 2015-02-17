@@ -36,25 +36,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                tools:text="NAME" />
+                tools:text="NAME"
+                android:textColor="@color/abc_primary_text_material_light" />
 
             <TextView
                 android:id="@+id/time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="TIME" />
+                tools:text="TIME"
+                android:textColor="@color/abc_secondary_text_material_light" />
 
             <TextView
                 android:id="@+id/distance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="DISTANCE" />
+                tools:text="DISTANCE"
+                android:textColor="@color/abc_secondary_text_material_light" />
 
         </LinearLayout>
 
         <android.support.v7.widget.Toolbar
             cahue:theme="@style/ActionBar.Details"
-            cahue:popupTheme="@style/ActionBar.DetailsPopupThemeOverlay"
             android:id="@+id/car_toolbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -3,7 +3,6 @@ package com.bahpps.cahue.locationServices;
 import android.content.Context;
 import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -12,25 +11,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Requests;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 
 /**
@@ -41,7 +29,7 @@ import java.util.Calendar;
  */
 public class CarMovedService extends LocationPollerService {
 
-    private final static String TAG = "CarMovedPositionReceiver";
+    private final static String TAG = CarMovedService.class.getSimpleName();
 
     /**
      * Minimum desired accuracy
@@ -53,10 +41,6 @@ public class CarMovedService extends LocationPollerService {
      */
     private static final long MINIMUM_STAY_MS = 180000;
 
-    /**
-     * Times we will be retrying to post a spot location
-     */
-    private static final int POST_RETRIES = 3;
 
     @Override
     protected boolean checkPreconditions(Car car) {
@@ -76,7 +60,7 @@ public class CarMovedService extends LocationPollerService {
          * and if it's close and more accurate, we use it.
          */
         if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
-            if (car.location.distanceTo(spotLocation) < ACCURACY_THRESHOLD_M)
+            if (car.location != null && car.location.distanceTo(spotLocation) < ACCURACY_THRESHOLD_M)
                 spotLocation = car.location;
         }
 
@@ -96,72 +80,11 @@ public class CarMovedService extends LocationPollerService {
     }
 
     private void doPostSpotLocation(Location spotLocation, Car car) {
-        postSpotLocation(spotLocation, car, POST_RETRIES);
-    }
-
-    private void postSpotLocation2(final Location location, final Car car, final int retries) {
-
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void[] objects) {
-                try {
-
-                    Log.i(TAG, "Posting parking spot location");
-
-                    Uri.Builder builder = new Uri.Builder();
-                    builder.scheme("https")
-                            .authority(Endpoints.BASE_URL)
-                            .appendPath(Endpoints.SPOTS_PATH);
-
-                    HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httpPost = CommUtil.createHttpPost(CarMovedService.this, builder.build().toString());
-
-                    String json = getParkingSpotJSON(location, car).toString();
-
-                    Log.i(TAG, "Posting\n" + json);
-                    httpPost.setEntity(new StringEntity(json));
-
-                    Log.d(TAG, httpPost.toString());
-
-                    HttpResponse response = httpclient.execute(httpPost);
-                    StatusLine statusLine = response.getStatusLine();
-
-                    Log.i(TAG, "Post result: " + statusLine.getStatusCode());
-                    if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-
-                        Log.i(TAG, "Post result: " + EntityUtils.toString(response.getEntity()));
-                    } else {
-                        //Closes the connection.
-                        if (response != null && response.getEntity() != null) {
-                            response.getEntity().getContent().close();
-                            Log.e(TAG, statusLine.getReasonPhrase());
-                        }
-                        if (retries > 0)
-                            postSpotLocation(location, car, retries - 1);
-                    }
-                    return null;
-
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (ClientProtocolException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void v) {
-                onLocationPost();
-            }
-        }.execute();
+        postSpotLocation(spotLocation, car);
     }
 
 
-    private void postSpotLocation(final Location location, final Car car, final int retries) {
+    private void postSpotLocation(final Location location, final Car car) {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = CommUtil.getInstance(this).getRequestQueue();
@@ -181,6 +104,7 @@ public class CarMovedService extends LocationPollerService {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        onLocationPost();
                         Log.i(TAG, "Post result: " + response.toString());
                     }
                 },
@@ -188,8 +112,6 @@ public class CarMovedService extends LocationPollerService {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Network error : " + error.networkResponse.statusCode);
-                        if (retries > 0)
-                            postSpotLocation(location, car, retries - 1);
                     }
                 });
         // Add the request to the RequestQueue.

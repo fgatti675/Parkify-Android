@@ -15,7 +15,7 @@ import android.widget.Toast;
 import com.bahpps.cahue.BaseActivity;
 import com.bahpps.cahue.MapsActivity;
 import com.bahpps.cahue.R;
-import com.bahpps.cahue.cars.CarDatabase;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;

@@ -15,10 +15,18 @@
         android:padding="@dimen/large_padding">
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/cars"
+            android:textColor="@color/abc_primary_text_material_light" />
+
+        <TextView
             android:id="@+id/title_dialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_device_long" />
+            android:text="@string/select_device_long"
+            android:textColor="@color/abc_secondary_text_material_light"  />
 
         <Button
             android:id="@+id/enable_bt"

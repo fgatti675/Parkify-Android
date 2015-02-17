@@ -10,12 +10,10 @@ import android.util.Log;
 import com.bahpps.cahue.locationServices.CarMovedService;
 import com.bahpps.cahue.cars.Car;
 
-import org.apache.http.client.methods.HttpPost;
-
 /**
 * Created by Francesco on 17/10/2014.
 */
-public class DebugService extends CarMovedService {
+public class DebugCarMovedService extends CarMovedService {
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -23,6 +21,7 @@ public class DebugService extends CarMovedService {
 
     @Override
     public void onLocationPolled(Context context, Location spotLocation, Car car) {
+        car = new Car();
         super.onLocationPolled(context, spotLocation, car);
         serviceListener.onNewLocation(spotLocation);
     }
@@ -32,9 +31,9 @@ public class DebugService extends CarMovedService {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        DebugService getService() {
+        DebugCarMovedService getService() {
             // Return this instance of LocalService so clients can call public methods
-            return DebugService.this;
+            return DebugCarMovedService.this;
         }
     }
 
