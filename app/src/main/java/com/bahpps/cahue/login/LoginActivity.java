@@ -81,25 +81,49 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     }
 
-    protected void onGoogleAuthTokenSet(String authToken) {
-        setLoading(false);
-        String gcmRegId = getGCMRegId();
+    protected void onGoogleAuthTokenSet(final String authToken) {
+        new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... params) {
+                try {
+                    return getGCMRegId();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            onGCMError();
+                        }
+                    });
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String regId) {
+                if(regId != null) onGCMRegIdSet(regId, authToken);
+            }
+        }.execute();
+    }
+
+    private void onGCMRegIdSet(String gcmRegId, String authToken) {
         new LoginAsyncTask(gcmRegId, authToken, this, this).execute();
     }
 
-    private String getGCMRegId() {
+    private void onGCMError() {
+        setLoading(false);
+        Toast.makeText(this, R.string.gcm_error, Toast.LENGTH_SHORT).show();
+    }
+
+    private String getGCMRegId() throws IOException {
 
         gcm = GoogleCloudMessaging.getInstance(this);
 
         String regId = GCMUtil.getRegistrationId(this);
 
         if (regId.isEmpty()) {
-
-            try {
-                regId = gcm.register(GCMUtil.SENDER_ID);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            regId = gcm.register(GCMUtil.SENDER_ID); // TODO: this can crash
             Log.d(TAG, "Device registered, registration ID: " + regId);
 
             // Persist the regID - no need to register again.
@@ -162,8 +186,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
             protected void onPostExecute(String authToken) {
                 if (authToken == null) {
                     // TODO: nicer
-                    Toast.makeText(LoginActivity.this, "Error with Google auth", Toast.LENGTH_SHORT).show();
-                    setLoading(false);
+                    onTokenRetrieveError();
                 } else {
                     onGoogleAuthTokenSet(authToken);
                 }
@@ -172,6 +195,11 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         }.execute();
 
 
+    }
+
+    private void onTokenRetrieveError() {
+        Toast.makeText(this, "Error Google auth", Toast.LENGTH_SHORT).show();
+        setLoading(false);
     }
 
 

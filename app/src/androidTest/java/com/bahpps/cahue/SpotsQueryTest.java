@@ -3,7 +3,6 @@ package com.bahpps.cahue;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
-import com.bahpps.cahue.debug.TestParkingSpotsQuery;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.bahpps.cahue.spots.query.ParkingSpotsQuery;
 import com.google.android.gms.maps.model.LatLng;
@@ -52,8 +51,8 @@ public class SpotsQueryTest extends ActivityTestCase {
 
         final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
 
-        final ParkingSpotsQuery parkingSpotsQuery = new TestParkingSpotsQuery(
-                null,
+        final ParkingSpotsQuery parkingSpotsQuery = new TestSpotsQuery(
+                getActivity(),
                 latLngBounds,
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
 
@@ -83,9 +82,10 @@ public class SpotsQueryTest extends ActivityTestCase {
             }
         });
 
-    /* The testing thread will wait here until the UI thread releases it
-     * above with the countDown() or 30 seconds passes and it times out.
-     */
+        /**
+         *  The testing thread will wait here until the UI thread releases it
+         * above with the countDown() or 30 seconds passes and it times out.
+         */
         signal.await(60, TimeUnit.SECONDS);
 
         // The task is done, and now you can assert some things!

@@ -17,10 +17,8 @@ import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarsSync;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-
-import java.util.Set;
+import org.json.JSONObject;
 
 /**
  * Created by Francesco on 15/01/2015.
@@ -35,7 +33,8 @@ public class GcmIntentService extends IntentService {
     /**
      * Message parameters
      */
-    public static final String CARS = "CARS";
+    public static final String UPDATED_CAR = "UPDATED_CAR";
+    public static final String DELETED_CAR = "DELETED_CAR";
 
     private static final String TAG = GcmIntentService.class.getSimpleName();
 
@@ -73,8 +72,13 @@ public class GcmIntentService extends IntentService {
 
                 try {
 
-                    String carsJson = extras.getString(CARS);
-                    saveCars(carsJson);
+                    String updatedCar = extras.getString(UPDATED_CAR);
+                    if (updatedCar != null)
+                        saveCar(updatedCar);
+
+                    String deletedCarId = extras.getString(DELETED_CAR);
+                    if (deletedCarId != null)
+                        deleteCar(deletedCarId);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -89,18 +93,14 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    private void saveCars(String carsJson) throws JSONException {
-        Set<Car> cars = Car.fromJSONArray(new JSONArray(carsJson));
-        CarDatabase.getInstance(this).saveCars(cars);
+    private void saveCar(String carJson) throws JSONException {
+        Car car = Car.fromJSON(new JSONObject(carJson));
+        CarsSync.saveAndBroadcast(CarDatabase.getInstance(this), getApplicationContext(), car);
+    }
 
-        for (Car car : cars) {
-            /**
-             * Tell everyone else
-             */
-            Intent carUpdateIntent = new Intent(CarsSync.INTENT_CAR_UPDATE);
-            carUpdateIntent.putExtra(CarsSync.INTENT_CAR_EXTRA, car);
-            sendBroadcast(carUpdateIntent);
-        }
+    private void deleteCar(String carId) throws JSONException {
+        CarDatabase database = CarDatabase.getInstance(this);
+        database.delete(carId);
     }
 
     public static final int NOTIFICATION_ID = 1;

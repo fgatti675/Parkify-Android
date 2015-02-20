@@ -28,7 +28,6 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
 import com.bahpps.cahue.cars.CarManagerActivity;
-import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.debug.DebugActivity;
 import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.LoginActivity;
@@ -127,10 +126,10 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Car car = (Car) intent.getExtras().get(CarsSync.INTENT_CAR_EXTRA);
+            Car car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
             if (car != null) {
                 Log.i(TAG, "Car update received: " + car);
-                getParkedCarDelegate(car).updateCar(car);
+                getParkedCarDelegate(car).setCar(car);
             }
 
         }
@@ -213,7 +212,7 @@ public class MapsActivity extends BaseActivity
         myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                zoomToMyLocation(false);
+                zoomToMyLocation();
             }
         });
 
@@ -303,12 +302,12 @@ public class MapsActivity extends BaseActivity
 
     }
 
-    private SpotsDelegate getSpotsDelegate(){
+    private SpotsDelegate getSpotsDelegate() {
         SpotsDelegate spotsDelegate = (SpotsDelegate) getFragmentManager().findFragmentByTag(SpotsDelegate.FRAGMENT_TAG);
         if (spotsDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            spotsDelegate =  SpotsDelegate.newInstance();
+            spotsDelegate = SpotsDelegate.newInstance();
             spotsDelegate.setRetainInstance(true);
             transaction.add(spotsDelegate, SpotsDelegate.FRAGMENT_TAG);
             transaction.commit();
@@ -326,7 +325,7 @@ public class MapsActivity extends BaseActivity
         if (parkedCarDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            parkedCarDelegate =  ParkedCarDelegate.newInstance(car);
+            parkedCarDelegate = ParkedCarDelegate.newInstance(car);
             parkedCarDelegate.setRetainInstance(true);
             transaction.add(parkedCarDelegate, car.id);
             transaction.commit();
@@ -442,7 +441,11 @@ public class MapsActivity extends BaseActivity
         super.onResume();
 
         // when our activity resumes, we want to register for location updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(CarsSync.INTENT_CAR_UPDATE));
+        registerReceiver(carUpdateReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
+        List<Car> cars = carDatabase.retrieveCars(false);
+        for (Car car : cars) {
+            getParkedCarDelegate(car).setCar(car);
+        }
 
         setInitialCamera();
 
@@ -622,14 +625,14 @@ public class MapsActivity extends BaseActivity
                 if (!parkedCarDelegate.isTooFar()) {
                     parkedCarDelegate.setFollowing(true);
                     onCarClicked(car);
-                }else
-                    zoomToMyLocation(true);
-
+                } else {
+                    zoomToMyLocation();
+                }
             }
 
             // zoom to user otherwise
             else {
-                zoomToMyLocation(true);
+                zoomToMyLocation();
             }
 
             initialCameraSet = true;
@@ -738,7 +741,7 @@ public class MapsActivity extends BaseActivity
      */
     private void setDetailsFragment(DetailsFragment fragment) {
 
-        if(isFinishing()) return;
+        if (isFinishing()) return;
 
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
@@ -787,7 +790,7 @@ public class MapsActivity extends BaseActivity
                 });
     }
 
-    private void zoomToMyLocation(boolean resetZoom) {
+    private void zoomToMyLocation() {
 
         Log.d(TAG, "zoomToMyLocation");
 
@@ -798,9 +801,7 @@ public class MapsActivity extends BaseActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
 
-        float zoom = 17F;
-        if (!resetZoom)
-            zoom = Math.max(mMap.getCameraPosition().zoom, 14);
+        float zoom = Math.max(mMap.getCameraPosition().zoom, 14);
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                 .zoom(zoom)

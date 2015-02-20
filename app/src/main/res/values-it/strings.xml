@@ -42,6 +42,13 @@
     <string name="activate_bluetooth">Attiva Bluetooth</string>
     <string name="car_name_select">Nome della macchina</string>
     <string name="edit">Cambia</string>
-    <string name="pick_color">Pick car\'s color</string>
+    <string name="pick_color">Scegli il colore della macchina</string>
+    <string name="gcm_error" >Error retrieving device ID</string>
+    <string name="no_cars_long">Non ci sono macchine registrate. Registrare una adesso?</string>
+    <string name="no_cars">Senza macchine!</string>
+    <string name="add_car_no_bt">Agiungi macchina senza Bluetooth</string>
+    <string name="delete_car">Elimina macchina</string>
+    <string name="delete_car_confirmation">Sicuro che vuoi eliminare questa macchina?</string>
+    <string name="delete_error">Errore al eliminare la macchina</string>
 
 </resources>

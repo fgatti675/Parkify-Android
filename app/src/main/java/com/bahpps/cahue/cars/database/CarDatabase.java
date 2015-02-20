@@ -2,6 +2,7 @@ package com.bahpps.cahue.cars.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -21,6 +22,9 @@ import java.util.Set;
  * Created by Francesco on 22/01/2015.
  */
 public class CarDatabase  {
+
+    public static final String INTENT_CAR_UPDATE = "CAR_UPDATED_INTENT";
+    public static final String INTENT_CAR_EXTRA = "CAR_EXTRA";
 
     private static CarDatabase mInstance;
     private Context context;
@@ -99,6 +103,13 @@ public class CarDatabase  {
             database.close();
             carDatabaseHelper.close();
         }
+
+        /**
+         * Tell everyone else
+         */
+        Intent intent = new Intent(INTENT_CAR_UPDATE);
+        intent.putExtra(INTENT_CAR_EXTRA, car);
+        context.sendBroadcast(intent);
     }
 
     private ContentValues getCarContentValues(Car car) {
@@ -161,7 +172,8 @@ public class CarDatabase  {
             Cursor cursor = database.query(Car.TABLE_NAME,
                     PROJECTION,
                     onlyParked ? Car.COLUMN_LATITUDE + " > 0" : null,
-                    null, null, null, null);
+                    null, null, null,
+                    Car.COLUMN_TIME + " DESC");
 
             while (cursor.moveToNext()) {
                 cars.add(cursorToCar(cursor));
@@ -251,6 +263,17 @@ public class CarDatabase  {
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
             database.delete(Car.TABLE_NAME, "id = '" + car.id + "'", null);
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+    }
+
+    public void delete(String carId) {
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+        try {
+            database.delete(Car.TABLE_NAME, "id = '" + carId + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();

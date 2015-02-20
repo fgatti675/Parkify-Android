@@ -68,6 +68,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
     private Location userLocation;
 
+    private int lightColor;
+
     /**
      * Map components
      */
@@ -135,17 +137,15 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         carDatabase = CarDatabase.getInstance(getActivity());
 
-        updateCar((Car) getArguments().getParcelable(ARG_CAR));
+        this.car = getArguments().getParcelable(ARG_CAR);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
 
-    public void updateCar(Car car) {
+    public void setCar(Car car) {
 
         this.car = car;
+
+        if (!isResumed()) return;
 
         directionPoints.clear();
 
@@ -162,7 +162,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         this.mMap = map;
 
-        updateCar(this.car);
+        setCar(this.car);
     }
 
     public void onLocationChanged(Location userLocation) {
@@ -176,8 +176,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
     public void doDraw() {
-        if (mMap == null) return;
+        if (mMap == null || isDetached()) return;
         Log.i(TAG, "Drawing parked car components");
+        setUpColors();
         clear();
         drawCar();
         drawDirections();
@@ -195,6 +196,25 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         setFollowing(false);
     }
 
+    private void setUpColors() {
+
+        lightColor = getSemiTransparent(getResources().getColor(R.color.car_silver));
+
+        if (car.color == null) {
+            iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
+        } else {
+            iconGenerator.setColor(car.color);
+            boolean brightColor = isBrightColor(car.color);
+            iconGenerator.setTextAppearance(getActivity(),
+                    brightColor ?
+                            com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
+                            com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+
+            if (car.color != getResources().getColor(R.color.car_white))
+                lightColor = brightColor ? car.color : getSemiTransparent(car.color);
+        }
+    }
+
     /**
      * Displays the car in the map
      */
@@ -208,27 +228,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         iconGenerator.setContentRotation(-90);
 
-        int lightColor = getSemiTransparent(getResources().getColor(R.color.car_gray));
-
-        if (car.color == null) {
-            iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
-        } else {
-            iconGenerator.setColor(car.color);
-            boolean brightColor = isBrightColor(car.color);
-            iconGenerator.setTextAppearance(getActivity(),
-                    brightColor ?
-                            com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
-                            com.google.maps.android.R.style.Bubble_TextAppearance_Light);
-            lightColor = brightColor ? car.color : getSemiTransparent(car.color);
-        }
-
         // Uses a colored icon.
         LatLng carLatLng = getCarLatLng();
 
         String name = car.name;
         if (name == null)
             name = getActivity().getResources().getText(R.string.car).toString();
-
 
         carMarker = mMap.addMarker(new MarkerOptions()
                 .position(carLatLng)
@@ -288,12 +293,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         Log.d(TAG, "Drawing directions");
 
-        int color;
-        if (car.color != null)
-            color = getSemiTransparent(car.color);
-        else
-            color = getSemiTransparent(getActivity().getResources().getColor(R.color.car_white));
-        PolylineOptions rectLine = new PolylineOptions().width(10).color(color);
+        PolylineOptions rectLine = new PolylineOptions().width(10).color(lightColor);
 
         for (int i = 0; i < directionPoints.size(); i++) {
             rectLine.add(directionPoints.get(i));

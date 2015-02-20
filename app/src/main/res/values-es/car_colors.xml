@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="car_white">White</string>
-    <string name="car_black">Black</string>
-    <string name="car_silver">Silver</string>
-    <string name="car_gray">Gray</string>
-    <string name="car_red">Red</string>
-    <string name="car_blue">Blue</string>
-    <string name="car_brown">Brown</string>
-    <string name="car_green">Green</string>
-    <string name="car_yellow">Yellow</string>
-    <string name="car_gold">Gol</string>
-    <string name="car_orange">Orange</string>
-    <string name="car_pink">Pink</string>
-    <string name="car_olive">Olive</string>
+    <string name="car_white">Blanco</string>
+    <string name="car_black">Negro</string>
+    <string name="car_silver">Plata</string>
+    <string name="car_gray">Gris</string>
+    <string name="car_red">Rojo</string>
+    <string name="car_blue">Azul</string>
+    <string name="car_brown">Marrón</string>
+    <string name="car_green">Verde</string>
+    <string name="car_yellow">Amarillo</string>
+    <string name="car_gold">Oro</string>
+    <string name="car_orange">Naranja</string>
+    <string name="car_pink">Rosa</string>
+    <string name="car_olive">Oliva</string>
 </resources>

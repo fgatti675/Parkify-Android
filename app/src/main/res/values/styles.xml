@@ -89,14 +89,19 @@
 
     <!-- Base application theme. -->
     <style name="CahueTheme.ButtonAccent" parent="CahueTheme.Dark">
-        <item name="android:colorButtonNormal">@color/theme_accent_1</item>
+        <item name="android:background">@color/theme_accent_1</item>
     </style>
 
+    <!--<style name="CahueTheme.BorderLessButton" parent="Widget.Material.Button.Borderless">-->
+        <!--<item name="background">@drawable/btn_borderless_material</item>-->
+        <!--<item name="stateListAnimator">@null</item>-->
+    <!--</style>-->
+
     <style name="CardViewStyle" parent="CardView.Light">
-        <item name="android:foreground">?android:attr/selectableItemBackground</item>
-        <item name="android:textColor">@color/abc_primary_text_material_light</item>
-        <item name="android:textColorPrimary">@color/abc_primary_text_material_light</item>
-        <item name="android:textColorSecondary">@color/abc_secondary_text_material_light</item>
-    </style>
+    <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    <item name="android:textColor">@color/abc_primary_text_material_light</item>
+    <item name="android:textColorPrimary">@color/abc_primary_text_material_light</item>
+    <item name="android:textColorSecondary">@color/abc_secondary_text_material_light</item>
+</style>
 
 </resources>

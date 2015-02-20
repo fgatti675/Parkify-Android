@@ -92,14 +92,14 @@ public class Car implements Parcelable {
 
         Car car = (Car) o;
 
-        if (!btAddress.equals(car.btAddress)) return false;
+        if (!id.equals(car.id)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return btAddress.hashCode();
+        return id.hashCode();
     }
 
     @Override
@@ -135,8 +135,10 @@ public class Car implements Parcelable {
             Car car = new Car();
             car.id = carJSON.getString("id");
             car.name = carJSON.getString("name");
-            car.btAddress = carJSON.getString("btAddress");
 
+            if (carJSON.has("btAddress")) {
+                car.btAddress = carJSON.getString("btAddress");
+            }
             if (carJSON.has("color")) {
                 car.color = carJSON.getInt("color");
             }

@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -30,6 +31,8 @@ import android.widget.TextView;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.util.CarImages;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +41,22 @@ import java.util.UUID;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and devices detected in the area after discovery. When
- * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
+ * a linkedDevice is chosen by the user, the MAC address of the linkedDevice is sent back to the parent Activity in the result
  * Intent.
  */
-public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener {
+public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener, GoogleApiClient.ConnectionCallbacks {
 
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
 
     public interface DeviceSelectionLoadingListener {
 
@@ -63,6 +77,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     private LinearLayoutManager layoutManager;
     private RecyclerViewCarsAdapter adapter;
 
+
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
     /**
      * Device selection
      */
@@ -133,6 +150,11 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         devices = new ArrayList<>();
         cars = carDatabase.retrieveCars(false);
 
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -142,7 +164,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         if (mBtAdapter != null) {
             mBtAdapter.cancelDiscovery();
         }
-
+        mGoogleApiClient.disconnect();
     }
 
     // The BroadcastReceiver that listens for discovered devices and
@@ -152,7 +174,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            // When discovery finds a device
+            // When discovery finds a linkedDevice
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -225,7 +247,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
 
         /**
-         * Find device with the same address as the car
+         * Find linkedDevice with the same address as the car
          */
         BluetoothDevice device = null;
         for (BluetoothDevice d : devices) {
@@ -236,7 +258,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
 
         /**
-         * The device with the address of the car should not be listed anymore
+         * The linkedDevice with the address of the car should not be listed anymore
          */
         if (device != null) {
             int deviceIndex = devices.indexOf(device);
@@ -268,12 +290,12 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         adapter.notifyDataSetChanged();
     }
 
-    public class RecyclerViewCarsAdapter extends
-            RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public class RecyclerViewCarsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public static final int CAR_TYPE = 0;
         public static final int INFO_TYPE = 1;
         public static final int BT_DEVICE_TYPE = 2;
+        public static final int ADD_BUTTON_TYPE = 3;
 
         @Override
         public int getItemViewType(int position) {
@@ -282,8 +304,13 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 return CAR_TYPE;
             else if (position == cars.size())
                 return INFO_TYPE;
-            else
+            else if (position > cars.size() && position < cars.size() + 1 + devices.size())
                 return BT_DEVICE_TYPE;
+            else if (position == (cars.size() + devices.size() + 1))
+                return ADD_BUTTON_TYPE;
+            else
+                throw new IllegalStateException("Error in recycler view positions");
+
         }
 
         @Override
@@ -307,7 +334,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             else if (viewType == INFO_TYPE) {
 
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.fragment_device_selection,
+                        inflate(R.layout.card_manager_instructions,
                                 viewGroup,
                                 false);
 
@@ -328,11 +355,30 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
              */
             else if (viewType == BT_DEVICE_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.list_device_item,
+                        inflate(R.layout.list_item_device,
                                 viewGroup,
                                 false);
 
                 return new DeviceViewHolder(itemView);
+            }
+
+            /**
+             * Add car button
+             */
+            else if (viewType == ADD_BUTTON_TYPE) {
+                View itemView = LayoutInflater.from(viewGroup.getContext()).
+                        inflate(R.layout.button_add_device,
+                                viewGroup,
+                                false);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Car car = createCar();
+                        editCar(car, true);
+                    }
+                });
+
+                return new SimpleViewHolder(itemView);
             }
 
             throw new IllegalStateException("New type added to the recycler view but no view holder associated");
@@ -341,10 +387,12 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
 
+            int viewType = getItemViewType(position);
+
             /**
              * Car
              */
-            if (position < cars.size()) {
+            if (viewType == CAR_TYPE) {
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
@@ -356,7 +404,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             /**
              * Device
              */
-            else if (position > cars.size()) {
+            else if (viewType == BT_DEVICE_TYPE) {
 
                 DeviceViewHolder deviceViewHolder = (DeviceViewHolder) viewHolder;
                 final BluetoothDevice device = devices.get(position - cars.size() - 1);
@@ -373,7 +421,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         @Override
         public int getItemCount() {
-            return cars.size() + 1 + devices.size();
+            return cars.size() + 1 + devices.size() + 1;
         }
     }
 
@@ -428,7 +476,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                     + " must implement DeviceSelectionLoadingListener");
         }
 
-        // Register for broadcasts when a device is discovered
+        // Register for broadcasts when a linkedDevice is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         activity.registerReceiver(mReceiver, filter);
 
@@ -474,12 +522,17 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         /**
          * Create a car
          */
-        Car car = new Car();
-        car.id = UUID.randomUUID().toString();
+        Car car = createCar();
         car.btAddress = device.getAddress();
         car.name = device.getName();
 
         editCar(car, true);
+    }
+
+    private Car createCar() {
+        Car car = new Car();
+        car.id = UUID.randomUUID().toString();
+        return car;
     }
 
     private void editCar(Car car, boolean newCar) {
@@ -497,8 +550,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public final class CarViewHolder extends RecyclerView.ViewHolder {
 
         private Toolbar toolbar;
+        private TextView linkedDevice;
         private TextView name;
         private TextView time;
+        private TextView distance;
         private ImageView carImage;
 
         public CarViewHolder(View itemView) {
@@ -506,8 +561,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
             carImage = (ImageView) itemView.findViewById(R.id.car_image);
             toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
+            linkedDevice = (TextView) itemView.findViewById(R.id.linked_device);
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
+            distance = (TextView) itemView.findViewById(R.id.distance);
         }
 
         public void bind(final Car car) {
@@ -535,6 +592,22 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
             if (car.color != null) {
                 carImage.setImageDrawable(getResources().getDrawable(CarImages.getImageResourceId(car.color, getActivity())));
+            }
+            if (car.btAddress != null && mBtAdapter.isEnabled()) {
+                linkedDevice.setVisibility(View.VISIBLE);
+                for (BluetoothDevice device : mBtAdapter.getBondedDevices()) {
+                    if (device.getAddress().equals(car.btAddress)) {
+                        linkedDevice.setText(device.getName());
+                        break;
+                    }
+                }
+            } else {
+                linkedDevice.setVisibility(View.GONE);
+            }
+
+            if (mLastLocation != null && car.location != null) {
+                float distanceM = car.location.distanceTo(mLastLocation);
+                distance.setText(String.format("%.1f km", distanceM / 1000));
             }
 
         }

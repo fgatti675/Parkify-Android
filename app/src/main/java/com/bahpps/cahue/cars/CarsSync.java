@@ -20,6 +20,7 @@ import com.bahpps.cahue.util.CommUtil;
 import com.bahpps.cahue.util.Requests;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
@@ -34,25 +35,14 @@ public class CarsSync {
 
     public static final String NEEDS_SYNC_PREF = "NEEDS_SYNC";
 
-    public static final String INTENT_CAR_UPDATE = "CAR_UPDATED_INTENT";
-    public static final String INTENT_CAR_EXTRA = "CAR_EXTRA";
 
     public static void storeCar(CarDatabase carDatabase, final Context context, final Car car) {
-
         saveAndBroadcast(carDatabase, context, car);
-        postCars(context, carDatabase);
-
+        postCar(car, context, carDatabase);
     }
 
-    private static void saveAndBroadcast(CarDatabase carDatabase, Context context, Car car) {
+    public static void saveAndBroadcast(CarDatabase carDatabase, Context context, Car car) {
         carDatabase.saveCar(car);
-
-        /**
-         * Tell everyone else
-         */
-        Intent intent = new Intent(INTENT_CAR_UPDATE);
-        intent.putExtra(INTENT_CAR_EXTRA, car);
-        context.sendBroadcast(intent);
     }
 
     /**
@@ -137,9 +127,7 @@ public class CarsSync {
      * @param context
      * @param carDatabase
      */
-    public static void postCars(final Context context, final CarDatabase carDatabase) {
-
-        final List<Car> cars = carDatabase.retrieveCars(false);
+    public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = CommUtil.getInstance(context).getRequestQueue();
@@ -154,11 +142,11 @@ public class CarsSync {
         /**
          * Send a Json with the cars contained in this phone
          */
-        JsonRequest carSyncRequest = new Requests.JsonArrayPostRequest(
+        JsonRequest carSyncRequest = new Requests.JsonPostRequest(
                 context,
                 builder.toString(),
-                getCarsJSON(cars),
-                new Response.Listener<JSONArray>() {
+                car.toJSON(),
+                new Response.Listener<JSONObject>() {
                     /**
                      * Here we are receiving cars that were modified by other clients and
                      * their state is outdated here
@@ -166,10 +154,8 @@ public class CarsSync {
                      * @param response
                      */
                     @Override
-                    public void onResponse(JSONArray response) {
+                    public void onResponse(JSONObject response) {
                         Log.i(TAG, "Post result: " + response.toString());
-                        Set<Car> cars = Car.fromJSONArray(response);
-                        carDatabase.saveCars(cars);
                         setNeedsSyncPref(context, false);
                     }
                 },

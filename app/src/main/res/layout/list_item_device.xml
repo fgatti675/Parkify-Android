@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/add_icon"
+        android:textAlignment="center"
         tools:text="Add car" />
 
 </RelativeLayout>

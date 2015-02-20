@@ -82,26 +82,12 @@ public class SetCarPositionDialog extends DialogFragment {
 
         selected = cars.get(0);
 
-        String lastSavedId = CarManager.getLastCarSavedId(getActivity());
-
-        int itemIndex = 0;
-        boolean lastSelected = false;
-        if (lastSavedId != null) {
-            for (Car car : cars) {
-                if (car.btAddress.equals(lastSavedId)) {
-                    selected = car;
-                    lastSelected = true;
-                    break;
-                }
-                itemIndex++;
-            }
-        }
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder
                 .setTitle(R.string.car_dialog_text)
-                .setSingleChoiceItems(optionsArray, lastSelected ? itemIndex : 0, new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(optionsArray, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         selected = cars.get(i);
@@ -112,7 +98,7 @@ public class SetCarPositionDialog extends DialogFragment {
                         selected.location = location;
                         selected.time = new Date();
 
-                        Log.w(TAG, selected.toString());
+                        Log.i(TAG, selected.toString());
 
                         // If ok, we just send and intent and leave the location receivers to do all the work
                         CarDatabase carDatabase = CarDatabase.getInstance(getActivity());

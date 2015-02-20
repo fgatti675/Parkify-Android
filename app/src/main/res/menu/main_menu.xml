@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_link_device"
         android:title="@string/link_device"
-        android:icon="@drawable/ic_action_headset"
+        android:icon="@drawable/ic_action_maps_directions_car_dark"
         cahue:showAsAction="always" />
 
     <item
@@ -17,7 +17,6 @@
     <item
         android:id="@+id/action_display_help"
         android:title="@string/help"
-        android:icon="@drawable/ic_action_help"
         cahue:showAsAction="never" />
 
     <item
