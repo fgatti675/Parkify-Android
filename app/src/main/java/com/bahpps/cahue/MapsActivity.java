@@ -522,6 +522,11 @@ public class MapsActivity extends BaseActivity
 
     }
 
+    @Override
+    protected boolean autoConnect() {
+        return true;
+    }
+
     /**
      * Checks whether the device currently has a network connection
      */

@@ -1,26 +1,17 @@
 package com.bahpps.cahue;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import android.os.UserManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bahpps.cahue.login.AuthUtils;
-import com.bahpps.cahue.util.Util;
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -29,9 +20,7 @@ import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.PlusClient;
-import com.google.android.gms.plus.model.people.Person;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -130,7 +119,7 @@ public abstract class BaseActivity
 
     }
 
-    private void setUpLocationClientIfNeeded() {
+    private void setUpGoogleApiClientIfNeeded() {
 
         if (mGoogleApiClient == null) {
 
@@ -140,7 +129,6 @@ public abstract class BaseActivity
                     .addApi(Plus.API)
                     .addApi(LocationServices.API)
                     .addApi(ActivityRecognition.API)
-                    .addScope(Plus.SCOPE_PLUS_LOGIN)
                     .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"))
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
@@ -153,6 +141,7 @@ public abstract class BaseActivity
      * Try to sign in the user.
      */
     public void signIn() {
+
         if (!mGoogleApiClient.isConnecting()) {
             // Show the dialog as we are now signing in.
             mSigningIn = true;
@@ -162,12 +151,39 @@ public abstract class BaseActivity
 
     }
 
+    protected void connect() {
+        if(!mGoogleApiClient.isConnected()){
+            mGoogleApiClient.connect();
+            onConnectingStatusChange(true);
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        setUpLocationClientIfNeeded();
-        Log.d(TAG, "mGoogleApiClient connecting");
-        mGoogleApiClient.connect();
+        setUpGoogleApiClientIfNeeded();
+        if (autoConnect()) {
+            Log.d(TAG, "mGoogleApiClient connecting");
+            mGoogleApiClient.connect();
+        }
+    }
+
+    /**
+     * Should google play services connect automatically on activity start
+     * @return
+     */
+    protected abstract boolean autoConnect();
+
+
+    /**
+     * Successfully connected
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.d(TAG, "onConnected");
+        mSigningIn = false;
+        onPlusClientSignIn();
+        onConnectingStatusChange(false);
     }
 
 
@@ -224,17 +240,6 @@ public abstract class BaseActivity
         }
     }
 
-
-    /**
-     * Successfully connected
-     */
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        Log.d(TAG, "onConnected");
-        mSigningIn = false;
-        onPlusClientSignIn();
-        onConnectingStatusChange(false);
-    }
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -296,7 +301,6 @@ public abstract class BaseActivity
     public GoogleApiClient getGoogleApiClient() {
         return mGoogleApiClient;
     }
-
 
 
     /**

@@ -46,7 +46,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         public void onCarClicked(Car car);
     }
 
-
     private static final String TAG = ParkedCarDelegate.class.getSimpleName();
 
     private static final String ARG_CAR = "car";
@@ -176,7 +175,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
     public void doDraw() {
-        if (mMap == null || isDetached()) return;
+        if (mMap == null || !isAdded()) return;
+
         Log.i(TAG, "Drawing parked car components");
         setUpColors();
         clear();

@@ -40,8 +40,6 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     private View mProgressView;
     private SignInButton mPlusSignInButton;
 
-    private String mLoggedEmail;
-
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
 
@@ -63,7 +61,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
             mPlusSignInButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    signIn();
+                    login();
                 }
             });
         } else {
@@ -76,9 +74,15 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     }
 
+    private void login() {
+        setLoading(true);
+        connect();
+        signIn();
+    }
+
     @Override
     protected void onSignInRequired() {
-
+        signIn();
     }
 
     protected void onGoogleAuthTokenSet(final String authToken) {
@@ -158,7 +162,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
                 });
     }
 
-    private void requestOauthToken() {
+    private void requestOauthToken(final String email) {
 
         Log.i(TAG, "requestOauthToken");
 
@@ -168,7 +172,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
             protected String doInBackground(Void[] objects) {
                 String mGoogleAuthToken = null;
                 try {
-                    mGoogleAuthToken = GoogleAuthUtil.getToken(LoginActivity.this, mLoggedEmail, SCOPE);
+                    mGoogleAuthToken = GoogleAuthUtil.getToken(LoginActivity.this, email, SCOPE);
                 } catch (UserRecoverableAuthException userRecoverableException) {
                     // GooglePlayServices.apk is either old, disabled, or not present
                     // so we need to show the user some UI in the activity to recover.
@@ -202,19 +206,23 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         setLoading(false);
     }
 
+    @Override
+    protected boolean autoConnect() {
+        return false;
+    }
 
     @Override
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
-
-        getProfileInformation();
-        requestOauthToken();
+        setLoading(true);
+        String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
+        requestOauthToken(email);
     }
 
     @Override
     protected void onConnectingStatusChange(boolean connecting) {
-        if (!isFinishing())
-            setLoading(connecting);
+//        if (!isFinishing())
+//            setLoading(connecting);
     }
 
     @Override
@@ -256,22 +264,26 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     /**
      * Fetching user's information name, mLoggedEmail, profile pic
      */
+    @Deprecated
     private void getProfileInformation() {
         try {
+            String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
+
             if (Plus.PeopleApi.getCurrentPerson(getGoogleApiClient()) != null) {
+
+
                 Person currentPerson = Plus.PeopleApi
                         .getCurrentPerson(getGoogleApiClient());
                 String personName = currentPerson.getDisplayName();
                 String personPhotoUrl = currentPerson.getImage().getUrl();
                 String personGooglePlusProfile = currentPerson.getUrl();
-                mLoggedEmail = Plus.AccountApi.getAccountName(getGoogleApiClient());
 
                 Log.e(TAG, "Name: " + personName + ", plusProfile: "
-                        + personGooglePlusProfile + ", mLoggedEmail: " + mLoggedEmail
+                        + personGooglePlusProfile + ", email: " + email
                         + ", Image: " + personPhotoUrl);
 
 //                txtName.setText(personName);
-//                txtEmail.setText(mLoggedEmail);
+//                txtEmail.setText(email);
 
                 // by default the profile url gives 50x50 px image only
                 // we can replace the value with whatever dimension we want by
