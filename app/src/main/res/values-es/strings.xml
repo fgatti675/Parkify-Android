@@ -50,5 +50,6 @@
     <string name="delete_car_confirmation">¿Seguro que quieres borrar este coche?</string>
     <string name="add_car_no_bt">Añade un coche sin Bluetooth</string>
     <string name="delete_error">Error al borrar coche</string>
+    <string name="login_error">Error al registrarse</string>
 
 </resources>

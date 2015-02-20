@@ -47,5 +47,6 @@
     <string name="delete_error">Error while deleting car</string>
     <string name="gcm_error">Error retrieving device ID</string>
     <string name="add_car_no_bt">Add car without BlueTooth</string>
+    <string name="login_error" >Login error</string>
 
 </resources>

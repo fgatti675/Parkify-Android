@@ -13,7 +13,7 @@ import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarsSync;
-import com.bahpps.cahue.util.CommUtil;
+import com.bahpps.cahue.util.Singleton;
 import com.bahpps.cahue.util.Requests;
 
 import org.json.JSONException;
@@ -87,7 +87,7 @@ public class CarMovedService extends LocationPollerService {
     private void postSpotLocation(final Location location, final Car car) {
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = CommUtil.getInstance(this).getRequestQueue();
+        RequestQueue queue = Singleton.getInstance(this).getRequestQueue();
 
         Log.i(TAG, "Posting parking spot location");
 

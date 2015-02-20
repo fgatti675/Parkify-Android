@@ -1,7 +1,6 @@
 package com.bahpps.cahue.cars;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -16,7 +15,7 @@ import com.android.volley.toolbox.JsonRequest;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.database.CarDatabase;
-import com.bahpps.cahue.util.CommUtil;
+import com.bahpps.cahue.util.Singleton;
 import com.bahpps.cahue.util.Requests;
 
 import org.json.JSONArray;
@@ -24,7 +23,6 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Francesco on 04/02/2015.
@@ -78,7 +76,7 @@ public class CarsSync {
 
     public static void remove(final Context context, final Car car, final CarDatabase database) {
         // Instantiate the RequestQueue.
-        RequestQueue queue = CommUtil.getInstance(context).getRequestQueue();
+        RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
 
         Log.i(TAG, "Posting sars");
 
@@ -130,7 +128,7 @@ public class CarsSync {
     public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = CommUtil.getInstance(context).getRequestQueue();
+        RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
 
         Log.i(TAG, "Posting sars");
 

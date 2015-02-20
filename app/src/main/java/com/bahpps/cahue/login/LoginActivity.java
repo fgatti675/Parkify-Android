@@ -254,7 +254,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     public void onLoginError() {
         setLoading(false);
         // TODO: error toast
-        Toast.makeText(this, "Login error", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
     }
 
 

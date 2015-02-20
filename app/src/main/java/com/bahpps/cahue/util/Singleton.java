@@ -2,7 +2,6 @@ package com.bahpps.cahue.util;
 
 import android.content.Context;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bahpps.cahue.login.AuthUtils;
@@ -16,11 +15,10 @@ import java.util.Map;
 /**
  * Created by francesco on 14.01.2015.
  */
-public class CommUtil {
+public class Singleton {
 
     public static final String AUTH_HEADER = "Authorization";
     public static final String DEVICE_HEADER = "Device";
-
 
     @Deprecated
     public static HttpPost createHttpPost(Context context, String url) {
@@ -35,19 +33,19 @@ public class CommUtil {
         return httpPost;
     }
 
-    private static CommUtil mInstance;
+    private static Singleton mInstance;
 
     private RequestQueue mRequestQueue;
     private static Context mContext;
 
-    private CommUtil(Context context) {
+    private Singleton(Context context) {
         mContext = context;
         mRequestQueue = getRequestQueue();
     }
 
-    public static synchronized CommUtil getInstance(Context context) {
+    public static synchronized Singleton getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new CommUtil(context);
+            mInstance = new Singleton(context);
         }
         return mInstance;
     }
@@ -60,11 +58,6 @@ public class CommUtil {
         }
         return mRequestQueue;
     }
-
-    public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
-    }
-
 
     public static Map<String, String> generateHeaders(Context context) {
 

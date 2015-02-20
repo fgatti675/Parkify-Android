@@ -8,19 +8,15 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.bahpps.cahue.login.AuthUtils;
-import com.bahpps.cahue.login.GCMUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -50,7 +46,7 @@ public class Requests {
 
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
-            return CommUtil.generateHeaders(context);
+            return Singleton.generateHeaders(context);
         }
     }
 
@@ -72,7 +68,7 @@ public class Requests {
 
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
-            return CommUtil.generateHeaders(context);
+            return Singleton.generateHeaders(context);
         }
 
         // Need this cause we cant extend a standard class, because the cant get json arrays as a parameter
@@ -107,7 +103,7 @@ public class Requests {
 
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
-            return CommUtil.generateHeaders(context);
+            return Singleton.generateHeaders(context);
         }
     }
 

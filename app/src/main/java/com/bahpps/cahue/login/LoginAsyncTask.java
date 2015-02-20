@@ -6,11 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bahpps.cahue.Endpoints;
-import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.spots.ParkingSpot;
-import com.bahpps.cahue.util.CommUtil;
-import com.bahpps.cahue.util.Util;
-import com.google.android.gms.maps.model.LatLng;
+import com.bahpps.cahue.util.Singleton;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -20,13 +16,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.text.ParseException;
 
 /**
  * Created by francesco on 22.01.2015.
@@ -75,7 +68,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                     .appendPath(Endpoints.USERS_PATH)
                     .appendPath(Endpoints.CREATE_USER_GOOGLE_PATH);
 
-            HttpPost httpPost = CommUtil.createHttpPost(context, builder.build().toString());
+            HttpPost httpPost = Singleton.createHttpPost(context, builder.build().toString());
             String json = createRegistrationJSON(registrationId, authToken);
             Log.d(TAG, json);
             httpPost.setEntity(new StringEntity(json));
