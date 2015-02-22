@@ -26,7 +26,7 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.bahpps.cahue.activityRecognition.ActivityRecognitionService;
+import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
 import com.bahpps.cahue.cars.CarManagerActivity;
 import com.bahpps.cahue.debug.DebugActivity;
 import com.bahpps.cahue.login.AuthUtils;
@@ -114,7 +114,7 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            activityType = (int) intent.getExtras().get(ActivityRecognitionService.SURE_ACTIVITY_TYPE);
+            activityType = (int) intent.getExtras().get(ActivityRecognitionIntentService.SURE_ACTIVITY_TYPE);
 
         }
     };
@@ -154,7 +154,7 @@ public class MapsActivity extends BaseActivity
                 REQUEST,
                 this);
 
-        Intent intent = new Intent(this, ActivityRecognitionService.class);
+        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
         pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);

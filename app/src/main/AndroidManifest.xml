@@ -71,7 +71,7 @@
 
         <activity
             android:name=".login.LoginActivity"
-            android:label="@string/title_activity_login"
+            android:label="@string/sign_in"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"></activity>
         <activity
@@ -79,7 +79,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/CahueTheme.Dark"></activity>
 
-        <service android:name=".activityRecognition.ActivityRecognitionService" />
+        <service android:name=".activityRecognition.ActivityRecognitionIntentService" />
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"

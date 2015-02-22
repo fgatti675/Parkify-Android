@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="CahueTheme.ButtonAccent" parent="CahueTheme.Dark">
+    <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
         <item name="android:colorButtonNormal">@color/theme_accent_1</item>
+    </style>
+
+    <style name="CahueTheme.Button.Google" parent="CahueTheme.Dark">
+        <item name="android:colorButtonNormal">@color/google_red</item>
     </style>
 
 </resources>

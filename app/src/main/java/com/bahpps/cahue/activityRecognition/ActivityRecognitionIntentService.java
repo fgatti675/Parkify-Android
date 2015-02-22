@@ -14,7 +14,7 @@ import android.util.Log;
 
 import java.util.LinkedList;
 
-public class ActivityRecognitionService extends IntentService {
+public class ActivityRecognitionIntentService extends IntentService {
 
     public static final String INTENT_ACTIVITY_RECOGNIZED = "INTENT_ACTIVITY_RECOGNIZED";
 
@@ -25,7 +25,7 @@ public class ActivityRecognitionService extends IntentService {
 
     private String TAG = this.getClass().getSimpleName();
 
-    public ActivityRecognitionService() {
+    public ActivityRecognitionIntentService() {
         super("My Activity Recognition Service");
     }
 

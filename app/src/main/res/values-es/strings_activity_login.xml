@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title_activity_login">Entrar</string>
+    <string name="sign_in">Entrar</string>
 
     <!-- Strings related to login -->
     <string name="disconnect">Desconectar</string>

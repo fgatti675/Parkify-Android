@@ -64,7 +64,7 @@ public class CarMovedService extends LocationPollerService {
                 spotLocation = car.location;
         }
 
-        CarsSync.clearLocation(carDatabase, car);
+        CarsSync.clearLocation(carDatabase, this, car);
 
         /**
          * If it's still not accurate, we don't use it
@@ -97,10 +97,12 @@ public class CarMovedService extends LocationPollerService {
                 .appendPath(Endpoints.SPOTS_PATH);
 
         // Send a JSON spot location.
+        JSONObject parkingSpotJSON = getParkingSpotJSON(location, car);
+        Log.i(TAG, "Posting: " + parkingSpotJSON);
         JsonRequest stringRequest = new Requests.JsonPostRequest(
                 this,
                 builder.toString(),
-                getParkingSpotJSON(location, car),
+                parkingSpotJSON,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -114,6 +116,7 @@ public class CarMovedService extends LocationPollerService {
                         Log.e(TAG, "Network error : " + error.networkResponse.statusCode);
                     }
                 });
+
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }

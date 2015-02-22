@@ -281,7 +281,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
     public void removeCar() {
-        CarsSync.clearLocation(carDatabase, car);
+        CarsSync.clearLocation(carDatabase, getActivity(), car);
         clear();
     }
 

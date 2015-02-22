@@ -87,9 +87,12 @@
 
     </style>
 
-    <!-- Base application theme. -->
-    <style name="CahueTheme.ButtonAccent" parent="CahueTheme.Dark">
+    <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
         <item name="android:background">@color/theme_accent_1</item>
+    </style>
+
+    <style name="CahueTheme.Button.Google" parent="CahueTheme.Dark">
+        <item name="android:background">@color/google_red</item>
     </style>
 
     <!--<style name="CahueTheme.BorderLessButton" parent="Widget.Material.Button.Borderless">-->

@@ -33,14 +33,9 @@ public class CarsSync {
 
     public static final String NEEDS_SYNC_PREF = "NEEDS_SYNC";
 
-
-    public static void storeCar(CarDatabase carDatabase, final Context context, final Car car) {
-        saveAndBroadcast(carDatabase, context, car);
-        postCar(car, context, carDatabase);
-    }
-
-    public static void saveAndBroadcast(CarDatabase carDatabase, Context context, Car car) {
-        carDatabase.saveCar(car);
+    public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
+        carDatabase.save(car);
+        postCar(car, context);
     }
 
     /**
@@ -48,12 +43,12 @@ public class CarsSync {
      *
      * @param car
      */
-    public static void clearLocation(CarDatabase carDatabase, Car car) {
+    public static void clearLocation(CarDatabase carDatabase, Context context, Car car) {
 
         car.time = new Date();
         car.location = null;
 
-        carDatabase.saveCar(car);
+        storeCar(carDatabase, context, car);
     }
 
     private static boolean isSyncNeeded(Context context) {
@@ -108,7 +103,7 @@ public class CarsSync {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
-                        saveAndBroadcast(database, context, car);
+                        database.save(car);
                         error.printStackTrace();
                     }
                 });
@@ -120,17 +115,16 @@ public class CarsSync {
     }
 
     /**
-     * Post the current state of the cars database to the server
+     * Post the current state of the car to the server
      *
      * @param context
-     * @param carDatabase
      */
-    public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
+    public static void postCar(Car car, final Context context) {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
 
-        Log.i(TAG, "Posting sars");
+        Log.i(TAG, "Posting car");
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")

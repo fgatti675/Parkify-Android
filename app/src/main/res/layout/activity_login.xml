@@ -31,10 +31,13 @@
             android:visibility="invisible"
             android:layout_centerHorizontal="true" />
 
-        <com.google.android.gms.common.SignInButton
+        <Button
             android:id="@+id/plus_sign_in_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:theme="@style/CahueTheme.Button.Google"
+            android:text="@string/common_signin_button_text"/>
+
     </RelativeLayout>
 
 </LinearLayout>

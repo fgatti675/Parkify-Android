@@ -87,6 +87,8 @@ public abstract class LocationPollerService extends Service implements
         }
     }
 
+    protected abstract boolean checkPreconditions(Car car);
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -134,8 +136,6 @@ public abstract class LocationPollerService extends Service implements
         }
 
     }
-
-    protected abstract boolean checkPreconditions(Car car);
 
     private void notifyLocation(Location location) {
         try {

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.bahpps.cahue.BaseActivity;
@@ -38,7 +39,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     // UI references.
     private View mProgressView;
-    private SignInButton mPlusSignInButton;
+    private Button mPlusSignInButton;
 
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
@@ -53,7 +54,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         database = CarDatabase.getInstance(this);
 
         // Find the Google+ sign in button.
-        mPlusSignInButton = (SignInButton) findViewById(R.id.plus_sign_in_button);
+        mPlusSignInButton = (Button) findViewById(R.id.plus_sign_in_button);
         mProgressView = findViewById(R.id.login_progress);
 
         if (checkPlayServices()) {

@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:alpha="0"
         android:text="@string/ok"
-        android:theme="@style/CahueTheme.ButtonAccent"
+        android:theme="@style/CahueTheme.Button.Accent"
         android:visibility="gone"
         android:id="@+id/ok"
         android:layout_alignParentBottom="true"
