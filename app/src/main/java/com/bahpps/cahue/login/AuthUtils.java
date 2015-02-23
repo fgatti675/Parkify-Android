@@ -30,7 +30,13 @@ public class AuthUtils {
 
     public static void setIsLoggedIn(Context context, boolean loggedIn) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PREF_USER_LOGGED_IN, loggedIn).apply();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(PREF_USER_LOGGED_IN, loggedIn);
+        if (!loggedIn) {
+            editor.putString(PREF_OAUTH_TOKEN, null);
+            editor.putString(PREF_REFRESH_TOKEN, null);
+        }
+        editor.apply();
     }
 
     public static void saveRefreshToken(Context context, String refreshToken) {
