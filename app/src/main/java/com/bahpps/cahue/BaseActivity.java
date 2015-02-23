@@ -151,11 +151,12 @@ public abstract class BaseActivity
 
     }
 
-    protected void connect() {
-        if(!mGoogleApiClient.isConnected()){
-            mGoogleApiClient.connect();
-            onConnectingStatusChange(true);
+    protected void reconnect() {
+        if(mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
         }
+        mGoogleApiClient.connect();
+        onConnectingStatusChange(true);
     }
 
     @Override
@@ -213,11 +214,6 @@ public abstract class BaseActivity
 
             Log.v(TAG, "Sign out successful!");
         }
-
-        /**
-         * Clean saved token
-         */
-        AuthUtils.saveOAuthToken(BaseActivity.this, null);
 
         onConnectingStatusChange(false);
         onPlusClientSignOut();

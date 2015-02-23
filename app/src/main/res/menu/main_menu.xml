@@ -24,8 +24,8 @@
         android:title="@string/disconnect"
         cahue:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_debug"
-        android:title="Debug"
-        cahue:showAsAction="never" />
+    <!--<item-->
+        <!--android:id="@+id/action_debug"-->
+        <!--android:title="Debug"-->
+        <!--cahue:showAsAction="never" />-->
 </menu>

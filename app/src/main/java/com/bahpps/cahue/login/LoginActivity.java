@@ -20,7 +20,6 @@ import com.bahpps.cahue.cars.database.CarDatabase;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
@@ -77,7 +76,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private void login() {
         setLoading(true);
-        connect();
+        reconnect();
         signIn();
     }
 
