@@ -31,7 +31,7 @@
         <item>@string/car_pink</item>
     </array>
 
-    <string-array name="rainbow_cars">
+    <string-array translatable="false" name="rainbow_cars">
         <item>@drawable/ic_car_silver</item>
         <item>@drawable/ic_car_black</item>
         <item>@drawable/ic_car_silver</item>
@@ -55,7 +55,7 @@
     <string name="car_brown">Brown</string>
     <string name="car_green">Green</string>
     <string name="car_yellow">Yellow</string>
-    <string name="car_gold">Golg</string>
+    <string name="car_gold">Gold</string>
     <string name="car_orange">Orange</string>
     <string name="car_pink">Pink</string>
     <string name="car_olive">Olive</string>
