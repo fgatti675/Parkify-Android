@@ -92,6 +92,7 @@ public class EditCarDialog extends DialogFragment {
          * Bind values
          */
         name.setText(car.name);
+        name.requestFocus();
         int position = spinnerAdapter.getPositionOf(car.color);
         spinner.setSelection(position);
 
