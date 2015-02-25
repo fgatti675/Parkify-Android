@@ -87,6 +87,43 @@ public class Requests {
         }
     }
 
+    /**
+     * Post a JSONArray and receive an array too
+     */
+    public static class JsonArrayGetRequest extends JsonRequest<JSONArray> {
+
+        private final Context context;
+
+        public JsonArrayGetRequest(Context context, String url,  Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
+            super(Method.POST, url, null, listener, errorListener);
+            this.context = context;
+            setRetryPolicy(new DefaultRetryPolicy(
+                    DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                    RETRIES,
+                    BACKOFF_MULTIPLIER));
+        }
+
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError {
+            return Singleton.generateHeaders(context);
+        }
+
+        // Need this cause we cant extend a standard class, because the cant get json arrays as a parameter
+        @Override
+        protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+            try {
+                String jsonString =
+                        new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                return Response.success(new JSONArray(jsonString),
+                        HttpHeaderParser.parseCacheHeaders(response));
+            } catch (UnsupportedEncodingException e) {
+                return Response.error(new ParseError(e));
+            } catch (JSONException je) {
+                return Response.error(new ParseError(je));
+            }
+        }
+    }
+
     public static class DeleteRequest extends StringRequest {
 
         private final Context context;
