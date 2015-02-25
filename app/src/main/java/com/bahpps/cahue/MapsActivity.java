@@ -1,10 +1,11 @@
 package com.bahpps.cahue;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,13 +29,12 @@ import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
-import com.bahpps.cahue.cars.CarManagerActivity;
-import com.bahpps.cahue.cars.CarsSync;
-import com.bahpps.cahue.debug.DebugActivity;
-import com.bahpps.cahue.login.AuthUtils;
-import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarManagerActivity;
 import com.bahpps.cahue.cars.database.CarDatabase;
+import com.bahpps.cahue.auth.Authenticator;
+import com.bahpps.cahue.debug.DebugActivity;
+import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
@@ -94,6 +94,8 @@ public class MapsActivity extends BaseActivity
             .setInterval(5000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+    private AccountManager mAccountManager;
 
     private CarDatabase carDatabase;
 
@@ -172,7 +174,8 @@ public class MapsActivity extends BaseActivity
     private void goToLogin() {
         if (!isFinishing()) {
             carDatabase.clearCars();
-            AuthUtils.setIsLoggedIn(this, false);
+//            for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
+//                mAccountManager.removeAccount(account, null, null);
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -192,7 +195,10 @@ public class MapsActivity extends BaseActivity
 
         carDatabase = CarDatabase.getInstance(this);
 
-        if (!AuthUtils.isLoggedIn(this)) {
+        mAccountManager = AccountManager.get(this);
+        final Account availableAccounts[] = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
+
+        if (availableAccounts.length == 0) {
             goToLogin();
             return;
         }
@@ -201,11 +207,6 @@ public class MapsActivity extends BaseActivity
         if (!Util.isTutorialShown(this)) {
             goToTutorial();
         }
-
-        /**
-         * Update cars with the server
-         */
-        syncIfOutdated();
 
         setContentView(R.layout.activity_main);
 
@@ -236,8 +237,6 @@ public class MapsActivity extends BaseActivity
 
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
-
-            CarsSync.TriggerRefresh();
 
         }
 
@@ -274,20 +273,6 @@ public class MapsActivity extends BaseActivity
          */
         bindBillingService();
 
-    }
-
-    /*
-     * Request the cars sync for the default account, authority, and
-     * manual sync settings
-     */
-    private void syncIfOutdated() {
-        Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-
-        ContentResolver.requestSync(null, null, settingsBundle);
     }
 
     private boolean mapInitialised = false;

@@ -11,7 +11,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.bahpps.cahue.login.AuthUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -100,9 +99,10 @@ public abstract class BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (checkPlayServices()) {
-            super.onCreate(savedInstanceState);
 
+        super.onCreate(savedInstanceState);
+
+        if (checkPlayServices()) {
             if (savedInstanceState != null) {
                 mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
             }

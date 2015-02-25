@@ -1,12 +1,15 @@
 package com.bahpps.cahue.login;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,6 +20,7 @@ import com.bahpps.cahue.BaseActivity;
 import com.bahpps.cahue.MapsActivity;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.database.CarDatabase;
+import com.bahpps.cahue.auth.Authenticator;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -36,12 +40,20 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
+
+    /**
+     * Content provider authority.
+     */
+    public static final String CONTENT_AUTHORITY = "com.bahpps.cahue.cars";
+    private static final long SYNC_FREQUENCY = 60 * 60;  // 1 hour (in seconds)
+
     // UI references.
     private View mProgressView;
-    private Button mPlusSignInButton;
 
+    private Button mPlusSignInButton;
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
+    private AccountManager mAccountManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +63,8 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         setContentView(R.layout.activity_login);
 
         database = CarDatabase.getInstance(this);
+
+        mAccountManager = AccountManager.get(this);
 
         // Find the Google+ sign in button.
         mPlusSignInButton = (Button) findViewById(R.id.plus_sign_in_button);
@@ -106,7 +120,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
             @Override
             protected void onPostExecute(String regId) {
-                if(regId != null) onGCMRegIdSet(regId, authToken);
+                if (regId != null) onGCMRegIdSet(regId, authToken);
             }
         }.execute();
     }
@@ -240,20 +254,53 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     @Override
     public void onBackEndLogin(LoginResultBean loginResult) {
 
-        AuthUtils.setIsLoggedIn(this, true);
-        AuthUtils.saveOAuthToken(this, loginResult.authToken);
-        AuthUtils.saveRefreshToken(this, loginResult.refreshToken);
-
         database.saveCars(loginResult.cars);
 
+        final Intent resultIntent = new Intent();
+        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email);
+        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Authenticator.ACCOUNT_TYPE);
+        resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
+        resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
+
+        finishLogin(resultIntent, loginResult.userId);
+
         startActivity(new Intent(this, MapsActivity.class));
+//        finish();
+    }
+
+    private void finishLogin(Intent intent, String userId) {
+
+        String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+
+        final Account account = new Account(accountName, intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
+
+        String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+        String refreshToken = intent.getStringExtra(AccountManager.KEY_PASSWORD);
+        String authTokenType = Authenticator.ACCOUNT_TYPE;
+
+        // Creating the account on the device and setting the auth token we got
+        // (Not setting the auth token will cause another call to the server to authenticate the user)
+        Bundle bundle = new Bundle();
+        bundle.putString(Authenticator.USER_ID, userId);
+        mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
+        mAccountManager.setAuthToken(account, authTokenType, authToken);
+
+        // Inform the system that this account supports sync
+        ContentResolver.setIsSyncable(account, CONTENT_AUTHORITY, 1);
+        // Inform the system that this account is eligible for auto sync when the network is up
+        ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
+//        // Recommend a schedule for automatic synchronization. The system may modify this based
+//        // on other scheduled syncs and network utilization.
+//        ContentResolver.addPeriodicSync(
+//                account, CONTENT_AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+
+        setResult(RESULT_OK, intent);
         finish();
     }
 
     @Override
     public void onLoginError() {
         setLoading(false);
-        // TODO: error toast
         Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
     }
 
