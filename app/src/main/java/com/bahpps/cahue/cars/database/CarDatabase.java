@@ -69,6 +69,9 @@ public class CarDatabase  {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
+
+            database.delete(Car.TABLE_NAME, null, null);
+
             for (Car car : cars) {
 
                 if (car.id == null)

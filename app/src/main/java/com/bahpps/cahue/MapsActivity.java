@@ -4,6 +4,7 @@ import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
 import com.bahpps.cahue.cars.CarManagerActivity;
+import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.debug.DebugActivity;
 import com.bahpps.cahue.login.AuthUtils;
 import com.bahpps.cahue.login.LoginActivity;
@@ -200,6 +202,11 @@ public class MapsActivity extends BaseActivity
             goToTutorial();
         }
 
+        /**
+         * Update cars with the server
+         */
+        syncIfOutdated();
+
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
@@ -230,6 +237,8 @@ public class MapsActivity extends BaseActivity
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
 
+            CarsSync.TriggerRefresh();
+
         }
 
         /**
@@ -256,13 +265,29 @@ public class MapsActivity extends BaseActivity
         /**
          * Details
          */
-        detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
-
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
+        detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
+        /**
+         * Bind service used for donations
+         */
         bindBillingService();
 
+    }
+
+    /*
+     * Request the cars sync for the default account, authority, and
+     * manual sync settings
+     */
+    private void syncIfOutdated() {
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+
+        ContentResolver.requestSync(null, null, settingsBundle);
     }
 
     private boolean mapInitialised = false;

@@ -1,8 +1,10 @@
 package com.bahpps.cahue.cars;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,6 +17,7 @@ import com.android.volley.toolbox.JsonRequest;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.database.CarDatabase;
+import com.bahpps.cahue.cars.sync.GenericAccountService;
 import com.bahpps.cahue.util.Singleton;
 import com.bahpps.cahue.util.Requests;
 
@@ -23,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Francesco on 04/02/2015.
@@ -31,7 +35,11 @@ public class CarsSync {
 
     private static final String TAG = CarsSync.class.getSimpleName();
 
-    public static final String NEEDS_SYNC_PREF = "NEEDS_SYNC";
+    /**
+     * Content provider authority.
+     */
+    public static final String CONTENT_AUTHORITY = "com.bahpps.cahue.cars";
+    public static final String ACCOUNT_TYPE = "cahue.com";
 
     public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
         carDatabase.save(car);
@@ -51,29 +59,57 @@ public class CarsSync {
         storeCar(carDatabase, context, car);
     }
 
-    private static boolean isSyncNeeded(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(NEEDS_SYNC_PREF, false);
-    }
-
-    private static void setNeedsSyncPref(Context context, boolean isNeeded) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(NEEDS_SYNC_PREF, isNeeded).apply();
-    }
-
     /**
      * Retrieve the state of the cars from the server
+     *
      * @param context
      */
-    public static void update(Context context){
+    public static void retrieveFromServer(final Context context, final CarDatabase database) {
 
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority(Endpoints.BASE_URL)
+                .appendPath(Endpoints.CARS_PATH);
+
+        /**
+         * Retrieve an array of cars
+         */
+        Request carSyncRequest = new Requests.JsonArrayGetRequest(
+                context,
+                builder.toString(),
+                new Response.Listener<JSONArray>() {
+                    /**
+                     * Here we are receiving cars that were modified by other clients and
+                     * their state is outdated here
+                     *
+                     * @param response
+                     */
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Set<Car> cars = Car.fromJSONArray(response);
+                        database.saveCars(cars);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
+                        error.printStackTrace();
+                    }
+                });
+
+        // Add the request to the RequestQueue.
+        queue.add(carSyncRequest);
     }
 
     public static void remove(final Context context, final Car car, final CarDatabase database) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
 
-        Log.i(TAG, "Posting sars");
+        Log.i(TAG, "Posting cars");
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -84,7 +120,7 @@ public class CarsSync {
         /**
          * Send a Json with the cars contained in this phone
          */
-        Request carSyncRequest = new Requests.DeleteRequest(
+        Request removeRequest = new Requests.DeleteRequest(
                 context,
                 builder.toString(),
                 new Response.Listener<String>() {
@@ -111,7 +147,7 @@ public class CarsSync {
         database.delete(car);
 
         // Add the request to the RequestQueue.
-        queue.add(carSyncRequest);
+        queue.add(removeRequest);
     }
 
     /**
@@ -148,7 +184,6 @@ public class CarsSync {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.i(TAG, "Post result: " + response.toString());
-                        setNeedsSyncPref(context, false);
                     }
                 },
                 new Response.ErrorListener() {
@@ -163,12 +198,25 @@ public class CarsSync {
         queue.add(carSyncRequest);
     }
 
-    private static JSONArray getCarsJSON(List<Car> cars) {
-        JSONArray carsArray = new JSONArray();
-        for (Car car : cars)
-            carsArray.put(car.toJSON());
-
-        Log.d(TAG, carsArray.toString());
-        return carsArray;
+    /**
+     * Helper method to trigger an immediate sync ("refresh").
+     * <p/>
+     * <p>This should only be used when we need to preempt the normal sync schedule. Typically, this
+     * means the user has pressed the "refresh" button.
+     * <p/>
+     * Note that SYNC_EXTRAS_MANUAL will cause an immediate sync, without any optimization to
+     * preserve battery life. If you know new data is available (perhaps via a GCM notification),
+     * but the user is not actively waiting for that data, you should omit this flag; this will give
+     * the OS additional freedom in scheduling your sync request.
+     */
+    public static void TriggerRefresh() {
+        Bundle b = new Bundle();
+        // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(
+                GenericAccountService.GetAccount(ACCOUNT_TYPE),                         // Sync account
+                CONTENT_AUTHORITY,                                                      // Content authority
+                b);                                                                     // Extras
     }
 }
