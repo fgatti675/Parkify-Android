@@ -150,10 +150,12 @@ public class MapsActivity extends BaseActivity
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
+
     private PendingIntent pIntent;
 
     @Override
     protected void onPlusClientSignIn() {
+
         LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
                 REQUEST,
                 this);
@@ -162,7 +164,6 @@ public class MapsActivity extends BaseActivity
         pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
-
 
     }
 
@@ -174,8 +175,8 @@ public class MapsActivity extends BaseActivity
     private void goToLogin() {
         if (!isFinishing()) {
             carDatabase.clearCars();
-//            for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
-//                mAccountManager.removeAccount(account, null, null);
+            for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
+                mAccountManager.removeAccount(account, null, null);
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
             finish();

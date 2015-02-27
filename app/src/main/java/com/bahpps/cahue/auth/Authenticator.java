@@ -27,6 +27,10 @@ import java.util.concurrent.ExecutionException;
 */
 public class Authenticator extends AbstractAccountAuthenticator {
 
+
+    public static final String ARG_ACCOUNT_TYPE = "arg_account_type";
+    public static final String ARG_AUTH_TOKEN_TYPE = "arg_auth_token_type";
+
     public static final String ACCOUNT_TYPE = "cahue.com";
     public static final String AUTH_TOKEN_TYPE = "iweco_cars";
     public static final String USER_ID = "user_id";
@@ -54,8 +58,8 @@ public class Authenticator extends AbstractAccountAuthenticator {
                              Bundle options) throws NetworkErrorException {
 
         final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(ACCOUNT_TYPE, accountType);
-        intent.putExtra(AUTH_TOKEN_TYPE, authTokenType);
+        intent.putExtra(ARG_ACCOUNT_TYPE, accountType);
+        intent.putExtra(ARG_AUTH_TOKEN_TYPE, authTokenType);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 
         final Bundle bundle = new Bundle();
@@ -103,8 +107,8 @@ public class Authenticator extends AbstractAccountAuthenticator {
         // an intent to display our AuthenticatorActivity.
         final Intent intent = new Intent(mContext, LoginActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-        intent.putExtra(ACCOUNT_TYPE, account.type);
-        intent.putExtra(AUTH_TOKEN_TYPE, authTokenType);
+        intent.putExtra(ARG_ACCOUNT_TYPE, account.type);
+        intent.putExtra(ARG_AUTH_TOKEN_TYPE, authTokenType);
         final Bundle bundle = new Bundle();
         bundle.putParcelable(AccountManager.KEY_INTENT, intent);
         return bundle;

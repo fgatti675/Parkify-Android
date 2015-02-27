@@ -1,7 +1,9 @@
 package com.bahpps.cahue.cars;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,7 +14,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.bahpps.cahue.Endpoints;
 import com.bahpps.cahue.R;
+import com.bahpps.cahue.auth.Authenticator;
+import com.bahpps.cahue.auth.IwecoAccountService;
 import com.bahpps.cahue.cars.database.CarDatabase;
+import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.util.Singleton;
 import com.bahpps.cahue.util.Requests;
 
@@ -131,6 +136,28 @@ public class CarsSync {
 
         // Add the request to the RequestQueue.
         queue.add(carSyncRequest);
+    }
+
+    /**
+     * Helper method to trigger an immediate sync ("refresh").
+     *
+     * <p>This should only be used when we need to preempt the normal sync schedule. Typically, this
+     * means the user has pressed the "refresh" button.
+     *
+     * Note that SYNC_EXTRAS_MANUAL will cause an immediate sync, without any optimization to
+     * preserve battery life. If you know new data is available (perhaps via a GCM notification),
+     * but the user is not actively waiting for that data, you should omit this flag; this will give
+     * the OS additional freedom in scheduling your sync request.
+     */
+    public static void TriggerRefresh() {
+        Bundle b = new Bundle();
+        // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        ContentResolver.requestSync(
+                IwecoAccountService.GetAccount(Authenticator.ACCOUNT_TYPE), // Sync account
+                LoginActivity.CONTENT_AUTHORITY,                                          // Content authority
+                b);                                                         // Extras
     }
 
 }
