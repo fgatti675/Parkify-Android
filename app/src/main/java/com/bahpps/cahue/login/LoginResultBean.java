@@ -18,6 +18,8 @@ import java.util.Set;
  */
 public class LoginResultBean {
 
+    String userId;
+
     String email;
 
     String googleId;
@@ -34,6 +36,7 @@ public class LoginResultBean {
 
             loginResultBean.authToken = json.getString("authToken");
             loginResultBean.refreshToken = json.getString("refreshToken");
+            loginResultBean.userId = json.getJSONObject("user").getString("id");
             loginResultBean.email = json.getJSONObject("user").getJSONObject("googleUser").getString("email");
             loginResultBean.googleId = json.getJSONObject("user").getJSONObject("googleUser").getString("googleId");
 

@@ -1,5 +1,7 @@
 package com.bahpps.cahue;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -27,12 +29,12 @@ import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
-import com.bahpps.cahue.cars.CarManagerActivity;
-import com.bahpps.cahue.debug.DebugActivity;
-import com.bahpps.cahue.login.AuthUtils;
-import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.CarManagerActivity;
 import com.bahpps.cahue.cars.database.CarDatabase;
+import com.bahpps.cahue.auth.Authenticator;
+import com.bahpps.cahue.debug.DebugActivity;
+import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.parkedCar.CarDetailsFragment;
 import com.bahpps.cahue.parkedCar.ParkedCarDelegate;
 import com.bahpps.cahue.parkedCar.SetCarPositionDialog;
@@ -93,6 +95,8 @@ public class MapsActivity extends BaseActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+    private AccountManager mAccountManager;
+
     private CarDatabase carDatabase;
 
     private View myLocationButton;
@@ -146,10 +150,12 @@ public class MapsActivity extends BaseActivity
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
         }
     };
+
     private PendingIntent pIntent;
 
     @Override
     protected void onPlusClientSignIn() {
+
         LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
                 REQUEST,
                 this);
@@ -158,7 +164,6 @@ public class MapsActivity extends BaseActivity
         pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
-
 
     }
 
@@ -170,7 +175,8 @@ public class MapsActivity extends BaseActivity
     private void goToLogin() {
         if (!isFinishing()) {
             carDatabase.clearCars();
-            AuthUtils.setIsLoggedIn(this, false);
+            for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
+                mAccountManager.removeAccount(account, null, null);
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -190,7 +196,10 @@ public class MapsActivity extends BaseActivity
 
         carDatabase = CarDatabase.getInstance(this);
 
-        if (!AuthUtils.isLoggedIn(this)) {
+        mAccountManager = AccountManager.get(this);
+        final Account availableAccounts[] = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
+
+        if (availableAccounts.length == 0) {
             goToLogin();
             return;
         }
@@ -256,11 +265,13 @@ public class MapsActivity extends BaseActivity
         /**
          * Details
          */
-        detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
-
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
+        detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
+        /**
+         * Bind service used for donations
+         */
         bindBillingService();
 
     }

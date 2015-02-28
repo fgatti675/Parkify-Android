@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.bahpps.cahue.Endpoints;
+import com.bahpps.cahue.util.Requests;
 import com.bahpps.cahue.util.Singleton;
 
 import org.apache.http.HttpResponse;
@@ -68,7 +69,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                     .appendPath(Endpoints.USERS_PATH)
                     .appendPath(Endpoints.CREATE_USER_GOOGLE_PATH);
 
-            HttpPost httpPost = Singleton.createHttpPost(context, builder.build().toString());
+            HttpPost httpPost = Requests.createHttpPost(context, builder.build().toString());
             String json = createRegistrationJSON(registrationId, authToken);
             Log.d(TAG, json);
             httpPost.setEntity(new StringEntity(json));
