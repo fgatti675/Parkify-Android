@@ -51,5 +51,6 @@
     <string name="delete_car_confirmation">Sicuro che vuoi eliminare questa macchina?</string>
     <string name="delete_error">Errore al eliminare la macchina</string>
     <string name="login_error">Errore</string>
+    <string name="sync_error">Errore durante la sincronizzazione</string>
 
 </resources>

@@ -45,7 +45,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
      * Content provider authority.
      */
     public static final String CONTENT_AUTHORITY = "com.bahpps.cahue.cars";
-    private static final long SYNC_FREQUENCY = 60 * 60;  // 1 hour (in seconds)
+    private static final long SYNC_FREQUENCY = 3 * 60 * 60;  // 1 hour (in seconds)
 
     // UI references.
     private View mProgressView;
@@ -289,10 +289,10 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         ContentResolver.setIsSyncable(account, CONTENT_AUTHORITY, 1);
         // Inform the system that this account is eligible for auto sync when the network is up
         ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
-//        // Recommend a schedule for automatic synchronization. The system may modify this based
-//        // on other scheduled syncs and network utilization.
-//        ContentResolver.addPeriodicSync(
-//                account, CONTENT_AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+        // Recommend a schedule for automatic synchronization. The system may modify this based
+        // on other scheduled syncs and network utilization.
+        ContentResolver.addPeriodicSync(
+                account, CONTENT_AUTHORITY, new Bundle(), SYNC_FREQUENCY);
 
         setResult(RESULT_OK, intent);
         finish();
