@@ -139,6 +139,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         this.car = getArguments().getParcelable(ARG_CAR);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        doDraw();
+    }
 
     public void setCar(Car car) {
 
@@ -175,7 +180,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
     public void doDraw() {
-        if (mMap == null || !isAdded()) return;
+        if (mMap == null || !isResumed()) return;
 
         Log.i(TAG, "Drawing parked car components");
         setUpColors();

@@ -5,11 +5,9 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +19,7 @@ import com.bahpps.cahue.MapsActivity;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.auth.Authenticator;
+import com.bahpps.cahue.cars.database.CarsProvider;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -40,12 +39,6 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
-
-    /**
-     * Content provider authority.
-     */
-    public static final String CONTENT_AUTHORITY = "com.bahpps.cahue.cars";
-    private static final long SYNC_FREQUENCY = 3 * 60 * 60;  // 1 hour (in seconds)
 
     // UI references.
     private View mProgressView;
@@ -254,7 +247,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     @Override
     public void onBackEndLogin(LoginResultBean loginResult) {
 
-        database.saveCars(loginResult.cars);
+        database.save(loginResult.cars);
 
         final Intent resultIntent = new Intent();
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email);
@@ -286,13 +279,13 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         mAccountManager.setAuthToken(account, authTokenType, authToken);
 
         // Inform the system that this account supports sync
-        ContentResolver.setIsSyncable(account, CONTENT_AUTHORITY, 1);
+        ContentResolver.setIsSyncable(account, CarsProvider.CONTENT_AUTHORITY, 1);
         // Inform the system that this account is eligible for auto sync when the network is up
-        ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
+        ContentResolver.setSyncAutomatically(account, CarsProvider.CONTENT_AUTHORITY, true);
         // Recommend a schedule for automatic synchronization. The system may modify this based
         // on other scheduled syncs and network utilization.
-        ContentResolver.addPeriodicSync(
-                account, CONTENT_AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+//        ContentResolver.addPeriodicSync(
+//                account, CarsProvider.CONTENT_AUTHORITY, new Bundle(), CarsProvider.SYNC_FREQUENCY);
 
         setResult(RESULT_OK, intent);
         finish();

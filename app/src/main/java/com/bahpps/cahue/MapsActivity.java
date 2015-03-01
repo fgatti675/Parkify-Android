@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -31,6 +32,7 @@ import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarManagerActivity;
+import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.auth.Authenticator;
 import com.bahpps.cahue.debug.DebugActivity;
@@ -124,6 +126,11 @@ public class MapsActivity extends BaseActivity
     };
 
     /**
+     * Current logged user
+     */
+    private Account mAccount;
+
+    /**
      * If we get a new car position while we are using the app, we update the map
      */
     private final BroadcastReceiver carUpdateReceiver = new BroadcastReceiver() {
@@ -175,12 +182,16 @@ public class MapsActivity extends BaseActivity
     private void goToLogin() {
         if (!isFinishing()) {
             carDatabase.clearCars();
-            for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
-                mAccountManager.removeAccount(account, null, null);
+            clearAccounts();
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
+    }
+
+    private void clearAccounts() {
+        for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
+            mAccountManager.removeAccount(account, null, null);
     }
 
     @Override
@@ -202,7 +213,12 @@ public class MapsActivity extends BaseActivity
         if (availableAccounts.length == 0) {
             goToLogin();
             return;
+        } else if (availableAccounts.length > 1) {
+            Log.w(TAG, "Multiple accounts found");
         }
+
+        // There should be just one account
+        mAccount = availableAccounts[0];
 
         // show help dialog only on first run of the app
         if (!Util.isTutorialShown(this)) {
@@ -210,6 +226,14 @@ public class MapsActivity extends BaseActivity
         }
 
         setContentView(R.layout.activity_main);
+
+//        Button button = (Button) findViewById(R.id.refresh);
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                CarsSync.TriggerRefresh(mAccount);
+//            }
+//        });
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 8);
@@ -453,6 +477,7 @@ public class MapsActivity extends BaseActivity
 
         // when our activity resumes, we want to register for location updates
         registerReceiver(carUpdateReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
+
         List<Car> cars = carDatabase.retrieveCars(false);
         for (Car car : cars) {
             getParkedCarDelegate(car).setCar(car);
@@ -586,6 +611,7 @@ public class MapsActivity extends BaseActivity
 
 
     private void openDonationDialog() {
+        // TODO: do this better?
         DonateDialog dialog = new DonateDialog();
         dialog.setIInAppBillingService(iInAppBillingService);
         dialog.show(getFragmentManager(), "DonateDialog");

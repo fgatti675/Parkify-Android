@@ -270,7 +270,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         /**
          * DB and server update
          */
-        updateCar(car);
+        CarsSync.storeCar(carDatabase, getActivity(), car);
     }
 
     public void onCarRemoved(Car car) {
@@ -452,10 +452,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             }
 
         }
-    }
-
-    private void updateCar(Car car) {
-        CarsSync.storeCar(carDatabase, getActivity(), car);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.bahpps.cahue.cars;
 
+import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import com.bahpps.cahue.R;
 import com.bahpps.cahue.auth.Authenticator;
 import com.bahpps.cahue.auth.IwecoAccountService;
 import com.bahpps.cahue.cars.database.CarDatabase;
+import com.bahpps.cahue.cars.database.CarsProvider;
 import com.bahpps.cahue.login.LoginActivity;
 import com.bahpps.cahue.util.Singleton;
 import com.bahpps.cahue.util.Requests;
@@ -149,15 +151,15 @@ public class CarsSync {
      * but the user is not actively waiting for that data, you should omit this flag; this will give
      * the OS additional freedom in scheduling your sync request.
      */
-    public static void TriggerRefresh() {
+    public static void TriggerRefresh(Account account) {
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         ContentResolver.requestSync(
-                IwecoAccountService.GetAccount(Authenticator.ACCOUNT_TYPE), // Sync account
-                LoginActivity.CONTENT_AUTHORITY,                                          // Content authority
-                b);                                                         // Extras
+                account,                                        // Sync account
+                CarsProvider.CONTENT_AUTHORITY,                              // Content authority
+                b);                                             // Extras
     }
 
 }

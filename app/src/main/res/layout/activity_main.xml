@@ -43,4 +43,13 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
 
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="REFRESH"-->
+        <!--android:id="@+id/refresh"-->
+        <!--android:layout_alignBottom="@+id/my_location"-->
+        <!--android:layout_toLeftOf="@+id/my_location"-->
+        <!--android:layout_toStartOf="@+id/my_location" />-->
+
 </RelativeLayout>

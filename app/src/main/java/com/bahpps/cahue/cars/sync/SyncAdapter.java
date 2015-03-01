@@ -41,6 +41,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
 
+        Log.i(TAG, "Sync called");
+
         if (account == null)
             return;
 
@@ -70,7 +72,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     @Override
                     public void onResponse(JSONArray response) {
                         Set<Car> cars = Car.fromJSONArray(response);
-                        database.saveCars(cars);
+                        database.save(cars);
                     }
                 },
                 new Response.ErrorListener() {

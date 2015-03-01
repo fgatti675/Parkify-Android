@@ -64,7 +64,7 @@ public class CarDatabase  {
      *
      * @param cars
      */
-    public void saveCars(Collection<Car> cars) {
+    public void save(Collection<Car> cars) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -79,6 +79,8 @@ public class CarDatabase  {
 
                 ContentValues values = getCarContentValues(car);
                 database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+                broadCastCarUpdate(car);
             }
         } finally {
             database.close();
@@ -107,9 +109,15 @@ public class CarDatabase  {
             carDatabaseHelper.close();
         }
 
-        /**
-         * Tell everyone else
-         */
+        broadCastCarUpdate(car);
+
+    }
+
+    /**
+     * Tell everyone interested that this car was updated
+     */
+    private void broadCastCarUpdate(Car car) {
+
         Intent intent = new Intent(INTENT_CAR_UPDATE);
         intent.putExtra(INTENT_CAR_EXTRA, car);
         context.sendBroadcast(intent);
@@ -126,8 +134,9 @@ public class CarDatabase  {
             values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
             values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
             values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
+            values.put(Car.COLUMN_TIME, car.time.getTime());
         }
-        values.put(Car.COLUMN_TIME, car.time.getTime());
+
         return values;
     }
 
