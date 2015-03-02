@@ -208,16 +208,17 @@ public class MapsActivity extends BaseActivity
         carDatabase = CarDatabase.getInstance(this);
 
         mAccountManager = AccountManager.get(this);
-        final Account availableAccounts[] = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
+        final Account[] availableAccounts = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
 
         if (availableAccounts.length == 0) {
             goToLogin();
             return;
-        } else if (availableAccounts.length > 1) {
+        }
+        // There should be just one account
+        else if (availableAccounts.length > 1) {
             Log.w(TAG, "Multiple accounts found");
         }
 
-        // There should be just one account
         mAccount = availableAccounts[0];
 
         // show help dialog only on first run of the app
