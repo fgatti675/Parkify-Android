@@ -23,25 +23,25 @@ public class MarkerFactory {
 
     public static BitmapDescriptor getMarkerBitmap(ParkingSpot.Type type, Context context, boolean selected) {
 
-        if(selected)
-            return getSelectedMarkerBitmap(type, context);
+        if (selected) {
 
-        BitmapDescriptor descriptor = typeBitmapDescriptorMap.get(type);
-        if (descriptor == null) {
-            descriptor = createMarkerBitmap(context, type, false);
-            typeBitmapDescriptorMap.put(type, descriptor);
+            BitmapDescriptor descriptor = selectedTypeBitmapDescriptorMap.get(type);
+            if (descriptor == null) {
+                descriptor = createMarkerBitmap(context, type, true);
+                selectedTypeBitmapDescriptorMap.put(type, descriptor);
+            }
+            return descriptor;
+
+        } else {
+
+            BitmapDescriptor descriptor = typeBitmapDescriptorMap.get(type);
+            if (descriptor == null) {
+                descriptor = createMarkerBitmap(context, type, false);
+                typeBitmapDescriptorMap.put(type, descriptor);
+            }
+            return descriptor;
+
         }
-        return descriptor;
-
-    }
-
-    private static BitmapDescriptor getSelectedMarkerBitmap(ParkingSpot.Type type, Context context) {
-        BitmapDescriptor descriptor = selectedTypeBitmapDescriptorMap.get(type);
-        if (descriptor == null) {
-            descriptor = createMarkerBitmap(context, type, true);
-            selectedTypeBitmapDescriptorMap.put(type, descriptor);
-        }
-        return descriptor;
 
     }
 

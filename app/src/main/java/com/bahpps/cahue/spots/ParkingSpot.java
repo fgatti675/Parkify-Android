@@ -13,9 +13,8 @@ import java.util.Date;
  */
 public class ParkingSpot implements Parcelable {
 
-    private static long GREEN_TIME_THRESHOLD_MS = 10 * 60 * 1000;
-    private static long YELLOW_TIME_THRESHOLD_MS = 20 * 60 * 1000;
-    private static long ORANGE_TIME_THRESHOLD_MS = 40 * 60 * 1000;
+    private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
+    private static long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
 
     public final Long id;
 
@@ -104,8 +103,8 @@ public class ParkingSpot implements Parcelable {
             return Type.green;
         else if (timeSinceSpotWasFree_ms < YELLOW_TIME_THRESHOLD_MS)
             return Type.yellow;
-        else if (timeSinceSpotWasFree_ms < ORANGE_TIME_THRESHOLD_MS)
-            return Type.orange;
+//        else if (timeSinceSpotWasFree_ms < ORANGE_TIME_THRESHOLD_MS)
+//            return Type.orange;
         else
             return Type.red;
     }
@@ -116,7 +115,7 @@ public class ParkingSpot implements Parcelable {
     public static enum Type {
 
         red(0.02F, R.color.marker_red, R.dimen.marker_diameter_red),
-        orange(0.04F, R.color.marker_orange, R.dimen.marker_diameter_orange),
+//        orange(0.04F, R.color.marker_orange, R.dimen.marker_diameter_orange),
         yellow(0.03F, R.color.marker_yellow, R.dimen.marker_diameter_yellow),
         green(0.06F, R.color.marker_green, R.dimen.marker_diameter_green);
 
