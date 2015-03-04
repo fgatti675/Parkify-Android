@@ -346,7 +346,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
             // if there is no marker we create it
             if (marker == null) {
                 BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, getActivity(), parkingSpot.equals(selectedSpot));
-                marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).icon(markerBitmap).anchor(0.5f, 0.5f));
+                marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).icon(markerBitmap)
+                        .anchor(MarkerFactory.iconGenerator.getAnchorU(), MarkerFactory.iconGenerator.getAnchorV()));
+//                        .anchor(0.5f, 0.5f));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);

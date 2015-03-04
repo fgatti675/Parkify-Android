@@ -9,6 +9,7 @@ import com.bahpps.cahue.R;
 import com.bahpps.cahue.spots.ParkingSpot;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.maps.android.ui.IconGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +19,16 @@ import java.util.Map;
  */
 public class MarkerFactory {
 
+    public static IconGenerator iconGenerator;
+
     private static Map<ParkingSpot.Type, BitmapDescriptor> typeBitmapDescriptorMap = new HashMap<ParkingSpot.Type, BitmapDescriptor>();
     private static Map<ParkingSpot.Type, BitmapDescriptor> selectedTypeBitmapDescriptorMap = new HashMap<ParkingSpot.Type, BitmapDescriptor>();
 
     public static BitmapDescriptor getMarkerBitmap(ParkingSpot.Type type, Context context, boolean selected) {
+
+        if (iconGenerator == null) {
+            iconGenerator = new IconGenerator(context.getApplicationContext());
+        }
 
         if (selected) {
 
@@ -46,6 +53,17 @@ public class MarkerFactory {
     }
 
     private static BitmapDescriptor createMarkerBitmap(Context context, ParkingSpot.Type type, boolean selected) {
+
+        iconGenerator.setTextAppearance(android.R.style.TextAppearance_DeviceDefault_Inverse);
+
+        if (type == ParkingSpot.Type.green) {
+            iconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_green));
+            return BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("T"));
+        } else if (type == ParkingSpot.Type.yellow) {
+            iconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_yellow));
+            return BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("T"));
+        }
+
 
         int diameter = context.getResources().getDimensionPixelSize(selected ? R.dimen.marker_diameter_selected : type.diameterId);
         Bitmap mDotMarkerBitmap = Bitmap.createBitmap(diameter, diameter, Bitmap.Config.ARGB_8888);
