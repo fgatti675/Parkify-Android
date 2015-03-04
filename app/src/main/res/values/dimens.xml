@@ -5,8 +5,7 @@
     <dimen name="keyline_2">72dp</dimen>
     <dimen name="keyline_2_minus_16dp">56dp</dimen>
 
-
-    <dimen name="marker_diameter_red">10dp</dimen>
+    <dimen name="marker_diameter_red">9dp</dimen>
     <dimen name="marker_diameter_orange">9dp</dimen>
     <dimen name="marker_diameter_yellow">12dp</dimen>
     <dimen name="marker_diameter_green">16dp</dimen>
