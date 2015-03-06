@@ -46,8 +46,9 @@ public class CarsSync {
      */
     public static void clearLocation(CarDatabase carDatabase, Context context, Car car) {
 
-        car.time = new Date();
+        car.time = null;
         car.location = null;
+        car.address = null;
 
         storeCar(carDatabase, context, car);
     }

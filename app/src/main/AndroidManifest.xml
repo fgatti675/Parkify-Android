@@ -18,12 +18,12 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
-    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <!-- Required to enable our SyncAdapter after it's created. -->
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <!-- Required because we're manually creating a new account. -->
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
 
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -65,7 +65,8 @@
         </receiver>
 
         <!-- DEBUG -->
-        <activity android:name=".debug.DebugActivity"
+        <activity
+            android:name=".debug.DebugActivity"
             android:parentActivityName=".MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -95,6 +96,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".parkedCar.CarPositionUpdatedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.bahpps.cahue.cars.CAR_UPDATED" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".gcm.GcmIntentService" />
 
         <activity
@@ -109,11 +118,12 @@
             android:name="com.bahpps.cahue.cars.database.CarsProvider"
             android:authorities="com.bahpps.cahue.cars"
             android:exported="false"
-            android:syncable="true"/>
+            android:syncable="true" />
 
         <!-- This service implements our SyncAdapter. It needs to be exported, so that the system
         sync framework can access it. -->
-        <service android:name=".cars.sync.SyncService"
+        <service
+            android:name=".cars.sync.SyncService"
             android:exported="true">
             <!-- This intent filter is required. It allows the system to launch our sync service
             as needed. -->
@@ -121,19 +131,23 @@
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
             <!-- This points to a required XML file which describes our SyncAdapter. -->
-            <meta-data android:name="android.content.SyncAdapter"
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service
-            android:name=".auth.IwecoAccountService">
+        <service android:name=".auth.IwecoAccountService">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
+                <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <service
+            android:name=".util.FetchAddressIntentService"
+            android:exported="false" />
 
     </application>
 

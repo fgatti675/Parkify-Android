@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public class CarDatabase  {
 
-    public static final String INTENT_CAR_UPDATE = "CAR_UPDATED_INTENT";
+    public static final String INTENT_CAR_UPDATE = "com.bahpps.cahue.cars.CAR_UPDATED";
     public static final String INTENT_CAR_EXTRA = "CAR_EXTRA";
 
     private static CarDatabase mInstance;
@@ -50,7 +50,8 @@ public class CarDatabase  {
             Car.COLUMN_LATITUDE,
             Car.COLUMN_LONGITUDE,
             Car.COLUMN_ACCURACY,
-            Car.COLUMN_TIME
+            Car.COLUMN_TIME,
+            Car.COLUMN_ADDRESS
     };
 
     private static final String TAG = CarDatabase.class.getSimpleName();
@@ -94,6 +95,7 @@ public class CarDatabase  {
      * @param car
      */
     public void save(Car car) {
+
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
 
@@ -135,6 +137,7 @@ public class CarDatabase  {
             values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
             values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
             values.put(Car.COLUMN_TIME, car.time.getTime());
+            values.put(Car.COLUMN_ADDRESS, car.address);
         }
 
         return values;
@@ -251,6 +254,7 @@ public class CarDatabase  {
             location.setAccuracy(accuracy);
             car.location = location;
             car.time = new Date(cursor.getLong(7));
+            car.address = cursor.isNull(8) ? null : cursor.getString(8);
         }
 
         return car;

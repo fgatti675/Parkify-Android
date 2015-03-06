@@ -3,7 +3,11 @@ package com.bahpps.cahue.parkedCar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +24,7 @@ import android.widget.TextView;
 import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.util.CarImages;
 
 
@@ -40,11 +45,20 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     TextView name;
     TextView time;
     TextView distance;
+    TextView address;
 
     Toolbar toolbar;
     private ImageView image;
 
     ParkedCarDelegate parkedCarDelegate;
+
+    private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
+            update();
+        }
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -79,6 +93,18 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     public void onResume() {
         super.onResume();
 
+        update();
+
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(carUpdatedReceiver);
+    }
+
+    private void update() {
         //update image
         updateImage();
 
@@ -88,8 +114,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         // Update distance
         updateDistance();
 
-        updateFollowButtonState();
+        // Update address
+        updateAddress();
 
+        updateFollowButtonState();
     }
 
 
@@ -115,6 +143,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         time = (TextView) view.findViewById(R.id.time);
 
         distance = (TextView) view.findViewById(R.id.distance);
+
+        address = (TextView) view.findViewById(R.id.address);
 
         Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
         view.startAnimation(fadeInAnimation);
@@ -148,7 +178,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private void updateTimeTextView() {
         // Set time ago
-        time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+        if (car.time != null)
+            time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
     }
 
     public void setUserLocation(Location userLocation) {
@@ -163,6 +194,18 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         if (userLocation != null && car.location != null) {
             float distanceM = car.location.distanceTo(userLocation);
             distance.setText(String.format("%.1f km", distanceM / 1000));
+            distance.setVisibility(View.VISIBLE);
+        } else {
+            distance.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateAddress() {
+        if (car.address != null) {
+            address.setText(car.address);
+            address.setVisibility(View.VISIBLE);
+        } else {
+            address.setVisibility(View.GONE);
         }
     }
 

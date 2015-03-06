@@ -55,9 +55,18 @@
                 android:textColor="@color/abc_secondary_text_material_light" />
 
             <TextView
+                android:id="@+id/address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:text="ADDRESS"
+                android:textColor="@color/abc_secondary_text_material_light" />
+
+            <TextView
                 android:id="@+id/distance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 tools:text="DISTANCE"
                 android:textColor="@color/abc_secondary_text_material_light" />
 

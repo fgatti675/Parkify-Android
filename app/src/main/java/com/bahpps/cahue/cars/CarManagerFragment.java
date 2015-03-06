@@ -550,6 +550,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         private TextView name;
         private TextView time;
         private TextView distance;
+        private TextView address;
         private ImageView carImage;
 
         public CarViewHolder(View itemView) {
@@ -561,13 +562,18 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             name = (TextView) itemView.findViewById(R.id.name);
             time = (TextView) itemView.findViewById(R.id.time);
             distance = (TextView) itemView.findViewById(R.id.distance);
+            address = (TextView) itemView.findViewById(R.id.address);
         }
 
         public void bind(final Car car) {
 
             name.setText(car.name);
-            if (car.location != null && car.time != null)
+            if (car.location != null && car.time != null) {
                 time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+                time.setVisibility(View.VISIBLE);
+            } else {
+                time.setVisibility(View.GONE);
+            }
 
             toolbar.getMenu().clear();
             toolbar.inflateMenu(R.menu.car_list_menu);
@@ -589,6 +595,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             if (car.color != null) {
                 carImage.setImageDrawable(getResources().getDrawable(CarImages.getImageResourceId(car.color, getActivity())));
             }
+            
             if (car.btAddress != null && mBtAdapter.isEnabled()) {
                 linkedDevice.setVisibility(View.VISIBLE);
                 for (BluetoothDevice device : mBtAdapter.getBondedDevices()) {
@@ -604,6 +611,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             if (mLastLocation != null && car.location != null) {
                 float distanceM = car.location.distanceTo(mLastLocation);
                 distance.setText(String.format("%.1f km", distanceM / 1000));
+                distance.setVisibility(View.VISIBLE);
+            } else {
+                distance.setVisibility(View.GONE);
             }
 
         }
