@@ -17,56 +17,69 @@ import com.google.maps.android.ui.IconGenerator;
  */
 public class MarkerFactory {
 
-    private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
-    private static long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
 
-    private static IconGenerator iconGenerator;
+    private static IconGenerator greenIconGenerator;
+    private static IconGenerator yellowIconGenerator;
+    private static IconGenerator selectedIconGenerator;
 
     public static MarkerOptions getMarker(ParkingSpot spot, Context context, boolean selected) {
 
-        if (iconGenerator == null) {
-            iconGenerator = new IconGenerator(context.getApplicationContext());
+        if (greenIconGenerator == null) {
+            greenIconGenerator = new IconGenerator(context.getApplicationContext());
+            greenIconGenerator.setContentPadding(10, 10, 10, 10);
+            greenIconGenerator.setTextAppearance(R.style.MarkerStyle);
+            greenIconGenerator.setColor(context.getResources().getColor(R.color.marker_green));
+
+            yellowIconGenerator = new IconGenerator(context.getApplicationContext());
+            yellowIconGenerator.setContentPadding(10, 10, 10, 10);
+            yellowIconGenerator.setTextAppearance(R.style.MarkerStyle);
+            yellowIconGenerator.setColor(context.getResources().getColor(R.color.marker_yellow));
+
+            selectedIconGenerator = new IconGenerator(context.getApplicationContext());
+            selectedIconGenerator.setContentPadding(10, 10, 10, 10);
+            selectedIconGenerator.setTextAppearance(R.style.SelectedMarkerStyle);
+            selectedIconGenerator.setColor(context.getResources().getColor(android.R.color.white));
         }
 
         long timeSinceSpotWasFree = System.currentTimeMillis() - spot.time.getTime();
-        if (timeSinceSpotWasFree < GREEN_TIME_THRESHOLD_MS)
-            return getGreenMarker(context, timeSinceSpotWasFree, spot.position, selected);
-        else if (timeSinceSpotWasFree < YELLOW_TIME_THRESHOLD_MS)
-            return getYellowMarker(context, timeSinceSpotWasFree, spot.position, selected);
-        else
+        ParkingSpot.Type markerType = spot.getMarkerType();
+        if (markerType == ParkingSpot.Type.green)
+            return getGreenMarker(timeSinceSpotWasFree, spot.position, selected);
+        else if (markerType == ParkingSpot.Type.yellow)
+            return getYellowMarker(timeSinceSpotWasFree, spot.position, selected);
+        else if (markerType == ParkingSpot.Type.red)
             return getRedMarker(context, spot.position, selected);
 
+        throw new IllegalStateException("Add spot type to " + MarkerFactory.class.getName());
+
     }
 
-    private static MarkerOptions getGreenMarker(Context context, long timeSinceSpotWasFree, LatLng position, boolean selected) {
-        if(selected)
-            return getSelectedMarker(context, timeSinceSpotWasFree, position);
+    private static MarkerOptions getGreenMarker(long timeSinceSpotWasFree, LatLng position, boolean selected) {
+        if (selected)
+            return getSelectedMarker(timeSinceSpotWasFree, position);
 
-        iconGenerator.setTextAppearance(R.style.MarkerStyle);
-        iconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_green));
-        return getMarkerOptions(timeSinceSpotWasFree, position);
-    }
-
-    private static MarkerOptions getMarkerOptions(long timeSinceSpotWasFree, LatLng position) {
         return new MarkerOptions()
                 .position(position)
-                .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(getMarkerText(timeSinceSpotWasFree))))
-                .anchor(MarkerFactory.iconGenerator.getAnchorU(), MarkerFactory.iconGenerator.getAnchorV());
+                .icon(BitmapDescriptorFactory.fromBitmap(greenIconGenerator.makeIcon(getMarkerText(timeSinceSpotWasFree))))
+                .anchor(MarkerFactory.greenIconGenerator.getAnchorU(), MarkerFactory.greenIconGenerator.getAnchorV());
     }
 
-    private static MarkerOptions getYellowMarker(Context context, long timeSinceSpotWasFree, LatLng position, boolean selected) {
-        if(selected)
-            return getSelectedMarker(context, timeSinceSpotWasFree, position);
+    private static MarkerOptions getYellowMarker(long timeSinceSpotWasFree, LatLng position, boolean selected) {
+        if (selected)
+            return getSelectedMarker(timeSinceSpotWasFree, position);
 
-        iconGenerator.setTextAppearance(R.style.MarkerStyle);
-        iconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_yellow));
-        return getMarkerOptions(timeSinceSpotWasFree, position);
+        return new MarkerOptions()
+                .position(position)
+                .icon(BitmapDescriptorFactory.fromBitmap(yellowIconGenerator.makeIcon(getMarkerText(timeSinceSpotWasFree))))
+                .anchor(MarkerFactory.yellowIconGenerator.getAnchorU(), MarkerFactory.yellowIconGenerator.getAnchorV());
     }
 
-    private static MarkerOptions getSelectedMarker(Context context, long timeSinceSpotWasFree, LatLng position) {
-        iconGenerator.setTextAppearance(R.style.SelectedMarkerStyle);
-        iconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_selected));
-        return getMarkerOptions(timeSinceSpotWasFree, position);
+
+    private static MarkerOptions getSelectedMarker(long timeSinceSpotWasFree, LatLng position) {
+        return new MarkerOptions()
+                .position(position)
+                .icon(BitmapDescriptorFactory.fromBitmap(selectedIconGenerator.makeIcon(getMarkerText(timeSinceSpotWasFree))))
+                .anchor(MarkerFactory.selectedIconGenerator.getAnchorU(), MarkerFactory.selectedIconGenerator.getAnchorV());
     }
 
     private static String getMarkerText(long ms) {
