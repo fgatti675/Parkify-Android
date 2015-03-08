@@ -130,6 +130,7 @@ public abstract class BaseActivity
                     .addApi(LocationServices.API)
                     .addApi(ActivityRecognition.API)
                     .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"))
+                    .addScope(Plus.SCOPE_PLUS_LOGIN)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
@@ -203,10 +204,11 @@ public abstract class BaseActivity
 
         // We only want to sign out if we're connected.
         if (mGoogleApiClient.isConnected()) {
+
             // Clear the default account in order to allow the user to potentially choose a
             // different account from the account chooser.
+            Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
 
-            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             // Disconnect from Google Play Services, then reconnect in order to restart the
             // process from scratch.
             mGoogleApiClient.disconnect();
