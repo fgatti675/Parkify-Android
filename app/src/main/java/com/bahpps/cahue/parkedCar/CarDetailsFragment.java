@@ -50,8 +50,11 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
-            update();
+            Car receivedCar = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
+            if (car.id == receivedCar.id) {
+                car = receivedCar;
+                update();
+            }
         }
     };
 
@@ -105,7 +108,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         updateFollowButtonState();
     }
-
 
 
     @Override

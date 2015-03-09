@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/cars"
-            android:textColor="@color/abc_primary_text_material_light" />
+            android:textColor="@color/body_text_1" />
 
         <TextView
             android:id="@+id/title_dialog"

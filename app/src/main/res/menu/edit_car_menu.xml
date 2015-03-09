@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_edit"
         android:title="@string/edit"
-        android:icon="@drawable/ic_action_action_settings_accent"
+        android:icon="@drawable/ic_border_color_grey600_24dp"
         cahue:showAsAction="always"  />
 
     <item

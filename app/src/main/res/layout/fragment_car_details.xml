@@ -47,7 +47,7 @@
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         tools:text="NAME"
-                        android:textColor="@color/abc_primary_text_material_light" />
+                        android:textColor="@color/body_text_1" />
 
                     <TextView
                         android:paddingLeft="@dimen/small_padding"
@@ -55,7 +55,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         tools:text="DEVICE"
-                        android:textColor="@color/secondary_text_disabled_material_light" />
+                        android:textColor="@color/body_text_3" />
 
                 </LinearLayout>
             </android.support.v7.widget.Toolbar>
@@ -79,7 +79,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         tools:text="Hace 2 horas"
-                        android:textColor="@color/abc_secondary_text_material_light"
+                        android:textColor="@color/body_text_2"
                         android:gravity="right"
                         android:singleLine="false" />
 
@@ -91,7 +91,7 @@
                         tools:text="1477.3 km"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"
-                        android:textColor="@color/abc_secondary_text_material_light"
+                        android:textColor="@color/body_text_2"
                         android:singleLine="true" />
 
                 </RelativeLayout>
@@ -103,7 +103,7 @@
                     tools:text="ADDRESS"
                     android:textAllCaps="true"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/secondary_text_disabled_material_light" />
+                    android:textColor="@color/body_text_3" />
             </LinearLayout>
 
         </LinearLayout>

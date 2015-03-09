@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -31,6 +32,7 @@ import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarManagerActivity;
+import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.auth.Authenticator;
 import com.bahpps.cahue.debug.DebugActivity;
@@ -740,9 +742,9 @@ public class MapsActivity extends BaseActivity
     }
 
     @Override
+    // Handle presses on the action bar items
     public boolean onMenuItemClick(MenuItem menuItem) {
 
-        // Handle presses on the action bar items
         switch (menuItem.getItemId()) {
             case R.id.action_link_device:
                 startDeviceSelection();
@@ -756,9 +758,9 @@ public class MapsActivity extends BaseActivity
             case R.id.action_disconnect:
                 signOut();
                 return true;
-//            case R.id.action_debug:
-//                goToDebug();
-//                return true;
+            case R.id.action_debug:
+                goToDebug();
+                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
