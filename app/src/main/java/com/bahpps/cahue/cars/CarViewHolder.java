@@ -67,8 +67,14 @@ public final class CarViewHolder extends RecyclerView.ViewHolder {
             linkedDevice.setVisibility(View.VISIBLE);
             for (BluetoothDevice device : btAdapter.getBondedDevices()) {
                 if (device.getAddress().equals(car.btAddress)) {
-                    linkedDevice.setText(device.getName());
-                    break;
+                    String deviceName = device.getName();
+                    if(car.name == null || !car.name.equals(deviceName)) {
+                        linkedDevice.setText(deviceName);
+                        linkedDevice.setVisibility(View.VISIBLE);
+                        break;
+                    } else{
+                        linkedDevice.setVisibility(View.GONE);
+                    }
                 }
             }
         } else {

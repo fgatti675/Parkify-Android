@@ -178,7 +178,8 @@ public class Car implements Parcelable {
                 jsonObject.put("longitude", location.getLongitude());
                 jsonObject.put("accuracy", location.getAccuracy());
             }
-            jsonObject.put("time", Util.DATE_FORMAT.format(time));
+            if (time != null)
+                jsonObject.put("time", Util.DATE_FORMAT.format(time));
         } catch (JSONException e) {
             e.printStackTrace();
         }

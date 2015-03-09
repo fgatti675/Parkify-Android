@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -32,7 +31,6 @@ import com.android.vending.billing.IInAppBillingService;
 import com.bahpps.cahue.activityRecognition.ActivityRecognitionIntentService;
 import com.bahpps.cahue.cars.Car;
 import com.bahpps.cahue.cars.CarManagerActivity;
-import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.auth.Authenticator;
 import com.bahpps.cahue.debug.DebugActivity;
@@ -76,6 +74,7 @@ public class MapsActivity extends BaseActivity
         SpotsDelegate.SpotSelectedListener,
         ParkedCarDelegate.CarSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
+        SetCarPositionDialog.Callbacks,
         CameraUpdateListener,
         OnMapReadyCallback {
 
@@ -852,6 +851,12 @@ public class MapsActivity extends BaseActivity
                 .build());
 
         onCameraUpdateRequest(cameraUpdate);
+    }
+
+    @Override
+    public void onCarPositionUpdate(Car selected) {
+        getParkedCarDelegate(selected).setFollowing(true);
+        onCarClicked(selected);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.bahpps.cahue.tutorial;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.drawable.Drawable;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class TutorialActivity extends ActionBarActivity
+public class TutorialActivity extends Activity
         implements CarManagerFragment.DeviceSelectionLoadingListener,
         EditCarDialog.CarEditedListener,
         ViewPager.OnPageChangeListener {

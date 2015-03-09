@@ -6,12 +6,12 @@
         android:id="@+id/action_edit"
         android:title="@string/edit"
         android:icon="@drawable/ic_action_action_settings_accent"
-        cahue:showAsAction="always" />
+        cahue:showAsAction="always"  />
 
     <item
         android:id="@+id/action_delete"
         android:title="@string/delete_car"
         android:icon="@drawable/ic_action_clear"
-        cahue:showAsAction="never" />
+        cahue:showAsAction="never"/>
 
 </menu>

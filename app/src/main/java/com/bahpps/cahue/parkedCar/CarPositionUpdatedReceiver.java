@@ -32,7 +32,10 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
 
         car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
 
-        if (car.address == null) {
+        /**
+         * Location is set but the address isn't, so let's try to fetch it
+         */
+        if (car.address == null && car.location != null) {
             Intent fetchAddressIntent = new Intent(context, FetchAddressIntentService.class);
             fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
             fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, car.location);

@@ -212,7 +212,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         lightColor = ColorUtil.getSemiTransparent(getResources().getColor(R.color.car_silver));
 
         if (car.color == null) {
-            iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
+            iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+            int color = getResources().getColor(R.color.theme_accent_1);
+            iconGenerator.setColor(color);
+            lightColor = ColorUtil.getSemiTransparent(color);
         } else {
             iconGenerator.setColor(car.color);
             boolean brightColor = ColorUtil.isBrightColor(car.color);
@@ -262,7 +265,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         accuracyCircle = mMap.addCircle(circleOptions);
 
     }
-
 
 
     public Car getCar() {
@@ -450,8 +452,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
-            setFollowing(true);
             carSelectedListener.onCarClicked(car);
+            setFollowing(true);
         } else {
             setFollowing(false);
         }

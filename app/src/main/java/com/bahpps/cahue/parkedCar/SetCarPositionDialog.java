@@ -1,5 +1,6 @@
 package com.bahpps.cahue.parkedCar;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -28,6 +29,12 @@ import java.util.List;
  */
 public class SetCarPositionDialog extends DialogFragment {
 
+    private Callbacks mCallbacks;
+
+    public interface Callbacks{
+        void onCarPositionUpdate(Car selected);
+    }
+
     private final static String TAG = SetCarPositionDialog.class.getSimpleName();
     private static final String ARG_LOCATION = "arg_location";
 
@@ -51,6 +58,17 @@ public class SetCarPositionDialog extends DialogFragment {
         return fragment;
     }
 
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if(!(activity instanceof Callbacks)) {
+            throw new IllegalStateException(activity.getClass().getSimpleName() + " must implement " + Callbacks.class.getName());
+        }
+
+        mCallbacks = (Callbacks) activity;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -104,6 +122,7 @@ public class SetCarPositionDialog extends DialogFragment {
                         // If ok, we just send and intent and leave the location receivers to do all the work
                         CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
                         CarsSync.storeCar(carDatabase, getActivity(), selected);
+                        mCallbacks.onCarPositionUpdate(selected);
 
                     }
                 })

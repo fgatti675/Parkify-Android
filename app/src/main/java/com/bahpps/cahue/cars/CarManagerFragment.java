@@ -397,7 +397,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, mBtAdapter);
 
                 carViewHolder.toolbar.getMenu().clear();
-                carViewHolder.toolbar.inflateMenu(R.menu.car_list_menu);
+                carViewHolder.toolbar.inflateMenu(R.menu.edit_car_menu);
                 carViewHolder.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
