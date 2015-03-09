@@ -5,13 +5,13 @@
     <item
         android:id="@+id/action_link_device"
         android:title="@string/link_device"
-        android:icon="@drawable/ic_action_maps_directions_car"
+        android:icon="@drawable/ic_car_white_24dp"
         cahue:showAsAction="always" />
 
     <item
         android:id="@+id/action_donate"
         android:title="@string/donate"
-        android:icon="@drawable/ic_action_favorite"
+        android:icon="@drawable/ic_heart_white_24dp"
         cahue:showAsAction="ifRoom" />
 
     <item

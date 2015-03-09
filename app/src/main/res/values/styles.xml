@@ -27,7 +27,7 @@
         <item name="android:textColorPrimary">@color/body_text_2</item>
         <item name="android:textColorSecondary">@color/body_text_1</item>
 
-        <item name="cardCornerRadius">4dp</item>
+        <item name="cardCornerRadius">@dimen/cardCornerRadius</item>
 
         <!--<item name="android:windowContentOverlay">@null</item>-->
         <!--<item name="android:windowBackground">@android:color/white</item>-->
@@ -58,12 +58,6 @@
     <style name="ActionBar.TitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">#fff</item>
         <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="ActionBar.Details" parent="CahueTheme">
-        <!--<item name="android:minWidth">0dp</item>-->
-        <item name="android:paddingLeft">@dimen/default_padding</item>
-        <!--<item name="android:scaleType">centerInside</item>-->
     </style>
 
     <style name="ActionBar.DetailsPopupThemeOverlay" parent="ThemeOverlay.AppCompat">
