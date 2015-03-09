@@ -12,15 +12,13 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.R;
@@ -35,6 +33,8 @@ import com.bahpps.cahue.cars.database.CarDatabase;
  */
 public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMenuItemClickListener {
 
+    public static final String TAG = CarDetailsFragment.class.getSimpleName();
+
     // the fragment initialization parameter
     private static final String ARG_CAR = "car";
 
@@ -48,14 +48,17 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     ParkedCarDelegate parkedCarDelegate;
 
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Car receivedCar = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
-            if (car.id == receivedCar.id) {
+            if (car.equals(receivedCar)) {
+                Log.d(TAG, "Received car " + receivedCar);
                 car = receivedCar;
                 update();
             }
         }
+
     };
 
     /**
@@ -89,11 +92,14 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     @Override
     public void onResume() {
+
         super.onResume();
+
+        Log.d(TAG, "Register receiver");
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
 
         update();
 
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
     }
 
     @Override

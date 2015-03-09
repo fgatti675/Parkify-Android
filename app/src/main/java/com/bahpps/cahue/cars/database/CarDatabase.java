@@ -120,6 +120,8 @@ public class CarDatabase  {
      */
     private void broadCastCarUpdate(Car car) {
 
+        Log.d(TAG, "Sending car update broadcast");
+
         Intent intent = new Intent(INTENT_CAR_UPDATE);
         intent.putExtra(INTENT_CAR_EXTRA, car);
         context.sendBroadcast(intent);
