@@ -17,4 +17,5 @@
     <dimen name="default_padding">8dp</dimen>
     <dimen name="large_padding">16dp</dimen>
     <dimen name="elevation">8dp</dimen>
+    <dimen name="cardCornerRadius">2dp</dimen>
 </resources>

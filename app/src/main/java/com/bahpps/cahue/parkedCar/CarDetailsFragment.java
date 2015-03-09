@@ -3,7 +3,12 @@ package com.bahpps.cahue.parkedCar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,7 +25,8 @@ import android.widget.TextView;
 import com.bahpps.cahue.DetailsFragment;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
-import com.bahpps.cahue.util.CarImages;
+import com.bahpps.cahue.cars.CarViewHolder;
+import com.bahpps.cahue.cars.database.CarDatabase;
 
 
 /**
@@ -37,14 +43,17 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private OnCarPositionDeletedListener mListener;
 
-    TextView name;
-    TextView time;
-    TextView distance;
-
-    Toolbar toolbar;
-    private ImageView image;
+    CarViewHolder carViewHolder;
 
     ParkedCarDelegate parkedCarDelegate;
+
+    private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
+            update();
+        }
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -79,25 +88,25 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     public void onResume() {
         super.onResume();
 
-        //update image
-        updateImage();
+        update();
 
-        // update time ago
-        updateTimeTextView();
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
+    }
 
-        // Update distance
-        updateDistance();
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(carUpdatedReceiver);
+    }
+
+    private void update() {
+
+        carViewHolder.bind(getActivity(), car, userLocation, BluetoothAdapter.getDefaultAdapter());
 
         updateFollowButtonState();
-
     }
 
 
-    private void updateImage() {
-        if (car.color != null) {
-            image.setImageDrawable(getResources().getDrawable(CarImages.getImageResourceId(car.color, getActivity())));
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -106,23 +115,14 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         View view = inflater.inflate(R.layout.fragment_car_details, container, false);
 
-        // Set time ago
-        name = (TextView) view.findViewById(R.id.name);
-        name.setText(car.name != null ? car.name : getResources().getString(R.string.car));
-
-        image = (ImageView) view.findViewById(R.id.car_image);
-
-        time = (TextView) view.findViewById(R.id.time);
-
-        distance = (TextView) view.findViewById(R.id.distance);
+        carViewHolder = new CarViewHolder(view);
 
         Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
         view.startAnimation(fadeInAnimation);
 
-        toolbar = (Toolbar) view.findViewById(R.id.car_toolbar);
+        carViewHolder.toolbar.inflateMenu(R.menu.parked_car_menu);
+        carViewHolder.toolbar.setOnMenuItemClickListener(this);
 
-        toolbar.inflateMenu(R.menu.parked_car_menu);
-        toolbar.setOnMenuItemClickListener(this);
         return view;
     }
 
@@ -146,23 +146,11 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         builder.create().show();
     }
 
-    private void updateTimeTextView() {
-        // Set time ago
-        time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
-    }
-
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
         if (view != null) {
-            updateDistance();
-        }
-    }
-
-    private void updateDistance() {
-        if (userLocation != null && car.location != null) {
-            float distanceM = car.location.distanceTo(userLocation);
-            distance.setText(String.format("%.1f km", distanceM / 1000));
+            carViewHolder.updateDistance(userLocation, car.location);
         }
     }
 
@@ -192,7 +180,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     private void updateFollowButtonState() {
         boolean selected = parkedCarDelegate.isFollowing();
 
-        MenuItem item = toolbar.getMenu().findItem(R.id.action_follow);
+        MenuItem item = carViewHolder.toolbar.getMenu().findItem(R.id.action_follow);
         item.setIcon(getResources().getDrawable(
                 selected
                         ? R.drawable.ic_action_maps_navigation_accent

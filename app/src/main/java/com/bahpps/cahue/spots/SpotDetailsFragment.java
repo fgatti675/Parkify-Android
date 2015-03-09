@@ -76,7 +76,7 @@ public class SpotDetailsFragment extends DetailsFragment {
             updateTimeAgo();
 
             // Update distance
-            distance = (TextView) view.findViewById(R.id.distance);
+            distance = (TextView) view.findViewById(R.id.distance_time);
 
             // Set rectangle color
             rectangleImage = (ImageView) view.findViewById(R.id.spot_image);

@@ -18,19 +18,16 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.database.CarDatabase;
-import com.bahpps.cahue.util.CarImages;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -49,7 +46,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     @Override
     public void onConnected(Bundle bundle) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mLastUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         adapter.notifyDataSetChanged();
     }
 
@@ -79,7 +76,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
 
     private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
+    private Location mLastUserLocation;
     /**
      * Device selection
      */
@@ -396,8 +393,25 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
-                Car car = cars.get(position);
-                carViewHolder.bind(car);
+                final Car car = cars.get(position);
+                carViewHolder.bind(getActivity(), car, mLastUserLocation, mBtAdapter);
+
+                carViewHolder.toolbar.getMenu().clear();
+                carViewHolder.toolbar.inflateMenu(R.menu.car_list_menu);
+                carViewHolder.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.action_edit:
+                                editCar(car, false);
+                                return true;
+                            case R.id.action_delete:
+                                showClearDialog(car);
+                                return true;
+                        }
+                        return false;
+                    }
+                });
 
             }
 
@@ -541,73 +555,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             devices.add(device);
             adapter.notifyItemInserted(cars.size() + devices.size());
         }
-    }
-
-    public final class CarViewHolder extends RecyclerView.ViewHolder {
-
-        private Toolbar toolbar;
-        private TextView linkedDevice;
-        private TextView name;
-        private TextView time;
-        private TextView distance;
-        private ImageView carImage;
-
-        public CarViewHolder(View itemView) {
-            super(itemView);
-
-            carImage = (ImageView) itemView.findViewById(R.id.car_image);
-            toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
-            linkedDevice = (TextView) itemView.findViewById(R.id.linked_device);
-            name = (TextView) itemView.findViewById(R.id.name);
-            time = (TextView) itemView.findViewById(R.id.time);
-            distance = (TextView) itemView.findViewById(R.id.distance);
-        }
-
-        public void bind(final Car car) {
-
-            name.setText(car.name);
-            if (car.location != null && car.time != null)
-                time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
-
-            toolbar.getMenu().clear();
-            toolbar.inflateMenu(R.menu.car_list_menu);
-            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    switch (menuItem.getItemId()) {
-                        case R.id.action_edit:
-                            editCar(car, false);
-                            return true;
-                        case R.id.action_delete:
-                            showClearDialog(car);
-                            return true;
-                    }
-                    return false;
-                }
-            });
-
-            if (car.color != null) {
-                carImage.setImageDrawable(getResources().getDrawable(CarImages.getImageResourceId(car.color, getActivity())));
-            }
-            if (car.btAddress != null && mBtAdapter.isEnabled()) {
-                linkedDevice.setVisibility(View.VISIBLE);
-                for (BluetoothDevice device : mBtAdapter.getBondedDevices()) {
-                    if (device.getAddress().equals(car.btAddress)) {
-                        linkedDevice.setText(device.getName());
-                        break;
-                    }
-                }
-            } else {
-                linkedDevice.setVisibility(View.GONE);
-            }
-
-            if (mLastLocation != null && car.location != null) {
-                float distanceM = car.location.distanceTo(mLastLocation);
-                distance.setText(String.format("%.1f km", distanceM / 1000));
-            }
-
-        }
-
     }
 
     public final static class DeviceViewHolder extends RecyclerView.ViewHolder {

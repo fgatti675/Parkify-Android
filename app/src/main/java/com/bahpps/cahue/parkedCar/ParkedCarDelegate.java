@@ -1,16 +1,22 @@
 package com.bahpps.cahue.parkedCar;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.bahpps.cahue.AbstractMarkerDelegate;
 import com.bahpps.cahue.CameraUpdateListener;
 import com.bahpps.cahue.R;
 import com.bahpps.cahue.cars.Car;
+import com.bahpps.cahue.util.ColorUtil;
+import com.bahpps.cahue.util.FetchAddressIntentService;
 import com.bahpps.cahue.cars.database.CarDatabase;
 import com.bahpps.cahue.cars.CarsSync;
 import com.bahpps.cahue.util.GMapV2Direction;
@@ -203,20 +209,20 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
     private void setUpColors() {
 
-        lightColor = getSemiTransparent(getResources().getColor(R.color.car_silver));
+        lightColor = ColorUtil.getSemiTransparent(getResources().getColor(R.color.car_silver));
 
         if (car.color == null) {
             iconGenerator.setStyle(IconGenerator.STYLE_DEFAULT);
         } else {
             iconGenerator.setColor(car.color);
-            boolean brightColor = isBrightColor(car.color);
+            boolean brightColor = ColorUtil.isBrightColor(car.color);
             iconGenerator.setTextAppearance(getActivity(),
                     brightColor ?
                             com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
                             com.google.maps.android.R.style.Bubble_TextAppearance_Light);
 
             if (car.color != getResources().getColor(R.color.car_white))
-                lightColor = brightColor ? car.color : getSemiTransparent(car.color);
+                lightColor = brightColor ? car.color : ColorUtil.getSemiTransparent(car.color);
         }
     }
 
@@ -257,28 +263,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
     }
 
-    private int getSemiTransparent(int color) {
-        return Color.argb(100, Color.red(color), Color.green(color), Color.blue(color));
-    }
-
-    public static boolean isBrightColor(int color) {
-        if (android.R.color.transparent == color)
-            return true;
-
-        boolean rtnValue = false;
-
-        int[] rgb = {Color.red(color), Color.green(color), Color.blue(color)};
-
-        int brightness = (int) Math.sqrt(rgb[0] * rgb[0] * .241 + rgb[1]
-                * rgb[1] * .691 + rgb[2] * rgb[2] * .068);
-
-        // color is light
-        if (brightness >= 200) {
-            rtnValue = true;
-        }
-
-        return rtnValue;
-    }
 
 
     public Car getCar() {

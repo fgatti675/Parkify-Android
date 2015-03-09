@@ -31,6 +31,7 @@ public class ParkedCarService extends LocationPollerService {
         Log.i(TAG, "Received : " + location);
 
         car.location = location;
+        car.address = null;
         car.time = new Date();
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);

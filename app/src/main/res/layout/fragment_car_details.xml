@@ -6,38 +6,53 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_padding"
-    cahue:cardCornerRadius="4dp">
+    cahue:cardCornerRadius="@dimen/cardCornerRadius">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="@dimen/large_padding"
         android:layout_centerVertical="true">
 
         <ImageView
             android:id="@+id/car_image"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_car_silver"
-            android:layout_centerVertical="true" />
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:padding="@dimen/large_padding"
+            android:src="@drawable/ic_car_white_36dp"
+            android:background="@color/theme_accent_1" />
 
         <LinearLayout
             android:id="@+id/infoLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/large_padding"
+            android:paddingBottom="@dimen/large_padding"
             android:layout_weight="1"
             android:layout_centerVertical="true"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/name"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                tools:text="NAME"
-                android:textColor="@color/abc_primary_text_material_light" />
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    tools:text="NAME"
+                    android:textColor="@color/abc_primary_text_material_light"
+                    android:layout_gravity="center_vertical" />
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/car_toolbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/linked_device"
@@ -47,29 +62,44 @@
                 tools:text="DEVICE"
                 android:textColor="@color/abc_secondary_text_material_light" />
 
-            <TextView
-                android:id="@+id/time"
+            <RelativeLayout
+                android:paddingRight="@dimen/large_padding"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="TIME"
-                android:textColor="@color/abc_secondary_text_material_light" />
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Hace 2 horas"
+                    android:textAllCaps="true"
+                    android:textColor="@color/abc_secondary_text_material_light"
+                    android:gravity="right"
+                    android:singleLine="false" />
+
+                <TextView
+                    android:id="@+id/distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    tools:text="1477.3 km"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:textAllCaps="true"
+                    android:textColor="@color/abc_secondary_text_material_light"
+                    android:singleLine="true" />
+
+            </RelativeLayout>
 
             <TextView
-                android:id="@+id/distance"
+                android:id="@+id/address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="DISTANCE"
-                android:textColor="@color/abc_secondary_text_material_light" />
+                tools:text="ADDRESS"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/secondary_text_disabled_material_light" />
 
         </LinearLayout>
-
-        <android.support.v7.widget.Toolbar
-            cahue:theme="@style/ActionBar.Details"
-            android:id="@+id/car_toolbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true">
-        </android.support.v7.widget.Toolbar>
 
     </LinearLayout>
 

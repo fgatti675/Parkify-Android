@@ -31,21 +31,6 @@
         <item>@string/car_pink</item>
     </array>
 
-    <string-array translatable="false" name="rainbow_cars">
-        <item>@drawable/ic_car_silver</item>
-        <item>@drawable/ic_car_black</item>
-        <item>@drawable/ic_car_silver</item>
-        <item>@drawable/ic_car_gray</item>
-        <item>@drawable/ic_car_red</item>
-        <item>@drawable/ic_car_blue</item>
-        <item>@drawable/ic_car_brown</item>
-        <item>@drawable/ic_car_green</item>
-        <item>@drawable/ic_car_yellow</item>
-        <item>@drawable/ic_car_gold</item>
-        <item>@drawable/ic_car_orange</item>
-        <item>@drawable/ic_car_pink</item>
-    </string-array>
-
     <string name="car_white">White</string>
     <string name="car_black">Black</string>
     <string name="car_silver">Silver</string>

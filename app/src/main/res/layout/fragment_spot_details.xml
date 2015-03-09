@@ -6,7 +6,7 @@
     android:layout_margin="@dimen/default_padding"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    card_view:cardCornerRadius="4dp">
+    card_view:cardCornerRadius="@dimen/cardCornerRadius">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -44,7 +44,7 @@
                 android:textColor="@color/abc_secondary_text_material_light" />
 
             <TextView
-                android:id="@+id/distance"
+                android:id="@+id/distance_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="DISTANCE"

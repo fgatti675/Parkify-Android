@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/debug_send_location"
-            android:src="@drawable/ic_action_favorite"
+            android:src="@drawable/ic_heart_white_36dp"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
 

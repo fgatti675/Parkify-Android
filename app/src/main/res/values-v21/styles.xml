@@ -43,10 +43,6 @@
         <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="ActionBar.Details" parent="CahueTheme">
-        <item name="android:paddingLeft">@dimen/default_padding</item>
-    </style>
-
     <!-- Base application theme. -->
     <style name="CahueTheme.Dark" parent="android:Theme.Material">
 
