@@ -73,7 +73,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
     private Map<Marker, ParkingSpot> markerSpotsMap;
-    private Map<Marker, ParkingSpot.Type> markerTypeMap;
 
     private GoogleMap mMap;
 
@@ -124,7 +123,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
             spotMarkersMap = new HashMap<>();
             markerSpotsMap = new HashMap<>();
-            markerTypeMap = new HashMap<>();
         }
     }
 
@@ -190,7 +188,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         if (clearSpots) spots.clear();
         markerSpotsMap.clear();
         spotMarkersMap.clear();
-        markerTypeMap.clear();
     }
 
     private boolean repeatLastQuery() {
@@ -341,22 +338,17 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
             Marker marker = spotMarkersMap.get(parkingSpot);
 
-            ParkingSpot.Type type = parkingSpot.getMarkerType();
-
             // if there is no marker we create it
             if (marker == null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, getActivity(), parkingSpot.equals(selectedSpot));
-                marker = mMap.addMarker(new MarkerOptions().flat(true).position(spotPosition).icon(markerBitmap).anchor(0.5f, 0.5f));
+                marker = mMap.addMarker(MarkerFactory.getMarker(parkingSpot, getActivity(), parkingSpot.equals(selectedSpot)));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);
-                markerTypeMap.put(marker, parkingSpot.getMarkerType());
             }
 
             // else we may need to update it
-            else if (type != markerTypeMap.get(marker)) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(type, getActivity(), parkingSpot.equals(selectedSpot));
-                marker.setIcon(markerBitmap);
+            else if (true) { // TODO
+                updateMarker(parkingSpot, marker, parkingSpot.equals(selectedSpot));
             }
 
 
@@ -366,6 +358,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
             }
 
         }
+    }
+
+    private void updateMarker(ParkingSpot parkingSpot, Marker marker, boolean selected) {
+        MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity(), selected);
+        marker.setIcon(markerOptions.getIcon());
     }
 
 
@@ -391,7 +388,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         selectedSpot = markerSpotsMap.get(marker);
         if (selectedSpot != null) {
             Marker selectedMarker = spotMarkersMap.get(selectedSpot);
-            selectedMarker.setIcon(MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), getActivity(), true));
+
+            updateMarker(selectedSpot, selectedMarker, true);
             selectedMarker.showInfoWindow();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
@@ -409,8 +407,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
             // we may have restored the selected spot but it may not have been drawn (like on device rotation)
             if (previousMarker != null) {
-                BitmapDescriptor markerBitmap = MarkerFactory.getMarkerBitmap(selectedSpot.getMarkerType(), getActivity(), false);
-                previousMarker.setIcon(markerBitmap);
+                updateMarker(selectedSpot, previousMarker, false);
             }
         }
         selectedSpot = null;
@@ -440,7 +437,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {
 
         marker.setVisible(true);
-        final float dAlpha = spot.getMarkerType().dAlpha;
+        final float dAlpha = 0.03F;
         marker.setAlpha(0);
 
         handler.post(new Runnable() {

@@ -22,7 +22,6 @@ public class ParkingSpot implements Parcelable {
 
     public final Date time;
 
-
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
             new Parcelable.Creator<ParkingSpot>() {
                 @Override
@@ -114,10 +113,9 @@ public class ParkingSpot implements Parcelable {
      */
     public static enum Type {
 
-        red(0.02F, R.color.marker_red, R.dimen.marker_diameter_red),
-//        orange(0.04F, R.color.marker_orange, R.dimen.marker_diameter_orange),
-        yellow(0.03F, R.color.marker_yellow, R.dimen.marker_diameter_yellow),
-        green(0.06F, R.color.marker_green, R.dimen.marker_diameter_green);
+        red(0.02F, R.color.marker_red, R.dimen.marker_diameter_red, true),
+        yellow(0.03F, R.color.marker_yellow, R.dimen.marker_diameter_yellow, false),
+        green(0.06F, R.color.marker_green, R.dimen.marker_diameter_green, false);
 
         /**
          * Difference in alpha values per frame when the marker is included in the map
@@ -134,10 +132,16 @@ public class ParkingSpot implements Parcelable {
          */
         public final int diameterId;
 
-        Type(float dAlpha, int colorId, int diameterId) {
+        /**
+         * The marker is displayed flat and centered
+         */
+        public boolean flatAndCentered;
+
+        Type(float dAlpha, int colorId, int diameterId, boolean flatAndCentered) {
             this.dAlpha = dAlpha;
             this.colorId = colorId;
             this.diameterId = diameterId;
+            this.flatAndCentered = flatAndCentered;
         }
 
     }
