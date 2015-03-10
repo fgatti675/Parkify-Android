@@ -613,7 +613,6 @@ public class MapsActivity extends BaseActivity
 
 
     private void openDonationDialog() {
-        // TODO: do this better?
         DonateDialog dialog = new DonateDialog();
         dialog.setIInAppBillingService(iInAppBillingService);
         dialog.show(getFragmentManager(), "DonateDialog");
@@ -659,21 +658,21 @@ public class MapsActivity extends BaseActivity
 
             final List<Car> parkedCars = carDatabase.retrieveCars(true);
 
-            // TODO: change this to find closest cars and not all
-            // One parked car
-            if (parkedCars.size() == 1) {
-
-                Car car = parkedCars.get(0);
+            List<Car> closeCars = new ArrayList<>();
+            for (Car car : parkedCars) {
                 ParkedCarDelegate parkedCarDelegate = getParkedCarDelegate(car);
                 parkedCarDelegate.onLocationChanged(getUserLocation());
                 if (!parkedCarDelegate.isTooFar()) {
-                    parkedCarDelegate.setFollowing(true);
-                    onCarClicked(car);
-                } else {
-                    zoomToMyLocation();
+                    closeCars.add(car);
                 }
             }
 
+            // One parked car
+            if (closeCars.size() == 1) {
+                Car car = closeCars.get(0);
+                getParkedCarDelegate(car).setFollowing(true);
+                onCarClicked(car);
+            }
             // zoom to user otherwise
             else {
                 zoomToMyLocation();
