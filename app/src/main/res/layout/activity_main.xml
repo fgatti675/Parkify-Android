@@ -24,7 +24,7 @@
         android:layout_alignParentBottom="true"
         android:visibility="invisible"
         android:elevation="@dimen/elevation"
-        tools:context="com.bahpps.cahue.spots.SpotDetailsFragment" />
+        tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
     <include
         layout="@layout/toolbar_actionbar_translucent"

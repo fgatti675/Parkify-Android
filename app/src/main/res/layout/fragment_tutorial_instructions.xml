@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context="com.bahpps.cahue.tutorial.TutorialInstructionsFragment">
+    tools:context="com.cahue.iweco.tutorial.TutorialInstructionsFragment">
 
     <TextView
         android:layout_width="wrap_content"
