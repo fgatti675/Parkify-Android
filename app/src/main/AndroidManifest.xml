@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.bahpps.cahue">
+    package="com.cahue.iweco">
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
@@ -29,10 +29,10 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <permission
-        android:name="com.bahpps.cahue.permission.C2D_MESSAGE"
+        android:name="com.cahue.iweco.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.bahpps.cahue.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.cahue.iweco.permission.C2D_MESSAGE" />
 
     <application
         android:allowBackup="true"
@@ -46,17 +46,17 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".MapsActivity">
+        <activity android:name="com.cahue.iweco.MapsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service android:name=".locationServices.ParkedCarService" />
-        <service android:name=".locationServices.CarMovedService" />
+        <service android:name="com.cahue.iweco.locationServices.ParkedCarService" />
+        <service android:name="com.cahue.iweco.locationServices.CarMovedService" />
 
-        <receiver android:name=".util.BluetoothDetector">
+        <receiver android:name="com.cahue.iweco.util.BluetoothDetector">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
@@ -66,64 +66,64 @@
 
         <!-- DEBUG -->
         <activity
-            android:name=".debug.DebugActivity"
-            android:parentActivityName=".MapsActivity">
+            android:name="com.cahue.iweco.debug.DebugActivity"
+            android:parentActivityName="com.cahue.iweco.MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bahpps.cahue.MapsActivity" />
+                android:value="com.cahue.iweco.MapsActivity" />
         </activity>
 
-        <service android:name=".debug.DebugCarMovedService" />
+        <service android:name="com.cahue.iweco.debug.DebugCarMovedService" />
 
         <activity
-            android:name=".login.LoginActivity"
+            android:name="com.cahue.iweco.login.LoginActivity"
             android:label="@string/sign_in"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"></activity>
         <activity
-            android:name=".tutorial.TutorialActivity"
+            android:name="com.cahue.iweco.tutorial.TutorialActivity"
             android:screenOrientation="portrait"
             android:theme="@style/CahueTheme.Dark"></activity>
 
-        <service android:name=".activityRecognition.ActivityRecognitionIntentService" />
+        <service android:name="com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService" />
 
         <receiver
-            android:name=".gcm.GcmBroadcastReceiver"
+            android:name="com.cahue.iweco.gcm.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="com.bahpps.cahue" />
+                <category android:name="com.cahue.iweco" />
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name=".parkedCar.CarPositionUpdatedReceiver"
+            android:name="com.cahue.iweco.parkedCar.CarPositionUpdatedReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.bahpps.cahue.cars.CAR_UPDATED" />
+                <action android:name="com.cahue.iweco.cars.CAR_UPDATED" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".gcm.GcmIntentService" />
+        <service android:name="com.cahue.iweco.gcm.GcmIntentService" />
 
         <activity
-            android:name=".cars.CarManagerActivity"
-            android:parentActivityName=".MapsActivity">
+            android:name="com.cahue.iweco.cars.CarManagerActivity"
+            android:parentActivityName="com.cahue.iweco.MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bahpps.cahue.MapsActivity" />
+                android:value="com.cahue.iweco.MapsActivity" />
         </activity>
 
         <provider
-            android:name="com.bahpps.cahue.cars.database.CarsProvider"
-            android:authorities="com.bahpps.cahue.cars"
+            android:name="com.cahue.iweco.cars.database.CarsProvider"
+            android:authorities="com.cahue.iweco.cars"
             android:exported="false"
             android:syncable="true" />
 
         <!-- This service implements our SyncAdapter. It needs to be exported, so that the system
         sync framework can access it. -->
         <service
-            android:name=".cars.sync.SyncService"
+            android:name="com.cahue.iweco.cars.sync.SyncService"
             android:exported="true">
             <!-- This intent filter is required. It allows the system to launch our sync service
             as needed. -->
@@ -136,7 +136,7 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service android:name=".auth.IwecoAccountService">
+        <service android:name="com.cahue.iweco.auth.IwecoAccountService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -146,7 +146,7 @@
         </service>
 
         <service
-            android:name=".util.FetchAddressIntentService"
+            android:name="com.cahue.iweco.util.FetchAddressIntentService"
             android:exported="false" />
 
     </application>

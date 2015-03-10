@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/large_padding"
-        tools:context="com.bahpps.cahue.spots.SpotDetailsFragment">
+        tools:context="com.cahue.iweco.spots.SpotDetailsFragment">
 
         <ImageView
             android:id="@+id/spot_image"
