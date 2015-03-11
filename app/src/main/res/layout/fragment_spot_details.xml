@@ -6,6 +6,8 @@
     android:layout_margin="@dimen/default_padding"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:foreground="?android:attr/selectableItemBackground"
+    style="@style/CardViewStyle"
     card_view:cardCornerRadius="@dimen/cardCornerRadius">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -48,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="DISTANCE"
-                android:textColor="@color/abc_secondary_text_material_light"  />
+                android:textColor="@color/abc_secondary_text_material_light" />
 
         </LinearLayout>
 

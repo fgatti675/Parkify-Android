@@ -101,7 +101,6 @@
     <!--</style>-->
 
     <style name="CardViewStyle" parent="CardView.Light">
-        <item name="android:foreground">?android:attr/selectableItemBackground</item>
         <item name="android:textColor">@color/abc_primary_text_material_light</item>
         <item name="android:textColorPrimary">@color/abc_primary_text_material_light</item>
         <item name="android:textColorSecondary">@color/abc_secondary_text_material_light</item>
@@ -113,9 +112,9 @@
     </style>
 
     <style name="SelectedMarkerStyle">
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/body_text_2</item>
+        <item name="android:textColor">@color/body_text_1</item>
     </style>
 
 </resources>

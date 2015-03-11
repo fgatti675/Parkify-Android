@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_padding"
+    android:foreground="?android:attr/selectableItemBackground"
     cahue:cardCornerRadius="@dimen/cardCornerRadius">
 
     <LinearLayout
