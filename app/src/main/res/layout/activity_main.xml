@@ -31,16 +31,16 @@
         android:id="@+id/toolbar_actionbar" />
 
 
-    <com.gc.materialdesign.views.ButtonFloat
+    <com.melnykov.fab.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        cahue:animate="true"
-        cahue:iconDrawable="@drawable/ic_action_device_gps_fixed"
-        android:background="@color/theme_accent_1"
+        cahue:fab_colorNormal="@android:color/white"
+        cahue:fab_colorPressed="@color/theme_accent_1"
+        cahue:fab_colorRipple="@color/theme_accent_1"
+        android:src="@drawable/ic_action_device_gps_fixed"
         android:id="@+id/my_location"
+        android:layout_margin="@dimen/large_padding"
         android:layout_marginRight="@dimen/large_padding"
-        android:layout_marginBottom="@dimen/large_padding"
-        android:layout_above="@+id/marker_details_container"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>

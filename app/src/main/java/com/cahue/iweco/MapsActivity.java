@@ -275,8 +275,12 @@ public class MapsActivity extends BaseActivity
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
             mapInitialised = savedInstanceState.getBoolean("mapInitialised");
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
+            cameraFollowing = savedInstanceState.getBoolean("cameraFollowing");
 
         }
+
+        setCameraFollowing(cameraFollowing);
+
         /**
          * Add delegates
          */
@@ -557,6 +561,7 @@ public class MapsActivity extends BaseActivity
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
         savedInstanceState.putBoolean("mapInitialised", mapInitialised);
         savedInstanceState.putBoolean("detailsDisplayed", detailsDisplayed);
+        savedInstanceState.putBoolean("cameraFollowing", cameraFollowing);
 
     }
 
@@ -837,7 +842,11 @@ public class MapsActivity extends BaseActivity
         this.cameraFollowing = cameraFollowing;
         if (cameraFollowing) {
             zoomToMyLocation();
+            myLocationButton.setBackgroundColor(getResources().getColor(R.color.theme_accent_1));
+        }else {
+            myLocationButton.setBackgroundColor(getResources().getColor(android.R.color.white));
         }
+
     }
 
     private void zoomToMyLocation() {

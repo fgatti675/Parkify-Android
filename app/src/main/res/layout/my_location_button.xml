@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.gc.materialdesign.views.ButtonFloat xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cahue="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    cahue:animate="true"
-    cahue:iconDrawable="@drawable/ic_action_device_gps_fixed"
-    android:background="@color/theme_accent_1"/>
