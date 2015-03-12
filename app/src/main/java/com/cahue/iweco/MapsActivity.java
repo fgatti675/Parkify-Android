@@ -31,6 +31,8 @@ import com.android.vending.billing.IInAppBillingService;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
+import com.cahue.iweco.cars.CarManagerFragment;
+import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.debug.DebugActivity;
@@ -75,6 +77,8 @@ public class MapsActivity extends BaseActivity
         ParkedCarDelegate.CarSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
         SetCarPositionDialog.Callbacks,
+        CarManagerFragment.Callbacks,
+        EditCarDialog.CarEditedListener,
         CameraUpdateListener,
         OnMapReadyCallback {
 
@@ -106,6 +110,11 @@ public class MapsActivity extends BaseActivity
     private boolean detailsDisplayed = false;
 
     private IInAppBillingService iInAppBillingService;
+
+    /**
+     * Car fragment manager, just there if there are 2 panels
+     */
+    private CarManagerFragment carFragment;
 
     /**
      * Currently recognized activity type (what the user is doing)
@@ -255,6 +264,9 @@ public class MapsActivity extends BaseActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // could be null
+        carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
+
         /**
          * There is no saved instance so we create a few things
          */
@@ -262,6 +274,8 @@ public class MapsActivity extends BaseActivity
 
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
+            if (carFragment != null)
+                carFragment.setRetainInstance(true);
 
         }
 
@@ -743,7 +757,7 @@ public class MapsActivity extends BaseActivity
     public boolean onMenuItemClick(MenuItem menuItem) {
 
         switch (menuItem.getItemId()) {
-            case R.id.action_link_device:
+            case R.id.action_open_car_manager:
                 startDeviceSelection();
                 return true;
             case R.id.action_display_help:
@@ -858,4 +872,19 @@ public class MapsActivity extends BaseActivity
         onCarClicked(selected);
     }
 
+    @Override
+    public void devicesBeingLoaded(boolean loading) {
+        // Do nothing
+    }
+
+    @Override
+    public void onManagerCarClick(Car car) {
+        getParkedCarDelegate(car).setFollowing(true);
+    }
+
+    @Override
+    public void onCarEdited(Car car, boolean newCar) {
+        if (carFragment != null)
+            carFragment.onCarEdited(car, newCar);
+    }
 }

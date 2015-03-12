@@ -23,7 +23,7 @@ import java.util.Map;
 
 
 public class TutorialActivity extends Activity
-        implements CarManagerFragment.DeviceSelectionLoadingListener,
+        implements CarManagerFragment.Callbacks,
         EditCarDialog.CarEditedListener,
         ViewPager.OnPageChangeListener {
 
@@ -143,6 +143,11 @@ public class TutorialActivity extends Activity
     public void devicesBeingLoaded(boolean loading) {
         Log.d(TAG, "Devices being loaded: " + loading);
         progressBar.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onManagerCarClick(Car car) {
+        // Do nothing
     }
 
     @Override

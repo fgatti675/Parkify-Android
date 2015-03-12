@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -18,6 +19,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -44,6 +46,8 @@ import java.util.UUID;
 public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener, GoogleApiClient.ConnectionCallbacks {
 
 
+    private boolean clickableCars;
+
     @Override
     public void onConnected(Bundle bundle) {
         mLastUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -52,12 +56,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     @Override
     public void onConnectionSuspended(int i) {
-
-    }
-
-    public interface DeviceSelectionLoadingListener {
-
-        public void devicesBeingLoaded(boolean loading);
 
     }
 
@@ -84,7 +82,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     private Button enableBTButton;
 
-    private DeviceSelectionLoadingListener mListener;
+    private Callbacks callbacks;
+
     private RecyclerView recyclerView;
     private Set<String> selectedDeviceAddresses;
 
@@ -185,7 +184,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
             // When discovery is finished, remove progress bar
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                mListener.devicesBeingLoaded(false);
+                callbacks.devicesBeingLoaded(false);
             }
 
             // Update UI and discovery if BT state changed
@@ -211,7 +210,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             Log.d(TAG, "doDiscovery");
 
             // Indicate scanning in the title
-            mListener.devicesBeingLoaded(true);
+            callbacks.devicesBeingLoaded(true);
 
             // Request discover from BluetoothAdapter
             mBtAdapter.startDiscovery();
@@ -396,6 +395,20 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 final Car car = cars.get(position);
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, mBtAdapter);
 
+                /**
+                 * Set up click listener
+                 */
+                if (clickableCars)
+                    carViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            callbacks.onManagerCarClick(car);
+                        }
+                    });
+
+                /**
+                 * Set up toolbar
+                 */
                 carViewHolder.toolbar.getMenu().clear();
                 carViewHolder.toolbar.inflateMenu(R.menu.edit_car_menu);
                 carViewHolder.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -480,7 +493,14 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (DeviceSelectionLoadingListener) activity;
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement DeviceSelectionLoadingListener");
+        }
+
+        try {
+            callbacks = (Callbacks) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement DeviceSelectionLoadingListener");
@@ -503,10 +523,22 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        callbacks = null;
 
         // Unregister broadcast listeners
         getActivity().unregisterReceiver(mReceiver);
+    }
+
+    /**
+     * Parse attributes during inflation from a view hierarchy into the
+     * arguments we handle.
+     */
+    @Override
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(activity, attrs, savedInstanceState);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.CarManagerFragment);
+        clickableCars = a.getBoolean(R.styleable.CarManagerFragment_clickableCars, false);
+        a.recycle();
     }
 
     private void showClearDialog(final Car car) {
@@ -573,5 +605,17 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         public SimpleViewHolder(View view) {
             super(view);
         }
+    }
+
+
+    /**
+     * Called when a car is clicked
+     */
+    public interface Callbacks {
+
+        void devicesBeingLoaded(boolean loading);
+
+        void onManagerCarClick(Car car);
+
     }
 }

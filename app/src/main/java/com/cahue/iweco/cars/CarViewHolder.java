@@ -19,6 +19,7 @@ import com.cahue.iweco.util.ColorUtil;
  */
 public final class CarViewHolder extends RecyclerView.ViewHolder {
 
+    public View cardView;
     public Toolbar toolbar;
     public TextView linkedDevice;
     public TextView name;
@@ -28,7 +29,10 @@ public final class CarViewHolder extends RecyclerView.ViewHolder {
     public ImageView carImage;
 
     public CarViewHolder(View itemView) {
+
         super(itemView);
+
+        this.cardView = itemView;
 
         carImage = (ImageView) itemView.findViewById(R.id.car_image);
         toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
