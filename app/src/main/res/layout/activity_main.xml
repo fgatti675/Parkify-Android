@@ -30,18 +30,21 @@
         layout="@layout/toolbar_actionbar_translucent"
         android:id="@+id/toolbar_actionbar" />
 
-    <com.shamanland.fab.FloatingActionButton
-        android:id="@+id/my_location"
+
+    <com.gc.materialdesign.views.ButtonFloat
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="0dp"
-        android:layout_margin="@dimen/large_padding"
-        android:src="@drawable/ic_action_device_gps_fixed"
-        cahue:floatingActionButtonColor="@android:color/white"
+        cahue:animate="true"
+        cahue:iconDrawable="@drawable/ic_action_device_gps_fixed"
+        android:background="@color/theme_accent_1"
+        android:id="@+id/my_location"
+        android:layout_marginRight="@dimen/large_padding"
+        android:layout_marginBottom="@dimen/large_padding"
         android:layout_above="@+id/marker_details_container"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
+
 
     <!--<Button-->
         <!--android:layout_width="wrap_content"-->

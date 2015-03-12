@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Cahue</string>
+    <string name="app_name">iweco</string>
     <string name="scanning">Scanning for devices...</string>
     <string name="cars">Cars</string>
     <string name="select_device_long">All you have to do is select which is the Bluetooth device installed in your car and forget about where you parked.\n\nYou will need to keep your Bluetooth activated and at least one of GPS or WIFI.</string>

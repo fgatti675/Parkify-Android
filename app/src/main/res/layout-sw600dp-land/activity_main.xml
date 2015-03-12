@@ -52,18 +52,19 @@
             tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
 
-        <com.shamanland.fab.FloatingActionButton
+        <com.gc.materialdesign.views.ButtonFloat
             android:id="@+id/my_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="0dp"
             android:layout_margin="@dimen/large_padding"
-            android:src="@drawable/ic_action_device_gps_fixed"
-            cahue:floatingActionButtonColor="@android:color/white"
+            cahue:animate="true"
+            cahue:iconDrawable="@drawable/ic_action_device_gps_fixed"
+            android:background="@android:color/white"
             android:layout_above="@+id/marker_details_container"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"/>
 
     </RelativeLayout>
 </LinearLayout>

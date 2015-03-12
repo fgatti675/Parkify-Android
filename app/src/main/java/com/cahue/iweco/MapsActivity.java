@@ -107,6 +107,8 @@ public class MapsActivity extends BaseActivity
 
     private IInAppBillingService iInAppBillingService;
 
+    private boolean cameraFollowing;
+
     /**
      * Currently recognized activity type (what the user is doing)
      */
@@ -245,7 +247,7 @@ public class MapsActivity extends BaseActivity
         myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                zoomToMyLocation();
+                setCameraFollowing(true);
             }
         });
 
@@ -829,6 +831,13 @@ public class MapsActivity extends BaseActivity
                     public void onCancel() {
                     }
                 });
+    }
+
+    private void setCameraFollowing(boolean cameraFollowing) {
+        this.cameraFollowing = cameraFollowing;
+        if (cameraFollowing) {
+            zoomToMyLocation();
+        }
     }
 
     private void zoomToMyLocation() {
