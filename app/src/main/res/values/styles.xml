@@ -16,13 +16,11 @@
 
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
-        <item name="colorAccent">@color/theme_accent_1</item>
+        <item name="colorAccent">@color/theme_accent</item>
 
         <!-- used in toolbar up arrow for example -->
         <!--<item name="colorControlNormal">@color/theme_accent_1</item>-->
 
-        <!--   theme UI controls like checkboxes and text fields -->
-        <item name="android:textColorLink">@color/theme_accent_2</item>
 
         <item name="android:textColorPrimary">@color/body_text_1</item>
         <item name="android:textColorSecondary">@color/body_text_2</item>
@@ -47,8 +45,8 @@
     </style>
 
     <style name="ActionBarThemeOverlay" parent="CahueTheme">
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
         <!--<item name="colorControlNormal">?actionBarIconColor</item>-->
         <!--<item name="colorControlHighlight">@color/white</item>-->
     </style>
@@ -82,13 +80,13 @@
         <item name="android:textColorPrimary">@color/body_text_1_inverse</item>
         <item name="android:textColorSecondary">@color/body_text_2_inverse</item>
 
-        <item name="colorAccent">@color/theme_accent_1</item>
+        <item name="colorAccent">@color/theme_accent</item>
         <!--<item name="cardBackgroundColor">@color/theme_primary_dark</item>-->
 
     </style>
 
     <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
-        <item name="android:background">@color/theme_accent_1</item>
+        <item name="android:background">@color/theme_accent</item>
     </style>
 
     <style name="CahueTheme.Button.Google" parent="CahueTheme.Dark">

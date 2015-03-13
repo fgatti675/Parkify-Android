@@ -54,7 +54,7 @@ public final class CarViewHolder extends RecyclerView.ViewHolder {
             if (car.color != null)
                 carImage.setBackgroundColor(car.color);
             else
-                carImage.setBackgroundColor(context.getResources().getColor(R.color.theme_accent_1));
+                carImage.setBackgroundColor(context.getResources().getColor(R.color.theme_accent));
 
             if (car.color != null && ColorUtil.isBrightColor(car.color)) {
                 carImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_car_grey600_36dp));

@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:cahue="http://schemas.android.com/apk/res-auto">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="200dp"
@@ -51,16 +48,13 @@
             android:elevation="@dimen/elevation"
             tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
-        <com.melnykov.fab.FloatingActionButton
+        <include
+            layout="@layout/button_my_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            cahue:fab_colorNormal="@android:color/white"
-            cahue:fab_colorPressed="@color/theme_accent_1"
-            cahue:fab_colorRipple="@color/theme_accent_1"
-            android:src="@drawable/ic_action_device_gps_fixed"
             android:id="@+id/my_location"
+            android:layout_above="@+id/marker_details_container"
             android:layout_margin="@dimen/large_padding"
-            android:layout_marginRight="@dimen/large_padding"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"/>

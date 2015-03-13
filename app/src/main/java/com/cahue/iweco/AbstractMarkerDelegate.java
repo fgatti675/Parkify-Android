@@ -1,21 +1,17 @@
 package com.cahue.iweco;
 
 import android.app.Fragment;
-import android.location.Location;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Marker;
 
 /**
  * Created by francesco on 28.10.2014.
  */
-public abstract class AbstractMarkerDelegate extends Fragment {
-
+public abstract class AbstractMarkerDelegate extends Fragment implements CameraUpdateRequester, LocationListener {
 
     public abstract void doDraw();
-
-
 
     /**
      * Called when the map is ready to be used
@@ -25,18 +21,10 @@ public abstract class AbstractMarkerDelegate extends Fragment {
 
     }
 
-
     /**
      * Called when the details view is closed
      */
     public void onDetailsClosed() {
-
-    }
-
-    /**
-     * Called when the go to my location button is pressed
-     */
-    public void onZoomToMyLocation() {
 
     }
 
@@ -49,21 +37,5 @@ public abstract class AbstractMarkerDelegate extends Fragment {
     public boolean onMarkerClick(Marker marker) {
         return false;
     }
-
-    /**
-     * Indicate this delegate that the camera of the map has changed.
-     * This method need to implement the logic to load any new data if necessary (asynchronously).
-     *
-     * @param cameraPosition
-     * @param justFinishedAnimating
-     */
-    public abstract void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating);
-
-    /**
-     * Called when the user changes location
-     *
-     * @param location
-     */
-    public abstract void onLocationChanged(Location location);
 
 }

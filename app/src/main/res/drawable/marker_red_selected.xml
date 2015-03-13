@@ -8,7 +8,7 @@
 
     <stroke
         android:width="4dp"
-        android:color="@android:color/white" />
+        android:color="@color/white" />
 
     <size
         android:width="@dimen/marker_diameter_selected"
