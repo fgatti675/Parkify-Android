@@ -10,7 +10,7 @@ public abstract class DetailsFragment extends Fragment {
 
     public abstract void setUserLocation(Location userLocation);
 
-    public void onCameraUpdate(boolean justFinishedAnimating){
+    public void onCameraUpdate(){
 
     }
 }

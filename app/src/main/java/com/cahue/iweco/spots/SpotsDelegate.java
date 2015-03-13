@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
+import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,7 +35,8 @@ import java.util.concurrent.TimeUnit;
  * <p/>
  * Created by Francesco on 21/10/2014.
  */
-public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpotsQuery.ParkingSpotsUpdateListener {
+public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpotsQuery.ParkingSpotsUpdateListener,
+        CameraUpdateRequester {
 
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
@@ -452,7 +454,17 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating) {
+    public void onLocationChanged(Location userLocation) {
+        LatLng userLatLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+
+//        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
+//            queryClosestSpots(userLatLng);
+//        else
+//            Log.v(TAG, "No need to query for closest points again");
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
         float zoom = mMap.getCameraPosition().zoom;
         Log.v(TAG, "zoom: " + zoom);
 
@@ -475,17 +487,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         }
 
         doDraw();
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-//        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
-//            queryClosestSpots(userLocation);
-//        else
-//            Log.v(TAG, "No need to query for closest points again");
 
     }
 

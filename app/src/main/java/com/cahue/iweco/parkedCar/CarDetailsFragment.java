@@ -181,11 +181,12 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     }
 
     @Override
-    public void onCameraUpdate(boolean justFinishedAnimating) {
+    public void onCameraUpdate() {
         updateFollowButtonState();
     }
 
     private void updateFollowButtonState() {
+
         boolean selected = parkedCarDelegate.isFollowing();
 
         MenuItem item = carViewHolder.toolbar.getMenu().findItem(R.id.action_follow);
@@ -193,6 +194,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
                 selected
                         ? R.drawable.ic_action_maps_navigation_accent
                         : R.drawable.ic_action_maps_navigation));
+
     }
 
     @Override
