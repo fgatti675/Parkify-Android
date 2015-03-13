@@ -10,6 +10,7 @@ import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 
 import java.io.IOException;
@@ -24,11 +25,10 @@ public class FetchAddressIntentService extends IntentService {
 
     public static final int SUCCESS_RESULT = 0;
     public static final int FAILURE_RESULT = 1;
-    public static final String PACKAGE_NAME = "com.cahue.iweco.cars";
 
-    public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
-    public static final String RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY";
-    public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
+    public static final String RECEIVER = BuildConfig.APPLICATION_ID + ".FETCH_ADDRESS";
+    public static final String RESULT_DATA_KEY = BuildConfig.APPLICATION_ID + RECEIVER + ".RESULT_DATA_KEY";
+    public static final String LOCATION_DATA_EXTRA = BuildConfig.APPLICATION_ID + RECEIVER + ".LOCATION_DATA_EXTRA";
 
     private static final String TAG = FetchAddressIntentService.class.getSimpleName();
 

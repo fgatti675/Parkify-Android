@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService;
+import com.cahue.iweco.activityRecognition.ActivityRecognitionUtil;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -43,6 +44,9 @@ import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.Util;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
@@ -110,7 +114,7 @@ public class MapsActivity extends BaseActivity
     /**
      * Currently recognized activity type (what the user is doing)
      */
-    private int activityType = DetectedActivity.UNKNOWN;
+    private DetectedActivity activityType;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -119,7 +123,7 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            activityType = (int) intent.getExtras().get(ActivityRecognitionIntentService.SURE_ACTIVITY_TYPE);
+            activityType = (DetectedActivity) intent.getExtras().get(ActivityRecognitionUtil.INTENT_EXTRA_ACTIVITY);
 
         }
     };
@@ -171,6 +175,7 @@ public class MapsActivity extends BaseActivity
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
 
+
     }
 
     @Override
@@ -206,6 +211,7 @@ public class MapsActivity extends BaseActivity
 
         carDatabase = CarDatabase.getInstance(this);
 
+
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
 
@@ -226,6 +232,8 @@ public class MapsActivity extends BaseActivity
         }
 
         setContentView(R.layout.activity_main);
+
+        activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
 //        Button button = (Button) findViewById(R.id.refresh);
 //        button.setOnClickListener(new View.OnClickListener() {

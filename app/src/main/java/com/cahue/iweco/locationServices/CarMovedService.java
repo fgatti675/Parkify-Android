@@ -9,6 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.Endpoints;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -31,23 +32,13 @@ public class CarMovedService extends LocationPollerService {
 
     private final static String TAG = CarMovedService.class.getSimpleName();
 
-    /**
-     * Minimum desired accuracy
-     */
-    private final static int ACCURACY_THRESHOLD_M = 25;
-
-    /**
-     * Only post locations if the car has stopped for at least a few minutes
-     */
-    private static final long MINIMUM_STAY_MS = 180000;
-
 
     @Override
     protected boolean checkPreconditions(Car car) {
         long now = Calendar.getInstance().getTimeInMillis();
         if (car.time == null) return true;
         long parkingTime = car.time.getTime();
-        return now - parkingTime > MINIMUM_STAY_MS;
+        return now - parkingTime > Constants.MINIMUM_STAY_MS;
     }
 
     @Override
@@ -59,8 +50,8 @@ public class CarMovedService extends LocationPollerService {
          * If the accuracy is not good enough, we can check the previous location of the car
          * and if it's close and more accurate, we use it.
          */
-        if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
-            if (car.location != null && car.location.distanceTo(spotLocation) < ACCURACY_THRESHOLD_M)
+        if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
+            if (car.location != null && car.location.distanceTo(spotLocation) < Constants.ACCURACY_THRESHOLD_M)
                 spotLocation = car.location;
         }
 
@@ -69,7 +60,7 @@ public class CarMovedService extends LocationPollerService {
         /**
          * If it's still not accurate, we don't use it
          */
-        if (spotLocation.getAccuracy() < ACCURACY_THRESHOLD_M) {
+        if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             doPostSpotLocation(spotLocation, car);
         }
 

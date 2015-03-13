@@ -62,10 +62,10 @@ public class GCMUtil {
         final SharedPreferences prefs = getGCMPreferences(context);
         int appVersion = Util.getAppVersion(context);
         Log.i(TAG, "Saving regId on app version " + appVersion);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
-        editor.putInt(PROPERTY_APP_VERSION, appVersion);
-        editor.commit();
+        prefs.edit()
+                .putString(PROPERTY_REG_ID, regId)
+                .putInt(PROPERTY_APP_VERSION, appVersion)
+                .apply();
     }
 
 

@@ -11,6 +11,7 @@ import android.util.Log;
 import com.cahue.iweco.cars.Car;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -59,11 +60,11 @@ public abstract class LocationPollerService extends Service implements
      */
     private Location bestAccuracyLocation;
 
-
     @Override
     public void onCreate() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
+                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
@@ -145,9 +146,17 @@ public abstract class LocationPollerService extends Service implements
             Log.i(TAG, "Notifying location polled: " + location);
             onLocationPolled(this, location, car);
         } finally {
-            mGoogleApiClient.disconnect();
-            stopSelf();
+            finish();
         }
+    }
+
+    private void finish() {
+        mGoogleApiClient.disconnect();
+        stopSelf();
+    }
+
+    public GoogleApiClient getGoogleApiClient() {
+        return mGoogleApiClient;
     }
 
     public abstract void onLocationPolled(Context context, Location location, Car car);

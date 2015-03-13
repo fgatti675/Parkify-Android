@@ -15,20 +15,13 @@ import java.util.LinkedList;
 
 public class ActivityRecognitionIntentService extends IntentService {
 
-    public static final String INTENT_ACTIVITY_RECOGNIZED = "INTENT_ACTIVITY_RECOGNIZED";
-
-    // activity we are sure the user is doing (or almost)
-    public static final String SURE_ACTIVITY_TYPE = "SURE_ACTIVITY_TYPE";
-    public static final String SURE_ACTIVITY_CONFIDENCE = "SURE_ACTIVITY_CONFIDENCE";
-
-
     private String TAG = this.getClass().getSimpleName();
 
     public ActivityRecognitionIntentService() {
         super("My Activity Recognition Service");
     }
 
-    private static int lastActivityType = -1;
+    private static int lastActivityType = DetectedActivity.UNKNOWN;
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -37,26 +30,24 @@ public class ActivityRecognitionIntentService extends IntentService {
 
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
-            int type = result.getMostProbableActivity().getType();
-            int confidence = result.getMostProbableActivity().getConfidence();
+            DetectedActivity mostProbableActivity = result.getMostProbableActivity();
+
+            int type = mostProbableActivity.getType();
+            int confidence = mostProbableActivity.getConfidence();
 
             if (!isMovementRelated(type)) return;
 
-            SharedPreferences prefs = Util.getSharedPreferences(this);
+            DetectedActivity previousActivity = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
-            int lastAssuredType = prefs.getInt(SURE_ACTIVITY_TYPE, -1);
-            int lastAssuredConfidence = prefs.getInt(SURE_ACTIVITY_CONFIDENCE, -1);
+            if (type == lastActivityType && type != previousActivity.getType() && confidence > 95) {
 
+                String typeString = getTypeAsText(type);
 
-            if (type == lastActivityType && type != lastAssuredType && confidence > 85) {
-
-                String typeString = getType(type);
-
-                String previousText = "Previous: " + getType(lastAssuredType) + " (" + lastAssuredConfidence + "%)\n";
+                String previousText = "Previous: " + getTypeAsText(previousActivity.getType()) + " (" + previousActivity.getConfidence() + "%)\n";
 
                 StringBuilder stringBuilder = new StringBuilder(previousText);
                 for(DetectedActivity detectedActivity:result.getProbableActivities()) {
-                    stringBuilder.append(getType(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+                    stringBuilder.append(getTypeAsText(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
                 }
 
                 long[] pattern = {0, 100, 1000};
@@ -65,14 +56,14 @@ public class ActivityRecognitionIntentService extends IntentService {
                         new Notification.Builder(this)
                                 .setVibrate(pattern)
                                 .setSmallIcon(R.drawable.ic_navigation_cancel)
-                                .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
+                                .setContentTitle(typeString + " (" + mostProbableActivity.getConfidence() + "%)")
                                 .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
                                 .setContentText(previousText);
 
                 int id = (int) Math.random();
                 mNotifyMgr.notify("" + id, id, mBuilder.build());
 
-                sureActivity(prefs, type, confidence);
+                ActivityRecognitionUtil.setDetectedActivity(this, mostProbableActivity);
 
             }
 
@@ -80,21 +71,8 @@ public class ActivityRecognitionIntentService extends IntentService {
         }
     }
 
-    private void sureActivity(SharedPreferences prefs, int activityType, int confidence) {
 
-        Intent intent = new Intent(INTENT_ACTIVITY_RECOGNIZED);
-        intent.putExtra(SURE_ACTIVITY_TYPE, activityType);
-        intent.putExtra(SURE_ACTIVITY_CONFIDENCE, confidence);
-        sendBroadcast(intent);
-
-        prefs.edit()
-                .putInt(SURE_ACTIVITY_TYPE, activityType)
-                .putInt(SURE_ACTIVITY_CONFIDENCE, confidence)
-                .apply();
-
-    }
-
-    private String getType(int type) {
+    private String getTypeAsText(int type) {
         if (type == DetectedActivity.UNKNOWN)
             return "Unknown";
         else if (type == DetectedActivity.IN_VEHICLE)
