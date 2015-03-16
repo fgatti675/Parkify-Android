@@ -28,7 +28,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     public static final String ARG_ACCOUNT_TYPE = "arg_account_type";
     public static final String ARG_AUTH_TOKEN_TYPE = "arg_auth_token_type";
 
-    public static final String ACCOUNT_TYPE = "cahue.com";
+    public static final String ACCOUNT_TYPE = "Cahue";
     public static final String AUTH_TOKEN_TYPE = "iweco_cars";
     public static final String USER_ID = "user_id";
 
