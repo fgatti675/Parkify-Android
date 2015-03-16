@@ -19,7 +19,7 @@ public class BluetoothDetector extends BroadcastReceiver {
     BluetoothDevice device;
 
     /**
-     * This receiver is in charge of detecting BT disconnection, as declared on the manifest
+     * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
      */
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -59,7 +59,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, CarMovedService.class);
-        intent.putExtra(LocationPollerService.EXTRA_BT_CAR, car);
+        intent.putExtra(LocationPollerService.EXTRA_CAR, car);
         context.startService(intent);
 
     }
@@ -71,7 +71,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, ParkedCarService.class);
-        intent.putExtra(LocationPollerService.EXTRA_BT_CAR, car);
+        intent.putExtra(LocationPollerService.EXTRA_CAR, car);
         context.startService(intent);
 
     }

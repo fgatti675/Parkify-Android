@@ -23,16 +23,18 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService;
+import com.cahue.iweco.activityRecognition.PassiveActivityRecognitionIntentService;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionUtil;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarManagerFragment;
+import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
@@ -46,9 +48,6 @@ import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.Util;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
@@ -85,8 +84,8 @@ public class MapsActivity extends BaseActivity
         CarManagerFragment.Callbacks,
         EditCarDialog.CarEditedListener,
         CameraManager,
-        OnMapReadyCallback, 
-        CameraUpdateRequester  {
+        OnMapReadyCallback,
+        CameraUpdateRequester {
 
     protected static final String TAG = "Maps";
 
@@ -184,7 +183,7 @@ public class MapsActivity extends BaseActivity
                 REQUEST,
                 this);
 
-        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
+        Intent intent = new Intent(this, PassiveActivityRecognitionIntentService.class);
         pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
@@ -248,13 +247,16 @@ public class MapsActivity extends BaseActivity
 
         activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
-//        Button button = (Button) findViewById(R.id.refresh);
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                CarsSync.TriggerRefresh(mAccount);
-//            }
-//        });
+        if (BuildConfig.DEBUG) {
+            Button button = (Button) findViewById(R.id.refresh);
+            button.setVisibility(View.VISIBLE);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CarsSync.TriggerRefresh(mAccount);
+                }
+            });
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(toolbar, 8);
@@ -660,7 +662,7 @@ public class MapsActivity extends BaseActivity
 
         if (mMap == null) return;
 
-        if(cameraFollowing)
+        if (cameraFollowing)
             zoomToMyLocation();
 
         for (AbstractMarkerDelegate delegate : delegates) {
@@ -790,9 +792,9 @@ public class MapsActivity extends BaseActivity
             case R.id.action_disconnect:
                 signOut();
                 return true;
-//            case R.id.action_debug:
-//                goToDebug();
-//                return true;
+            case R.id.action_debug:
+                goToDebug();
+                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }

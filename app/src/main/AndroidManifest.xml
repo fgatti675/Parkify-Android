@@ -85,7 +85,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/CahueTheme.Dark"></activity>
 
-        <service android:name="com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService" />
+        <service android:name=".activityRecognition.PassiveActivityRecognitionIntentService" />
 
         <receiver
             android:name="com.cahue.iweco.gcm.GcmBroadcastReceiver"
@@ -136,7 +136,8 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service android:name=".activityRecognition.GeofenceTransitionsIntentService"/>
+        <service android:name=".locationServices.ActivityRecognitionIntentService" />
+        <service android:name=".locationServices.GeofenceTransitionsIntentService"/>
 
         <service android:name="com.cahue.iweco.auth.IwecoAccountService">
             <intent-filter>

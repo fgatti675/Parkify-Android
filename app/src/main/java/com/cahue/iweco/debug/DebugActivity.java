@@ -55,7 +55,7 @@ public class DebugActivity extends Activity implements DebugCarMovedService.Serv
         car.id = "Debug ID";
         car.btAddress = "DEBUG";
 
-        intent.putExtra(LocationPollerService.EXTRA_BT_CAR, car);
+        intent.putExtra(LocationPollerService.EXTRA_CAR, car);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         locationTextView.setText("Polling...");
     }

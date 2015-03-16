@@ -20,9 +20,9 @@ public class DebugParkedCarService extends ParkedCarService {
     ServiceListener serviceListener;
 
     @Override
-    public void onLocationPolled(Context context, Location spotLocation, Car car) {
+    public void onFirstPreciseFixPolled(Context context, Location spotLocation, Car car) {
         car = new Car();
-        super.onLocationPolled(context, spotLocation, car);
+        super.onFirstPreciseFixPolled(context, spotLocation, car);
         serviceListener.onNewLocation(spotLocation);
     }
 

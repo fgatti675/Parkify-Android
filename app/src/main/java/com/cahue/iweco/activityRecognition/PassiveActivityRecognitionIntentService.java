@@ -14,11 +14,11 @@ import android.content.SharedPreferences;
 
 import java.util.LinkedList;
 
-public class ActivityRecognitionIntentService extends IntentService {
+public class PassiveActivityRecognitionIntentService extends IntentService {
 
     private String TAG = this.getClass().getSimpleName();
 
-    public ActivityRecognitionIntentService() {
+    public PassiveActivityRecognitionIntentService() {
         super("My Activity Recognition Service");
     }
 
@@ -40,32 +40,35 @@ public class ActivityRecognitionIntentService extends IntentService {
 
             DetectedActivity previousActivity = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
-            if (type == lastActivityType && type != previousActivity.getType() && confidence > 95) {
+            if (BuildConfig.DEBUG) {
 
-                String typeString = getTypeAsText(type);
+                if (type == lastActivityType && type != previousActivity.getType() && confidence > 95) {
 
-                String previousText = "Previous: " + getTypeAsText(previousActivity.getType()) + " (" + previousActivity.getConfidence() + "%)\n";
+                    String typeString = getTypeAsText(type);
 
-                StringBuilder stringBuilder = new StringBuilder(previousText);
-                for(DetectedActivity detectedActivity:result.getProbableActivities()) {
-                    stringBuilder.append(getTypeAsText(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+                    String previousText = "Previous: " + getTypeAsText(previousActivity.getType()) + " (" + previousActivity.getConfidence() + "%)\n";
+
+                    StringBuilder stringBuilder = new StringBuilder(previousText);
+                    for (DetectedActivity detectedActivity : result.getProbableActivities()) {
+                        stringBuilder.append(getTypeAsText(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+                    }
+
+                    long[] pattern = {0, 100, 1000};
+                    NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    Notification.Builder mBuilder =
+                            new Notification.Builder(this)
+                                    .setVibrate(pattern)
+                                    .setSmallIcon(R.drawable.ic_navigation_cancel)
+                                    .setContentTitle(typeString + " (" + mostProbableActivity.getConfidence() + "%)")
+                                    .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
+                                    .setContentText(previousText);
+
+                    int id = (int) Math.random();
+                    mNotifyMgr.notify("" + id, id, mBuilder.build());
+
+                    ActivityRecognitionUtil.setDetectedActivity(this, mostProbableActivity);
+
                 }
-
-                long[] pattern = {0, 100, 1000};
-                NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                Notification.Builder mBuilder =
-                        new Notification.Builder(this)
-                                .setVibrate(pattern)
-                                .setSmallIcon(R.drawable.ic_navigation_cancel)
-                                .setContentTitle(typeString + " (" + mostProbableActivity.getConfidence() + "%)")
-                                .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
-                                .setContentText(previousText);
-
-                int id = (int) Math.random();
-                mNotifyMgr.notify("" + id, id, mBuilder.build());
-
-                ActivityRecognitionUtil.setDetectedActivity(this, mostProbableActivity);
-
             }
 
             lastActivityType = type;

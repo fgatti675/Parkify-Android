@@ -1,41 +1,60 @@
 package com.cahue.iweco.locationServices;
 
-import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.Log;
 
-import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService;
+import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.ActivityRecognition;
-import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * This class is in charge of receiving location updates, after and store it as the cars position.
+ * This class is in charge of receiving a location fix when the user parks his car.
  * Triggered when BT is disconnected
  *
  * @author Francesco
  */
-public class ParkedCarService extends LocationPollerService {
+public class ParkedCarService extends LocationPollerService implements ResultCallback<Status> {
 
     private final static String TAG = "ParkedCarService";
 
-    private PendingIntent pIntent;
+    private Location carLocation;
+
+    private PendingIntent mGeofencePendingIntent;
+
+    private ResultReceiver resultReceiver = new ResultReceiver(new Handler()) {
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+
+            if (resultCode == GeofenceTransitionsIntentService.SUCCESS_RESULT) {
+                Location location = resultData.getParcelable(GeofenceTransitionsIntentService.GEOFENCE_TRIGGERING_LOCATION_KEY);
+                notifyApproachingCar(location, getCar());
+            }
+
+            LocationServices.GeofencingApi.removeGeofences(
+                    getGoogleApiClient(),
+                    mGeofencePendingIntent
+            );
+        }
+    };
 
     @Override
     protected boolean checkPreconditions(Car car) {
@@ -43,7 +62,7 @@ public class ParkedCarService extends LocationPollerService {
     }
 
     @Override
-    public void onLocationPolled(Context context, Location location, Car car) {
+    public void onFirstPreciseFixPolled(Context context, Location location, Car car) {
 
         Log.i(TAG, "Received : " + location);
 
@@ -51,54 +70,115 @@ public class ParkedCarService extends LocationPollerService {
         car.address = null;
         car.time = new Date();
 
+        carLocation = location;
+
         CarDatabase carDatabase = CarDatabase.getInstance(context);
         CarsSync.storeCar(carDatabase, context, car);
 
         /**
-         * If the car was parked accurately we check if the user gets far enough walking after it
+         * If the location of the car is not good enough we cannot set a geofence afterwards so
+         * we can finish it
          */
-        if (location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-            Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
-            pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
-        }
+        if (carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M)
+            finish();
 
     }
 
-    public class ActivityRecognitionIntentService extends IntentService {
+    @Override
+    public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
 
-        private String TAG = this.getClass().getSimpleName();
+        if (carLocation == null
+                || carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
+                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M)
+            return;
 
-        public static final String RECEIVER = BuildConfig.APPLICATION_ID + ".GET_ACTIVITY";
-        public static final String DETECTED_ACTIVITY_DATA_KEY = BuildConfig.APPLICATION_ID + RECEIVER + ".DETECTED_ACTIVITY_DATA_KEY";
+        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD)
+            return;
 
-        public ActivityRecognitionIntentService() {
-            super("My Activity Recognition Service");
-        }
+        /**
+         * Look for the most frequent activity
+         */
+        int[] frequencies = new int[9];
+        for (DetectedActivity activity : detectedActivities)
+            frequencies[activity.getType()]++;
 
-        protected ResultReceiver mReceiver;
-
-        @Override
-        protected void onHandleIntent(Intent intent) {
-
-            ResultReceiver resultReceiver;
-
-            mReceiver = intent.getParcelableExtra(RECEIVER);
-
-            if (ActivityRecognitionResult.hasResult(intent)) {
-
+        int mostProbable = DetectedActivity.UNKNOWN;
+        int mostProbableFrequency = 0;
+        for (int i = 0; i < frequencies.length; i++) {
+            if (frequencies[i] > mostProbableFrequency) {
+                mostProbable = i;
+                mostProbableFrequency = frequencies[i];
             }
-
         }
 
-        private void deliverResultToReceiver(int resultCode, DetectedActivity detectedActivity) {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(DETECTED_ACTIVITY_DATA_KEY, detectedActivity);
-            mReceiver.send(resultCode, bundle);
-        }
+        /**
+         * If the user didn't walk after parking we stop
+         */
+        if (mostProbable != DetectedActivity.ON_FOOT) return;
+
+        /**
+         * Create a geofence around the car
+         */
+        Geofence geofence = new Geofence.Builder()
+                // Set the request ID of the geofence. This is a string to identify this
+                // geofence.
+                .setRequestId(car.id)
+                .setCircularRegion(
+                        carLocation.getLatitude(),
+                        carLocation.getLongitude(),
+                        Constants.GEOFENCE_RADIUS_IN_METERS
+                )
+                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                .build();
+
+        GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(geofence)
+                .build();
+
+        LocationServices.GeofencingApi.addGeofences(
+                getGoogleApiClient(),
+                geofencingRequest,
+                getGeofencePendingIntent(car)
+        ).setResultCallback(this);
 
     }
 
+    private PendingIntent getGeofencePendingIntent(Car car) {
 
+        // Reuse the PendingIntent if we already have it.
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        intent.putExtra(EXTRA_CAR, car);
+        intent.putExtra(GeofenceTransitionsIntentService.RECEIVER, resultReceiver);
+
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return mGeofencePendingIntent;
+    }
+
+    @Override
+    public void onResult(Status status) {
+
+    }
+
+    private void notifyApproachingCar(Location location, Car car) {
+
+        long[] pattern = {0, 110, 1000};
+        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder mBuilder =
+                new Notification.Builder(this)
+                        .setVibrate(pattern)
+                        .setSmallIcon(R.drawable.ic_car_white_36dp)
+                        .setContentTitle("Approaching " + car.name)
+                        .setContentText(String.format("Distance: %d meters", location.distanceTo(car.location)));
+
+        int id = (int) Math.random();
+        mNotifyMgr.notify("" + id, id, mBuilder.build());
+    }
 }

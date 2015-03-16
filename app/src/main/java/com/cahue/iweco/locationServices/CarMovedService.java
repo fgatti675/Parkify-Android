@@ -16,11 +16,13 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.util.Singleton;
 import com.cahue.iweco.util.Requests;
+import com.google.android.gms.location.DetectedActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * This class is in charge of uploading the location of the car to the server when BT connects
@@ -32,7 +34,6 @@ public class CarMovedService extends LocationPollerService {
 
     private final static String TAG = CarMovedService.class.getSimpleName();
 
-
     @Override
     protected boolean checkPreconditions(Car car) {
         long now = Calendar.getInstance().getTimeInMillis();
@@ -42,7 +43,7 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onLocationPolled(Context context, Location spotLocation, Car car) {
+    public void onFirstPreciseFixPolled(Context context, Location spotLocation, Car car) {
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);
 
@@ -63,6 +64,11 @@ public class CarMovedService extends LocationPollerService {
         if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             doPostSpotLocation(spotLocation, car);
         }
+
+    }
+
+    @Override
+    public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
 
     }
 
