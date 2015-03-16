@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,7 +8,7 @@
     xmlns:cahue="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
-        android:layout_width="200dp"
+        android:layout_width="340dp"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
@@ -22,6 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/car_manager_fragment"
+            cahue:clickableCars="true"
             class="com.cahue.iweco.cars.CarManagerFragment" />
 
     </LinearLayout>
@@ -51,19 +50,16 @@
             android:elevation="@dimen/elevation"
             tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
-
-        <com.shamanland.fab.FloatingActionButton
-            android:id="@+id/my_location"
+        <include
+            layout="@layout/button_my_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="0dp"
-            android:layout_margin="@dimen/large_padding"
-            android:src="@drawable/ic_action_device_gps_fixed"
-            cahue:floatingActionButtonColor="@android:color/white"
+            android:id="@+id/my_location"
             android:layout_above="@+id/marker_details_container"
+            android:layout_margin="@dimen/large_padding"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"/>
 
     </RelativeLayout>
 </LinearLayout>

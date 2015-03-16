@@ -12,12 +12,11 @@ import android.widget.ProgressBar;
 import com.cahue.iweco.R;
 
 /**
- * This Activity appears as a dialog. It lists any paired devices and devices detected in the area after discovery. When
- * a device is chosen by the user, the MAC address of the device is sent back to the parent Activity in the result
- * Intent.
+ * This activity is in charge of wrapping a {@link com.cahue.iweco.cars.CarManagerFragment}
  */
-public class CarManagerActivity extends ActionBarActivity
-        implements CarManagerFragment.DeviceSelectionLoadingListener,
+public class CarManagerActivity
+        extends ActionBarActivity
+        implements CarManagerFragment.Callbacks,
         EditCarDialog.CarEditedListener {
 
     private static final String TAG = CarManagerActivity.class.getSimpleName();
@@ -35,19 +34,8 @@ public class CarManagerActivity extends ActionBarActivity
          * Get an instance of the fragment
          */
         carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
-//
-//        /**
-//         * There is no saved instance so we create a few things
-//         */
-//        if (savedInstanceState == null) {
-//
-//            // First incarnation of this activity.
-//            carFragment.setRetainInstance(true);
-//
-//        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(toolbar, 5);
         toolbar.setTitle(R.string.cars);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
         setSupportActionBar(toolbar);
@@ -74,6 +62,11 @@ public class CarManagerActivity extends ActionBarActivity
     @Override
     public void devicesBeingLoaded(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onManagerCarClick(Car car) {
+        // TODO : nothing?
     }
 
     @Override

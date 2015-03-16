@@ -1,5 +1,6 @@
 package com.cahue.iweco.activityRecognition;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.location.ActivityRecognitionResult;

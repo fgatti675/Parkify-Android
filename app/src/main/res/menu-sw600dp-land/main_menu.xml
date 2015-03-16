@@ -3,12 +3,6 @@
     xmlns:cahue="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_open_car_manager"
-        android:title="@string/link_device"
-        android:icon="@drawable/ic_car_white_24dp"
-        cahue:showAsAction="always" />
-
-    <item
         android:id="@+id/action_donate"
         android:title="@string/donate"
         android:icon="@drawable/ic_heart_white_24dp"

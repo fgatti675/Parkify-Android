@@ -24,4 +24,8 @@
         <attr name="photoItemForegroundBorderless" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="CarManagerFragment">
+        <attr name="clickableCars" format="boolean" />
+    </declare-styleable>
+
 </resources>

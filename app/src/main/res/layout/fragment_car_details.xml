@@ -21,7 +21,7 @@
             android:layout_height="match_parent"
             android:padding="@dimen/large_padding"
             android:src="@drawable/ic_car_white_36dp"
-            android:background="@color/theme_accent_1" />
+            android:background="@color/theme_accent" />
 
         <LinearLayout
             android:id="@+id/infoLayout"

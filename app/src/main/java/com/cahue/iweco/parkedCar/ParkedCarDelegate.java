@@ -7,7 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
-import com.cahue.iweco.CameraUpdateListener;
+import com.cahue.iweco.CameraUpdateRequester;
+import com.cahue.iweco.CameraManager;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.util.ColorUtil;
@@ -37,7 +38,7 @@ import java.util.List;
 /**
  * Created by francesco on 27.10.2014.
  */
-public class ParkedCarDelegate extends AbstractMarkerDelegate {
+public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraUpdateRequester {
 
     /**
      * Interface for components listening for the marker click event in the map
@@ -61,7 +62,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
     private IconGenerator iconGenerator;
 
-    private CameraUpdateListener cameraUpdateListener;
+    private CameraManager cameraManager;
     private GoogleMap mMap;
     private CarSelectedListener carSelectedListener;
 
@@ -112,17 +113,17 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         super.onAttach(activity);
 
         try {
-            this.cameraUpdateListener = (CameraUpdateListener) activity;
+            this.cameraManager = (CameraManager) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement CameraUpdateListener");
+                    + " must implement " + CameraManager.class.getName());
         }
 
         try {
             this.carSelectedListener = (CarSelectedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement CarSelectedListener");
+                    + " must implement " + CarSelectedListener.class.getName());
         }
     }
 
@@ -169,15 +170,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         setCar(this.car);
     }
 
-    public void onLocationChanged(Location userLocation) {
-        this.userLocation = userLocation;
-
-        if (lastDirectionsUpdate == null || System.currentTimeMillis() - lastDirectionsUpdate.getTime() > DIRECTIONS_EXPIRY)
-            fetchDirections(false);
-
-        updateCameraIfFollowing();
-
-    }
 
     public void doDraw() {
         if (mMap == null || !isResumed()) return;
@@ -196,10 +188,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         if (directionsPolyline != null) directionsPolyline.remove();
     }
 
-    @Override
-    public void onZoomToMyLocation() {
-        setFollowing(false);
-    }
 
     private void setUpColors() {
 
@@ -207,7 +195,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
 
         if (car.color == null) {
             iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
-            int color = getResources().getColor(R.color.theme_accent_1);
+            int color = getResources().getColor(R.color.theme_accent);
             iconGenerator.setColor(color);
             lightColor = ColorUtil.getSemiTransparent(color);
         } else {
@@ -360,6 +348,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
     }
 
 
+    @Override
+    public void onLocationChanged(Location userLocation) {
+        this.userLocation = userLocation;
+
+        if (lastDirectionsUpdate == null || System.currentTimeMillis() - lastDirectionsUpdate.getTime() > DIRECTIONS_EXPIRY)
+            fetchDirections(false);
+
+        updateCameraIfFollowing();
+    }
+
     public void setFollowing(boolean following) {
 
         if (this.following != following)
@@ -394,7 +392,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
      */
     protected boolean zoomToSeeBoth() {
 
-        if (cameraUpdateListener == null)
+        if (cameraManager == null)
             return false;
 
         Log.v(TAG, "zoomToSeeBoth");
@@ -411,7 +409,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         for (LatLng latLng : directionPoints)
             builder.include(latLng);
 
-        cameraUpdateListener.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
+        cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
 
         return true;
     }
@@ -428,17 +426,18 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate {
         LatLng loc = getCarLatLng();
 
         if (loc != null) {
-            cameraUpdateListener.onCameraUpdateRequest(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                    .target(loc)
-                    .zoom(15.5f)
-                    .build()));
+            cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                            .target(loc)
+                            .zoom(15.5f)
+                            .build()),
+                    this);
         }
     }
 
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, boolean justFinishedAnimating) {
-        if (!justFinishedAnimating)
+    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+        if (requester != this)
             following = false;
     }
 

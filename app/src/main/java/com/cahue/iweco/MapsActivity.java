@@ -32,6 +32,8 @@ import com.cahue.iweco.activityRecognition.ActivityRecognitionIntentService;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionUtil;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
+import com.cahue.iweco.cars.CarManagerFragment;
+import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.debug.DebugActivity;
@@ -60,6 +62,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.melnykov.fab.FloatingActionButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,8 +82,11 @@ public class MapsActivity extends BaseActivity
         ParkedCarDelegate.CarSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
         SetCarPositionDialog.Callbacks,
-        CameraUpdateListener,
-        OnMapReadyCallback {
+        CarManagerFragment.Callbacks,
+        EditCarDialog.CarEditedListener,
+        CameraManager,
+        OnMapReadyCallback, 
+        CameraUpdateRequester  {
 
     protected static final String TAG = "Maps";
 
@@ -104,12 +110,20 @@ public class MapsActivity extends BaseActivity
 
     private CarDatabase carDatabase;
 
-    private View myLocationButton;
+    private FloatingActionButton myLocationButton;
     private ScrollView detailsContainer;
     private DetailsFragment detailsFragment;
     private boolean detailsDisplayed = false;
 
     private IInAppBillingService iInAppBillingService;
+
+    private boolean cameraFollowing;
+
+
+    /**
+     * Car fragment manager, just there if there are 2 panels
+     */
+    private CarManagerFragment carFragment;
 
     /**
      * Currently recognized activity type (what the user is doing)
@@ -211,7 +225,6 @@ public class MapsActivity extends BaseActivity
 
         carDatabase = CarDatabase.getInstance(this);
 
-
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
 
@@ -249,11 +262,11 @@ public class MapsActivity extends BaseActivity
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
 
-        myLocationButton = findViewById(R.id.my_location);
+        myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
         myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                zoomToMyLocation();
+                setCameraFollowing(true);
             }
         });
 
@@ -263,6 +276,9 @@ public class MapsActivity extends BaseActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // could be null
+        carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
+
         /**
          * There is no saved instance so we create a few things
          */
@@ -270,6 +286,8 @@ public class MapsActivity extends BaseActivity
 
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
+            if (carFragment != null)
+                carFragment.setRetainInstance(true);
 
         }
 
@@ -281,8 +299,10 @@ public class MapsActivity extends BaseActivity
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
             mapInitialised = savedInstanceState.getBoolean("mapInitialised");
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
+            cameraFollowing = savedInstanceState.getBoolean("cameraFollowing");
 
         }
+
         /**
          * Add delegates
          */
@@ -563,6 +583,7 @@ public class MapsActivity extends BaseActivity
         savedInstanceState.putBoolean("initialCameraSet", initialCameraSet);
         savedInstanceState.putBoolean("mapInitialised", mapInitialised);
         savedInstanceState.putBoolean("detailsDisplayed", detailsDisplayed);
+        savedInstanceState.putBoolean("cameraFollowing", cameraFollowing);
 
     }
 
@@ -639,6 +660,9 @@ public class MapsActivity extends BaseActivity
 
         if (mMap == null) return;
 
+        if(cameraFollowing)
+            zoomToMyLocation();
+
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onLocationChanged(location);
         }
@@ -681,7 +705,7 @@ public class MapsActivity extends BaseActivity
             }
             // zoom to user otherwise
             else {
-                zoomToMyLocation();
+                setCameraFollowing(cameraFollowing);
             }
 
             initialCameraSet = true;
@@ -721,14 +745,17 @@ public class MapsActivity extends BaseActivity
 
         if (mMap == null) return;
 
+        if (cameraUpdateRequester != this)
+            setCameraFollowing(false);
+
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onCameraChange(cameraPosition, justFinishedAnimating);
+            delegate.onCameraChange(cameraPosition, cameraUpdateRequester);
         }
 
         if (detailsFragment != null && detailsFragment.isResumed())
-            detailsFragment.onCameraUpdate(justFinishedAnimating);
+            detailsFragment.onCameraUpdate();
 
-        justFinishedAnimating = false;
+        cameraUpdateRequester = null;
 
     }
 
@@ -751,7 +778,7 @@ public class MapsActivity extends BaseActivity
     public boolean onMenuItemClick(MenuItem menuItem) {
 
         switch (menuItem.getItemId()) {
-            case R.id.action_link_device:
+            case R.id.action_open_car_manager:
                 startDeviceSelection();
                 return true;
             case R.id.action_display_help:
@@ -819,10 +846,10 @@ public class MapsActivity extends BaseActivity
     }
 
 
-    private boolean justFinishedAnimating = false;
+    private CameraUpdateRequester cameraUpdateRequester;
 
     @Override
-    public void onCameraUpdateRequest(CameraUpdate cameraUpdate) {
+    public void onCameraUpdateRequest(CameraUpdate cameraUpdate, final CameraUpdateRequester cameraUpdateRequester) {
 
         if (mMap == null) return;
 
@@ -830,7 +857,7 @@ public class MapsActivity extends BaseActivity
                 new GoogleMap.CancelableCallback() {
                     @Override
                     public void onFinish() {
-                        justFinishedAnimating = true;
+                        MapsActivity.this.cameraUpdateRequester = cameraUpdateRequester;
                     }
 
                     @Override
@@ -839,25 +866,32 @@ public class MapsActivity extends BaseActivity
                 });
     }
 
+    private void setCameraFollowing(boolean cameraFollowing) {
+        this.cameraFollowing = cameraFollowing;
+        if (cameraFollowing) {
+            zoomToMyLocation();
+            myLocationButton.setImageResource(R.drawable.ic_action_maps_my_location_accent);
+        } else {
+            myLocationButton.setImageResource(R.drawable.ic_action_maps_my_location);
+        }
+
+    }
+
     private void zoomToMyLocation() {
 
         Log.d(TAG, "zoomToMyLocation");
 
-        for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onZoomToMyLocation();
-        }
-
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
 
-        float zoom = Math.max(mMap.getCameraPosition().zoom, 14);
+        float zoom = Math.max(mMap.getCameraPosition().zoom, 15);
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                 .zoom(zoom)
                 .target(userPosition)
                 .build());
 
-        onCameraUpdateRequest(cameraUpdate);
+        onCameraUpdateRequest(cameraUpdate, this);
     }
 
     @Override
@@ -866,4 +900,24 @@ public class MapsActivity extends BaseActivity
         onCarClicked(selected);
     }
 
+    @Override
+    public void devicesBeingLoaded(boolean loading) {
+        // Do nothing
+    }
+
+    @Override
+    public void onManagerCarClick(Car car) {
+        getParkedCarDelegate(car).setFollowing(true);
+    }
+
+    @Override
+    public void onCarEdited(Car car, boolean newCar) {
+        if (carFragment != null)
+            carFragment.onCarEdited(car, newCar);
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+
+    }
 }
