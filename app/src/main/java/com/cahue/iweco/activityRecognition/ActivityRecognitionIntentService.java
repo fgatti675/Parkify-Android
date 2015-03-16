@@ -1,5 +1,6 @@
 package com.cahue.iweco.activityRecognition;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -48,35 +49,37 @@ public class ActivityRecognitionIntentService extends IntentService {
             int lastAssuredConfidence = prefs.getInt(SURE_ACTIVITY_CONFIDENCE, -1);
 
 
-            if (type == lastActivityType && type != lastAssuredType && confidence > 85) {
+            if (BuildConfig.DEBUG) {
+                if (type == lastActivityType && type != lastAssuredType && confidence > 85) {
 
-                String typeString = getType(type);
+                    String typeString = getType(type);
 
-                String previousText = "Previous: " + getType(lastAssuredType) + " (" + lastAssuredConfidence + "%)\n";
+                    String previousText = "Previous: " + getType(lastAssuredType) + " (" + lastAssuredConfidence + "%)\n";
 
-                StringBuilder stringBuilder = new StringBuilder(previousText);
-                for(DetectedActivity detectedActivity:result.getProbableActivities()) {
-                    stringBuilder.append(getType(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+                    StringBuilder stringBuilder = new StringBuilder(previousText);
+                    for (DetectedActivity detectedActivity : result.getProbableActivities()) {
+                        stringBuilder.append(getType(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+                    }
+
+                    long[] pattern = {0, 100, 1000};
+                    NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    Notification.Builder mBuilder =
+                            new Notification.Builder(this)
+                                    .setVibrate(pattern)
+                                    .setSmallIcon(R.drawable.ic_navigation_cancel)
+                                    .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
+                                    .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
+                                    .setContentText(previousText);
+
+                    int id = (int) Math.random();
+                    mNotifyMgr.notify("" + id, id, mBuilder.build());
+
+                    sureActivity(prefs, type, confidence);
+
                 }
 
-                long[] pattern = {0, 100, 1000};
-                NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                Notification.Builder mBuilder =
-                        new Notification.Builder(this)
-                                .setVibrate(pattern)
-                                .setSmallIcon(R.drawable.ic_navigation_cancel)
-                                .setContentTitle(typeString + " (" + result.getMostProbableActivity().getConfidence() + "%)")
-                                .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
-                                .setContentText(previousText);
-
-                int id = (int) Math.random();
-                mNotifyMgr.notify("" + id, id, mBuilder.build());
-
-                sureActivity(prefs, type, confidence);
-
+                lastActivityType = type;
             }
-
-            lastActivityType = type;
         }
     }
 
