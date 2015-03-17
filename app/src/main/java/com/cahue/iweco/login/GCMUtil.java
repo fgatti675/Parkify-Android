@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.util.Util;
 
 /**
@@ -43,10 +44,10 @@ public class GCMUtil {
         // since the existing regID is not guaranteed to work with the new
         // app version.
         int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        int currentVersion = Util.getAppVersion(context);
+        int currentVersion = BuildConfig.VERSION_CODE;
         if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
-            return "";
+            Log.i(TAG, "App version changed."); // TODO: do something?
+//            return "";
         }
         return registrationId;
     }
@@ -60,7 +61,7 @@ public class GCMUtil {
      */
     public static void storeRegistrationId(Context context, String regId) {
         final SharedPreferences prefs = getGCMPreferences(context);
-        int appVersion = Util.getAppVersion(context);
+        int appVersion = BuildConfig.VERSION_CODE;
         Log.i(TAG, "Saving regId on app version " + appVersion);
         prefs.edit()
                 .putString(PROPERTY_REG_ID, regId)
