@@ -67,8 +67,4 @@ public class DebugCarMovedService extends CarMovedService {
         serviceListener.onLocationPost();
     }
 
-    public interface ServiceListener{
-        public void onNewLocation(Location location);
-        public void onLocationPost();
-    }
 }

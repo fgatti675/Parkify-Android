@@ -21,9 +21,9 @@
         android:layout_alignParentRight="true" />
 
     <TextView
-        android:id="@+id/postText"
+        android:id="@+id/resultText"
         android:layout_weight="1"
-        android:text="Post"
+        android:text="Result"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,34 +32,34 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_below="@id/locationText"
-        android:layout_above="@+id/buttons"  />
+        android:layout_above="@+id/buttons" />
 
-    <LinearLayout
+
+    <RelativeLayout
         android:id="@+id/buttons"
         android:orientation="horizontal"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal">
 
-        <ImageButton
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/debug_send_location"
-            android:src="@drawable/ic_heart_white_36dp"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
+            android:drawableTop="@drawable/ic_car_white_48dp"
+            android:id="@+id/park"
+            android:text="Park" />
 
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Send location"
-            android:id="@+id/textView2"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/debug_send_location"
-            android:layout_gravity="center_vertical" />
-    </LinearLayout>
+            android:drawableTop="@drawable/ic_car_white_48dp"
+            android:id="@+id/driveOff"
+            android:text="Drive off"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
 
 </LinearLayout>

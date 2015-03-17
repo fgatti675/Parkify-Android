@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationServices.ParkedCarService;
 
 /**
@@ -21,7 +22,7 @@ public class DebugParkedCarService extends ParkedCarService {
 
     @Override
     public void onFirstPreciseFixPolled(Context context, Location spotLocation, Car car) {
-        car = new Car();
+        car = CarDatabase.getInstance(context).retrieveCars(false).iterator().next(); // TODO
         super.onFirstPreciseFixPolled(context, spotLocation, car);
         serviceListener.onNewLocation(spotLocation);
     }
@@ -54,7 +55,4 @@ public class DebugParkedCarService extends ParkedCarService {
     }
 
 
-    public interface ServiceListener{
-        public void onNewLocation(Location location);
-    }
 }

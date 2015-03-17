@@ -10,53 +10,71 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.cahue.iweco.R;
+import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.cars.Car;
 
 import java.util.Date;
 
 
-public class DebugActivity extends Activity implements DebugCarMovedService.ServiceListener {
+public class DebugActivity extends Activity implements ServiceListener {
 
 
-    DebugCarMovedService mService;
-    boolean mBound = false;
+    DebugCarMovedService mMovedService;
+    DebugParkedCarService mParkedService;
+    boolean mCarMovedBound = false;
+    boolean mCarParkedBound = false;
     TextView locationTextView;
-    TextView postTextView;
+    TextView resultTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
 
-        ImageButton button = (ImageButton) findViewById(R.id.debug_send_location);
-        button.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.park).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pollLocation();
+                carParked();
+            }
+        });
+
+        findViewById(R.id.driveOff).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                carMoved();
             }
         });
 
         locationTextView = (TextView) findViewById(R.id.locationText);
-        postTextView = (TextView) findViewById(R.id.postText);
+        resultTextView = (TextView) findViewById(R.id.resultText);
+
     }
 
 
-    private void pollLocation(){
-        Log.d("debug", "Debug poll location ");
+    private void carMoved() {
+        Log.d("debug", "Car moved");
         Intent intent = new Intent(this, DebugCarMovedService.class);
 
-        // should implement a debug database instead of this
-        Car car = new Car();
-        car.id = "Debug ID";
-        car.btAddress = "DEBUG";
+        Car car = CarDatabase.getInstance(this).retrieveCars(false).iterator().next(); // TODO
 
         intent.putExtra(LocationPollerService.EXTRA_CAR, car);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, mCarMovedConnection, Context.BIND_AUTO_CREATE);
+        locationTextView.setText("Polling...");
+    }
+
+    private void carParked() {
+        Log.d("debug", "Car parked");
+        Intent intent = new Intent(this, DebugParkedCarService.class);
+
+        Car car = CarDatabase.getInstance(this).retrieveCars(false).iterator().next(); // TODO
+
+        intent.putExtra(LocationPollerService.EXTRA_CAR, car);
+        bindService(intent, mCarParkedConnection, Context.BIND_AUTO_CREATE);
         locationTextView.setText("Polling...");
     }
 
@@ -64,29 +82,59 @@ public class DebugActivity extends Activity implements DebugCarMovedService.Serv
     protected void onStop() {
         super.onStop();
         // Unbind from the service
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
+        if (mCarMovedBound) {
+            unbindService(mCarMovedConnection);
+            mCarMovedBound = false;
+        }
+
+        if (mCarParkedBound) {
+            unbindService(mCarParkedConnection);
+            mCarParkedBound = false;
         }
     }
 
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private ServiceConnection mCarMovedConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
+
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             DebugCarMovedService.LocalBinder binder = (DebugCarMovedService.LocalBinder) service;
-            mService = binder.getService();
-            mService.setServiceListener(DebugActivity.this);
-            mBound = true;
+            mMovedService = binder.getService();
+            mMovedService.setServiceListener(DebugActivity.this);
+            mCarMovedBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
+            mCarMovedBound = false;
+        }
+    };
+
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private ServiceConnection mCarParkedConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            DebugParkedCarService.LocalBinder binder = (DebugParkedCarService.LocalBinder) service;
+            mParkedService = binder.getService();
+            mParkedService.setServiceListener(DebugActivity.this);
+            mCarParkedBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mCarParkedBound = false;
         }
     };
 
@@ -103,6 +151,6 @@ public class DebugActivity extends Activity implements DebugCarMovedService.Serv
     @Override
     public void onLocationPost() {
         Log.d("debug", "Debug new post");
-        postTextView.setText("Posted");
+        resultTextView.setText("Posted");
     }
 }
