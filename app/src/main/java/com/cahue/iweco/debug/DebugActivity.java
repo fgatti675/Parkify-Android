@@ -61,9 +61,9 @@ public class DebugActivity extends Activity implements ServiceListener {
         Intent intent = new Intent(this, DebugCarMovedService.class);
 
         Car car = CarDatabase.getInstance(this).retrieveCars(false).iterator().next(); // TODO
-
         intent.putExtra(LocationPollerService.EXTRA_CAR, car);
         bindService(intent, mCarMovedConnection, Context.BIND_AUTO_CREATE);
+
         locationTextView.setText("Polling...");
     }
 
@@ -72,9 +72,9 @@ public class DebugActivity extends Activity implements ServiceListener {
         Intent intent = new Intent(this, DebugParkedCarService.class);
 
         Car car = CarDatabase.getInstance(this).retrieveCars(false).iterator().next(); // TODO
-
         intent.putExtra(LocationPollerService.EXTRA_CAR, car);
         bindService(intent, mCarParkedConnection, Context.BIND_AUTO_CREATE);
+
         locationTextView.setText("Polling...");
     }
 

@@ -378,7 +378,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     public boolean updateCameraIfFollowing() {
 
-        if (mMap == null) return false;
+        if (mMap == null || !isResumed()) return false;
 
         if (following) {
             return zoomToSeeBoth();

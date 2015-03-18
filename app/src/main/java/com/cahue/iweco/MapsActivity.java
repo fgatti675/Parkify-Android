@@ -29,7 +29,6 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.cahue.iweco.activityRecognition.PassiveActivityRecognitionIntentService;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionUtil;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
@@ -39,6 +38,10 @@ import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.debug.DebugActivity;
+import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
+import com.cahue.iweco.locationServices.CarMovedService;
+import com.cahue.iweco.locationServices.LocationPollerService;
+import com.cahue.iweco.locationServices.ParkedCarService;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarDelegate;
@@ -162,7 +165,7 @@ public class MapsActivity extends BaseActivity
         }
     };
 
-    private ServiceConnection mServiceConn = new ServiceConnection() {
+    private ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             iInAppBillingService = null;
@@ -174,7 +177,7 @@ public class MapsActivity extends BaseActivity
         }
     };
 
-    private PendingIntent pIntent;
+    private PendingIntent pActivityRecognitionIntent;
 
     @Override
     protected void onPlusClientSignIn() {
@@ -183,11 +186,10 @@ public class MapsActivity extends BaseActivity
                 REQUEST,
                 this);
 
-        Intent intent = new Intent(this, PassiveActivityRecognitionIntentService.class);
-        pIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
+        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pIntent);
-
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pActivityRecognitionIntent);
 
     }
 
@@ -248,14 +250,7 @@ public class MapsActivity extends BaseActivity
         activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
         if (BuildConfig.DEBUG) {
-            Button button = (Button) findViewById(R.id.refresh);
-            button.setVisibility(View.VISIBLE);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    CarsSync.TriggerRefresh(mAccount);
-                }
-            });
+            setDebugConfig();
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
@@ -505,7 +500,7 @@ public class MapsActivity extends BaseActivity
 
         super.onResume();
 
-        // when our activity resumes, we want to register for location updates
+        // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
 
         List<Car> cars = carDatabase.retrieveCars(false);
@@ -520,7 +515,7 @@ public class MapsActivity extends BaseActivity
     private void bindBillingService() {
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+        bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -551,7 +546,7 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onSignInRequired() {
         Log.d(TAG, "onSignInRequired");
-        signIn();
+        goToLogin();
     }
 
 
@@ -560,12 +555,12 @@ public class MapsActivity extends BaseActivity
         super.onDestroy();
         Log.d(TAG, "onDestroy");
         if (iInAppBillingService != null) {
-            unbindService(mServiceConn);
+            unbindService(mBillingServiceConn);
         }
 
         if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
-            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pIntent);
+            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
         }
 
         saveMapCameraPosition();
@@ -921,5 +916,41 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
 
+    }
+
+    /**
+     * Only for debugging
+     */
+    private void setDebugConfig() {
+        Button refresh = (Button) findViewById(R.id.refresh);
+        refresh.setVisibility(View.VISIBLE);
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CarsSync.TriggerRefresh(mAccount);
+            }
+        });
+
+        Button carParked = (Button) findViewById(R.id.park);
+        carParked.setVisibility(View.VISIBLE);
+        carParked.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
+                intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next());
+                startService(intent);
+            }
+        });
+
+        Button carMoved = (Button) findViewById(R.id.driveOff);
+        carMoved.setVisibility(View.VISIBLE);
+        carMoved.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
+                intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next());
+                startService(intent);
+            }
+        });
     }
 }

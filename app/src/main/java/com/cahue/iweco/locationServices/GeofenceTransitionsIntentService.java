@@ -38,6 +38,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
+        Log.d(TAG, "Geofence intent received");
+
         mReceiver = intent.getParcelableExtra(RECEIVER);
 
         Bundle bundle = new Bundle();

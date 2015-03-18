@@ -28,5 +28,5 @@ public class Constants {
 
     public static final float GEOFENCE_RADIUS_IN_METERS = 40;
 
-    public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 5 * 60 * 60 * 1000;
+    public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 8 * 60 * 60 * 1000;
 }

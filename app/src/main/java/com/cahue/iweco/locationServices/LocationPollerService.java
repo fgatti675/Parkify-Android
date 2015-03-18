@@ -2,8 +2,10 @@ package com.cahue.iweco.locationServices;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +14,7 @@ import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.cars.database.CarDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -57,7 +60,7 @@ public abstract class LocationPollerService extends Service implements
      */
     private final static int ACCURACY_THRESHOLD_M = 18;
 
-    private final static String TAG = "LocationPoller";
+    private final static String TAG = LocationPollerService.class.getSimpleName();
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -79,6 +82,22 @@ public abstract class LocationPollerService extends Service implements
      * Flag to indicate that the first precise fix has been notified
      */
     private boolean firstPreciseFixNotified = false;
+    private boolean finalFixNotified = false;
+
+
+    // Is the broadcast receiver listening for activity updates ?
+    private boolean listeningActivities = false;
+
+    // Use a broadcast receiver to get the detected activities
+    BroadcastReceiver activityReceiver = new BroadcastReceiver() {
+        @Override
+        public synchronized void onReceive(Context context, Intent intent) {
+            DetectedActivity detectedActivity = intent.getParcelableExtra(ActivityRecognitionIntentService.DETECTED_ACTIVITY_DATA_KEY);
+            Log.d(TAG, "Received : " + detectedActivity);
+            detectedActivities.add(detectedActivity);
+        }
+    };
+
 
     @Override
     public void onCreate() {
@@ -138,22 +157,24 @@ public abstract class LocationPollerService extends Service implements
          */
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
-        // Use a resultReceiver to get the detected activities
-        ResultReceiver activityReceiver = new ResultReceiver(new Handler()) {
-            protected synchronized void onReceiveResult(int resultCode, Bundle resultData) {
-                DetectedActivity detectedActivity = resultData.getParcelable(ActivityRecognitionIntentService.DETECTED_ACTIVITY_DATA_KEY);
-                detectedActivities.add(detectedActivity);
-            }
-        };
-
         /**
          * Start activity recognition
          */
         Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
-        intent.putExtra(ActivityRecognitionIntentService.RECEIVER, activityReceiver);
-        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pActivityRecognitionIntent = PendingIntent.getService(this, 84727, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        listeningActivities = true;
+        registerReceiver(activityReceiver, new IntentFilter(ActivityRecognitionIntentService.INTENT_ACTIVITY_DETECTED));
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, 2000, pActivityRecognitionIntent);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+        if (listeningActivities)
+            unregisterReceiver(activityReceiver);
     }
 
     @Override
@@ -181,7 +202,7 @@ public abstract class LocationPollerService extends Service implements
 
         }
 
-        if (now.getTime() - startTime.getTime() > FINISH_TIMEOUT_MS) {
+        if (!finalFixNotified && now.getTime() - startTime.getTime() > FINISH_TIMEOUT_MS) {
             notifyFinishEventLocation(location);
         }
     }
@@ -212,13 +233,15 @@ public abstract class LocationPollerService extends Service implements
             location.setExtras(extras);
             Log.i(TAG, "Notifying location polled: " + location);
             onActivitiesDetected(this, detectedActivities, location, car);
+            finalFixNotified = true;
         } finally {
             finish();
         }
     }
 
-
     protected void finish() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
         mGoogleApiClient.disconnect();
         stopSelf();
     }

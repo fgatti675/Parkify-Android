@@ -30,11 +30,6 @@ public class DebugCarMovedService extends CarMovedService {
         serviceListener.onNewLocation(spotLocation);
     }
 
-    @Override
-    public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
-
-    }
-
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.

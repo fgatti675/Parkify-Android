@@ -40,15 +40,22 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 
     private PendingIntent mGeofencePendingIntent;
 
-    private ResultReceiver resultReceiver = new ResultReceiver(new Handler()) {
+    /**
+     * Result receiver that will send a notification when we are approaching a parked car.
+     */
+    private ResultReceiver geofenceResultReceiver = new ResultReceiver(new Handler()) {
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
+            Log.d(TAG, "Geofence result received");
+
             if (resultCode == GeofenceTransitionsIntentService.SUCCESS_RESULT) {
+                Log.d(TAG, "Geofence result SUCCESS");
                 Location location = resultData.getParcelable(GeofenceTransitionsIntentService.GEOFENCE_TRIGGERING_LOCATION_KEY);
                 notifyApproachingCar(location, getCar());
             }
 
+            // remove the geofence we just entered
             LocationServices.GeofencingApi.removeGeofences(
                     getGoogleApiClient(),
                     mGeofencePendingIntent
@@ -89,11 +96,15 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 
         if (carLocation == null
                 || carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
-                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M)
+                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
+            Log.d(TAG, "Geofence not added because accuracy is not good enough");
             return;
+        }
 
-        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD)
+        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD) {
+            Log.d(TAG, "Geofence not added because we are not far enough from the car");
             return;
+        }
 
         /**
          * Look for the most frequent activity
@@ -114,14 +125,16 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
         /**
          * If the user didn't walk after parking we stop
          */
-        if (mostProbable != DetectedActivity.ON_FOOT) return;
+        if (mostProbable != DetectedActivity.ON_FOOT) {
+            Log.d(TAG, "Geofence not added because most probable activity is: " + mostProbable);
+            return;
+        }
 
         /**
          * Create a geofence around the car
          */
         Geofence geofence = new Geofence.Builder()
-                // Set the request ID of the geofence. This is a string to identify this
-                // geofence.
+                // Set the request ID of the geofence. This is a string to identify this geofence.
                 .setRequestId(car.id)
                 .setCircularRegion(
                         carLocation.getLatitude(),
@@ -143,6 +156,8 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
                 getGeofencePendingIntent(car)
         ).setResultCallback(this);
 
+        Log.d(TAG, "Geofence added");
+
     }
 
     private PendingIntent getGeofencePendingIntent(Car car) {
@@ -154,7 +169,7 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
         intent.putExtra(EXTRA_CAR, car);
-        intent.putExtra(GeofenceTransitionsIntentService.RECEIVER, resultReceiver);
+        intent.putExtra(GeofenceTransitionsIntentService.RECEIVER, geofenceResultReceiver);
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
@@ -165,6 +180,20 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
     @Override
     public void onResult(Status status) {
 
+    }
+
+    private void notifyGeofenceAdded(Location location, Car car) {
+
+        long[] pattern = {0, 110, 1000};
+        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder mBuilder =
+                new Notification.Builder(this)
+                        .setVibrate(pattern)
+                        .setSmallIcon(R.drawable.ic_action_maps_my_location)
+                        .setContentTitle("Geofence set for " + car.name);
+
+        int id = (int) Math.random();
+        mNotifyMgr.notify("" + id, id, mBuilder.build());
     }
 
     private void notifyApproachingCar(Location location, Car car) {

@@ -74,6 +74,7 @@
         </activity>
 
         <service android:name="com.cahue.iweco.debug.DebugCarMovedService" />
+        <service android:name="com.cahue.iweco.debug.DebugParkedCarService" />
 
         <activity
             android:name="com.cahue.iweco.login.LoginActivity"
