@@ -32,12 +32,34 @@
             android:visibility="invisible"
             android:layout_centerHorizontal="true" />
 
-        <Button
-            android:id="@+id/plus_sign_in_button"
+        <LinearLayout
+            android:id="@+id/buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/CahueTheme.Button.Google"
-            android:text="@string/common_signin_button_text"/>
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/plus_sign_in_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/CahueTheme.Button.Google"
+                android:text="@string/common_signin_button_text_long" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/login_benefits"
+                android:gravity="center"
+                android:padding="@dimen/default_padding"
+                android:layout_gravity="center" />
+
+            <Button
+                android:id="@+id/no_sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="?android:attr/borderlessButtonStyle"
+                android:text="@string/no_sign_in" />
+        </LinearLayout>
 
     </RelativeLayout>
 

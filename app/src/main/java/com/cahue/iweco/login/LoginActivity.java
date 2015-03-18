@@ -17,6 +17,8 @@ import android.widget.Toast;
 import com.cahue.iweco.BaseActivity;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
+import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.database.CarsProvider;
@@ -28,6 +30,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -42,11 +45,13 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     // UI references.
     private View mProgressView;
+    private View mButtonsLayout;
 
     private Button mPlusSignInButton;
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
     private AccountManager mAccountManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,8 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);
+
+        mButtonsLayout = findViewById(R.id.buttons);
 
         database = CarDatabase.getInstance(this);
 
@@ -78,7 +85,20 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
             mPlusSignInButton.setVisibility(View.GONE);
             return;
         }
+        Button noSingIn = (Button) findViewById(R.id.no_sign_in);
+        noSingIn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AuthUtils.setSkippedLogin(LoginActivity.this, true);
+                goToMaps();
+            }
+        });
 
+    }
+
+    private void goToMaps() {
+        startActivity(new Intent(this, MapsActivity.class));
+        finish();
     }
 
     private void login() {
@@ -159,12 +179,12 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
                     }
                 });
 
-        mPlusSignInButton.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
-        mPlusSignInButton.animate().setDuration(animTime).alpha(!show ? 1 : 0)
+        mButtonsLayout.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mButtonsLayout.animate().setDuration(animTime).alpha(!show ? 1 : 0)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mPlusSignInButton.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+                        mButtonsLayout.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
                     }
                 });
     }
@@ -246,6 +266,13 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     public void onBackEndLogin(LoginResultBean loginResult) {
+        /**
+         * Maybe there was some data there already due to that the app was being used
+         * without signing in
+         */
+        List<Car> cars = database.retrieveCars(false);
+        for(Car car: cars)
+            CarsSync.postCar(car, this);
 
         database.save(loginResult.cars);
 
@@ -257,8 +284,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
         finishLogin(resultIntent, loginResult.userId);
 
-        startActivity(new Intent(this, MapsActivity.class));
-//        finish();
+        goToMaps();
     }
 
     private void finishLogin(Intent intent, String userId) {

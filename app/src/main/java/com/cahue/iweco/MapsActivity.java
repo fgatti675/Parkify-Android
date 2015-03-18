@@ -38,6 +38,7 @@ import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.debug.DebugActivity;
+import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.locationServices.LocationPollerService;
@@ -200,7 +201,12 @@ public class MapsActivity extends BaseActivity
 
     private void goToLogin() {
         if (!isFinishing()) {
-            carDatabase.clearCars();
+
+            if (!isSkippedLogin())
+                carDatabase.clearCars();
+
+            AuthUtils.setSkippedLogin(this, false);
+
             clearAccounts();
             Log.d(TAG, "goToLogin");
             startActivity(new Intent(this, LoginActivity.class));
@@ -229,7 +235,7 @@ public class MapsActivity extends BaseActivity
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
 
-        if (availableAccounts.length == 0) {
+        if (availableAccounts.length == 0 && !isSkippedLogin()) {
             goToLogin();
             return;
         }
@@ -238,7 +244,8 @@ public class MapsActivity extends BaseActivity
             Log.w(TAG, "Multiple accounts found");
         }
 
-        mAccount = availableAccounts[0];
+        if (availableAccounts.length > 0)
+            mAccount = availableAccounts[0];
 
         // show help dialog only on first run of the app
         if (!Util.isTutorialShown(this)) {
@@ -258,6 +265,11 @@ public class MapsActivity extends BaseActivity
 
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
+
+        if (isSkippedLogin()) {
+            MenuItem item = toolbar.getMenu().findItem(R.id.action_disconnect);
+            item.setTitle(R.string.common_signin_button_text_long);
+        }
 
         myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
         myLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -927,7 +939,10 @@ public class MapsActivity extends BaseActivity
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mAccount != null)
                 CarsSync.TriggerRefresh(mAccount);
+                else
+                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT);
             }
         });
 

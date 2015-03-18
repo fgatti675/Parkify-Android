@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.cahue.iweco.login.AuthUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -38,6 +39,11 @@ public abstract class BaseActivity
     private final static int OUR_REQUEST_CODE = 49404;
 
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+    /**
+     * The user didn't log in, but we still love him
+     */
+    private boolean mSkippedLogin;
 
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
@@ -101,6 +107,7 @@ public abstract class BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
         if (checkPlayServices()) {
             if (savedInstanceState != null) {
@@ -125,15 +132,18 @@ public abstract class BaseActivity
 
             // Initialize the PlusClient connection.
             // Scopes indicate the information about the user your application will be able to access.
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Plus.API)
+            GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
                     .addApi(ActivityRecognition.API)
-                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"))
-                    .addScope(Plus.SCOPE_PLUS_LOGIN)
                     .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
+                    .addOnConnectionFailedListener(this);
+
+            if (!mSkippedLogin)
+                builder.addApi(Plus.API)
+                        .addScope(Plus.SCOPE_PLUS_LOGIN)
+                        .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
+
+            mGoogleApiClient = builder.build();
 
         }
     }
@@ -207,7 +217,8 @@ public abstract class BaseActivity
 
             // Clear the default account in order to allow the user to potentially choose a
             // different account from the account chooser.
-            Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
+            if (!mSkippedLogin)
+                Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
 
             // Disconnect from Google Play Services, then reconnect in order to restart the
             // process from scratch.
@@ -327,6 +338,10 @@ public abstract class BaseActivity
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }
+    }
+
+    public boolean isSkippedLogin() {
+        return mSkippedLogin;
     }
 
 }

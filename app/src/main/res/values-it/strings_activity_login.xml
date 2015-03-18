@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sign_in">Entra</string>
-
     <!-- Strings related to login -->
     <string name="disconnect">Uscire</string>
+
+    <string name="login_benefits">per sincronizzare le macchine online, o...</string>
+    <string name="no_sign_in">Continua senza registrarti</string>
 </resources>

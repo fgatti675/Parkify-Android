@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sign_in">Entrar</string>
-
     <!-- Strings related to login -->
     <string name="disconnect">Desconectar</string>
+
+    <string name="login_benefits">para permitir que los coches se almacenen en la nube y la sincronización entre dispositivos, o...</string>
+    <string name="no_sign_in">Continua sin registrarte</string>
 </resources>
