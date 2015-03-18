@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class ParkedCarService extends LocationPollerService implements ResultCallback<Status> {
 
-    private final static String TAG = "ParkedCarService";
+    private final static String TAG = ParkedCarService.class.getSimpleName();
 
     private Location carLocation;
 
@@ -94,10 +95,11 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
     @Override
     public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
 
-        if (carLocation == null
-                || carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
+        if (carLocation == null) return;
+
+        if (carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
                 || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
-            Log.d(TAG, "Geofence not added because accuracy is not good enough");
+            Log.d(TAG, "Geofence not added because accuracy is not good enough: Car " + carLocation.getAccuracy() + " / User " + + lastLocation.getAccuracy());
             return;
         }
 
@@ -113,11 +115,11 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
         for (DetectedActivity activity : detectedActivities)
             frequencies[activity.getType()]++;
 
-        int mostProbable = DetectedActivity.UNKNOWN;
+        int mostProbableActivityType = DetectedActivity.UNKNOWN;
         int mostProbableFrequency = 0;
         for (int i = 0; i < frequencies.length; i++) {
             if (frequencies[i] > mostProbableFrequency) {
-                mostProbable = i;
+                mostProbableActivityType = i;
                 mostProbableFrequency = frequencies[i];
             }
         }
@@ -125,8 +127,11 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
         /**
          * If the user didn't walk after parking we stop
          */
-        if (mostProbable != DetectedActivity.ON_FOOT) {
-            Log.d(TAG, "Geofence not added because most probable activity is: " + mostProbable);
+        if (mostProbableActivityType != DetectedActivity.ON_FOOT) {
+            Log.d(TAG, "Geofence not added because most probable activity is: " + mostProbableActivityType);
+            if (BuildConfig.DEBUG) {
+                notifyGeofenceError(car, mostProbableActivityType);
+            }
             return;
         }
 
@@ -156,6 +161,10 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
                 getGeofencePendingIntent(car)
         ).setResultCallback(this);
 
+        if (BuildConfig.DEBUG) {
+            notifyGeofenceAdded(car, mostProbableActivityType);
+        }
+
         Log.d(TAG, "Geofence added");
 
     }
@@ -182,20 +191,6 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 
     }
 
-    private void notifyGeofenceAdded(Location location, Car car) {
-
-        long[] pattern = {0, 110, 1000};
-        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification.Builder mBuilder =
-                new Notification.Builder(this)
-                        .setVibrate(pattern)
-                        .setSmallIcon(R.drawable.ic_action_maps_my_location)
-                        .setContentTitle("Geofence set for " + car.name);
-
-        int id = (int) Math.random();
-        mNotifyMgr.notify("" + id, id, mBuilder.build());
-    }
-
     private void notifyApproachingCar(Location location, Car car) {
 
         long[] pattern = {0, 110, 1000};
@@ -209,5 +204,56 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 
         int id = (int) Math.random();
         mNotifyMgr.notify("" + id, id, mBuilder.build());
+    }
+
+    private void notifyGeofenceError(Car car, int activityType) {
+
+        long[] pattern = {0, 110, 1000};
+        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder mBuilder =
+                new Notification.Builder(this)
+                        .setVibrate(pattern)
+                        .setSmallIcon(R.drawable.ic_action_navigation_close)
+                        .setContentTitle("Geofence ERROR for " + car.name)
+                        .setContentText("Detected activity: " + getTypeAsText(activityType));
+
+        int id = (int) Math.random();
+        mNotifyMgr.notify("" + id, id, mBuilder.build());
+    }
+
+    private void notifyGeofenceAdded(Car car, int activityType) {
+
+        long[] pattern = {0, 110, 1000};
+        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder mBuilder =
+                new Notification.Builder(this)
+                        .setVibrate(pattern)
+                        .setSmallIcon(R.drawable.ic_action_maps_my_location)
+                        .setContentTitle("Geofence set for " + car.name)
+                        .setContentText("Detected activity: " + getTypeAsText(activityType));
+
+        int id = (int) Math.random();
+        mNotifyMgr.notify("" + id, id, mBuilder.build());
+    }
+
+    private String getTypeAsText(int type) {
+        if (type == DetectedActivity.UNKNOWN)
+            return "Unknown";
+        else if (type == DetectedActivity.IN_VEHICLE)
+            return "In Vehicle";
+        else if (type == DetectedActivity.ON_BICYCLE)
+            return "On Bicycle";
+        else if (type == DetectedActivity.ON_FOOT)
+            return "On Foot";
+        else if (type == DetectedActivity.STILL)
+            return "Still";
+        else if (type == DetectedActivity.TILTING)
+            return "Tilting";
+        else if (type == DetectedActivity.WALKING)
+            return "Walking";
+        else if (type == DetectedActivity.RUNNING)
+            return "Running";
+        else
+            return "";
     }
 }
