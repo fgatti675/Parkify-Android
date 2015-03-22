@@ -25,7 +25,6 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
-
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <permission
@@ -118,7 +117,7 @@
         <provider
             android:name="com.cahue.iweco.cars.database.CarsProvider"
             android:authorities="com.cahue.iweco.cars"
-            android:exported="false"
+            android:exported="true"
             android:syncable="true" />
 
         <!-- This service implements our SyncAdapter. It needs to be exported, so that the system

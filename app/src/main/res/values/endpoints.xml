@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="baseURL" translatable="false">glossy-radio.appspot.com</string>
+
+    <string name="carsPath" translatable="false">cars</string>
+    <string name="spotsPath" translatable="false">spots</string>
+    <string name="nearestPath" translatable="false">nearest</string>
+    <string name="usersPath" translatable="false">users</string>
+    <string name="createGooglePath" translatable="false">createGoogle</string>
+    <string name="refreshPath" translatable="false">refresh</string>
+
+</resources>

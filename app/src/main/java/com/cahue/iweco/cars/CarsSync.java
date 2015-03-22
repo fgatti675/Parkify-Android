@@ -59,8 +59,8 @@ public class CarsSync {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.CARS_PATH)
+                .authority(context.getResources().getString(R.string.baseURL))
+                .appendPath(context.getResources().getString(R.string.carsPath))
                 .appendPath(car.id);
 
         /**
@@ -110,16 +110,18 @@ public class CarsSync {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.CARS_PATH);
+                .authority(context.getResources().getString(R.string.baseURL))
+                .appendPath(context.getResources().getString(R.string.carsPath));
 
         /**
          * Send a Json with the cars contained in this phone
          */
+        JSONObject jsonRequest = car.toJSON();
+        Log.d(TAG, jsonRequest.toString());
         JsonRequest carSyncRequest = new Requests.JsonPostRequest(
                 context,
                 builder.toString(),
-                car.toJSON(),
+                jsonRequest,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

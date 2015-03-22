@@ -32,8 +32,8 @@ public class TestSpotsQuery extends ParkingSpotsQuery {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.SPOTS_PATH)
+                .authority(context.getResources().getString(R.string.baseURL))
+                .appendPath(context.getResources().getString(R.string.spotsPath))
                 .appendQueryParameter("swLat", Double.toString(latLngBounds.southwest.latitude))
                 .appendQueryParameter("swLong", Double.toString(latLngBounds.southwest.longitude))
                 .appendQueryParameter("neLat", Double.toString(latLngBounds.northeast.latitude))

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cahue.iweco.Endpoints;
+import com.cahue.iweco.R;
 import com.cahue.iweco.util.Requests;
 
 import org.apache.http.HttpResponse;
@@ -64,9 +65,9 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
             Uri.Builder builder = new Uri.Builder();
             builder.scheme("https")
-                    .authority(Endpoints.BASE_URL)
-                    .appendPath(Endpoints.USERS_PATH)
-                    .appendPath(Endpoints.CREATE_USER_GOOGLE_PATH);
+                    .authority(context.getResources().getString(R.string.baseURL))
+                    .appendPath(context.getResources().getString(R.string.usersPath))
+                    .appendPath(context.getResources().getString(R.string.createGooglePath));
 
             HttpPost httpPost = Requests.createHttpPost(context, builder.build().toString());
             String json = createRegistrationJSON(registrationId, authToken);

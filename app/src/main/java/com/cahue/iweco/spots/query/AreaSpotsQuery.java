@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.cahue.iweco.Endpoints;
+import com.cahue.iweco.R;
 import com.cahue.iweco.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -17,10 +18,12 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
 
     private static final String TAG = AreaSpotsQuery.class.getSimpleName();
 
+    private final Context context;
     protected LatLngBounds latLngBounds;
 
     public AreaSpotsQuery(Context context,LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         super(context, listener);
+        this.context = context;
         this.latLngBounds = latLngBounds;
     }
 
@@ -32,8 +35,8 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.SPOTS_PATH)
+                .authority(context.getResources().getString(R.string.baseURL))
+                .appendPath(context.getResources().getString(R.string.spotsPath))
                 .appendQueryParameter("swLat", Double.toString(latLngBounds.southwest.latitude))
                 .appendQueryParameter("swLong", Double.toString(latLngBounds.southwest.longitude))
                 .appendQueryParameter("neLat", Double.toString(latLngBounds.northeast.latitude))

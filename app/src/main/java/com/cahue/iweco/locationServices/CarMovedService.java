@@ -11,6 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.Endpoints;
+import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
@@ -90,8 +91,8 @@ public class CarMovedService extends LocationPollerService {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.SPOTS_PATH);
+                .authority(getResources().getString(R.string.baseURL))
+                .appendPath(getResources().getString(R.string.spotsPath));
 
         // Send a JSON spot location.
         JSONObject parkingSpotJSON = getParkingSpotJSON(location, car);

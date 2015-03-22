@@ -13,7 +13,7 @@ import android.text.TextUtils;
 
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
-import com.cahue.iweco.Endpoints;
+import com.cahue.iweco.R;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.util.Singleton;
 
@@ -121,9 +121,9 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.USERS_PATH)
-                .appendPath(Endpoints.REFRESH)
+                .authority(mContext.getResources().getString(R.string.baseURL))
+                .appendPath(mContext.getResources().getString(R.string.usersPath))
+                .appendPath(mContext.getResources().getString(R.string.refreshPath))
                 .appendQueryParameter("user", userId)
                 .appendQueryParameter("refreshToken", refreshToken);
 

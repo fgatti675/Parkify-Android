@@ -35,7 +35,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
 
     private static final String TAG = NearestSpotsQuery.class.getSimpleName();
 
-    private Context context;
+    protected Context context;
     protected ParkingSpotsUpdateListener listener;
 
 

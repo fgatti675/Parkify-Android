@@ -28,6 +28,11 @@ android {
             versionCode 25
             versionName "2.2.4"
         }
+        local {
+            applicationId "com.cahue.iweco.local"
+            versionCode 1
+            versionName "0.1.0"
+        }
     }
 }
 

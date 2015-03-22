@@ -53,8 +53,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.CARS_PATH);
+                .authority(getContext().getResources().getString(R.string.baseURL))
+                .appendPath(getContext().getResources().getString(R.string.carsPath));
 
         /**
          * Retrieve an array of cars

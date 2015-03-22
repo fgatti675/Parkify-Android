@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.cahue.iweco.Endpoints;
+import com.cahue.iweco.R;
 import com.cahue.iweco.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -35,9 +35,9 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(Endpoints.BASE_URL)
-                .appendPath(Endpoints.SPOTS_PATH)
-                .appendPath(Endpoints.SPOTS_RETRIEVE_NEAREST)
+                .authority(context.getResources().getString(R.string.baseURL))
+                .appendPath(context.getResources().getString(R.string.spotsPath))
+                .appendPath(context.getResources().getString(R.string.nearestPath))
                 .appendQueryParameter("lat", Double.toString(center.latitude))
                 .appendQueryParameter("long", Double.toString(center.longitude))
                 .appendQueryParameter("count", Integer.toString(limit));

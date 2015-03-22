@@ -2,6 +2,7 @@ package com.cahue.iweco.locationServices;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
@@ -52,7 +53,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
 
         bundle.putInt(GEOFENCE_TRANSITION_KEY, geofencingEvent.getGeofenceTransition());
-        bundle.putParcelable(GEOFENCE_TRIGGERING_LOCATION_KEY, geofencingEvent.getTriggeringLocation());
+        Location location = geofencingEvent.getTriggeringLocation();
+        bundle.putParcelable(GEOFENCE_TRIGGERING_LOCATION_KEY, location);
         mReceiver.send(SUCCESS_RESULT, bundle);
 
     }

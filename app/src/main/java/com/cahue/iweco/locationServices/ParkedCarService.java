@@ -95,18 +95,18 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
     @Override
     public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
 
-        if (carLocation == null) return;
-
-        if (carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
-                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
-            Log.d(TAG, "Geofence not added because accuracy is not good enough: Car " + carLocation.getAccuracy() + " / User " + + lastLocation.getAccuracy());
-            return;
-        }
-
-        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD) {
-            Log.d(TAG, "Geofence not added because we are not far enough from the car");
-            return;
-        }
+//        if (carLocation == null) return;
+//
+//        if (carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
+//                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
+//            Log.d(TAG, "Geofence not added because accuracy is not good enough: Car " + carLocation.getAccuracy() + " / User " + + lastLocation.getAccuracy());
+//            return;
+//        }
+//
+//        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD) {
+//            Log.d(TAG, "Geofence not added because we are not far enough from the car");
+//            return;
+//        }
 
         /**
          * Look for the most frequent activity
@@ -124,16 +124,16 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
             }
         }
 
-        /**
-         * If the user didn't walk after parking we stop
-         */
-        if (mostProbableActivityType != DetectedActivity.ON_FOOT) {
-            Log.d(TAG, "Geofence not added because most probable activity is: " + mostProbableActivityType);
-            if (BuildConfig.DEBUG) {
-                notifyGeofenceError(car, mostProbableActivityType);
-            }
-            return;
-        }
+//        /**
+//         * If the user didn't walk after parking we stop
+//         */
+//        if (mostProbableActivityType != DetectedActivity.ON_FOOT) {
+//            Log.d(TAG, "Geofence not added because most probable activity is: " + mostProbableActivityType);
+//            if (BuildConfig.DEBUG) {
+//                notifyGeofenceError(car, mostProbableActivityType);
+//            }
+//            return;
+//        }
 
         /**
          * Create a geofence around the car
@@ -199,8 +199,10 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
                 new Notification.Builder(this)
                         .setVibrate(pattern)
                         .setSmallIcon(R.drawable.ic_car_white_36dp)
-                        .setContentTitle("Approaching " + car.name)
-                        .setContentText(String.format("Distance: %d meters", location.distanceTo(car.location)));
+                        .setContentTitle("Approaching " + car.name);
+
+        if (location != null)
+            mBuilder.setContentText(String.format("Distance: %d meters", location.distanceTo(car.location)));
 
         int id = (int) Math.random();
         mNotifyMgr.notify("" + id, id, mBuilder.build());
