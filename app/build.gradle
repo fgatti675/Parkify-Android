@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '21.1'
+    buildToolsVersion '22.0.1'
 
     defaultConfig {
         applicationId "com.cahue.iweco"
@@ -43,13 +43,15 @@ dependencies {
         exclude group: "com.google.android.gms"
     }
 //    compile 'com.google.code.gson:gson:2.+'
+    compile 'com.android.support:support-v4:21.0.+'
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:support-v13:21.0.3'
     compile 'com.android.support:cardview-v7:21.0.+'
     compile 'com.android.support:recyclerview-v7:21.0.+'
     compile 'com.google.android.gms:play-services-plus:6.5.+'
     compile 'com.google.android.gms:play-services-maps:6.5.+'
     compile 'com.google.android.gms:play-services-location:6.5.+'
     compile 'com.google.android.gms:play-services-wallet:6.5.+'
-    compile 'com.android.support:support-v13:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.melnykov:floatingactionbutton:1.2.0'
     compile 'com.mcxiaoke.volley:library:1.+'

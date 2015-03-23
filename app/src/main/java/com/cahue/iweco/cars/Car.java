@@ -26,6 +26,7 @@ public class Car implements Parcelable {
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_BT_ADDRESS = "bt_address";
     public static final String COLUMN_LATITUDE = "latitude";
+    public static final String COLUMN_SPOT_ID = "spot_id";
     public static final String COLUMN_LONGITUDE = "longitude";
     public static final String COLUMN_ACCURACY = "accuracy";
     public static final String COLUMN_ADDRESS = "address";
@@ -37,6 +38,8 @@ public class Car implements Parcelable {
     public String name;
 
     public String btAddress;
+
+    public Long spotId;
 
     public Location location;
 
@@ -63,6 +66,7 @@ public class Car implements Parcelable {
         id = parcel.readString();
         name = parcel.readString();
         btAddress = parcel.readString();
+        spotId = (Long) parcel.readValue(Long.class.getClassLoader());
         location = parcel.readParcelable(Location.class.getClassLoader());
         time = (Date) parcel.readSerializable();
         color = (Integer) parcel.readValue(Integer.class.getClassLoader());
@@ -83,6 +87,7 @@ public class Car implements Parcelable {
         parcel.writeString(id);
         parcel.writeString(name);
         parcel.writeString(btAddress);
+        parcel.writeValue(spotId);
         parcel.writeParcelable(location, i);
         parcel.writeSerializable(time);
         parcel.writeValue(color);
@@ -148,6 +153,10 @@ public class Car implements Parcelable {
                 car.color = carJSON.getInt("color");
             }
 
+            if (carJSON.has("spotId")) {
+                car.spotId = carJSON.getLong("spotId");
+            }
+
             if (carJSON.has("latitude") && carJSON.has("longitude")) {
                 Location location = new Location("JSON");
                 location.setLatitude(carJSON.getDouble("latitude"));
@@ -172,6 +181,7 @@ public class Car implements Parcelable {
             jsonObject.put("name", name);
             if (btAddress != null) jsonObject.put("btAddress", btAddress);
             if (color != null) jsonObject.put("color", color);
+            if (spotId != null) jsonObject.put("spotId", spotId);
             if (location != null) {
                 jsonObject.put("latitude", location.getLatitude());
                 jsonObject.put("longitude", location.getLongitude());
