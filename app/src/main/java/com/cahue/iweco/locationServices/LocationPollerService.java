@@ -50,7 +50,7 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Timeout after this service needs to finish
      */
-    private final static int FINISH_TIMEOUT_MS = 35500;
+    private final static int FINISH_TIMEOUT_MS = 60000;
 
     /**
      * Minimum desired accuracy
@@ -273,10 +273,6 @@ public abstract class LocationPollerService extends Service implements
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.i(TAG, "GoogleApiClient connection has failed");
         stopSelf();
-    }
-
-    public GoogleApiClient getGoogleApiClient() {
-        return mGoogleApiClient;
     }
 
     public Car getCar() {

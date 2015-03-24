@@ -17,8 +17,10 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
@@ -33,7 +35,7 @@ import java.util.List;
  *
  * @author Francesco
  */
-public class ParkedCarService extends LocationPollerService implements ResultCallback<Status> {
+public class ParkedCarService extends LocationPollerService {
 
     private final static String TAG = ParkedCarService.class.getSimpleName();
 
@@ -58,9 +60,11 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 
             // remove the geofence we just entered
             LocationServices.GeofencingApi.removeGeofences(
-                    getGoogleApiClient(),
+                    mGeofenceApiClient,
                     mGeofencePendingIntent
             );
+
+            mGeofenceApiClient.disconnect();
         }
     };
 
@@ -95,18 +99,18 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
     @Override
     public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
 
-//        if (carLocation == null) return;
-//
-//        if (carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
-//                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
-//            Log.d(TAG, "Geofence not added because accuracy is not good enough: Car " + carLocation.getAccuracy() + " / User " + + lastLocation.getAccuracy());
-//            return;
-//        }
-//
-//        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD) {
-//            Log.d(TAG, "Geofence not added because we are not far enough from the car");
-//            return;
-//        }
+        if (carLocation == null) return;
+
+        if (carLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
+                || lastLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
+            Log.d(TAG, "Geofence not added because accuracy is not good enough: Car " + carLocation.getAccuracy() + " / User " + + lastLocation.getAccuracy());
+            return;
+        }
+
+        if (carLocation.distanceTo(lastLocation) < Constants.PARKED_DISTANCE_THRESHOLD) {
+            Log.d(TAG, "Geofence not added because we are not far enough from the car");
+            return;
+        }
 
         /**
          * Look for the most frequent activity
@@ -134,39 +138,64 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
 //            }
 //            return;
 //        }
+        addGeofence(car, mostProbableActivityType);
 
-        /**
-         * Create a geofence around the car
-         */
-        Geofence geofence = new Geofence.Builder()
-                // Set the request ID of the geofence. This is a string to identify this geofence.
-                .setRequestId(car.id)
-                .setCircularRegion(
-                        carLocation.getLatitude(),
-                        carLocation.getLongitude(),
-                        Constants.GEOFENCE_RADIUS_IN_METERS
-                )
-                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+
+    }
+
+    private GoogleApiClient mGeofenceApiClient;
+
+    private void addGeofence(final Car car, final int mostProbableActivityType) {
+
+        mGeofenceApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+
+                        Log.d(TAG, "Geofence, onConnected");
+
+                        /**
+                         * Create a geofence around the car
+                         */
+                        Geofence geofence = new Geofence.Builder()
+                                // Set the request ID of the geofence. This is a string to identify this geofence.
+                                .setRequestId(car.id)
+                                .setCircularRegion(
+                                        carLocation.getLatitude(),
+                                        carLocation.getLongitude(),
+                                        Constants.GEOFENCE_RADIUS_IN_METERS
+                                )
+                                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                                .build();
+
+                        GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
+                                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                                .addGeofence(geofence)
+                                .build();
+
+                        LocationServices.GeofencingApi.addGeofences(
+                                mGeofenceApiClient,
+                                geofencingRequest,
+                                getGeofencePendingIntent(car)
+                        );
+
+                        if (BuildConfig.DEBUG) {
+                            notifyGeofenceAdded(car, mostProbableActivityType);
+                        }
+
+                        Log.i(TAG, "Geofence added");
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        Log.d(TAG, "Geofence, connection suspended");
+                    }
+                })
                 .build();
 
-        GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofence(geofence)
-                .build();
-
-        LocationServices.GeofencingApi.addGeofences(
-                getGoogleApiClient(),
-                geofencingRequest,
-                getGeofencePendingIntent(car)
-        ).setResultCallback(this);
-
-        if (BuildConfig.DEBUG) {
-            notifyGeofenceAdded(car, mostProbableActivityType);
-        }
-
-        Log.d(TAG, "Geofence added");
-
+        mGeofenceApiClient.connect();
     }
 
     private PendingIntent getGeofencePendingIntent(Car car) {
@@ -186,14 +215,9 @@ public class ParkedCarService extends LocationPollerService implements ResultCal
         return mGeofencePendingIntent;
     }
 
-    @Override
-    public void onResult(Status status) {
-
-    }
-
     private void notifyApproachingCar(Location location, Car car) {
 
-        long[] pattern = {0, 110, 1000};
+        long[] pattern = {0, 500, 0, 500};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder mBuilder =
                 new Notification.Builder(this)

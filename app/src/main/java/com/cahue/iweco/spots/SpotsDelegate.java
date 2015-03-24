@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -430,6 +431,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         clearSelectedSpot();
     }
 
+    Random random = new Random();
+
     private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {
 
         marker.setVisible(true);
@@ -439,6 +442,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         handler.post(new Runnable() {
             @Override
             public void run() {
+
                 float alpha = marker.getAlpha() + dAlpha;
                 if (alpha < 1) {
                     // Post again 12ms later.
@@ -450,6 +454,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
                 }
             }
         });
+
     }
 
 

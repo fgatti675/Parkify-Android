@@ -111,7 +111,7 @@ public class CarMovedService extends LocationPollerService {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Network error : " + error.networkResponse.statusCode);
+                        error.printStackTrace();
                     }
                 });
 
