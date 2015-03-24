@@ -44,7 +44,7 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onFirstPreciseFixPolled(Context context, Location spotLocation, Car car) {
+    public void onPreciseFixPolled(Context context, Location spotLocation, Car car) {
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);
 
@@ -65,11 +65,6 @@ public class CarMovedService extends LocationPollerService {
         if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             doPostSpotLocation(spotLocation, car);
         }
-
-    }
-
-    @Override
-    public void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car) {
 
     }
 

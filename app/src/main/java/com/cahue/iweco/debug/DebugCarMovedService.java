@@ -10,9 +10,6 @@ import android.util.Log;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.cars.Car;
-import com.google.android.gms.location.DetectedActivity;
-
-import java.util.List;
 
 /**
 * Created by Francesco on 17/10/2014.
@@ -24,9 +21,9 @@ public class DebugCarMovedService extends CarMovedService {
     ServiceListener serviceListener;
 
     @Override
-    public void onFirstPreciseFixPolled(Context context, Location spotLocation, Car car) {
+    public void onPreciseFixPolled(Context context, Location spotLocation, Car car) {
         car = CarDatabase.getInstance(context).retrieveCars(false).iterator().next(); // TODO
-        super.onFirstPreciseFixPolled(context, spotLocation, car);
+        super.onPreciseFixPolled(context, spotLocation, car);
         serviceListener.onNewLocation(spotLocation);
     }
 

@@ -48,11 +48,6 @@ public abstract class LocationPollerService extends Service implements
     private final static int PRECISE_FIX_TIMEOUT_MS = 18500;
 
     /**
-     * Timeout after this service needs to finish
-     */
-    private final static int FINISH_TIMEOUT_MS = 60000;
-
-    /**
      * Minimum desired accuracy
      */
     private final static int ACCURACY_THRESHOLD_M = 18;
@@ -78,9 +73,8 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Flag to indicate that the first precise fix has been notified
      */
-    private boolean firstPreciseFixNotified = false;
+    private boolean fixNotified = false;
     private boolean finalFixNotified = false;
-
 
     // Is the broadcast receiver listening for activity updates ?
     private boolean listeningActivities = false;
@@ -180,12 +174,12 @@ public abstract class LocationPollerService extends Service implements
         Date now = new Date();
 
         /**
-         * If the first precise fix wasn't yet sent.
+         * If the precise fix wasn't yet sent.
          */
-        if (!firstPreciseFixNotified) {
+        if (!fixNotified) {
 
             if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
-                notifyFirstEventLocation(location);
+                notifyFixLocation(location);
                 return;
             }
 
@@ -194,13 +188,8 @@ public abstract class LocationPollerService extends Service implements
             }
 
             if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
-                notifyFirstEventLocation(bestAccuracyLocation);
+                notifyFixLocation(bestAccuracyLocation);
             }
-
-        }
-
-        if (!finalFixNotified && now.getTime() - startTime.getTime() > FINISH_TIMEOUT_MS) {
-            notifyFinishEventLocation(location);
         }
     }
 
@@ -209,32 +198,16 @@ public abstract class LocationPollerService extends Service implements
      *
      * @param location
      */
-    private void notifyFirstEventLocation(Location location) {
+    private void notifyFixLocation(Location location) {
         Bundle extras = new Bundle();
         extras.putSerializable(EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
-        firstPreciseFixNotified = true;
-        onFirstPreciseFixPolled(this, location, car);
+        onPreciseFixPolled(this, location, car);
+        fixNotified = true;
+        finish();
     }
 
-    /**
-     * Store and notify the location of the event (like user parked or drove off)
-     *
-     * @param location
-     */
-    private void notifyFinishEventLocation(Location location) {
-        try {
-            Bundle extras = new Bundle();
-            extras.putSerializable(EXTRA_START_TIME, startTime);
-            location.setExtras(extras);
-            Log.i(TAG, "Notifying location polled: " + location);
-            onActivitiesDetected(this, detectedActivities, location, car);
-            finalFixNotified = true;
-        } finally {
-            finish();
-        }
-    }
 
     protected void finish() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -251,18 +224,8 @@ public abstract class LocationPollerService extends Service implements
      * @param location
      * @param car
      */
-    public abstract void onFirstPreciseFixPolled(Context context, Location location, Car car);
+    public abstract void onPreciseFixPolled(Context context, Location location, Car car);
 
-    /**
-     * Called after the service has been running for the established time {@link #FINISH_TIMEOUT_MS}.
-     * The activities that the user has
-     *
-     * @param context
-     * @param detectedActivities
-     * @param lastLocation
-     * @param car
-     */
-    public abstract void onActivitiesDetected(Context context, List<DetectedActivity> detectedActivities, Location lastLocation, Car car);
 
     @Override
     public void onConnectionSuspended(int i) {

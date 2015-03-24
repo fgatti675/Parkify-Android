@@ -54,6 +54,9 @@
 
         <service android:name="com.cahue.iweco.locationServices.ParkedCarService" />
         <service android:name="com.cahue.iweco.locationServices.CarMovedService" />
+        <service
+            android:name="com.cahue.iweco.locationServices.ApproachingCarService"
+            android:enabled="true" />
 
         <receiver android:name="com.cahue.iweco.util.BluetoothDetector">
             <intent-filter>
@@ -137,7 +140,7 @@
         </service>
 
         <service android:name=".locationServices.ActivityRecognitionIntentService" />
-        <service android:name=".locationServices.GeofenceTransitionsIntentService"/>
+        <service android:name=".locationServices.GeofenceTransitionsIntentService" />
 
         <service android:name="com.cahue.iweco.auth.IwecoAccountService">
             <intent-filter>

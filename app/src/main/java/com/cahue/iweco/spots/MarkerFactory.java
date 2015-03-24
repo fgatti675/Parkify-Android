@@ -26,17 +26,17 @@ public class MarkerFactory {
 
         if (greenIconGenerator == null) {
             greenIconGenerator = new IconGenerator(context.getApplicationContext());
-            greenIconGenerator.setContentPadding(10, 10, 10, 10);
+            greenIconGenerator.setContentPadding(10, 5, 10, 15);
             greenIconGenerator.setTextAppearance(R.style.MarkerStyle);
-            greenIconGenerator.setColor(context.getResources().getColor(R.color.marker_green));
+            greenIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_green));
 
             yellowIconGenerator = new IconGenerator(context.getApplicationContext());
-            yellowIconGenerator.setContentPadding(10, 10, 10, 10);
+            yellowIconGenerator.setContentPadding(10, 5, 10, 15);
             yellowIconGenerator.setTextAppearance(R.style.MarkerStyle);
             yellowIconGenerator.setColor(context.getResources().getColor(R.color.marker_yellow));
 
             selectedIconGenerator = new IconGenerator(context.getApplicationContext());
-            selectedIconGenerator.setContentPadding(10, 10, 10, 10);
+            selectedIconGenerator.setContentPadding(10, 5, 10, 15);
             selectedIconGenerator.setTextAppearance(R.style.SelectedMarkerStyle);
             selectedIconGenerator.setColor(context.getResources().getColor(android.R.color.white));
         }

@@ -24,7 +24,7 @@ public class Constants {
      * Distance at which we can set a geofence in the car after we parked, so that we know
      * when the user is approaching it.
      */
-    public static final float PARKED_DISTANCE_THRESHOLD = 100;
+    public static final float PARKED_DISTANCE_THRESHOLD = 80;
 
     public static final float GEOFENCE_RADIUS_IN_METERS = 40;
 

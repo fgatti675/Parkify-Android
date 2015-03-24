@@ -21,9 +21,9 @@ public class DebugParkedCarService extends ParkedCarService {
     ServiceListener serviceListener;
 
     @Override
-    public void onFirstPreciseFixPolled(Context context, Location spotLocation, Car car) {
+    public void onPreciseFixPolled(Context context, Location spotLocation, Car car) {
         car = CarDatabase.getInstance(context).retrieveCars(false).iterator().next(); // TODO
-        super.onFirstPreciseFixPolled(context, spotLocation, car);
+        super.onPreciseFixPolled(context, spotLocation, car);
         serviceListener.onNewLocation(spotLocation);
     }
 
