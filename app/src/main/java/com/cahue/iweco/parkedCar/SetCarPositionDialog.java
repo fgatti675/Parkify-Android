@@ -1,20 +1,27 @@
 package com.cahue.iweco.parkedCar;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
+import com.cahue.iweco.locationServices.ApproachingCarService;
+import com.cahue.iweco.locationServices.LocationPollerService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -100,7 +107,6 @@ public class SetCarPositionDialog extends DialogFragment {
 
         selected = cars.get(0);
 
-
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder
@@ -113,17 +119,7 @@ public class SetCarPositionDialog extends DialogFragment {
                 })
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
-                        selected.location = location;
-                        selected.address = null;
-                        selected.time = new Date();
-
-                        Log.i(TAG, selected.toString());
-
-                        // If ok, we just send and intent and leave the location receivers to do all the work
-                        CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
-                        CarsSync.storeCar(carDatabase, getActivity(), selected);
-                        mCallbacks.onCarPositionUpdate(selected);
-
+                        onCarSet(selected);
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);
@@ -131,6 +127,28 @@ public class SetCarPositionDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+    private void onCarSet(Car car) {
+        car.location = location;
+        car.address = null;
+        car.time = new Date();
+
+        Log.i(TAG, car.toString());
+
+        // If ok, we just send and intent and leave the location receivers to do all the work
+        CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
+        CarsSync.storeCar(carDatabase, getActivity(), car);
+        mCallbacks.onCarPositionUpdate(car);
+
+        /**
+         * In debug mode we set a geofence
+         */
+        if (BuildConfig.DEBUG) {
+            Intent intent = new Intent(getActivity(), ApproachingCarService.class);
+            intent.putExtra(LocationPollerService.EXTRA_CAR, car);
+            getActivity().startService(intent);
+        }
     }
 
 
