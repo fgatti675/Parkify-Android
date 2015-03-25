@@ -3,6 +3,7 @@ package com.cahue.iweco.tutorial;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,11 +41,23 @@ public class TutorialWelcomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tutorial_welcome, container, false);
+        final View view = inflater.inflate(R.layout.fragment_tutorial_welcome, container, false);
         AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
-        alpha.setDuration(1200);
+        alpha.setDuration(2000);
         alpha.setFillAfter(true);
         view.findViewById(R.id.textView).startAnimation(alpha);
+        final View logo = view.findViewById(R.id.logo);
+        logo.setVisibility(View.INVISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
+                alpha.setDuration(3000);
+                alpha.setFillAfter(true);
+                logo.setVisibility(View.VISIBLE);
+                logo.startAnimation(alpha);
+            }
+        }, 1000/* 1sec delay */);
         return view;
     }
 

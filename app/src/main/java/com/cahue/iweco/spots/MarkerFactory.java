@@ -26,19 +26,19 @@ public class MarkerFactory {
 
         if (greenIconGenerator == null) {
             greenIconGenerator = new IconGenerator(context.getApplicationContext());
-            greenIconGenerator.setContentPadding(10, 5, 10, 15);
-            greenIconGenerator.setTextAppearance(R.style.MarkerStyle);
+            greenIconGenerator.setContentPadding(15, 5, 15, 0);
+            greenIconGenerator.setTextAppearance(R.style.GreenMarkerStyle);
             greenIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_green));
 
             yellowIconGenerator = new IconGenerator(context.getApplicationContext());
-            yellowIconGenerator.setContentPadding(10, 5, 10, 15);
-            yellowIconGenerator.setTextAppearance(R.style.MarkerStyle);
-            yellowIconGenerator.setColor(context.getResources().getColor(R.color.marker_yellow));
+            yellowIconGenerator.setContentPadding(12, 3, 12, 0);
+            yellowIconGenerator.setTextAppearance(R.style.OrangeMarkerStyle);
+            yellowIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_orange));
 
             selectedIconGenerator = new IconGenerator(context.getApplicationContext());
-            selectedIconGenerator.setContentPadding(10, 5, 10, 15);
+            selectedIconGenerator.setContentPadding(15, 5, 15, 0);
             selectedIconGenerator.setTextAppearance(R.style.SelectedMarkerStyle);
-            selectedIconGenerator.setColor(context.getResources().getColor(android.R.color.white));
+            selectedIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_selected));
         }
 
         long timeSinceSpotWasFree = System.currentTimeMillis() - spot.time.getTime();

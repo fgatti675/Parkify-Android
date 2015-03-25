@@ -43,7 +43,7 @@ public class Car implements Parcelable {
 
     public Location location;
 
-    public Date time = new Date();
+    public Date time;
 
     public Integer color;
 

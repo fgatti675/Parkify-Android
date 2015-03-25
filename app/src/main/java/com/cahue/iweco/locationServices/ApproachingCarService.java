@@ -190,7 +190,7 @@ public class ApproachingCarService extends LocationPollerService {
 
     private void notifyApproachingCar(Location location, Car car) {
 
-        long[] pattern = {0, 500, 0, 500};
+        long[] pattern = {0, 1000, 200, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder mBuilder =
                 new Notification.Builder(this)
@@ -222,7 +222,7 @@ public class ApproachingCarService extends LocationPollerService {
 
     private void notifyGeofenceAdded(Car car) {
 
-        long[] pattern = {0, 110, 1000};
+        long[] pattern = {0, 1000, 200, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder mBuilder =
                 new Notification.Builder(this)

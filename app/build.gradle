@@ -20,8 +20,8 @@ android {
     productFlavors {
         iweco {
             applicationId "com.cahue.iweco"
-            versionCode 5
-            versionName "0.1.4"
+            versionCode 6
+            versionName "0.2.0"
         }
         wimc {
             applicationId "com.whereismycar"
@@ -54,5 +54,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-wallet:6.5.+'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.melnykov:floatingactionbutton:1.2.0'
-    compile 'com.mcxiaoke.volley:library:1.+'
+    compile 'com.mcxiaoke.volley:library:1.0.+@aar'
 }

@@ -799,9 +799,9 @@ public class MapsActivity extends BaseActivity
             case R.id.action_disconnect:
                 signOut();
                 return true;
-            case R.id.action_debug:
-                goToDebug();
-                return true;
+//            case R.id.action_debug:
+//                goToDebug();
+//                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }

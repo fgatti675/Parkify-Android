@@ -40,7 +40,10 @@ public class CarMovedService extends LocationPollerService {
         long now = Calendar.getInstance().getTimeInMillis();
         if (car.time == null) return true;
         long parkingTime = car.time.getTime();
-        return now - parkingTime > Constants.MINIMUM_STAY_MS;
+        boolean result = now - parkingTime > Constants.MINIMUM_STAY_MS;
+        if (!result)
+            Log.w(TAG, "Preconditions failed");
+        return result;
     }
 
     @Override
@@ -92,9 +95,11 @@ public class CarMovedService extends LocationPollerService {
         // Send a JSON spot location.
         JSONObject parkingSpotJSON = getParkingSpotJSON(location, car);
         Log.i(TAG, "Posting: " + parkingSpotJSON);
+        String url = builder.toString();
+        Log.d(TAG, url);
         JsonRequest stringRequest = new Requests.JsonPostRequest(
                 this,
-                builder.toString(),
+                url,
                 parkingSpotJSON,
                 new Response.Listener<JSONObject>() {
                     @Override

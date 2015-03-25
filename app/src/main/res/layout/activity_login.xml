@@ -16,7 +16,8 @@
         android:stateListAnimator="@anim/abc_fade_in"
         android:id="@+id/imageView"
         android:src="@drawable/logo_dark"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:adjustViewBounds="true" />
 
     <RelativeLayout
         android:layout_width="match_parent"

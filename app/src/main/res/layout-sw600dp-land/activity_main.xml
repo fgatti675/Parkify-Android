@@ -13,7 +13,7 @@
         android:orientation="vertical">
 
         <include
-            layout="@layout/toolbar_actionbar_translucent"
+            layout="@layout/toolbar_main"
             android:id="@+id/toolbar_actionbar" />
 
         <fragment
