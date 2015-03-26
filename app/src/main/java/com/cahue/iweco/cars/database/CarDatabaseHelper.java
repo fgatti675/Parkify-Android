@@ -15,7 +15,7 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Schema version.
      */
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 4;
 
     /**
      * Filename for SQLite file.
@@ -35,6 +35,7 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
                     Car.COLUMN_ID + TYPE_TEXT + " PRIMARY KEY" + COMMA_SEP +
                     Car.COLUMN_NAME + TYPE_TEXT + COMMA_SEP +
                     Car.COLUMN_BT_ADDRESS + TYPE_TEXT + COMMA_SEP +
+                    Car.COLUMN_SPOT_ID + TYPE_INTEGER + COMMA_SEP +
                     Car.COLUMN_COLOR + TYPE_INTEGER + COMMA_SEP +
                     Car.COLUMN_LATITUDE + TYPE_REAL + COMMA_SEP +
                     Car.COLUMN_LONGITUDE + TYPE_REAL + COMMA_SEP +
@@ -61,11 +62,15 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // add address column
-        if (oldVersion == 2 && newVersion == 3){
+        if (oldVersion < 3) {
             db.execSQL("ALTER TABLE " + Car.TABLE_NAME + " ADD COLUMN " + Car.COLUMN_ADDRESS + " " + TYPE_TEXT);
         }
 
-        Log.d(CarDatabaseHelper.class.getSimpleName(), "Database updated from " + oldVersion + " to " + newVersion);
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE " + Car.TABLE_NAME + " ADD COLUMN " + Car.COLUMN_SPOT_ID + " " + TYPE_INTEGER);
+        }
+
+        Log.d(TAG, "Database updated from " + oldVersion + " to " + newVersion);
     }
 
 

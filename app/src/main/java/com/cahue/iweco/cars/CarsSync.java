@@ -13,7 +13,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
-import com.cahue.iweco.Endpoints;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.database.CarsProvider;
@@ -31,9 +30,9 @@ public class CarsSync {
     private static final String TAG = CarsSync.class.getSimpleName();
 
     public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
-        carDatabase.save(car);
+        carDatabase.saveAndBroadcast(car);
         if (!AuthUtils.isSkippedLogin(context))
-            postCar(car, context);
+            postCar(car, context, carDatabase);
     }
 
     /**
@@ -43,6 +42,7 @@ public class CarsSync {
      */
     public static void clearLocation(CarDatabase carDatabase, Context context, Car car) {
 
+        car.spotId =  null;
         car.time = null;
         car.location = null;
         car.address = null;
@@ -55,7 +55,7 @@ public class CarsSync {
         // Instantiate the RequestQueue.
         RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
 
-        Log.i(TAG, "Posting cars");
+        Log.i(TAG, "Removing car " + car);
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -85,7 +85,7 @@ public class CarsSync {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
-                        database.save(car);
+                        database.saveAndBroadcast(car);
                         error.printStackTrace();
                     }
                 });
@@ -101,7 +101,7 @@ public class CarsSync {
      *
      * @param context
      */
-    public static void postCar(Car car, final Context context) {
+    public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
@@ -125,7 +125,9 @@ public class CarsSync {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i(TAG, "Post result: " + response.toString());
+                        Log.d(TAG, response.toString());
+                        Car car = Car.fromJSON(response);
+                        carDatabase.save(car);
                     }
                 },
                 new Response.ErrorListener() {

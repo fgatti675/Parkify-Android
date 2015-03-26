@@ -130,6 +130,7 @@ public class SetCarPositionDialog extends DialogFragment {
     }
 
     private void onCarSet(Car car) {
+        car.spotId = null;
         car.location = location;
         car.address = null;
         car.time = new Date();

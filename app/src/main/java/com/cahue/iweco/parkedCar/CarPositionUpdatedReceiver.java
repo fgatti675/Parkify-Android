@@ -57,7 +57,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             // Display the address string
             // or an error message sent from the intent service.
             car.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-            CarDatabase.getInstance(context).save(car);
+            CarDatabase.getInstance(context).saveAndBroadcast(car);
 
         }
     }

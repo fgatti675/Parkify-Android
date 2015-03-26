@@ -934,13 +934,14 @@ public class MapsActivity extends BaseActivity
      * Only for debugging
      */
     private void setDebugConfig() {
+
         Button refresh = (Button) findViewById(R.id.refresh);
         refresh.setVisibility(View.VISIBLE);
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mAccount != null)
-                CarsSync.TriggerRefresh(mAccount);
+                if (mAccount != null)
+                    CarsSync.TriggerRefresh(mAccount);
                 else
                     Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT);
             }

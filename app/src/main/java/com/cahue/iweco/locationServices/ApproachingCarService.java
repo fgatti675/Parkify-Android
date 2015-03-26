@@ -140,7 +140,8 @@ public class ApproachingCarService extends LocationPollerService {
                                         Constants.GEOFENCE_RADIUS_IN_METERS
                                 )
                                 .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                                .setLoiteringDelay(5000)
                                 .build();
 
                         GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()

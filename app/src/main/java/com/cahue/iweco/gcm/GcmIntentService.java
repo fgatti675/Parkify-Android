@@ -90,7 +90,7 @@ public class GcmIntentService extends IntentService {
 
     private void saveCar(String carJson) throws JSONException {
         Car car = Car.fromJSON(new JSONObject(carJson));
-        CarDatabase.getInstance(this).save(car);
+        CarDatabase.getInstance(this).saveAndBroadcast(car);
     }
 
     private void deleteCar(String carId) throws JSONException {

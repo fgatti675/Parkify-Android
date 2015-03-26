@@ -266,13 +266,14 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     public void onBackEndLogin(LoginResultBean loginResult) {
+
         /**
          * Maybe there was some data there already due to that the app was being used
          * without signing in
          */
         List<Car> cars = database.retrieveCars(false);
         for(Car car: cars)
-            CarsSync.postCar(car, this);
+            CarsSync.postCar(car, this, CarDatabase.getInstance(this));
 
         database.save(loginResult.cars);
 

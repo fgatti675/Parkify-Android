@@ -25,8 +25,8 @@ public class Car implements Parcelable {
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_BT_ADDRESS = "bt_address";
-    public static final String COLUMN_LATITUDE = "latitude";
     public static final String COLUMN_SPOT_ID = "spot_id";
+    public static final String COLUMN_LATITUDE = "latitude";
     public static final String COLUMN_LONGITUDE = "longitude";
     public static final String COLUMN_ACCURACY = "accuracy";
     public static final String COLUMN_ADDRESS = "address";
@@ -117,6 +117,7 @@ public class Car implements Parcelable {
                 "id='" + id + '\'' +
                 ", btAddress='" + btAddress + '\'' +
                 ", name='" + name + '\'' +
+                ", spotId=" + spotId +
                 ", location=" + location +
                 ", time=" + time +
                 '}';

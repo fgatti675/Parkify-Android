@@ -1,6 +1,7 @@
 package com.cahue.iweco.parkedCar;
 
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -16,9 +17,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
@@ -100,6 +100,21 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         update();
 
+//        View view = getView();
+//
+//        // get the center for the clipping circle
+//        int cx = (view.getLeft() + view.getRight()) / 2;
+//        int cy = (view.getTop() + view.getBottom()) / 2;
+//
+//        // get the final radius for the clipping circle
+//        int finalRadius = Math.max(view.getWidth(), view.getHeight());
+//
+//        // create the animator for this view (the start radius is zero)
+//        Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
+//
+//        // make the view visible and start the animation
+//        view.setVisibility(View.VISIBLE);
+//        anim.start();
     }
 
     @Override
@@ -124,9 +139,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         View view = inflater.inflate(R.layout.fragment_car_details, container, false);
 
         carViewHolder = new CarViewHolder(view);
-
-        Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
-        view.startAnimation(fadeInAnimation);
 
         carViewHolder.toolbar.inflateMenu(R.menu.parked_car_menu);
         carViewHolder.toolbar.setOnMenuItemClickListener(this);

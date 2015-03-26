@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Created by Francesco on 22/01/2015.
  */
-public class CarDatabase  {
+public class CarDatabase {
 
     public static final String INTENT_CAR_UPDATE = "com.cahue.iweco.cars.CAR_UPDATED";
     public static final String INTENT_CAR_EXTRA = "CAR_EXTRA";
@@ -50,7 +50,8 @@ public class CarDatabase  {
             Car.COLUMN_LONGITUDE,
             Car.COLUMN_ACCURACY,
             Car.COLUMN_TIME,
-            Car.COLUMN_ADDRESS
+            Car.COLUMN_ADDRESS,
+            Car.COLUMN_SPOT_ID
     };
 
     private static final String TAG = CarDatabase.class.getSimpleName();
@@ -95,6 +96,8 @@ public class CarDatabase  {
      */
     public void save(Car car) {
 
+        Log.i(TAG, "Saving car: " + car);
+
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
 
@@ -110,6 +113,16 @@ public class CarDatabase  {
             carDatabaseHelper.close();
         }
 
+    }
+
+    /**
+     * Persist date about a car, location included
+     *
+     * @param car
+     */
+    public void saveAndBroadcast(Car car) {
+
+        save(car);
         broadCastCarUpdate(car);
 
     }
@@ -134,6 +147,7 @@ public class CarDatabase  {
         values.put(Car.COLUMN_COLOR, car.color);
 
         if (car.location != null) {
+            values.put(Car.COLUMN_SPOT_ID, car.spotId);
             values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
             values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
             values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
@@ -257,6 +271,9 @@ public class CarDatabase  {
             car.time = new Date(cursor.getLong(7));
             car.address = cursor.isNull(8) ? null : cursor.getString(8);
         }
+
+        if(!cursor.isNull(9))
+            car.spotId = cursor.getLong(9);
 
         return car;
     }

@@ -36,6 +36,7 @@ public class ParkedCarService extends LocationPollerService {
 
         Log.i(TAG, "Received : " + location);
 
+        car.spotId = null;
         car.location = location;
         car.address = null;
         car.time = new Date();

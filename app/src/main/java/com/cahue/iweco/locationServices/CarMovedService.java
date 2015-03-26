@@ -122,7 +122,9 @@ public class CarMovedService extends LocationPollerService {
     private static JSONObject getParkingSpotJSON(Location location, Car car) {
         try {
             JSONObject obj = new JSONObject();
-            obj.put("car", car.toJSON());
+            obj.put("car", car.id);
+            if (car.spotId != null)
+                obj.put("spotId", car.spotId);
             obj.put("latitude", location.getLatitude());
             obj.put("longitude", location.getLongitude());
             obj.put("accuracy", location.getAccuracy());
