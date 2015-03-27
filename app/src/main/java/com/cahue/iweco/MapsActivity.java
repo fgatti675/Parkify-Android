@@ -965,7 +965,8 @@ public class MapsActivity extends BaseActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
-                intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next());
+                Car car = carDatabase.retrieveCars(false).iterator().next();
+                intent.putExtra(LocationPollerService.EXTRA_CAR, car);
                 startService(intent);
             }
         });
