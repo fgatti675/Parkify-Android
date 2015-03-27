@@ -54,9 +54,5 @@ public class DebugCarMovedService extends CarMovedService {
         return true;
     }
 
-    @Override
-    public void onLocationPost(){
-        serviceListener.onLocationPost();
-    }
 
 }

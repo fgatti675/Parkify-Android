@@ -38,6 +38,7 @@ import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.debug.DebugActivity;
+import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
 import com.cahue.iweco.locationServices.CarMovedService;
@@ -966,6 +967,16 @@ public class MapsActivity extends BaseActivity
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
                 intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next());
                 startService(intent);
+            }
+        });
+
+        Button approachingCar = (Button) findViewById(R.id.approaching);
+        approachingCar.setVisibility(View.VISIBLE);
+        approachingCar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Car car = carDatabase.retrieveCars(false).iterator().next();
+                ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
             }
         });
     }

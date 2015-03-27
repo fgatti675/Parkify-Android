@@ -132,8 +132,9 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
                     ParkingSpot spot = new ParkingSpot(
                             entry.getLong("id"),
                             new LatLng(entry.getDouble("latitude"), entry.getDouble("longitude")),
-                            Util.DATE_FORMAT.parse(entry.getString("time"))
-                    );
+                            Float.parseFloat(entry.getString("accuracy")),
+                            Util.DATE_FORMAT.parse(entry.getString("time")),
+                            entry.getBoolean("future"));
                     spots.add(spot);
                 }
 

@@ -39,8 +39,9 @@ public class SpotsQueryTest extends ActivityTestCase {
                 add(new ParkingSpot(
                         6245697686863872L,
                         new LatLng(48.129830, 11.559060),
-                        new Date(1413928884000L)
-                ));
+                        10,
+                        new Date(1413928884000L),
+                        future));
             }
         };
 

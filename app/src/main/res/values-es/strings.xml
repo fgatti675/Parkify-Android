@@ -52,5 +52,6 @@
     <string name="delete_error">Error al borrar coche</string>
     <string name="login_error">Error al registrarse</string>
     <string name="sync_error">Error durante la sincronizacion</string>
+    <string name="aboutToLeave">¡Apunto de quedarse libre!</string>
 
 </resources>

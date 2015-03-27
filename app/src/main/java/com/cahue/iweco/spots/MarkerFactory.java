@@ -41,6 +41,9 @@ public class MarkerFactory {
             selectedIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_selected));
         }
 
+        if(spot.future)
+            return getFutureMarker(context, spot.position, selected);
+
         long timeSinceSpotWasFree = System.currentTimeMillis() - spot.time.getTime();
         ParkingSpot.Type markerType = spot.getMarkerType();
         if (markerType == ParkingSpot.Type.green)
@@ -52,6 +55,31 @@ public class MarkerFactory {
 
         throw new IllegalStateException("Add spot type to " + MarkerFactory.class.getName());
 
+    }
+
+    private static BitmapDescriptor futureBitmap;
+    private static BitmapDescriptor futureBitmapSelected;
+
+    private static MarkerOptions getFutureMarker(Context context, LatLng position, boolean selected) {
+
+        BitmapDescriptor bitmap;
+        if (futureBitmap == null) {
+            futureBitmap = createFutureBitmap(context, false);
+        }
+        if (futureBitmapSelected == null) {
+            futureBitmapSelected = createFutureBitmap(context, true);
+        }
+
+        if (selected)
+            bitmap = futureBitmapSelected;
+        else
+            bitmap = futureBitmap;
+
+        return new MarkerOptions()
+                .flat(true)
+                .position(position)
+                .icon(bitmap)
+                .anchor(0.5F, 1F);
     }
 
     private static MarkerOptions getGreenMarker(long timeSinceSpotWasFree, LatLng position, boolean selected) {
@@ -109,6 +137,10 @@ public class MarkerFactory {
                 .position(position)
                 .icon(bitmap)
                 .anchor(0.5F, 0.5F);
+    }
+
+    private static BitmapDescriptor createFutureBitmap(Context context, boolean selected) {
+        return BitmapDescriptorFactory.fromResource(R.drawable.map_marker_future);
     }
 
     private static BitmapDescriptor createRedMarkerBitmap(Context context, boolean selected) {

@@ -1,10 +1,15 @@
 package com.cahue.iweco.spots;
 
+import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.cahue.iweco.R;
+import com.cahue.iweco.cars.Car;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -20,7 +25,11 @@ public class ParkingSpot implements Parcelable {
 
     public final LatLng position;
 
+    public final float accuracy;
+
     public final Date time;
+
+    public final boolean future;
 
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
             new Parcelable.Creator<ParkingSpot>() {
@@ -38,13 +47,17 @@ public class ParkingSpot implements Parcelable {
     public ParkingSpot(Parcel parcel) {
         id = parcel.readLong();
         position = parcel.readParcelable(LatLng.class.getClassLoader());
+        accuracy = parcel.readFloat();
         time = (Date) parcel.readSerializable();
+        future = parcel.readByte() != 0;
     }
 
-    public ParkingSpot(Long id, LatLng location, Date time) {
+    public ParkingSpot(Long id, LatLng location, float accuracy, Date time, boolean future) {
         this.id = id;
         this.position = location;
+        this.accuracy = accuracy;
         this.time = time;
+        this.future = future;
     }
 
 
@@ -57,7 +70,26 @@ public class ParkingSpot implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeLong(id);
         parcel.writeParcelable(position, i);
+        parcel.writeFloat(accuracy);
         parcel.writeSerializable(time);
+        parcel.writeByte((byte) (future ? 1 : 0));
+    }
+
+    public JSONObject toJSON(Car car) {
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("car", car.id);
+            if (car.spotId != null)
+                obj.put("id", car.spotId);
+            obj.put("latitude", position.latitude);
+            obj.put("longitude", position.longitude);
+            obj.put("accuracy", accuracy);
+            obj.put("future", future);
+            return obj;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

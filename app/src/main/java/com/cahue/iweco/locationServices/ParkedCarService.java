@@ -12,7 +12,6 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
 
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -48,7 +47,7 @@ public class ParkedCarService extends LocationPollerService {
          * If the location of the car is good enough we can set a geofence afterwards.
          */
         if (car.location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-            Intent intent = new Intent(this, ApproachingCarService.class);
+            Intent intent = new Intent(this, GeofenceCarService.class);
             intent.putExtra(LocationPollerService.EXTRA_CAR, car);
             PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
             AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

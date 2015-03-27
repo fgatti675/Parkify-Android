@@ -55,6 +55,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:drawableTop="@drawable/ic_car_white_24dp"
+        android:id="@+id/approaching"
+        android:text="Approaching"
+        android:textColor="@color/white"
+        android:layout_above="@+id/park"
+        android:visibility="gone"
+        android:layout_alignRight="@+id/my_location"
+        android:layout_alignEnd="@+id/my_location"
+        android:layout_alignLeft="@+id/driveOff"
+        android:layout_alignStart="@+id/driveOff" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableTop="@drawable/ic_car_white_24dp"
         android:id="@+id/park"
         android:text="Park"
         android:textColor="@color/white"

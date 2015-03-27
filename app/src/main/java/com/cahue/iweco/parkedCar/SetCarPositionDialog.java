@@ -1,12 +1,9 @@
 package com.cahue.iweco.parkedCar;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -14,13 +11,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
-import com.cahue.iweco.locationServices.ApproachingCarService;
+import com.cahue.iweco.locationServices.GeofenceCarService;
 import com.cahue.iweco.locationServices.LocationPollerService;
 
 import java.util.ArrayList;
@@ -146,7 +142,7 @@ public class SetCarPositionDialog extends DialogFragment {
          * In debug mode we set a geofence
          */
         if (BuildConfig.DEBUG) {
-            Intent intent = new Intent(getActivity(), ApproachingCarService.class);
+            Intent intent = new Intent(getActivity(), GeofenceCarService.class);
             intent.putExtra(LocationPollerService.EXTRA_CAR, car);
             getActivity().startService(intent);
         }

@@ -43,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 tools:text="TIME"
-                android:textColor="@color/abc_secondary_text_material_light" />
+                android:textColor="@color/body_text_1"/>
 
             <TextView
                 android:id="@+id/distance_time"

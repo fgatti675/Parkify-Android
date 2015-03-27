@@ -88,7 +88,6 @@ public class SpotDetailsFragment extends DetailsFragment {
     }
 
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -122,7 +121,11 @@ public class SpotDetailsFragment extends DetailsFragment {
     }
 
     private void updateTimeAgo() {
-        timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
+        if (spot.future) {
+            timeAgo.setText(R.string.aboutToLeave);
+        } else {
+            timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
+        }
     }
 
 }

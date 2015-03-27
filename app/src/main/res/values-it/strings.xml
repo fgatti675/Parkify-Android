@@ -38,7 +38,7 @@
     <string name="other">Altro</string>
     <string name="cars">Macchine</string>
     <string name="remove_location">Elimina macchina</string>
-    <string name="purchase_account_error">Serve una account </string>
+    <string name="purchase_account_error">Serve una account</string>
     <string name="activate_bluetooth">Attiva Bluetooth</string>
     <string name="car_name_select">Nome della macchina</string>
     <string name="edit">Cambia</string>
@@ -52,5 +52,7 @@
     <string name="delete_error">Errore al eliminare la macchina</string>
     <string name="login_error">Errore</string>
     <string name="sync_error">Errore durante la sincronizzazione</string>
+
+    <string name="aboutToLeave">Libero fra poco!</string>
 
 </resources>

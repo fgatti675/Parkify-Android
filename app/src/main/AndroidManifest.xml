@@ -55,7 +55,7 @@
         <service android:name="com.cahue.iweco.locationServices.ParkedCarService" />
         <service android:name="com.cahue.iweco.locationServices.CarMovedService" />
         <service
-            android:name="com.cahue.iweco.locationServices.ApproachingCarService"
+            android:name=".locationServices.GeofenceCarService"
             android:enabled="true" />
 
         <receiver android:name="com.cahue.iweco.util.BluetoothDetector">

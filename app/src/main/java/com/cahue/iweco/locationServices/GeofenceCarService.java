@@ -15,6 +15,7 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.spots.ParkingSpotSender;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.Geofence;
@@ -25,9 +26,9 @@ import com.google.android.gms.location.LocationServices;
  * This service is in charge of detecting if the user is far away enough after parking, and if so,
  * setting a geofence around it.
  */
-public class ApproachingCarService extends LocationPollerService {
+public class GeofenceCarService extends LocationPollerService {
 
-    private static final String TAG = ApproachingCarService.class.getSimpleName();
+    private static final String TAG = GeofenceCarService.class.getSimpleName();
 
     private PendingIntent mGeofencePendingIntent;
 
@@ -46,6 +47,8 @@ public class ApproachingCarService extends LocationPollerService {
                 Log.d(TAG, "Geofence result SUCCESS");
                 Location location = resultData.getParcelable(GeofenceTransitionsIntentService.GEOFENCE_TRIGGERING_LOCATION_KEY);
                 notifyApproachingCar(location, getCar());
+
+                ParkingSpotSender.doPostSpotLocation(GeofenceCarService.this, getCar().location, true, getCar());
             }
 
             // remove the geofence we just entered
