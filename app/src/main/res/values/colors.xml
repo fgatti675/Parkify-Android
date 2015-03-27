@@ -26,14 +26,14 @@
     <color name="white">#ffffffff</color>
     <color name="light_grey">#ffebebeb</color>
 
-    <color name="theme_primary">#ff116071</color>
-    <color name="theme_primary_dark">#0B2D38</color>
-    <color name="theme_primary_light">#7986cb</color>
+    <color name="theme_primary">#377187</color>
+    <color name="theme_primary_dark">#0C536D</color>
+    <color name="theme_primary_light">#148BBA</color>
 
     <color name="theme_accent">#02edaf</color>
     <color name="theme_accent_light">#8a07ffc3</color>
 
-    <color name="marker_red">#ff116071</color>
+    <color name="marker_red">#377187</color>
     <color name="marker_yellow">#fa7d0a</color>
     <color name="marker_green">#02edaf</color>
 

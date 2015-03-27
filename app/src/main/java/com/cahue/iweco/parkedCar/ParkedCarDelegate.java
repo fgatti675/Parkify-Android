@@ -155,6 +155,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         directionPoints.clear();
 
         if (car == null || car.location == null) {
+            clear();
             return;
         }
 

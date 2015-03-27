@@ -127,7 +127,7 @@ public class CarsSync {
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
                         Car car = Car.fromJSON(response);
-                        carDatabase.save(car);
+                        carDatabase.updateSpotId(car);
                     }
                 },
                 new Response.ErrorListener() {

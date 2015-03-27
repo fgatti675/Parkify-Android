@@ -94,9 +94,35 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void save(Car car) {
+    public void updateSpotId(Car car) {
 
-        Log.i(TAG, "Saving car: " + car);
+        Log.i(TAG, "Updating spot: " + car);
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+
+        try {
+            if (car.id == null)
+                throw new NullPointerException("Car without an ID");
+
+
+            ContentValues values = new ContentValues();
+            values.put(Car.COLUMN_SPOT_ID, car.spotId);
+            database.update(Car.TABLE_NAME, values, "id = '" + car.id + "'", null);
+
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+
+    }
+
+    /**
+     * Persist date about a car, location included
+     *
+     * @param car
+     */
+    public void saveAndBroadcast(Car car) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -113,16 +139,6 @@ public class CarDatabase {
             carDatabaseHelper.close();
         }
 
-    }
-
-    /**
-     * Persist date about a car, location included
-     *
-     * @param car
-     */
-    public void saveAndBroadcast(Car car) {
-
-        save(car);
         broadCastCarUpdate(car);
 
     }
@@ -272,7 +288,7 @@ public class CarDatabase {
             car.address = cursor.isNull(8) ? null : cursor.getString(8);
         }
 
-        if(!cursor.isNull(9))
+        if (!cursor.isNull(9))
             car.spotId = cursor.getLong(9);
 
         return car;
