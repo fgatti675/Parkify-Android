@@ -76,7 +76,7 @@ public class MarkerFactory {
             bitmap = futureBitmap;
 
         return new MarkerOptions()
-                .flat(true)
+                .flat(false)
                 .position(position)
                 .icon(bitmap)
                 .anchor(0.5F, 1F);
