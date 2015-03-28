@@ -941,6 +941,7 @@ public class MapsActivity extends BaseActivity
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getSpotsDelegate().queryCameraView();
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(mAccount);
                 else

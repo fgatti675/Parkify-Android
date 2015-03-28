@@ -13,7 +13,7 @@ public class Constants {
     /**
      * Only post locations if the car has stopped for at least a few minutes
      */
-    public static final long MINIMUM_STAY_MS = 120000;
+    public static final long MINIMUM_STAY_MS = 2 * 60 * 1000;
 
     /**
      * Average walking speed

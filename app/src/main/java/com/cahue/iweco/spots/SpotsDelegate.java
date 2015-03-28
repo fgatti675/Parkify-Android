@@ -165,7 +165,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
                                 Log.d(TAG, "scheduledResetTask run");
                                 lastResetTaskRequestTime = new Date();
                                 shouldBeReset = true;
-                                repeatLastQuery();
+                                queryCameraView();
                             }
                         });
                     }
@@ -187,9 +187,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         spotMarkersMap.clear();
     }
 
-    private boolean repeatLastQuery() {
-        return queryCameraView();
-    }
 
 //    private synchronized boolean queryClosestSpots(LatLng userLocation) {
 //
@@ -213,8 +210,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
      *
      * @return
      */
-    private synchronized boolean queryCameraView() {
-
+    public synchronized boolean queryCameraView() {
 
         // What the user is actually seeing right now
 
@@ -300,7 +296,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     @Override
     public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
         Toast.makeText(getActivity(), "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
-        repeatLastQuery();
+        queryCameraView();
     }
 
     @Override

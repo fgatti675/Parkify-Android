@@ -42,6 +42,7 @@ public class CarMovedService extends LocationPollerService {
 
     @Override
     protected boolean checkPreconditions(Car car) {
+        if(BuildConfig.DEBUG) return true;
         long now = Calendar.getInstance().getTimeInMillis();
         if (car.time == null) return true;
         long parkingTime = car.time.getTime();
