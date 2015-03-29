@@ -10,14 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.cahue.iweco.login.LoginActivity">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:stateListAnimator="@anim/abc_fade_in"
-        android:id="@+id/imageView"
-        android:src="@drawable/logo_dark"
-        android:layout_gravity="center_horizontal"
-        android:adjustViewBounds="true" />
+    <include layout="@layout/intro_layout" />
 
     <RelativeLayout
         android:layout_width="match_parent"

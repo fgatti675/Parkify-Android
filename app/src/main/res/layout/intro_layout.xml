@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:stateListAnimator="@anim/abc_fade_in"
+    android:id="@+id/imageView"
+    android:src="@drawable/logo_dark"
+    android:layout_gravity="center_horizontal"
+    android:adjustViewBounds="true"
+    tools:showIn="@layout/activity_login" />
