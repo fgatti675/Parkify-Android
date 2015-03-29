@@ -1,7 +1,6 @@
 package com.cahue.iweco.parkedCar;
 
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -17,13 +16,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
+import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 
 
@@ -36,9 +35,11 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     public static final String TAG = CarDetailsFragment.class.getSimpleName();
 
     // the fragment initialization parameter
-    private static final String ARG_CAR = "car";
+    private static final String ARG_CAR_ID = "car_ID";
 
     private Location userLocation;
+
+    private String carId;
     private Car car;
 
     private OnCarPositionDeletedListener mListener;
@@ -47,14 +48,16 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     ParkedCarDelegate parkedCarDelegate;
 
+    private CarDatabase carDatabase;
+
+
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Car receivedCar = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
-            if (car.equals(receivedCar)) {
-                Log.d(TAG, "Received car " + receivedCar);
-                car = receivedCar;
+            String carId = intent.getExtras().getString(CarDatabase.INTENT_CAR_EXTRA_ID);
+            if (carId.equals(CarDetailsFragment.this.carId)) {
+                Log.d(TAG, "Received car " + carId);
                 update();
             }
         }
@@ -67,10 +70,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
-    public static CarDetailsFragment newInstance(Car car) {
+    public static CarDetailsFragment newInstance(String carId) {
         CarDetailsFragment fragment = new CarDetailsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_CAR, car);
+        args.putString(ARG_CAR_ID, carId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -84,10 +87,13 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
+        carDatabase = CarDatabase.getInstance(getActivity());
+
         if (getArguments() != null) {
-            car = getArguments().getParcelable(ARG_CAR);
+            carId = getArguments().getString(ARG_CAR_ID);
         }
-        parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id);
+        parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(carId);
+
     }
 
     @Override
@@ -100,21 +106,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         update();
 
-//        View view = getView();
-//
-//        // get the center for the clipping circle
-//        int cx = (view.getLeft() + view.getRight()) / 2;
-//        int cy = (view.getTop() + view.getBottom()) / 2;
-//
-//        // get the final radius for the clipping circle
-//        int finalRadius = Math.max(view.getWidth(), view.getHeight());
-//
-//        // create the animator for this view (the start radius is zero)
-//        Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
-//
-//        // make the view visible and start the animation
-//        view.setVisibility(View.VISIBLE);
-//        anim.start();
     }
 
     @Override
@@ -124,6 +115,12 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     }
 
     private void update() {
+
+        car = carDatabase.find(carId);
+        if(car == null){
+            mListener.onCarRemoved(carId);
+            return;
+        }
 
         carViewHolder.bind(getActivity(), car, userLocation, BluetoothAdapter.getDefaultAdapter());
 
@@ -152,8 +149,9 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (mListener != null) {
-                            mListener.onCarPositionDeleted(car);
+                            mListener.onCarRemoved(carId);
                         }
+                        CarsSync.clearLocation(carDatabase, getActivity(), car);
                         parkedCarDelegate.removeCar();
                     }
                 })
@@ -230,7 +228,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
      */
     public interface OnCarPositionDeletedListener {
 
-        public void onCarPositionDeleted(Car car);
+        public void onCarRemoved(String carId);
 
     }
 

@@ -23,7 +23,7 @@ import java.util.Set;
 public class CarDatabase {
 
     public static final String INTENT_CAR_UPDATE = "com.cahue.iweco.cars.CAR_UPDATED";
-    public static final String INTENT_CAR_EXTRA = "CAR_EXTRA";
+    public static final String INTENT_CAR_EXTRA_ID = "CAR_EXTRA_ID";
 
     private static CarDatabase mInstance;
     private Context context;
@@ -105,7 +105,6 @@ public class CarDatabase {
             if (car.id == null)
                 throw new NullPointerException("Car without an ID");
 
-
             ContentValues values = new ContentValues();
             values.put(Car.COLUMN_SPOT_ID, car.spotId);
             database.update(Car.TABLE_NAME, values, "id = '" + car.id + "'", null);
@@ -151,7 +150,7 @@ public class CarDatabase {
         Log.d(TAG, "Sending car update broadcast");
 
         Intent intent = new Intent(INTENT_CAR_UPDATE);
-        intent.putExtra(INTENT_CAR_EXTRA, car);
+        intent.putExtra(INTENT_CAR_EXTRA_ID, car.id);
         context.sendBroadcast(intent);
     }
 
@@ -200,6 +199,37 @@ public class CarDatabase {
         }
 
         return addresses;
+    }
+
+    /**
+     * Get a Collection of available car ids
+     *
+     * @return
+     */
+    public List<String> getCarIds() {
+        List<String> ids = new ArrayList<>();
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
+        try {
+
+            Cursor cursor = database.query(Car.TABLE_NAME,
+                    new String[]{Car.COLUMN_ID},
+                    null, null, null, null,
+                    Car.COLUMN_TIME + " DESC");
+
+            while (cursor.moveToNext()) {
+                ids.add(cursor.getString(0));
+            }
+            cursor.close();
+
+        } finally {
+            database.close();
+        }
+
+        Log.d(TAG, "Retrieved car ids from DB: " + ids);
+
+        return ids;
     }
 
     /**

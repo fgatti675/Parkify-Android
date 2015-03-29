@@ -48,7 +48,7 @@ public class ParkedCarService extends LocationPollerService {
          */
         if (car.location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             Intent intent = new Intent(this, GeofenceCarService.class);
-            intent.putExtra(LocationPollerService.EXTRA_CAR, car);
+            intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
             PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
             AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             Log.i(TAG, "Starting delayed geofence service");

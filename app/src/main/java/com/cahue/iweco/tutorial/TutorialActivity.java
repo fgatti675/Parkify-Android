@@ -146,7 +146,7 @@ public class TutorialActivity extends Activity
     }
 
     @Override
-    public void onManagerCarClick(Car car) {
+    public void onManagerCarClick(String carId) {
         // Do nothing
     }
 

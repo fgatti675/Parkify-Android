@@ -158,10 +158,10 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Car car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
-            if (car != null) {
-                Log.i(TAG, "Car update received: " + car);
-                getParkedCarDelegate(car).setCar(car);
+            String carId = intent.getExtras().getString(CarDatabase.INTENT_CAR_EXTRA_ID);
+            if (carId != null) {
+                Log.i(TAG, "Car update received: " + carId);
+                getParkedCarDelegate(carId).update();
             }
 
         }
@@ -316,12 +316,12 @@ public class MapsActivity extends BaseActivity
         /**
          * Add delegates
          */
+        if (!"wimc".equals(BuildConfig.FLAVOR))
+            delegates.add(getSpotsDelegate());
 
-        delegates.add(getSpotsDelegate());
-
-        List<Car> cars = carDatabase.retrieveCars(false);
-        for (Car car : cars) {
-            delegates.add(getParkedCarDelegate(car));
+        List<String> carIds = carDatabase.getCarIds();
+        for (String id : carIds) {
+            delegates.add(getParkedCarDelegate(id));
         }
 
         /**
@@ -390,17 +390,17 @@ public class MapsActivity extends BaseActivity
 
 
     /**
-     * @param car
+     * @param carId
      * @return
      */
-    private ParkedCarDelegate getParkedCarDelegate(Car car) {
-        ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id);
+    private ParkedCarDelegate getParkedCarDelegate(String carId) {
+        ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(carId);
         if (parkedCarDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            parkedCarDelegate = ParkedCarDelegate.newInstance(car);
+            parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
             parkedCarDelegate.setRetainInstance(true);
-            transaction.add(parkedCarDelegate, car.id);
+            transaction.add(parkedCarDelegate, carId);
             transaction.commit();
         }
         return parkedCarDelegate;
@@ -516,10 +516,10 @@ public class MapsActivity extends BaseActivity
         // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
 
-        List<Car> cars = carDatabase.retrieveCars(false);
-        for (Car car : cars) {
-            getParkedCarDelegate(car).setCar(car);
-        }
+//        List<Car> cars = carDatabase.retrieveCars(false); // TODO
+//        for (Car car : cars) {
+//            getParkedCarDelegate(car.id).update();
+//        }
 
         setInitialCamera();
 
@@ -700,7 +700,7 @@ public class MapsActivity extends BaseActivity
 
             List<Car> closeCars = new ArrayList<>();
             for (Car car : parkedCars) {
-                ParkedCarDelegate parkedCarDelegate = getParkedCarDelegate(car);
+                ParkedCarDelegate parkedCarDelegate = getParkedCarDelegate(car.id);
                 parkedCarDelegate.onLocationChanged(getUserLocation());
                 if (!parkedCarDelegate.isTooFar()) {
                     closeCars.add(car);
@@ -710,8 +710,8 @@ public class MapsActivity extends BaseActivity
             // One parked car
             if (closeCars.size() == 1) {
                 Car car = closeCars.get(0);
-                getParkedCarDelegate(car).setFollowing(true);
-                onCarClicked(car);
+                getParkedCarDelegate(car.id).setFollowing(true);
+                onCarClicked(car.id);
             }
             // zoom to user otherwise
             else {
@@ -845,14 +845,14 @@ public class MapsActivity extends BaseActivity
     }
 
     @Override
-    public void onCarPositionDeleted(Car car) {
+    public void onCarRemoved(String carId) {
         hideDetails();
     }
 
 
     @Override
-    public void onCarClicked(Car car) {
-        setDetailsFragment(CarDetailsFragment.newInstance(car));
+    public void onCarClicked(String carId) {
+        setDetailsFragment(CarDetailsFragment.newInstance(carId)); // TODO
     }
 
 
@@ -905,9 +905,9 @@ public class MapsActivity extends BaseActivity
     }
 
     @Override
-    public void onCarPositionUpdate(Car selected) {
-        getParkedCarDelegate(selected).setFollowing(true);
-        onCarClicked(selected);
+    public void onCarPositionUpdate(String carId) {
+        getParkedCarDelegate(carId).setFollowing(true);
+        onCarClicked(carId);
     }
 
     @Override
@@ -916,8 +916,8 @@ public class MapsActivity extends BaseActivity
     }
 
     @Override
-    public void onManagerCarClick(Car car) {
-        getParkedCarDelegate(car).setFollowing(true);
+    public void onManagerCarClick(String carId) {
+        getParkedCarDelegate(carId).setFollowing(true);
     }
 
     @Override
@@ -941,7 +941,8 @@ public class MapsActivity extends BaseActivity
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getSpotsDelegate().queryCameraView();
+                if (!"wimc".equals(BuildConfig.FLAVOR))
+                    getSpotsDelegate().queryCameraView();
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(mAccount);
                 else
@@ -955,7 +956,7 @@ public class MapsActivity extends BaseActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next());
+                intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next().id);
                 startService(intent);
             }
         });
@@ -967,7 +968,7 @@ public class MapsActivity extends BaseActivity
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
                 Car car = carDatabase.retrieveCars(false).iterator().next();
-                intent.putExtra(LocationPollerService.EXTRA_CAR, car);
+                intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
                 startService(intent);
             }
         });

@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.cars.database.CarDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -106,7 +107,10 @@ public abstract class LocationPollerService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            car = intent.getExtras().getParcelable(EXTRA_CAR);
+            car = CarDatabase.getInstance(this).find(intent.getExtras().getString(EXTRA_CAR));
+            if(car == null) {
+                Log.e(TAG, "CAR NOT FOUND");
+            }
             start();
         }
         return START_STICKY_COMPATIBILITY;

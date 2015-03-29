@@ -402,7 +402,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                     carViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            callbacks.onManagerCarClick(car);
+                            callbacks.onManagerCarClick(car.id);
                         }
                     });
 
@@ -615,7 +615,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         void devicesBeingLoaded(boolean loading);
 
-        void onManagerCarClick(Car car);
+        void onManagerCarClick(String carId);
 
     }
 }

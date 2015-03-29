@@ -190,7 +190,7 @@ public class GeofenceCarService extends LocationPollerService {
         }
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        intent.putExtra(EXTRA_CAR, car);
+        intent.putExtra(EXTRA_CAR, car.id);
         intent.putExtra(GeofenceTransitionsIntentService.RECEIVER, geofenceResultReceiver);
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when

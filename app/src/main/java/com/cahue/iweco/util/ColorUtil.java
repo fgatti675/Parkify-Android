@@ -19,7 +19,7 @@ public class ColorUtil {
                 * rgb[1] * .691 + rgb[2] * rgb[2] * .068);
 
         // color is light
-        if (brightness >= 200) {
+        if (brightness >= 220) {
             rtnValue = true;
         }
 

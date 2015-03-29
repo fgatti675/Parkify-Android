@@ -63,12 +63,10 @@ public class FetchAddressIntentService extends IntentService {
                     1);
         } catch (IOException ioException) {
             // Catch network or other I/O problems.
-            errorMessage = getString(R.string.service_not_available);
-            Log.e(TAG, errorMessage, ioException);
+            Log.e(TAG, "Service not available", ioException);
         } catch (IllegalArgumentException illegalArgumentException) {
             // Catch invalid latitude or longitude values.
-            errorMessage = getString(R.string.invalid_lat_long_used);
-            Log.e(TAG, errorMessage + ". " +
+            Log.e(TAG, "Invalid lat long" + ". " +
                     "Latitude = " + location.getLatitude() +
                     ", Longitude = " +
                     location.getLongitude(), illegalArgumentException);
@@ -77,8 +75,7 @@ public class FetchAddressIntentService extends IntentService {
         // Handle case where no address was found.
         if (addresses == null || addresses.size() == 0) {
             if (errorMessage.isEmpty()) {
-                errorMessage = getString(R.string.no_address_found);
-                Log.e(TAG, errorMessage);
+                Log.e(TAG, "No address found");
             }
             deliverResultToReceiver(FAILURE_RESULT, errorMessage);
         } else {
@@ -90,7 +87,7 @@ public class FetchAddressIntentService extends IntentService {
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
-            Log.i(TAG, getString(R.string.address_found));
+            Log.i(TAG, "Address found");
             deliverResultToReceiver(SUCCESS_RESULT,
                     TextUtils.join(", ", addressFragments));
         }

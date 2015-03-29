@@ -44,15 +44,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
      * Interface for components listening for the marker click event in the map
      */
     public interface CarSelectedListener {
-        public void onCarClicked(Car car);
+        public void onCarClicked(String carId);
     }
 
     private static final String TAG = ParkedCarDelegate.class.getSimpleName();
 
-    private static final String ARG_CAR = "car";
+    private static final String ARG_CAR_ID = "car";
     private static final int MAX_DIRECTIONS_DISTANCE = 2000;
     private static final int DIRECTIONS_EXPIRY = 30000;
 
+    private String carId;
     private Car car;
 
     // too far from the car to calculate directions
@@ -90,19 +91,19 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private GMapV2Direction directionsDelegate;
 
     private Date lastDirectionsUpdate;
-    private CarDatabase carDatabase;
 
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
+     * @param carId
      * @return A new instance of fragment CarDetailsFragment.
      */
-    public static ParkedCarDelegate newInstance(Car car) {
+    public static ParkedCarDelegate newInstance(String carId) {
         ParkedCarDelegate fragment = new ParkedCarDelegate();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_CAR, car);
+        args.putString(ARG_CAR_ID, carId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -135,9 +136,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         iconGenerator = new IconGenerator(getActivity());
         directionsDelegate = new GMapV2Direction();
 
-        carDatabase = CarDatabase.getInstance(getActivity());
-
-        this.car = getArguments().getParcelable(ARG_CAR);
+        this.carId = getArguments().getString(ARG_CAR_ID);
+        Log.i(TAG, "onCreate " + carId);
     }
 
     @Override
@@ -146,9 +146,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         doDraw();
     }
 
-    public void setCar(Car car) {
+    public void update() {
 
-        this.car = car;
+        this.car = CarDatabase.getInstance(getActivity()).find(carId);
 
         if (!isResumed()) return;
 
@@ -168,7 +168,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         this.mMap = map;
 
-        setCar(this.car);
+        update();
     }
 
 
@@ -217,7 +217,13 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
      */
     private void drawCar() {
 
-        if (car == null || car.location == null) {
+        if (car == null) {
+            Log.e(TAG, "Car is null");
+            return;
+        }
+
+
+        if (car.location == null) {
             return;
         }
 
@@ -255,7 +261,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     public void removeCar() {
-        CarsSync.clearLocation(carDatabase, getActivity(), car);
         clear();
     }
 
@@ -446,7 +451,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
-            carSelectedListener.onCarClicked(car);
+            carSelectedListener.onCarClicked(carId);
             setFollowing(true);
         } else {
             setFollowing(false);

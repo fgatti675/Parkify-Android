@@ -20,6 +20,8 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
 
     private Car car;
     private Context context;
+    private CarDatabase database;
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -29,7 +31,10 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             return;
         }
 
-        car = (Car) intent.getExtras().get(CarDatabase.INTENT_CAR_EXTRA);
+        database = CarDatabase.getInstance(context);
+
+        String carId = intent.getExtras().getString(CarDatabase.INTENT_CAR_EXTRA_ID);
+        car = database.find(carId);
 
         /**
          * Location is set but the address isn't, so let's try to fetch it
@@ -58,12 +63,12 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;
 
-            CarDatabase database = CarDatabase.getInstance(context);
             // check the address hasn't changed
             Car currentCar = database.find(car.id);
             if (currentCar == null) return;
 
-            if(currentCar.location != car.location) {
+            if (currentCar.location.getLatitude() != car.location.getLatitude()
+                    || currentCar.location.getLongitude() != car.location.getLongitude()) {
                 fetchAddress(context, currentCar);
                 return;
             }

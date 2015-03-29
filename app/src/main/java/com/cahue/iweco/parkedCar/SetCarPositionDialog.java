@@ -35,7 +35,7 @@ public class SetCarPositionDialog extends DialogFragment {
     private Callbacks mCallbacks;
 
     public interface Callbacks{
-        void onCarPositionUpdate(Car selected);
+        void onCarPositionUpdate(String carId);
     }
 
     private final static String TAG = SetCarPositionDialog.class.getSimpleName();
@@ -136,14 +136,14 @@ public class SetCarPositionDialog extends DialogFragment {
         // If ok, we just send and intent and leave the location receivers to do all the work
         CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
         CarsSync.storeCar(carDatabase, getActivity(), car);
-        mCallbacks.onCarPositionUpdate(car);
+        mCallbacks.onCarPositionUpdate(car.id);
 
         /**
          * In debug mode we set a geofence
          */
         if (BuildConfig.DEBUG) {
             Intent intent = new Intent(getActivity(), GeofenceCarService.class);
-            intent.putExtra(LocationPollerService.EXTRA_CAR, car);
+            intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
             getActivity().startService(intent);
         }
     }

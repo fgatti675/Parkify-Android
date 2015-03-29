@@ -65,7 +65,7 @@ public class CarManagerActivity
     }
 
     @Override
-    public void onManagerCarClick(Car car) {
+    public void onManagerCarClick(String carId) {
         // TODO : nothing?
     }
 
