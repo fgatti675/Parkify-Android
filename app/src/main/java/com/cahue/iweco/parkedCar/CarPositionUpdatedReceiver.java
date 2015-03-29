@@ -35,12 +35,16 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
          * Location is set but the address isn't, so let's try to fetch it
          */
         if (car.address == null && car.location != null) {
-            Intent fetchAddressIntent = new Intent(context, FetchAddressIntentService.class);
-            fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
-            fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, car.location);
-            context.startService(fetchAddressIntent);
+            fetchAddress(context, car);
         }
 
+    }
+
+    private void fetchAddress(Context context, Car car) {
+        Intent fetchAddressIntent = new Intent(context, FetchAddressIntentService.class);
+        fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
+        fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, car.location);
+        context.startService(fetchAddressIntent);
     }
 
     class AddressResultReceiver extends ResultReceiver {
@@ -54,10 +58,20 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;
 
+            CarDatabase database = CarDatabase.getInstance(context);
+            // check the address hasn't changed
+            Car currentCar = database.find(car.id);
+            if (currentCar == null) return;
+
+            if(currentCar.location != car.location) {
+                fetchAddress(context, currentCar);
+                return;
+            }
+
             // Display the address string
             // or an error message sent from the intent service.
             car.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-            CarDatabase.getInstance(context).saveAndBroadcast(car);
+            database.saveAndBroadcast(car);
 
         }
     }

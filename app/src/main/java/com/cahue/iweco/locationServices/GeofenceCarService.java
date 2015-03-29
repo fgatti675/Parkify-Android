@@ -22,6 +22,8 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.Arrays;
+
 /**
  * This service is in charge of detecting if the user is far away enough after parking, and if so,
  * setting a geofence around it.
@@ -131,6 +133,11 @@ public class GeofenceCarService extends LocationPollerService {
 
                         Log.d(TAG, "Geofence, onConnected");
 
+                        LocationServices.GeofencingApi.removeGeofences(
+                                mGeofenceApiClient,
+                                Arrays.asList(car.id)
+                        );
+
                         /**
                          * Create a geofence around the car
                          */
@@ -144,7 +151,7 @@ public class GeofenceCarService extends LocationPollerService {
                                 )
                                 .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
-                                .setLoiteringDelay(5000)
+                                .setLoiteringDelay(2000)
                                 .build();
 
                         GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()

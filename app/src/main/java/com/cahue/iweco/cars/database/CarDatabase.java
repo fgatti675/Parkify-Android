@@ -90,7 +90,7 @@ public class CarDatabase {
     }
 
     /**
-     * Persist date about a car, location included
+     * Update the spot ID of a parked car
      *
      * @param car
      */
@@ -235,6 +235,35 @@ public class CarDatabase {
         return cars;
     }
 
+    public Car find(String id) {
+        Car car;
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
+        try {
+            Cursor cursor = database.query(Car.TABLE_NAME,
+                    PROJECTION,
+                    Car.COLUMN_ID + " = '" + id + "'",
+                    null, null, null, null);
+
+            if (cursor.getCount() == 0) return null;
+
+            if (cursor.getCount() > 1)
+                throw new IllegalStateException("Can't have more than 1 car with the same ID");
+
+            cursor.moveToFirst();
+
+            car = cursorToCar(cursor);
+            cursor.close();
+
+            Log.d(TAG, "Retrieved car by ID: " + car);
+
+        } finally {
+            database.close();
+        }
+
+        return car;
+
+    }
 
     public Car findByBTAddress(String btAddress) {
         Car car;
