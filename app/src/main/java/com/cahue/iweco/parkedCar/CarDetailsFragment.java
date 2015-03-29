@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
@@ -55,10 +56,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String carId = intent.getExtras().getString(CarDatabase.INTENT_CAR_EXTRA_ID);
+            String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId.equals(CarDetailsFragment.this.carId)) {
-                Log.d(TAG, "Received car " + carId);
-                update();
+                Log.d(TAG, "Received car update request" + carId);
+                updateLayout();
             }
         }
 
@@ -102,9 +103,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         super.onResume();
 
         Log.d(TAG, "Register receiver");
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
 
-        update();
+        updateLayout();
 
     }
 
@@ -114,7 +116,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         getActivity().unregisterReceiver(carUpdatedReceiver);
     }
 
-    private void update() {
+    private void updateLayout() {
 
         car = carDatabase.find(carId);
         if(car == null){

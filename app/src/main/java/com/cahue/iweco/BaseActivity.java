@@ -162,7 +162,7 @@ public abstract class BaseActivity
 
     }
 
-    protected void reconnect() {
+    protected void connect() {
         if(mGoogleApiClient.isConnected()){
             mGoogleApiClient.disconnect();
         }

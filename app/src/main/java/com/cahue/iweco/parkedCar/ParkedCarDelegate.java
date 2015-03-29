@@ -143,7 +143,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public void onResume() {
         super.onResume();
-        doDraw();
+        update();
+        Log.i(TAG, "c " + carId);
     }
 
     public void update() {
@@ -165,9 +166,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     @Override
     public void onMapReady(GoogleMap map) {
-
         this.mMap = map;
-
         update();
     }
 
@@ -221,7 +220,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
             Log.e(TAG, "Car is null");
             return;
         }
-
 
         if (car.location == null) {
             return;

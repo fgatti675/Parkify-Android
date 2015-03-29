@@ -92,7 +92,7 @@ public class SpotDetailsFragment extends DetailsFragment {
     public void onResume() {
         super.onResume();
         updateDistance();
-        updateRectangle();
+        updateImage();
         updateTimeAgo();
     }
 
@@ -105,9 +105,13 @@ public class SpotDetailsFragment extends DetailsFragment {
         }
     }
 
-    private void updateRectangle() {
-        GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
-        gradientDrawable.setStroke((int) Util.dpToPx(getActivity(), 8), getResources().getColor(spot.getMarkerType().colorId));
+    private void updateImage() {
+        if (spot.future) {
+            rectangleImage.setImageResource(R.drawable.map_marker_future);
+        } else {
+            GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
+            gradientDrawable.setStroke((int) Util.dpToPx(getActivity(), 8), getResources().getColor(spot.getMarkerType().colorId));
+        }
     }
 
     private void updateDistance() {

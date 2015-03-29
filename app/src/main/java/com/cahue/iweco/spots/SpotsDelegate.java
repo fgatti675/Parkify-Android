@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.CameraUpdateRequester;
+import com.cahue.iweco.R;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.google.android.gms.maps.GoogleMap;
@@ -301,7 +302,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
     @Override
     public void onIOError() {
-        Toast.makeText(getActivity(), "Check internet connection", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), R.string.check_internet, Toast.LENGTH_SHORT).show();
     }
 
     int displayedMarkers;
@@ -321,6 +322,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         }
 
         for (final ParkingSpot parkingSpot : spots) {
+
+            Log.v(TAG, parkingSpot.toString());
 
             if (displayedMarkers > MARKERS_LIMIT) {
                 Log.v(TAG, "Marker display limit reached");

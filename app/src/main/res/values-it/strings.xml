@@ -54,5 +54,6 @@
     <string name="sync_error">Errore durante la sincronizzazione</string>
 
     <string name="aboutToLeave">Libero fra poco!</string>
+    <string name="check_internet">Controllare la connessione a Internet</string>
 
 </resources>

@@ -29,4 +29,16 @@ public class Constants {
     public static final float GEOFENCE_RADIUS_IN_METERS = 60;
 
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 8 * 60 * 60 * 1000;
+
+    /**
+     * Intents
+     */
+
+    // updated address
+    public static final String INTENT_ADDRESS_UPDATE = BuildConfig.APPLICATION_ID + ".INTENT_ADDRESS_UPDATE";
+    public static final String INTENT_EXTRA_ADDRESS = BuildConfig.APPLICATION_ID + ".EXTRA_ADDRESS";
+
+    // updated car
+    public static final String INTENT_CAR_UPDATE = BuildConfig.APPLICATION_ID +  ".INTENT_CAR_UPDATED";
+    public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ID";
 }

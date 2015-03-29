@@ -10,11 +10,6 @@ import android.net.Uri;
  */
 public class CarsProvider extends ContentProvider {
 
-    /**
-     * Content provider authority.
-     */
-    public static final String CONTENT_AUTHORITY = "com.cahue.iweco.cars";
-
     public static final long SYNC_FREQUENCY = 5 * 60;  // 3 hour (in seconds)
 
     /*

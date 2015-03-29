@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.util.Log;
 
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.Car;
 
 import java.util.ArrayList;
@@ -21,9 +22,6 @@ import java.util.Set;
  * Created by Francesco on 22/01/2015.
  */
 public class CarDatabase {
-
-    public static final String INTENT_CAR_UPDATE = "com.cahue.iweco.cars.CAR_UPDATED";
-    public static final String INTENT_CAR_EXTRA_ID = "CAR_EXTRA_ID";
 
     private static CarDatabase mInstance;
     private Context context;
@@ -117,6 +115,33 @@ public class CarDatabase {
     }
 
     /**
+     * Update the spot ID of a parked car
+     *
+     * @param car
+     */
+    public void updateAddress(Car car) {
+
+        Log.i(TAG, "Updating address: " + car);
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+
+        try {
+            if (car.id == null)
+                throw new NullPointerException("Car without an ID");
+
+            ContentValues values = new ContentValues();
+            values.put(Car.COLUMN_ADDRESS, car.address);
+            database.update(Car.TABLE_NAME, values, "id = '" + car.id + "'", null);
+
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+
+    }
+
+    /**
      * Persist date about a car, location included
      *
      * @param car
@@ -149,8 +174,8 @@ public class CarDatabase {
 
         Log.d(TAG, "Sending car update broadcast");
 
-        Intent intent = new Intent(INTENT_CAR_UPDATE);
-        intent.putExtra(INTENT_CAR_EXTRA_ID, car.id);
+        Intent intent = new Intent(Constants.INTENT_CAR_UPDATE);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         context.sendBroadcast(intent);
     }
 

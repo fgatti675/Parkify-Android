@@ -103,7 +103,7 @@
             android:name="com.cahue.iweco.parkedCar.CarPositionUpdatedReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.cahue.iweco.cars.CAR_UPDATED" />
+                <action android:name="com.cahue.iweco.INTENT_CAR_UPDATED" />
             </intent-filter>
         </receiver>
 

@@ -50,5 +50,6 @@
     <string name="login_error" >Login error</string>
     <string name="sync_error">Error synchronizing</string>
     <string name="aboutToLeave">About to be free!</string>
+    <string name="check_internet">Check internet connection</string>
 
 </resources>

@@ -15,6 +15,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.cahue.iweco.R;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.login.GCMUtil;
 
@@ -160,7 +161,7 @@ public class Requests {
         Map<String, String> headers = new HashMap<>();
 
         AccountManager accountManager = AccountManager.get(context);
-        final Account availableAccounts[] = accountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
+        final Account availableAccounts[] = accountManager.getAccountsByType(context.getString(R.string.account_type));
 
         String authToken = null;
         try {

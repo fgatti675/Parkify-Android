@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/debug_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/my_location"
+    android:layout_alignRight="@+id/my_location"
+    android:layout_alignEnd="@+id/my_location"
+    android:orientation="vertical"
+    android:visibility="gone"
+    android:gravity="right"
+    tools:showIn="@layout/activity_main">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="REFRESH"
+        android:id="@+id/refresh" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableTop="@drawable/ic_car_white_24dp"
+        android:id="@+id/approaching"
+        android:text="Approaching"
+        android:textColor="@color/white"
+        android:layout_above="@+id/park" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableTop="@drawable/ic_car_white_24dp"
+        android:id="@+id/park"
+        android:text="Park"
+        android:textColor="@color/white"
+        android:layout_above="@+id/driveOff" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableTop="@drawable/ic_car_white_24dp"
+        android:id="@+id/driveOff"
+        android:text="Drive off"
+        android:textColor="@color/white" />
+
+</LinearLayout>

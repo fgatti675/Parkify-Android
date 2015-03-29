@@ -53,5 +53,6 @@
     <string name="login_error">Error al registrarse</string>
     <string name="sync_error">Error durante la sincronizacion</string>
     <string name="aboutToLeave">¡Apunto de quedarse libre!</string>
+    <string name="check_internet">Comprueba tu conexión</string>
 
 </resources>

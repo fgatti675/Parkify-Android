@@ -61,5 +61,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"/>
 
+        <include layout="@layout/debug_layout" />
+
     </RelativeLayout>
 </LinearLayout>

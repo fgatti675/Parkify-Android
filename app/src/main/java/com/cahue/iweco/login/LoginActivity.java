@@ -21,7 +21,6 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
-import com.cahue.iweco.cars.database.CarsProvider;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -42,7 +41,6 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
 
-
     // UI references.
     private View mProgressView;
     private View mButtonsLayout;
@@ -51,7 +49,6 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
     private AccountManager mAccountManager;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,13 +100,13 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     private void login() {
         setLoading(true);
-        reconnect();
         signIn();
+        connect();
     }
 
     @Override
     protected void onSignInRequired() {
-        signIn();
+//        Toast.makeText(this, R.string.check_internet, Toast.LENGTH_SHORT).show();
     }
 
     protected void onGoogleAuthTokenSet(final String authToken) {
@@ -279,7 +276,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
         final Intent resultIntent = new Intent();
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email);
-        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Authenticator.ACCOUNT_TYPE);
+        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.account_type));
         resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
@@ -296,7 +293,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
         String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
         String refreshToken = intent.getStringExtra(AccountManager.KEY_PASSWORD);
-        String authTokenType = Authenticator.ACCOUNT_TYPE;
+        String authTokenType = getString(R.string.account_type);
 
         // Creating the account on the device and setting the auth token we got
         // (Not setting the auth token will cause another call to the server to authenticate the user)
@@ -306,9 +303,9 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         mAccountManager.setAuthToken(account, authTokenType, authToken);
 
         // Inform the system that this account supports sync
-        ContentResolver.setIsSyncable(account, CarsProvider.CONTENT_AUTHORITY, 1);
+        ContentResolver.setIsSyncable(account, getString(R.string.content_authority), 1);
         // Inform the system that this account is eligible for auto sync when the network is up
-        ContentResolver.setSyncAutomatically(account, CarsProvider.CONTENT_AUTHORITY, true);
+        ContentResolver.setSyncAutomatically(account, getString(R.string.content_authority), true);
         // Recommend a schedule for automatic synchronization. The system may modify this based
         // on other scheduled syncs and network utilization.
 //        ContentResolver.addPeriodicSync(

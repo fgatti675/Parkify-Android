@@ -158,7 +158,7 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String carId = intent.getExtras().getString(CarDatabase.INTENT_CAR_EXTRA_ID);
+            String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId != null) {
                 Log.i(TAG, "Car update received: " + carId);
                 getParkedCarDelegate(carId).update();
@@ -216,7 +216,7 @@ public class MapsActivity extends BaseActivity
     }
 
     private void clearAccounts() {
-        for (Account account : mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE))
+        for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
             mAccountManager.removeAccount(account, null, null);
     }
 
@@ -234,7 +234,7 @@ public class MapsActivity extends BaseActivity
         carDatabase = CarDatabase.getInstance(this);
 
         mAccountManager = AccountManager.get(this);
-        final Account[] availableAccounts = mAccountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
+        final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
 
         if (availableAccounts.length == 0 && !isSkippedLogin()) {
             goToLogin();
@@ -517,11 +517,11 @@ public class MapsActivity extends BaseActivity
         super.onResume();
 
         // when our activity resumes, we want to register for car updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(CarDatabase.INTENT_CAR_UPDATE));
+        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
 
-//        List<Car> cars = carDatabase.retrieveCars(false); // TODO
-//        for (Car car : cars) {
-//            getParkedCarDelegate(car.id).update();
+//        List<String> carIds = carDatabase.getCarIds();
+//        for (String id : carIds) {
+//            getParkedCarDelegate(id).update();
 //        }
 
         setInitialCamera();
@@ -939,6 +939,10 @@ public class MapsActivity extends BaseActivity
      */
     private void setDebugConfig() {
 
+        View debugLayout = findViewById(R.id.debug_layout);
+        if(debugLayout == null) return;
+        debugLayout.setVisibility(View.VISIBLE);
+
         Button refresh = (Button) findViewById(R.id.refresh);
         refresh.setVisibility(View.VISIBLE);
         refresh.setOnClickListener(new View.OnClickListener() {
@@ -947,7 +951,7 @@ public class MapsActivity extends BaseActivity
                 if (!"wimc".equals(BuildConfig.FLAVOR))
                     getSpotsDelegate().queryCameraView();
                 if (mAccount != null)
-                    CarsSync.TriggerRefresh(mAccount);
+                    CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
                 else
                     Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT);
             }

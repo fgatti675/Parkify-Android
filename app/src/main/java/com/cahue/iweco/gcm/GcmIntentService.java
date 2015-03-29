@@ -2,12 +2,17 @@ package com.cahue.iweco.gcm;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
+import com.cahue.iweco.MapsActivity;
+import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -90,6 +95,8 @@ public class GcmIntentService extends IntentService {
 
     private void saveCar(String carJson) throws JSONException {
         Car car = Car.fromJSON(new JSONObject(carJson));
+        if (BuildConfig.DEBUG)
+            sendNotification(car.toString());
         CarDatabase.getInstance(this).saveAndBroadcast(car);
     }
 
@@ -100,26 +107,26 @@ public class GcmIntentService extends IntentService {
 
     public static final int NOTIFICATION_ID = 1;
 
-//    // Put the message into a notification and post it.
-//    // This is just one simple example of what you might choose to do with
-//    // a GCM message.
-//    private void sendNotification(String msg) {
-//        mNotificationManager = (NotificationManager)
-//                this.getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-//                new Intent(this, MapsActivity.class), 0);
-//
-//        NotificationCompat.Builder mBuilder =
-//                new NotificationCompat.Builder(this)
-//                        .setSmallIcon(R.drawable.ic_stat_gcm)
-//                        .setContentTitle("GCM Notification")
-//                        .setStyle(new NotificationCompat.BigTextStyle()
-//                                .bigText(msg))
-//                        .setContentText(msg);
-//
-//        mBuilder.setContentIntent(contentIntent);
-//        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-//    }
+    // Put the message into a notification and post it.
+    // This is just one simple example of what you might choose to do with
+    // a GCM message.
+    private void sendNotification(String msg) {
+        mNotificationManager = (NotificationManager)
+                this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, MapsActivity.class), 0);
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_stat_gcm)
+                        .setContentTitle("GCM Notification")
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(msg))
+                        .setContentText(msg);
+
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    }
 }
 
