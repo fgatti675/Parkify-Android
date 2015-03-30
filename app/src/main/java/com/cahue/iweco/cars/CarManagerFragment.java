@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.util.DividerItemDecoration;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -120,6 +121,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity()));
 
         adapter = new RecyclerViewCarsAdapter();
 

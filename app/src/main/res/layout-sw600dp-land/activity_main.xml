@@ -48,6 +48,7 @@
             android:layout_alignParentBottom="true"
             android:visibility="invisible"
             android:elevation="@dimen/elevation"
+            android:padding="@dimen/default_padding"
             tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
         <include

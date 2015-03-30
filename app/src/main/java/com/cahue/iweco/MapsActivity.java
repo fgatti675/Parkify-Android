@@ -885,7 +885,7 @@ public class MapsActivity extends BaseActivity
             zoomToMyLocation();
             myLocationButton.setImageResource(R.drawable.ic_action_maps_my_location_accent);
         } else {
-            myLocationButton.setImageResource(R.drawable.ic_action_maps_my_location);
+            myLocationButton.setImageResource(R.drawable.ic_maps_my_location);
         }
 
     }
