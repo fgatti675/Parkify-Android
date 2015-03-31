@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.R;
@@ -27,14 +28,7 @@ public class TutorialActivity extends Activity
         EditCarDialog.CarEditedListener,
         ViewPager.OnPageChangeListener {
 
-    // TODO: not used, but it should
-    private static final Map<Integer, Class> positionFragmentMap = new HashMap() {{
-        put(0, TutorialWelcomeFragment.class);
-        put(1, TutorialInstructionsFragment.class);
-        put(2, CarManagerFragment.class);
-    }};
-
-    private static final int TOTAL_NUMBER_PAGES = 3;
+    private static final int TOTAL_NUMBER_PAGES = "wimc".equals(BuildConfig.FLAVOR) ? 3 : 4;
     private static final String TAG = TutorialActivity.class.getSimpleName();
 
     /**
@@ -103,7 +97,12 @@ public class TutorialActivity extends Activity
 
         background.getDrawable(0).setAlpha(0); // this is the lowest drawable
         background.getDrawable(1).setAlpha(0);
-        background.getDrawable(2).setAlpha(255); // this is the upper one
+        if("wimc".equals(BuildConfig.FLAVOR)){
+            background.getDrawable(2).setAlpha(255); // this is the upper one
+        }else {
+            background.getDrawable(2).setAlpha(0);
+            background.getDrawable(3).setAlpha(255); // this is the upper one
+        }
 
         mViewPager.setPageTransformer(true, new ViewPager.PageTransformer() {
             @Override
@@ -203,9 +202,12 @@ public class TutorialActivity extends Activity
                 case 0:
                     return TutorialWelcomeFragment.newInstance();
                 case 1:
-                    return TutorialInstructionsFragment.newInstance();
+                    return TutorialInstructionsFragment.newInstance(R.string.info_parking_text, TutorialInstructionsFragment.TYPE_PARKING);
                 case 2:
-                    if(carManagerFragment == null)
+                    if(!"wimc".equals(BuildConfig.FLAVOR))
+                        return TutorialInstructionsFragment.newInstance(R.string.info_spots_text, TutorialInstructionsFragment.TYPE_SPOTS);
+                case 3:
+                    if (carManagerFragment == null)
                         carManagerFragment = CarManagerFragment.newInstance();
                     return carManagerFragment;
             }
@@ -221,12 +223,17 @@ public class TutorialActivity extends Activity
         public boolean isViewFromObject(View view, Object object) {
             if (object instanceof TutorialWelcomeFragment) {
                 view.setTag(0);
-            }
-            else if (object instanceof TutorialInstructionsFragment) {
-                view.setTag(1);
-            }
-            else if (object instanceof CarManagerFragment) {
-                view.setTag(2);
+            } else if (object instanceof TutorialInstructionsFragment) {
+                if (((TutorialInstructionsFragment) object).getType().equals(TutorialInstructionsFragment.TYPE_PARKING))
+                    view.setTag(1);
+                else if (((TutorialInstructionsFragment) object).getType().equals(TutorialInstructionsFragment.TYPE_SPOTS))
+                    view.setTag(2);
+            } else if (object instanceof CarManagerFragment) {
+                if("wimc".equals(BuildConfig.FLAVOR)) {
+                    view.setTag(2);
+                } else{
+                    view.setTag(3);
+                }
             }
             return super.isViewFromObject(view, object);
         }
@@ -234,7 +241,7 @@ public class TutorialActivity extends Activity
 
     @Override
     public void onCarEdited(Car car, boolean newCar) {
-        ((CarManagerFragment) mSectionsPagerAdapter.getItem(2)).onCarEdited(car, newCar);
+        ((CarManagerFragment) mSectionsPagerAdapter.getItem("wimc".equals(BuildConfig.FLAVOR) ? 2 : 3)).onCarEdited(car, newCar);
     }
 
 }

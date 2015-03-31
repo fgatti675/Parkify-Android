@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:background="@color/background_translucent"
             android:padding="@dimen/large_padding"
-            android:text="@string/info_text"
+            android:text="@string/info_parking_text"
             android:id="@+id/textView"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true" />

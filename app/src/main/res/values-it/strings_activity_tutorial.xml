@@ -2,7 +2,7 @@
 <resources>
 
     <string name="welcome">Benvenuto</string>
-    <string name="info_text">Questa applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.</string>
+    <string name="info_parking_text">Questa applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.</string>
     <string name="next">Seguente</string>
     <string name="previous">Precedente</string>
 

@@ -15,13 +15,6 @@
             android:src="@drawable/map_sample" />
     </item>
 
-    <item >
-        <bitmap
-            android:id="@+id/Idofbg2"
-            android:gravity="center"
-            android:src="@drawable/map_sample" />
-    </item>
-
     <item android:drawable="@android:color/transparent">
     </item>
 
