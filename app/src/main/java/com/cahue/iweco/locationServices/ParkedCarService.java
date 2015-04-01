@@ -5,12 +5,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;
 
@@ -24,14 +26,13 @@ public class ParkedCarService extends LocationPollerService {
 
     private final static String TAG = ParkedCarService.class.getSimpleName();
 
-
     @Override
     protected boolean checkPreconditions(Car car) {
         return true;
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car) {
+    public void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient) {
 
         Log.i(TAG, "Received : " + location);
 
@@ -52,7 +53,7 @@ public class ParkedCarService extends LocationPollerService {
             PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
             AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             Log.i(TAG, "Starting delayed geofence service");
-            alarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 2 * 60 * 1000, pIntent);
+            alarm.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 60 * 1000, pIntent);
         }
 
     }

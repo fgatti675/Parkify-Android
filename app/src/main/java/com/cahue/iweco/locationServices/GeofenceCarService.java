@@ -35,7 +35,6 @@ public class GeofenceCarService extends LocationPollerService {
     private PendingIntent mGeofencePendingIntent;
 
     private GoogleApiClient mGeofenceApiClient;
-
     /**
      * Result receiver that will send a notification when we are approaching a parked car.
      */
@@ -53,13 +52,34 @@ public class GeofenceCarService extends LocationPollerService {
                 ParkingSpotSender.doPostSpotLocation(GeofenceCarService.this, getCar().location, true, getCar());
             }
 
-            // remove the geofence we just entered
-            LocationServices.GeofencingApi.removeGeofences(
-                    mGeofenceApiClient,
-                    mGeofencePendingIntent
-            );
+            mGeofenceApiClient = new GoogleApiClient.Builder(getBaseContext())
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                        @Override
+                        public void onConnected(Bundle bundle) {
 
-            mGeofenceApiClient.disconnect();
+                            Log.d(TAG, "Geofence, onConnected");
+
+                            // remove the geofence we just entered
+                            LocationServices.GeofencingApi.removeGeofences(
+                                    mGeofenceApiClient,
+                                    mGeofencePendingIntent
+                            );
+
+                            mGeofenceApiClient.disconnect();
+
+                            Log.i(TAG, "Geofence added");
+                        }
+
+                        @Override
+                        public void onConnectionSuspended(int i) {
+                            Log.d(TAG, "Geofence, connection suspended");
+                            mGeofenceApiClient.disconnect();
+                        }
+                    })
+                    .build();
+
+            mGeofenceApiClient.connect();
         }
     };
 
@@ -69,8 +89,8 @@ public class GeofenceCarService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car) {
-        
+    public void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient) {
+
         if (car.location == null) return;
 
         if (car.location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
@@ -120,66 +140,49 @@ public class GeofenceCarService extends LocationPollerService {
 //            return;
 //        }
 
-        addGeofence(car);
+        addGeofence(car, googleApiClient);
     }
 
-    private void addGeofence(final Car car) {
+    private void addGeofence(final Car car, GoogleApiClient googleApiClient) {
 
-        mGeofenceApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
+        LocationServices.GeofencingApi.removeGeofences(
+                googleApiClient,
+                Arrays.asList(car.id)
+        );
 
-                        Log.d(TAG, "Geofence, onConnected");
-
-                        LocationServices.GeofencingApi.removeGeofences(
-                                mGeofenceApiClient,
-                                Arrays.asList(car.id)
-                        );
-
-                        /**
-                         * Create a geofence around the car
-                         */
-                        Geofence geofence = new Geofence.Builder()
-                                // Set the request ID of the geofence. This is a string to identify this geofence.
-                                .setRequestId(car.id)
-                                .setCircularRegion(
-                                        car.location.getLatitude(),
-                                        car.location.getLongitude(),
-                                        Constants.GEOFENCE_RADIUS_IN_METERS
-                                )
-                                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
-                                .setLoiteringDelay(2000)
-                                .build();
-
-                        GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
-                                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                                .addGeofence(geofence)
-                                .build();
-
-                        LocationServices.GeofencingApi.addGeofences(
-                                mGeofenceApiClient,
-                                geofencingRequest,
-                                getGeofencePendingIntent(car)
-                        );
-
-                        if (BuildConfig.DEBUG) {
-                            notifyGeofenceAdded(car);
-                        }
-
-                        Log.i(TAG, "Geofence added");
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.d(TAG, "Geofence, connection suspended");
-                    }
-                })
+        /**
+         * Create a geofence around the car
+         */
+        Geofence geofence = new Geofence.Builder()
+                // Set the request ID of the geofence. This is a string to identify this geofence.
+                .setRequestId(car.id)
+                .setCircularRegion(
+                        car.location.getLatitude(),
+                        car.location.getLongitude(),
+                        Constants.GEOFENCE_RADIUS_IN_METERS
+                )
+                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(2000)
                 .build();
 
-        mGeofenceApiClient.connect();
+        GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(geofence)
+                .build();
+
+        LocationServices.GeofencingApi.addGeofences(
+                googleApiClient,
+                geofencingRequest,
+                getGeofencePendingIntent(car)
+        );
+
+        if (BuildConfig.DEBUG) {
+            notifyGeofenceAdded(car);
+        }
+
+
+        Log.i(TAG, "Geofence added");
     }
 
     private PendingIntent getGeofencePendingIntent(Car car) {
@@ -195,7 +198,7 @@ public class GeofenceCarService extends LocationPollerService {
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
-        mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mGeofencePendingIntent = PendingIntent.getService(this, car.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return mGeofencePendingIntent;
     }
 

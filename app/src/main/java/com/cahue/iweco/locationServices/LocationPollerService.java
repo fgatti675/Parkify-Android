@@ -164,6 +164,7 @@ public abstract class LocationPollerService extends Service implements
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, 2000, pActivityRecognitionIntent);
     }
 
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -207,7 +208,7 @@ public abstract class LocationPollerService extends Service implements
         extras.putSerializable(EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
-        onPreciseFixPolled(this, location, car);
+        onPreciseFixPolled(this, location, car, mGoogleApiClient);
         fixNotified = true;
         finish();
     }
@@ -223,12 +224,12 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Called after the first precise enough fix is received, or after {@link #PRECISE_FIX_TIMEOUT_MS}
      * is reached.
-     *
-     * @param context
+     *  @param context
      * @param location
      * @param car
+     * @param googleApiClient A connected GoogleApiClient
      */
-    public abstract void onPreciseFixPolled(Context context, Location location, Car car);
+    public abstract void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient);
 
 
     @Override

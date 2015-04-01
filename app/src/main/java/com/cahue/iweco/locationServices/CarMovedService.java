@@ -2,30 +2,17 @@ package com.cahue.iweco.locationServices;
 
 import android.content.Context;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
-import com.cahue.iweco.util.Singleton;
-import com.cahue.iweco.util.Requests;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.cahue.iweco.spots.ParkingSpotSender;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -53,7 +40,7 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location spotLocation, Car car) {
+    public void onPreciseFixPolled(Context context, Location spotLocation, Car car, GoogleApiClient googleApiClient) {
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);
 
@@ -74,36 +61,17 @@ public class CarMovedService extends LocationPollerService {
         }
 
         CarsSync.clearLocation(carDatabase, this, car);
-        clearGeofence(car);
+        clearGeofence(car, googleApiClient);
     }
 
-    private GoogleApiClient mGeofenceApiClient;
 
-    private void clearGeofence(final Car car){
-        mGeofenceApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
 
-                        Log.d(TAG, "Geofence, onConnected");
-                        LocationServices.GeofencingApi.removeGeofences(
-                                mGeofenceApiClient,
-                                Arrays.asList(car.id)
-                        );
-                        Log.d(TAG, "Geofence removed");
-                        mGeofenceApiClient.disconnect();
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.d(TAG, "Geofence, connection suspended");
-                        mGeofenceApiClient.disconnect();
-                    }
-                })
-                .build();
-
-        mGeofenceApiClient.connect();
+    private void clearGeofence(final Car car, GoogleApiClient googleApiClient){
+        LocationServices.GeofencingApi.removeGeofences(
+                googleApiClient,
+                Arrays.asList(car.id)
+        );
+        Log.d(TAG, "Geofence removed");
     }
 
 }
