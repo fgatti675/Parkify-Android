@@ -52,4 +52,8 @@
     <string name="aboutToLeave">About to be free!</string>
     <string name="check_internet">Check internet connection</string>
 
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 </resources>

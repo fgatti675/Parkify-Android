@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -90,7 +91,8 @@ public class MapsActivity extends BaseActivity
         EditCarDialog.CarEditedListener,
         CameraManager,
         OnMapReadyCallback,
-        CameraUpdateRequester {
+        CameraUpdateRequester,
+        NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     protected static final String TAG = "Maps";
 
@@ -123,6 +125,10 @@ public class MapsActivity extends BaseActivity
 
     private boolean cameraFollowing;
 
+    /**
+     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     */
+    private NavigationDrawerFragment mNavigationDrawerFragment;
 
     /**
      * Car fragment manager, just there if there are 2 panels
@@ -257,6 +263,8 @@ public class MapsActivity extends BaseActivity
 
         activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
+        setUpNavigationDrawer();
+
         if (BuildConfig.DEBUG) {
             setDebugConfig();
         }
@@ -267,6 +275,7 @@ public class MapsActivity extends BaseActivity
             toolbar.removeView(findViewById(R.id.logo));
             toolbar.setTitle(getString(R.string.app_name));
         }
+        toolbar.setNavigationIcon(R.drawable.ic_action_content_add);
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(this);
 
@@ -338,6 +347,18 @@ public class MapsActivity extends BaseActivity
          * Bind service used for donations
          */
         bindBillingService();
+
+    }
+
+    private void setUpNavigationDrawer() {
+
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
 
     }
 
@@ -989,5 +1010,10 @@ public class MapsActivity extends BaseActivity
                 ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
             }
         });
+    }
+
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+
     }
 }

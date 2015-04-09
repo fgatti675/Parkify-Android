@@ -17,4 +17,6 @@
     <dimen name="large_padding">16dp</dimen>
     <dimen name="elevation">8dp</dimen>
     <dimen name="cardCornerRadius">2dp</dimen>
+
+    <dimen name="navigation_drawer_width">240dp</dimen>
 </resources>

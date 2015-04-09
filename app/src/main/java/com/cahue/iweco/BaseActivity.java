@@ -19,7 +19,6 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.PlusClient;
 
 import java.io.InputStream;
 
@@ -67,7 +66,7 @@ public abstract class BaseActivity
     protected abstract void onPlusClientSignIn();
 
     /**
-     * Called when the {@link PlusClient} is disconnected.
+     * Called when the PlusClient is disconnected.
      */
     protected abstract void onPlusClientSignOut();
 
