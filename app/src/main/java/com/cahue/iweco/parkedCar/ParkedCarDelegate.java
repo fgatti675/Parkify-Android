@@ -170,6 +170,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         update();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.mMap = null;
+    }
 
     public void doDraw() {
         if (mMap == null || !isResumed()) return;

@@ -241,7 +241,7 @@ public class GeofenceCarService extends LocationPollerService {
         Notification.Builder mBuilder =
                 new Notification.Builder(this)
                         .setVibrate(pattern)
-                        .setSmallIcon(R.drawable.ic_maps_my_location)
+                        .setSmallIcon(R.drawable.ic_action_maps_my_location)
                         .setContentTitle("Geofence set for " + car.name);
 
         int id = (int) Math.random();

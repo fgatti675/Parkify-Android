@@ -2,12 +2,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="@dimen/default_padding">
+    android:gravity="center">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/cardList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

@@ -8,10 +8,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.R;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
+import com.cahue.iweco.spots.query.QueryResult;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -52,7 +54,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     private final static long TIMEOUT_MS = 60000;
 
     // number of spots being retrieved on nearby spots query
-    private final static int CLOSEST_LOCATIONS = 200;
+    private final static int CLOSEST_LOCATIONS = 100;
 
     // max number of spots displayed at once.
     private static final int MARKERS_LIMIT = 100;
@@ -66,7 +68,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    public final static float MAX_ZOOM = 0F;
+    public final static float MAX_ZOOM = 5F;
 
     private Set<ParkingSpot> spots;
     private Map<ParkingSpot, Marker> spotMarkersMap;
@@ -100,6 +102,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
     private ParkingSpot selectedSpot;
 
+    private float maxZoom;
+
     public static SpotsDelegate newInstance() {
         SpotsDelegate fragment = new SpotsDelegate();
         Bundle args = new Bundle();
@@ -121,6 +125,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
             spotMarkersMap = new HashMap<>();
             markerSpotsMap = new HashMap<>();
+
+            maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
         }
     }
 
@@ -259,10 +265,20 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     /**
      * Called when new parking spots are received
      *
-     * @param parkingSpots
+     * @param result
      */
     @Override
-    public synchronized void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots) {
+    public synchronized void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
+
+        if(result.moreResults) {
+            Log.d(TAG, "maxZoom set to " + maxZoom);
+            if(BuildConfig.DEBUG)
+                Toast.makeText(getActivity(), "maxZoom set to " + maxZoom, Toast.LENGTH_SHORT).show();
+
+            maxZoom = mMap.getCameraPosition().zoom;
+        }
+
+        Set<ParkingSpot> parkingSpots = result.spots;
 
 //        if (query == nearbyQuery)
 //            lastNearbyQuery = new Date();
@@ -361,6 +377,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         marker.setIcon(markerOptions.getIcon());
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.mMap = null;
+    }
 
     /**
      * Hide non visible markers (outside of viewport)
@@ -475,7 +496,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         /**
          * Query for current camera position
          */
-        if (zoom >= MAX_ZOOM) {
+        if (zoom >= maxZoom) {
             Log.d(TAG, "Querying because we are close enough");
 
             queryCameraView();
