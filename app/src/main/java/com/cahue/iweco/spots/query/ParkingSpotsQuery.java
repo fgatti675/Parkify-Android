@@ -30,10 +30,10 @@ import java.util.Set;
 /**
  * Created by francesco on 13.11.2014.
  */
-public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<ParkingSpot>> {
+public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResult> {
 
 
-    private static final String TAG = NearestSpotsQuery.class.getSimpleName();
+    private static final String TAG = ParkingSpotsQuery.class.getSimpleName();
 
     protected Context context;
     protected ParkingSpotsUpdateListener listener;
@@ -45,20 +45,18 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
     }
 
     @Override
-    protected void onCancelled() {
-        super.onCancelled();
-    }
+    protected abstract QueryResult doInBackground(Void... voids);
 
     @Override
-    protected void onPostExecute(final Set<ParkingSpot> parkingSpots) {
+    protected void onPostExecute(final QueryResult result) {
 
-        Log.d("ParkingSpotsQuery", parkingSpots.toString());
-        super.onPostExecute(parkingSpots);
+        Log.d("ParkingSpotsQuery", result.toString());
+        super.onPostExecute(result);
         if(context instanceof Activity){
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    listener.onSpotsUpdate(ParkingSpotsQuery.this, parkingSpots);
+                    listener.onSpotsUpdate(ParkingSpotsQuery.this, result);
                 }
             });
         }
@@ -118,13 +116,17 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
         return null;
     }
 
-    protected Set<ParkingSpot> parseResult(JSONObject result) {
-        Set<ParkingSpot> spots = new HashSet<ParkingSpot>();
+    protected QueryResult parseResult(JSONObject jsonObject) {
 
-        if (result != null) {
+        QueryResult result = new QueryResult();
+
+        Set<ParkingSpot> spots = new HashSet<>();
+
+        result.spots = spots;
+
+        if (jsonObject != null) {
             try {
-
-                JSONArray spotsArray = result.getJSONArray("spots");
+                JSONArray spotsArray = jsonObject.getJSONArray("spots");
                 for (int i = 0; i < spotsArray.length(); i++) {
 
                     JSONObject entry = spotsArray.getJSONObject(i);
@@ -138,15 +140,18 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
                     spots.add(spot);
                 }
 
+                result.moreResults = jsonObject.getBoolean("moreResults");
+                result.error = jsonObject.getBoolean("error");
+
             } catch (JSONException e) {
                 e.printStackTrace();
-                throw new RuntimeException("Error parsing spots result", e);
+                throw new RuntimeException("Error parsing spots jsonObject", e);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
 
-        return spots;
+        return result;
     }
 
     /**
@@ -155,7 +160,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, Set<Parkin
      */
     public interface ParkingSpotsUpdateListener {
 
-        void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots);
+        void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
 
         void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
 

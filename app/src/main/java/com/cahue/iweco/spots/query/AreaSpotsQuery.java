@@ -28,7 +28,7 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
     }
 
     @Override
-    protected Set<ParkingSpot> doInBackground(Void... voids) {
+    protected QueryResult doInBackground(Void... voids) {
 
         if (latLngBounds == null)
             throw new IllegalStateException("There must be a latLngBound set as a viewport to build the SQL query.");

@@ -5,7 +5,7 @@
 
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
-    <string name="select_device_long">Tutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato. Sarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.\n\n</string>
+    <string name="select_device_long">Tutto quello che devi fare è scegliere quale è il dispositivo Bluetooth installato nell\'automobile e dimenticare dove hai parcheggiato.\nSarà necessario mantenere il vostro Bluetooth attivato e almeno uno tra GPS o Wi-Fi.</string>
     <string name="none_paired">Nessun dispositivo associato</string>
     <string name="none_found">Nessun dispositivo trovato</string>
     <string name="button_scan">Cerca dispositivi</string>

@@ -5,7 +5,7 @@
     cahue:fab_colorNormal="@color/white"
     cahue:fab_colorPressed="@color/theme_accent"
     cahue:fab_colorRipple="@color/light_grey"
-    android:src="@drawable/ic_maps_my_location"
+    android:src="@drawable/ic_action_maps_my_location"
     android:id="@+id/my_location"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content" />

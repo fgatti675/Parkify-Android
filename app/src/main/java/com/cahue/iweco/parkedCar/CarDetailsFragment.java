@@ -59,6 +59,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId.equals(CarDetailsFragment.this.carId)) {
                 Log.d(TAG, "Received car update request" + carId);
+                car = carDatabase.find(carId);
                 updateLayout();
             }
         }
@@ -95,6 +96,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
         parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(carId);
 
+        car = carDatabase.find(carId);
     }
 
     @Override
@@ -118,7 +120,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private void updateLayout() {
 
-        car = carDatabase.find(carId);
         if(car == null){
             mListener.onCarRemoved(carId);
             return;
@@ -169,7 +170,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
-        if (view != null) {
+        if (view != null ) {
             carViewHolder.updateDistance(userLocation, car.location);
         }
     }

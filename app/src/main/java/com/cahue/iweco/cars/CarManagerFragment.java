@@ -21,6 +21,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -121,7 +122,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity()));
+        recyclerView.addItemDecoration(new FirstItemDecoration(getActivity()));
 
         adapter = new RecyclerViewCarsAdapter();
 
@@ -606,6 +607,22 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public final static class SimpleViewHolder extends RecyclerView.ViewHolder {
         public SimpleViewHolder(View view) {
             super(view);
+        }
+    }
+
+    class FirstItemDecoration extends RecyclerView.ItemDecoration {
+
+        private final int dp_padding;
+
+        public FirstItemDecoration(Context context) {
+            float dimension = context.getResources().getDimension(R.dimen.default_padding);
+            dp_padding = (int) context.getResources().getDimension(R.dimen.default_padding);
+        }
+
+        @Override
+        public void getItemOffsets(android.graphics.Rect outRect, android.view.View view, android.support.v7.widget.RecyclerView parent, android.support.v7.widget.RecyclerView.State state) {
+            if (parent.getChildPosition(view) == 0)
+                outRect.set(0, dp_padding, 0, 0);
         }
     }
 

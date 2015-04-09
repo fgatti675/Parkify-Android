@@ -28,7 +28,7 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
     }
 
     @Override
-    protected Set<ParkingSpot> doInBackground(Void... voids) {
+    protected QueryResult doInBackground(Void... voids) {
 
         if (center == null || limit == null)
             throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");

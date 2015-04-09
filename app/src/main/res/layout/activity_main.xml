@@ -5,54 +5,50 @@
     xmlns:tools="http://schemas.android.com/tools" android:id="@+id/drawer_layout"
     android:layout_width="match_parent" android:layout_height="match_parent"
     tools:context=".MainActivity">
+    
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MapsActivity">
 
-    <!-- As the main content view, the view below consumes the entire
-         space available using match_parent in both dimensions. -->
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/main_container"
+    <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".MapsActivity">
+        android:id="@+id/map"
+        class="com.google.android.gms.maps.MapFragment" />
 
-        <fragment
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/map"
-            class="com.google.android.gms.maps.MapFragment" />
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/marker_details_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"
+        tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
-        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/marker_details_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:visibility="invisible"
-            android:elevation="@dimen/elevation"
-            android:padding="@dimen/default_padding"
-            tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
+    <include
+        layout="@layout/toolbar_main"
+        android:id="@+id/toolbar_actionbar" />
 
-        <include
-            layout="@layout/toolbar_main"
-            android:id="@+id/toolbar_actionbar" />
+    <include
+        layout="@layout/button_my_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/my_location"
+        android:layout_above="@+id/marker_details_container"
+        android:layout_margin="@dimen/large_padding"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true" />
 
-        <include
-            layout="@layout/button_my_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/my_location"
-            android:layout_above="@+id/marker_details_container"
-            android:layout_margin="@dimen/large_padding"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true" />
+    <include layout="@layout/debug_layout" />
 
-        <include layout="@layout/debug_layout" />
-
-    </RelativeLayout>
+</RelativeLayout>
 
     <!-- android:layout_gravity="start" tells DrawerLayout to treat
          this as a sliding drawer on the left side for left-to-right
@@ -61,11 +57,11 @@
          android:layout_gravity="left" instead. -->
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->
-    <fragment android:id="@+id/navigation_drawer"
-        android:layout_width="@dimen/navigation_drawer_width"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:name="com.cahue.iweco.NavigationDrawerFragment"
-        tools:layout="@layout/fragment_navigation_drawer" />
+<fragment android:id="@+id/navigation_drawer"
+android:layout_width="@dimen/navigation_drawer_width"
+android:layout_height="match_parent"
+android:layout_gravity="start"
+android:name="com.cahue.iweco.NavigationDrawerFragment"
+tools:layout="@layout/fragment_navigation_drawer" />
 
-</android.support.v4.widget.DrawerLayout>
+    </android.support.v4.widget.DrawerLayout>
