@@ -17,7 +17,7 @@ import com.cahue.iweco.util.ColorUtil;
 /**
  * Created by Francesco on 08/03/2015.
  */
-public final class CarViewHolder extends RecyclerView.ViewHolder {
+public class CarViewHolder extends RecyclerView.ViewHolder {
 
     public View cardView;
     public Toolbar toolbar;
@@ -60,9 +60,9 @@ public final class CarViewHolder extends RecyclerView.ViewHolder {
         carImage.setBackgroundColor(color);
 
         if (ColorUtil.isBrightColor(color)) {
-            carImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_car_grey600_36dp));
+            carImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_car_grey600_24dp));
         } else {
-            carImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_car_white_36dp));
+            carImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_car_white_24dp));
         }
 
         if (car.btAddress != null && btAdapter.isEnabled()) {

@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.cahue.iweco.login.LoginActivity">
 
-    <include layout="@layout/intro_layout" />
+    <include layout="@layout/layout_intro" />
 
     <RelativeLayout
         android:layout_width="match_parent"

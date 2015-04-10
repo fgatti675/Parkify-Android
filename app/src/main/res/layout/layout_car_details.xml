@@ -4,15 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground"
     android:layout_centerVertical="true">
 
     <ImageView
         android:id="@+id/car_image"
-        android:layout_width="64dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:padding="@dimen/large_padding"
-        android:src="@drawable/ic_car_white_36dp"
-        android:background="@color/theme_accent" />
+        android:src="@drawable/ic_car_white_24dp"
+        android:background="@color/theme_accent"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="fitStart" />
 
     <LinearLayout
         android:id="@+id/infoLayout"
@@ -25,6 +29,8 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/car_toolbar"
             cahue:theme="@style/ActionBar.Details"
+            android:clickable="false"
+            android:focusable="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -93,7 +99,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="ADDRESS"
-                android:textAllCaps="true"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/body_text_3" />
         </LinearLayout>

@@ -15,6 +15,7 @@ import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.cahue.iweco.R;
@@ -304,11 +306,21 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
              */
             if (viewType == CAR_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.fragment_car_details,
+                        inflate(R.layout.layout_car_details,
                                 viewGroup,
                                 false);
 
-                return new CarViewHolder(itemView);
+                CardView cardView = new CardView(viewGroup.getContext());
+                cardView.addView(itemView);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                int margin = (int) viewGroup.getContext().getResources().getDimension(R.dimen.default_padding);
+                params.setMargins(margin, 0, margin, margin);
+                cardView.setLayoutParams(params);
+
+
+                return new CarViewHolder(cardView);
             }
 
             /**
@@ -586,17 +598,17 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     class FirstItemDecoration extends RecyclerView.ItemDecoration {
 
-        private final int dp_padding;
+        private final int initialMargin;
 
         public FirstItemDecoration(Context context) {
             float dimension = context.getResources().getDimension(R.dimen.default_padding);
-            dp_padding = (int) context.getResources().getDimension(R.dimen.default_padding);
+            initialMargin = (int) context.getResources().getDimension(R.dimen.default_padding);
         }
 
         @Override
         public void getItemOffsets(android.graphics.Rect outRect, android.view.View view, android.support.v7.widget.RecyclerView parent, android.support.v7.widget.RecyclerView.State state) {
             if (parent.getChildPosition(view) == 0)
-                outRect.set(0, dp_padding, 0, 0);
+                outRect.set(0, initialMargin, 0, 0);
         }
     }
 
@@ -619,4 +631,5 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         void devicesBeingLoaded(boolean loading);
 
     }
+
 }

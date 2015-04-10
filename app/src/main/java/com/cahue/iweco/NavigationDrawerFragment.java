@@ -2,6 +2,10 @@ package com.cahue.iweco;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,11 +20,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.util.DividerItemDecoration;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -36,7 +43,7 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     /**
      * A pointer to the current callbacks instance (the Activity).
      */
-    private NavigationDrawerCallbacks mCallbacks;
+    private OnCarClickedListener mCallbacks;
 
     /**
      * Helper component that ties the action bar to the navigation drawer.
@@ -56,6 +63,16 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
 
     private Location mLastUserLocation;
 
+    private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
+            adapter.notifyDataSetChanged();
+        }
+
+    };
+
     public NavigationDrawerFragment() {
     }
 
@@ -63,6 +80,12 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -84,7 +107,7 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-//        recyclerView.addItemDecoration(new FirstItemDecoration(getActivity()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
         adapter = new RecyclerViewDrawerAdapter();
 
@@ -154,12 +177,23 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(carUpdatedReceiver);
+    }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
+            mCallbacks = (OnCarClickedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
         }
@@ -169,6 +203,12 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -203,21 +243,24 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public static final int CAR_TYPE = 0;
-        public static final int INFO_TYPE = 1;
-        public static final int BT_DEVICE_TYPE = 2;
-        public static final int ADD_BUTTON_TYPE = 3;
+        public static final int CAR_MANAGER_TYPE = 1;
+        public static final int DONATE_TYPE = 2;
+        public static final int HELP_TYPE = 3;
+        public static final int SIGN_OUT_TYPE = 4;
 
         @Override
         public int getItemViewType(int position) {
 
             if (position < cars.size())
                 return CAR_TYPE;
-//            else if (position == cars.size())
-//                return INFO_TYPE;
-//            else if (position > cars.size() && position < cars.size() + 1 + devices.size())
-//                return BT_DEVICE_TYPE;
-//            else if (position == (cars.size() + devices.size() + 1))
-//                return ADD_BUTTON_TYPE;
+            else if (position == cars.size())
+                return CAR_MANAGER_TYPE;
+            else if (position == cars.size() + 1)
+                return DONATE_TYPE;
+            else if (position == cars.size() + 2)
+                return HELP_TYPE;
+            else if (position == cars.size() + 3)
+                return SIGN_OUT_TYPE;
             else
                 throw new IllegalStateException("Error in recycler view positions");
 
@@ -231,65 +274,22 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
              */
             if (viewType == CAR_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.fragment_car_details,
+                        inflate(R.layout.layout_car_details,
                                 viewGroup,
                                 false);
 
                 return new CarViewHolder(itemView);
-            }
+            } else if (viewType == CAR_MANAGER_TYPE
+                    || viewType == DONATE_TYPE
+                    || viewType == HELP_TYPE
+                    || viewType == SIGN_OUT_TYPE) {
 
-//            /**
-//             * Information
-//             */
-//            else if (viewType == INFO_TYPE) {
-//
-//                View itemView = LayoutInflater.from(viewGroup.getContext()).
-//                        inflate(R.layout.card_manager_instructions,
-//                                viewGroup,
-//                                false);
-//
-//                enableBTButton = (Button) itemView.findViewById(R.id.enable_bt);
-//                enableBTButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
-//                    }
-//                });
-//                updateEnableBTButton();
-//
-//                return new SimpleViewHolder(itemView);
-//            }
-//
-//            /**
-//             * Device selection
-//             */
-//            else if (viewType == BT_DEVICE_TYPE) {
-//                View itemView = LayoutInflater.from(viewGroup.getContext()).
-//                        inflate(R.layout.list_item_device,
-//                                viewGroup,
-//                                false);
-//
-//                return new DeviceViewHolder(itemView);
-//            }
-//
-//            /**
-//             * Add car button
-//             */
-//            else if (viewType == ADD_BUTTON_TYPE) {
-//                View itemView = LayoutInflater.from(viewGroup.getContext()).
-//                        inflate(R.layout.button_add_device,
-//                                viewGroup,
-//                                false);
-//                itemView.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        Car car = createCar();
-//                        editCar(car, true);
-//                    }
-//                });
-//
-//                return new SimpleViewHolder(itemView);
-//            }
+                View itemView = LayoutInflater.from(viewGroup.getContext()).
+                        inflate(R.layout.layout_item_drawer_navigation,
+                                viewGroup,
+                                false);
+                return new MenuViewHolder(itemView);
+            }
 
             throw new IllegalStateException("New type added to the recycler view but no view holder associated");
         }
@@ -312,67 +312,77 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
                 /**
                  * Set up click listener
                  */
-                carViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
+                View.OnClickListener clickListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mCallbacks.onNavigationCarClick(car.id);
+                        mCallbacks.onCarClicked(car.id);
                         mDrawerLayout.closeDrawers();
                     }
-                });
+                };
+                carViewHolder.cardView.setOnClickListener(clickListener);
 
                 /**
                  * Set up toolbar
                  */
-//                carViewHolder.toolbar.getMenu().clear();
-//                carViewHolder.toolbar.inflateMenu(R.menu.edit_car_menu);
-//                carViewHolder.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-//                    @Override
-//                    public boolean onMenuItemClick(MenuItem menuItem) {
-//                        switch (menuItem.getItemId()) {
-//                            case R.id.action_edit:
-//                                editCar(car, false);
-//                                return true;
-//                            case R.id.action_delete:
-//                                showClearDialog(car);
-//                                return true;
-//                        }
-//                        return false;
-//                    }
-//                });
+                carViewHolder.toolbar.setOnClickListener(clickListener);
 
+            } else if (viewType == CAR_MANAGER_TYPE
+                    || viewType == DONATE_TYPE
+                    || viewType == HELP_TYPE
+                    || viewType == SIGN_OUT_TYPE) {
+
+                MenuViewHolder menuViewHolder = (MenuViewHolder) viewHolder;
+                if (viewType == CAR_MANAGER_TYPE) {
+                    bindCarManager(menuViewHolder);
+                } else if (viewType == DONATE_TYPE) {
+                    bindDonate(menuViewHolder);
+                } else if (viewType == HELP_TYPE) {
+                    bindHelp(menuViewHolder);
+                } else if (viewType == SIGN_OUT_TYPE) {
+                    bindSignOut(menuViewHolder);
+                }
             }
 
-//            /**
-//             * Device
-//             */
-//            else if (viewType == BT_DEVICE_TYPE) {
-//
-//                DeviceViewHolder deviceViewHolder = (DeviceViewHolder) viewHolder;
-//                final BluetoothDevice device = devices.get(position - cars.size() - 1);
-//                deviceViewHolder.title.setText(device.getName());
-//                deviceViewHolder.layout.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        onDeviceSelected(device);
-//                    }
-//                });
-//
-//            }
+        }
+
+        private void bindSignOut(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.disconnect);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
+        }
+
+        private void bindHelp(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.help);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_help_circle_grey600_24dp);
+        }
+
+        private void bindDonate(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.donate);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_heart_grey600_24dp);
+        }
+
+        private void bindCarManager(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.cars);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_car_grey600_24dp);
         }
 
         @Override
         public int getItemCount() {
-            return cars.size();
+            return cars.size() + 4;
+        }
+
+        public class MenuViewHolder extends RecyclerView.ViewHolder {
+
+            public ImageView icon;
+            public TextView title;
+
+            public MenuViewHolder(View itemView) {
+                super(itemView);
+                icon = (ImageView) itemView.findViewById(R.id.icon);
+                title = (TextView) itemView.findViewById(R.id.title);
+            }
         }
     }
 
-    /**
-     * Callbacks interface that all activities using this fragment must implement.
-     */
-    public interface NavigationDrawerCallbacks {
-        /**
-         * Called when an item in the navigation drawer is selected.
-         */
-        void onNavigationCarClick(String carId);
-    }
+
+
 }

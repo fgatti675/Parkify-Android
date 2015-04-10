@@ -51,7 +51,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private CarDatabase carDatabase;
 
-
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
@@ -136,7 +135,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_car_details, container, false);
+        View view = inflater.inflate(R.layout.layout_car_details, container, false);
 
         carViewHolder = new CarViewHolder(view);
 
@@ -231,7 +230,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
      */
     public interface OnCarPositionDeletedListener {
 
-        public void onCarRemoved(String carId);
+        void onCarRemoved(String carId);
 
     }
 

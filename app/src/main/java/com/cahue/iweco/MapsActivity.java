@@ -20,7 +20,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -28,7 +27,6 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -39,7 +37,6 @@ import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.debug.DebugActivity;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.login.AuthUtils;
@@ -86,7 +83,6 @@ public class MapsActivity extends BaseActivity
         GoogleMap.OnMarkerClickListener,
         Toolbar.OnMenuItemClickListener,
         SpotsDelegate.SpotSelectedListener,
-        ParkedCarDelegate.CarSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
         SetCarPositionDialog.Callbacks,
         CarManagerFragment.Callbacks,
@@ -94,14 +90,13 @@ public class MapsActivity extends BaseActivity
         CameraManager,
         OnMapReadyCallback,
         CameraUpdateRequester,
-        NavigationDrawerFragment.NavigationDrawerCallbacks {
+        OnCarClickedListener {
 
     protected static final String TAG = "Maps";
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
-    static final int REQUEST_ON_CARS_MANAGER = 2424;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -275,12 +270,13 @@ public class MapsActivity extends BaseActivity
         ViewCompat.setElevation(mToolbar, 8);
         mToolbar.inflateMenu(R.menu.main_menu);
         mToolbar.setOnMenuItemClickListener(this);
-        setUpNavigationDrawer();
 
         if (isSkippedLogin()) {
             MenuItem item = mToolbar.getMenu().findItem(R.id.action_disconnect);
             item.setTitle(R.string.common_signin_button_text_long);
         }
+
+        setUpNavigationDrawer();
 
         myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
         myLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -687,8 +683,8 @@ public class MapsActivity extends BaseActivity
     /**
      * Method used to start the pairing activity
      */
-    protected void startDeviceSelection() {
-        startActivityForResult(new Intent(MapsActivity.this, CarManagerActivity.class), REQUEST_ON_CARS_MANAGER);
+    public void startDeviceSelection() {
+        startActivity(new Intent(MapsActivity.this, CarManagerActivity.class));
     }
 
     /**
@@ -739,7 +735,6 @@ public class MapsActivity extends BaseActivity
             // One parked car
             if (closeCars.size() == 1) {
                 Car car = closeCars.get(0);
-                getParkedCarDelegate(car.id).setFollowing(true);
                 onCarClicked(car.id);
             }
             // zoom to user otherwise
@@ -881,6 +876,7 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onCarClicked(String carId) {
+        getParkedCarDelegate(carId).setFollowing(true);
         setDetailsFragment(CarDetailsFragment.newInstance(carId)); // TODO
     }
 
@@ -933,20 +929,17 @@ public class MapsActivity extends BaseActivity
         onCameraUpdateRequest(cameraUpdate, this);
     }
 
+    /**
+     * Called when the user sets the car manually
+     */
     @Override
     public void onCarPositionUpdate(String carId) {
-        getParkedCarDelegate(carId).setFollowing(true);
         onCarClicked(carId);
     }
 
     @Override
     public void devicesBeingLoaded(boolean loading) {
         // Do nothing
-    }
-
-    @Override
-    public void onNavigationCarClick(String carId) {
-        getParkedCarDelegate(carId).setFollowing(true);
     }
 
     @Override

@@ -7,13 +7,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
-import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.CameraManager;
+import com.cahue.iweco.CameraUpdateRequester;
+import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
-import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.cars.CarsSync;
+import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,12 +40,6 @@ import java.util.List;
  */
 public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraUpdateRequester {
 
-    /**
-     * Interface for components listening for the marker click event in the map
-     */
-    public interface CarSelectedListener {
-        public void onCarClicked(String carId);
-    }
 
     private static final String TAG = ParkedCarDelegate.class.getSimpleName();
 
@@ -65,7 +59,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private CameraManager cameraManager;
     private GoogleMap mMap;
-    private CarSelectedListener carSelectedListener;
+    private OnCarClickedListener carSelectedListener;
 
     private Location userLocation;
 
@@ -121,10 +115,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         }
 
         try {
-            this.carSelectedListener = (CarSelectedListener) activity;
+            this.carSelectedListener = (OnCarClickedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement " + CarSelectedListener.class.getName());
+                    + " must implement " + OnCarClickedListener.class.getName());
         }
     }
 
@@ -455,7 +449,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
             carSelectedListener.onCarClicked(carId);
-            setFollowing(true);
         } else {
             setFollowing(false);
         }

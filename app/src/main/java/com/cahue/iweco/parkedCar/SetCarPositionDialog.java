@@ -35,6 +35,9 @@ public class SetCarPositionDialog extends DialogFragment {
     private Callbacks mCallbacks;
 
     public interface Callbacks{
+        /**
+         * Called when the user sets the car manually
+         */
         void onCarPositionUpdate(String carId);
     }
 
@@ -44,7 +47,6 @@ public class SetCarPositionDialog extends DialogFragment {
     private Location location;
 
     Car selected;
-
 
     /**
      * Use this factory method to create a new instance of
