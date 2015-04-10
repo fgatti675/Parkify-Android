@@ -17,8 +17,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -117,7 +119,7 @@ public class MapsActivity extends BaseActivity
     private CarDatabase carDatabase;
 
     private FloatingActionButton myLocationButton;
-    private ScrollView detailsContainer;
+    private CardView detailsContainer;
     private DetailsFragment detailsFragment;
     private boolean detailsDisplayed = false;
 
@@ -186,6 +188,7 @@ public class MapsActivity extends BaseActivity
     };
 
     private PendingIntent pActivityRecognitionIntent;
+    private Toolbar mToolbar;
 
     @Override
     protected void onPlusClientSignIn() {
@@ -263,24 +266,19 @@ public class MapsActivity extends BaseActivity
 
         activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
-        setUpNavigationDrawer();
 
         if (BuildConfig.DEBUG) {
             setDebugConfig();
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(toolbar, 8);
-        if ("wimc".equals(BuildConfig.FLAVOR)) {
-            toolbar.removeView(findViewById(R.id.logo));
-            toolbar.setTitle(getString(R.string.app_name));
-        }
-        toolbar.setNavigationIcon(R.drawable.ic_action_content_add);
-        toolbar.inflateMenu(R.menu.main_menu);
-        toolbar.setOnMenuItemClickListener(this);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        ViewCompat.setElevation(mToolbar, 8);
+        mToolbar.inflateMenu(R.menu.main_menu);
+        mToolbar.setOnMenuItemClickListener(this);
+        setUpNavigationDrawer();
 
         if (isSkippedLogin()) {
-            MenuItem item = toolbar.getMenu().findItem(R.id.action_disconnect);
+            MenuItem item = mToolbar.getMenu().findItem(R.id.action_disconnect);
             item.setTitle(R.string.common_signin_button_text_long);
         }
 
@@ -340,7 +338,7 @@ public class MapsActivity extends BaseActivity
          * Details
          */
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
-        detailsContainer = (ScrollView) findViewById(R.id.marker_details_container);
+        detailsContainer = (CardView) findViewById(R.id.marker_details_container);
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
         /**
@@ -358,7 +356,8 @@ public class MapsActivity extends BaseActivity
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+                (DrawerLayout) findViewById(R.id.drawer_layout),
+                mToolbar);
 
     }
 
@@ -523,6 +522,12 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
+
+        if(mNavigationDrawerFragment.isDrawerOpen()){
+            mNavigationDrawerFragment.closeDrawers();
+            return;
+        }
+
         if (detailsDisplayed) {
             for (AbstractMarkerDelegate delegate : delegates) delegate.onDetailsClosed();
             hideDetails();
@@ -940,7 +945,7 @@ public class MapsActivity extends BaseActivity
     }
 
     @Override
-    public void onManagerCarClick(String carId) {
+    public void onNavigationCarClick(String carId) {
         getParkedCarDelegate(carId).setFollowing(true);
     }
 
@@ -961,7 +966,7 @@ public class MapsActivity extends BaseActivity
     private void setDebugConfig() {
 
         View debugLayout = findViewById(R.id.debug_layout);
-        if(debugLayout == null) return;
+        if (debugLayout == null) return;
         debugLayout.setVisibility(View.VISIBLE);
 
         Button refresh = (Button) findViewById(R.id.refresh);
@@ -1012,8 +1017,4 @@ public class MapsActivity extends BaseActivity
         });
     }
 
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-
-    }
 }

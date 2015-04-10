@@ -38,6 +38,7 @@ public class CarManagerActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         toolbar.setTitle(R.string.cars);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        ViewCompat.setElevation(toolbar, 8);
         setSupportActionBar(toolbar);
 
         progressBar = (ProgressBar) toolbar.findViewById(R.id.progress_bar);
@@ -64,10 +65,6 @@ public class CarManagerActivity
         progressBar.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
     }
 
-    @Override
-    public void onManagerCarClick(String carId) {
-        // TODO : nothing?
-    }
 
     @Override
     public void onCarEdited(Car car, boolean newCar) {

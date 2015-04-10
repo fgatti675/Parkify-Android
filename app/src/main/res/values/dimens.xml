@@ -2,8 +2,6 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="keyline_2">72dp</dimen>
-    <dimen name="keyline_2_minus_16dp">56dp</dimen>
 
     <dimen name="marker_diameter_red">9dp</dimen>
     <dimen name="marker_diameter_orange">9dp</dimen>
@@ -18,5 +16,5 @@
     <dimen name="elevation">8dp</dimen>
     <dimen name="cardCornerRadius">2dp</dimen>
 
-    <dimen name="navigation_drawer_width">240dp</dimen>
+    <dimen name="navigation_drawer_width">300dp</dimen>
 </resources>

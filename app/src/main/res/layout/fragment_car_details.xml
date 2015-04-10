@@ -1,116 +1,103 @@
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:cahue="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/card_view"
-    android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/default_padding"
-    android:layout_marginLeft="@dimen/default_padding"
-    android:layout_marginRight="@dimen/default_padding"
-    android:foreground="?android:attr/selectableItemBackground"
-    cahue:cardCornerRadius="@dimen/cardCornerRadius">
+    android:orientation="horizontal"
+    android:layout_centerVertical="true">
+
+    <ImageView
+        android:id="@+id/car_image"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:padding="@dimen/large_padding"
+        android:src="@drawable/ic_car_white_36dp"
+        android:background="@color/theme_accent" />
 
     <LinearLayout
+        android:id="@+id/infoLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_centerVertical="true">
+        android:layout_weight="1"
+        android:layout_centerVertical="true"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/car_image"
-            android:layout_width="64dp"
-            android:layout_height="match_parent"
-            android:padding="@dimen/large_padding"
-            android:src="@drawable/ic_car_white_36dp"
-            android:background="@color/theme_accent" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/car_toolbar"
+            cahue:theme="@style/ActionBar.Details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    tools:text="NAME"
+                    android:textColor="@color/body_text_1" />
+
+                <TextView
+                    android:paddingLeft="@dimen/small_padding"
+                    android:id="@+id/linked_device"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="DEVICE"
+                    android:textColor="@color/body_text_3" />
+
+            </LinearLayout>
+        </android.support.v7.widget.Toolbar>
 
         <LinearLayout
-            android:id="@+id/infoLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/large_padding"
+            android:paddingBottom="@dimen/large_padding"
+            android:paddingRight="@dimen/large_padding"
             android:layout_weight="1"
             android:layout_centerVertical="true"
             android:orientation="vertical">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/car_toolbar"
-                cahue:theme="@style/ActionBar.Details"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:id="@+id/name"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        tools:text="NAME"
-                        android:textColor="@color/body_text_1" />
-
-                    <TextView
-                        android:paddingLeft="@dimen/small_padding"
-                        android:id="@+id/linked_device"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        tools:text="DEVICE"
-                        android:textColor="@color/body_text_3" />
-
-                </LinearLayout>
-            </android.support.v7.widget.Toolbar>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/large_padding"
-                android:paddingBottom="@dimen/large_padding"
-                android:paddingRight="@dimen/large_padding"
-                android:layout_weight="1"
-                android:layout_centerVertical="true"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:id="@+id/time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Hace 2 horas"
-                        android:textColor="@color/body_text_2"
-                        android:gravity="right"
-                        android:singleLine="false" />
-
-                    <TextView
-                        android:id="@+id/distance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="@dimen/default_padding"
-                        tools:text="1477.3 km"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
-                        android:textColor="@color/body_text_2"
-                        android:singleLine="true" />
-
-                </RelativeLayout>
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Hace 2 horas"
+                    android:textColor="@color/body_text_2"
+                    android:gravity="right"
+                    android:singleLine="false" />
 
                 <TextView
-                    android:id="@+id/address"
-                    android:layout_width="match_parent"
+                    android:id="@+id/distance"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="ADDRESS"
-                    android:textAllCaps="true"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/body_text_3" />
-            </LinearLayout>
+                    android:paddingLeft="@dimen/default_padding"
+                    tools:text="1477.3 km"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:textColor="@color/body_text_2"
+                    android:singleLine="true" />
 
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="ADDRESS"
+                android:textAllCaps="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/body_text_3" />
         </LinearLayout>
 
     </LinearLayout>
 
-</android.support.v7.widget.CardView>
+</LinearLayout>

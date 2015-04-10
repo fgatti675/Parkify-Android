@@ -145,11 +145,6 @@ public class TutorialActivity extends Activity
     }
 
     @Override
-    public void onManagerCarClick(String carId) {
-        // Do nothing
-    }
-
-    @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         if (position == 0) {
             previous.setAlpha(positionOffset);

@@ -21,7 +21,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +30,6 @@ import android.widget.TextView;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.util.DividerItemDecoration;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -46,20 +44,6 @@ import java.util.UUID;
  * Intent.
  */
 public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener, GoogleApiClient.ConnectionCallbacks {
-
-
-    private boolean clickableCars;
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        mLastUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
 
     // Debugging
     private static final String TAG = CarManagerFragment.class.getSimpleName();
@@ -117,7 +101,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         /**
          * RecyclerView
          */
-        recyclerView = (RecyclerView) view.findViewById(R.id.cardList);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -398,16 +382,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 final Car car = cars.get(position);
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, mBtAdapter);
 
-                /**
-                 * Set up click listener
-                 */
-                if (clickableCars)
-                    carViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            callbacks.onManagerCarClick(car.id);
-                        }
-                    });
 
                 /**
                  * Set up toolbar
@@ -540,7 +514,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
         super.onInflate(activity, attrs, savedInstanceState);
         TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.CarManagerFragment);
-        clickableCars = a.getBoolean(R.styleable.CarManagerFragment_clickableCars, false);
+//        clickableCars = a.getBoolean(R.styleable.CarManagerFragment_clickableCars, false);
         a.recycle();
     }
 
@@ -626,6 +600,16 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
 
     /**
      * Called when a car is clicked
@@ -633,8 +617,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public interface Callbacks {
 
         void devicesBeingLoaded(boolean loading);
-
-        void onManagerCarClick(String carId);
 
     }
 }
