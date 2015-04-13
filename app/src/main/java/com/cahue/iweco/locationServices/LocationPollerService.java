@@ -155,13 +155,13 @@ public abstract class LocationPollerService extends Service implements
         /**
          * Start activity recognition
          */
-        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
-        pActivityRecognitionIntent = PendingIntent.getService(this, 84727, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
+//        pActivityRecognitionIntent = PendingIntent.getService(this, 84727, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        listeningActivities = true;
-        registerReceiver(activityReceiver, new IntentFilter(ActivityRecognitionIntentService.INTENT_ACTIVITY_DETECTED));
+//        listeningActivities = true;
+//        registerReceiver(activityReceiver, new IntentFilter(ActivityRecognitionIntentService.INTENT_ACTIVITY_DETECTED));
 
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, 2000, pActivityRecognitionIntent);
+//        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, 2000, pActivityRecognitionIntent);
     }
 
 
@@ -169,8 +169,8 @@ public abstract class LocationPollerService extends Service implements
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if (listeningActivities)
-            unregisterReceiver(activityReceiver);
+//        if (listeningActivities)
+//            unregisterReceiver(activityReceiver);
     }
 
     @Override

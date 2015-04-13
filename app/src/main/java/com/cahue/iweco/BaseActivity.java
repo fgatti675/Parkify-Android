@@ -171,8 +171,8 @@ public abstract class BaseActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         setUpGoogleApiClientIfNeeded();
         if (autoConnect()) {
             Log.d(TAG, "mGoogleApiClient connecting");

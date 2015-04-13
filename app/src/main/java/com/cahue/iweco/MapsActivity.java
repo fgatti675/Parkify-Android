@@ -113,6 +113,8 @@ public class MapsActivity extends BaseActivity
 
     private CarDatabase carDatabase;
 
+    private Toolbar mToolbar;
+
     private FloatingActionButton myLocationButton;
     private CardView detailsContainer;
     private DetailsFragment detailsFragment;
@@ -183,7 +185,6 @@ public class MapsActivity extends BaseActivity
     };
 
     private PendingIntent pActivityRecognitionIntent;
-    private Toolbar mToolbar;
 
     @Override
     protected void onPlusClientSignIn() {
@@ -192,10 +193,10 @@ public class MapsActivity extends BaseActivity
                 REQUEST,
                 this);
 
-        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
-        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pActivityRecognitionIntent);
+//        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
+//        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pActivityRecognitionIntent);
 
     }
 
@@ -590,11 +591,6 @@ public class MapsActivity extends BaseActivity
             unbindService(mBillingServiceConn);
         }
 
-        if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
-            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
-        }
-
         saveMapCameraPosition();
     }
 
@@ -641,6 +637,10 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
+        if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
+//            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
+        }
         unregisterReceiver(carUpdateReceiver);
     }
 
