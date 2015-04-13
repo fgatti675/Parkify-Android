@@ -56,5 +56,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="edit_cars">Edit cars</string>
+    <string name="search_title">Search</string>
+    <string name="search_hint">Search for an address</string>
 
 </resources>

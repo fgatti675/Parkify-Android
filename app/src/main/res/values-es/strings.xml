@@ -58,5 +58,7 @@
     <string name="navigation_drawer_open">Abrir menu</string>
     <string name="navigation_drawer_close">Cerrar menu</string>
     <string name="edit_cars">Editar coches</string>
+    <string name="search_title">Busqueda</string>
+    <string name="search_hint">Busca una dirección</string>
 
 </resources>

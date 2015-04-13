@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -38,17 +40,17 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
-import com.cahue.iweco.spots.ParkingSpotSender;
-import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarDelegate;
 import com.cahue.iweco.parkedCar.SetCarPositionDialog;
 import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
@@ -90,7 +92,7 @@ public class MapsActivity extends BaseActivity
         OnMapReadyCallback,
         CameraUpdateRequester,
         OnCarClickedListener,
-        Navigation {
+        Navigation, Toolbar.OnMenuItemClickListener {
 
     protected static final String TAG = "Maps";
 
@@ -268,6 +270,12 @@ public class MapsActivity extends BaseActivity
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(mToolbar, 8);
+        if ("wimc".equals(BuildConfig.FLAVOR)) {
+            mToolbar.removeView(findViewById(R.id.logo));
+            mToolbar.setTitle(getString(R.string.app_name));
+        }
+        mToolbar.inflateMenu(R.menu.main_menu);
+        mToolbar.setOnMenuItemClickListener(this);
 
         setUpNavigationDrawer();
 
@@ -980,4 +988,21 @@ public class MapsActivity extends BaseActivity
         });
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+
+        switch (menuItem.getItemId()) {
+
+            case R.id.search:
+                // Associate searchable configuration with the SearchView
+                SearchManager searchManager =
+                        (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+                SearchView searchView = (SearchView) menuItem.getActionView();
+                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(menuItem);
+        }
+    }
 }
