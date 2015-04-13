@@ -3,16 +3,15 @@
     xmlns:cahue="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:choiceMode="singleChoice"
-    android:divider="#FFF"
-    android:dividerHeight="1dp"
-    android:background="@color/light_grey"
+    android:background="@color/white"
     android:orientation="vertical"
     tools:context=".NavigationDrawerFragment">
 
     <LinearLayout
+        android:id="@+id/user_details"
         android:layout_width="match_parent"
-        android:padding="@dimen/large_padding"
+        android:padding="@dimen/default_padding"
+        android:background="@color/light_grey"
         android:layout_height="wrap_content">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -21,19 +20,36 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_action_help"
             cahue:border_width="1dp"
-            cahue:border_color="@color/white" />
+            cahue:border_color="@color/white"
+            android:layout_gravity="center" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
+            android:padding="@dimen/large_padding"
             android:layout_height="wrap_content"
-            tools:text="Pedrito"
-            android:layout_gravity="center_vertical" />
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Pedrito"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="email@email.com"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 </LinearLayout>

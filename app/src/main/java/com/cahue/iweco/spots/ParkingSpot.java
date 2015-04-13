@@ -6,11 +6,13 @@ import android.os.Parcelable;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.util.Util;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -60,6 +62,19 @@ public class ParkingSpot implements Parcelable {
         this.future = future;
     }
 
+    public static ParkingSpot fromJSON(JSONObject jsonObject) throws JSONException {
+        try {
+            return new ParkingSpot(
+                    jsonObject.getLong("id"),
+                    new LatLng(jsonObject.getDouble("latitude"), jsonObject.getDouble("longitude")),
+                    Float.parseFloat(jsonObject.getString("accuracy")),
+                    Util.DATE_FORMAT.parse(jsonObject.getString("time")),
+                    jsonObject.optBoolean("future"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public int describeContents() {
@@ -98,6 +113,7 @@ public class ParkingSpot implements Parcelable {
                 "id='" + id + '\'' +
                 ", position=" + position +
                 ", time=" + time +
+                ", future=" + future +
                 '}';
     }
 
@@ -134,8 +150,6 @@ public class ParkingSpot implements Parcelable {
             return Type.green;
         else if (timeSinceSpotWasFree_ms < YELLOW_TIME_THRESHOLD_MS)
             return Type.yellow;
-//        else if (timeSinceSpotWasFree_ms < ORANGE_TIME_THRESHOLD_MS)
-//            return Type.orange;
         else
             return Type.red;
     }

@@ -126,17 +126,11 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
 
         if (jsonObject != null) {
             try {
+
                 JSONArray spotsArray = jsonObject.getJSONArray("spots");
                 for (int i = 0; i < spotsArray.length(); i++) {
-
                     JSONObject entry = spotsArray.getJSONObject(i);
-
-                    ParkingSpot spot = new ParkingSpot(
-                            entry.getLong("id"),
-                            new LatLng(entry.getDouble("latitude"), entry.getDouble("longitude")),
-                            Float.parseFloat(entry.getString("accuracy")),
-                            Util.DATE_FORMAT.parse(entry.getString("time")),
-                            entry.getBoolean("future"));
+                    ParkingSpot spot = ParkingSpot.fromJSON(entry);
                     spots.add(spot);
                 }
 
@@ -146,8 +140,6 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
             } catch (JSONException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error parsing spots jsonObject", e);
-            } catch (ParseException e) {
-                e.printStackTrace();
             }
         }
 

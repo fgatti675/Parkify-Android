@@ -27,9 +27,9 @@ import android.widget.TextView;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.DividerItemDecoration;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import com.cahue.iweco.util.LoadProfileImage;
 
 import java.util.List;
 
@@ -38,8 +38,9 @@ import java.util.List;
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks {
+public class NavigationDrawerFragment extends Fragment {
 
+    private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
     /**
      * A pointer to the current callbacks instance (the Activity).
      */
@@ -49,8 +50,6 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
      * Helper component that ties the action bar to the navigation drawer.
      */
     private ActionBarDrawerToggle mDrawerToggle;
-
-    private GoogleApiClient mGoogleApiClient;
 
     private DrawerLayout mDrawerLayout;
     private LinearLayout mDrawerListView;
@@ -63,6 +62,8 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
 
     private Location mLastUserLocation;
 
+    private Navigation navigation;
+
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
@@ -72,6 +73,10 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
         }
 
     };
+    private ImageView userImage;
+    private TextView usernameTextView;
+    private TextView emailTextView;
+    private boolean skippedLogin;
 
     public NavigationDrawerFragment() {
     }
@@ -79,13 +84,9 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                .addConnectionCallbacks(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
+        skippedLogin = AuthUtils.isSkippedLogin(getActivity());
+        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
     }
 
     @Override
@@ -99,6 +100,12 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
         mDrawerListView = (LinearLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
 
+        View userDetails = mDrawerListView.findViewById(R.id.user_details);
+
+        userImage = (ImageView) mDrawerListView.findViewById(R.id.profile_image);
+        usernameTextView = (TextView) mDrawerListView.findViewById(R.id.username);
+        emailTextView = (TextView) mDrawerListView.findViewById(R.id.email);
+
         /**
          * RecyclerView
          */
@@ -110,11 +117,15 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
         adapter = new RecyclerViewDrawerAdapter();
-
         recyclerView.setAdapter(adapter);
 
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        if (!skippedLogin)
+            setUpUserDetails();
+
+        userDetails.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
 
         return mDrawerListView;
     }
@@ -181,6 +192,7 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
     }
 
     @Override
@@ -195,7 +207,13 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
         try {
             mCallbacks = (OnCarClickedListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
+            throw new ClassCastException("Activity must implement OnCarClickedListener.");
+        }
+
+        try {
+            navigation = (Navigation) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement Navigation.");
         }
     }
 
@@ -208,7 +226,6 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -225,18 +242,6 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
 
     public void closeDrawers() {
         mDrawerLayout.closeDrawers();
-    }
-
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        mLastUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
     }
 
 
@@ -345,24 +350,48 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
 
         }
 
-        private void bindSignOut(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(R.string.disconnect);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
-        }
-
-        private void bindHelp(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(R.string.help);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_help_circle_grey600_24dp);
+        private void bindCarManager(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.edit_cars);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_border_color_grey600_24dp);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.goToCarManager();
+                }
+            });
         }
 
         private void bindDonate(MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.donate);
             menuViewHolder.icon.setImageResource(R.drawable.ic_heart_grey600_24dp);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.openDonationDialog();
+                }
+            });
         }
 
-        private void bindCarManager(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(R.string.cars);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_car_grey600_24dp);
+        private void bindSignOut(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(skippedLogin ? R.string.common_signin_button_text_long : R.string.disconnect);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.goToLogin();
+                }
+            });
+        }
+
+        private void bindHelp(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.help);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_help_circle_grey600_24dp);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.goToTutorial();
+                }
+            });
         }
 
         @Override
@@ -374,9 +403,11 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
 
             public ImageView icon;
             public TextView title;
+            public View itemView;
 
             public MenuViewHolder(View itemView) {
                 super(itemView);
+                this.itemView = itemView;
                 icon = (ImageView) itemView.findViewById(R.id.icon);
                 title = (TextView) itemView.findViewById(R.id.title);
             }
@@ -384,5 +415,10 @@ public class NavigationDrawerFragment extends Fragment implements GoogleApiClien
     }
 
 
+    private void setUpUserDetails() {
+        usernameTextView.setText(AuthUtils.getLoggedUsername(getActivity()));
+        emailTextView.setText(AuthUtils.getEmail(getActivity()));
+        new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
+    }
 
 }

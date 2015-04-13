@@ -81,7 +81,6 @@ public class MapsActivity extends BaseActivity
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
-        Toolbar.OnMenuItemClickListener,
         SpotsDelegate.SpotSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
         SetCarPositionDialog.Callbacks,
@@ -90,7 +89,8 @@ public class MapsActivity extends BaseActivity
         CameraManager,
         OnMapReadyCallback,
         CameraUpdateRequester,
-        OnCarClickedListener {
+        OnCarClickedListener,
+        Navigation {
 
     protected static final String TAG = "Maps";
 
@@ -204,7 +204,7 @@ public class MapsActivity extends BaseActivity
         goToLogin();
     }
 
-    private void goToLogin() {
+    public void goToLogin() {
         if (!isFinishing()) {
 
             if (!isSkippedLogin())
@@ -268,13 +268,6 @@ public class MapsActivity extends BaseActivity
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(mToolbar, 8);
-        mToolbar.inflateMenu(R.menu.main_menu);
-        mToolbar.setOnMenuItemClickListener(this);
-
-        if (isSkippedLogin()) {
-            MenuItem item = mToolbar.getMenu().findItem(R.id.action_disconnect);
-            item.setTitle(R.string.common_signin_button_text_long);
-        }
 
         setUpNavigationDrawer();
 
@@ -348,6 +341,7 @@ public class MapsActivity extends BaseActivity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mNavigationDrawerFragment.setRetainInstance(true);
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
@@ -519,7 +513,7 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onBackPressed() {
 
-        if(mNavigationDrawerFragment.isDrawerOpen()){
+        if (mNavigationDrawerFragment.isDrawerOpen()) {
             mNavigationDrawerFragment.closeDrawers();
             return;
         }
@@ -639,7 +633,7 @@ public class MapsActivity extends BaseActivity
         return false;
     }
 
-    private void goToTutorial() {
+    public void goToTutorial() {
         startActivity(new Intent(this, TutorialActivity.class));
         Util.setTutorialShown(this, true);
     }
@@ -674,7 +668,7 @@ public class MapsActivity extends BaseActivity
     }
 
 
-    private void openDonationDialog() {
+    public void openDonationDialog() {
         DonateDialog dialog = new DonateDialog();
         dialog.setIInAppBillingService(iInAppBillingService);
         dialog.show(getFragmentManager(), "DonateDialog");
@@ -683,7 +677,8 @@ public class MapsActivity extends BaseActivity
     /**
      * Method used to start the pairing activity
      */
-    public void startDeviceSelection() {
+    @Override
+    public void goToCarManager() {
         startActivity(new Intent(MapsActivity.this, CarManagerActivity.class));
     }
 
@@ -807,31 +802,6 @@ public class MapsActivity extends BaseActivity
 
     }
 
-    @Override
-    // Handle presses on the action bar items
-    public boolean onMenuItemClick(MenuItem menuItem) {
-
-        switch (menuItem.getItemId()) {
-            case R.id.action_open_car_manager:
-                startDeviceSelection();
-                return true;
-            case R.id.action_display_help:
-                goToTutorial();
-                return true;
-            case R.id.action_donate:
-                openDonationDialog();
-                return true;
-            case R.id.action_disconnect:
-                signOut();
-                return true;
-//            case R.id.action_debug:
-//                goToDebug();
-//                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
-        }
-
-    }
 
     private void goToDebug() {
         startActivity(new Intent(this, DebugActivity.class));

@@ -55,4 +55,8 @@
     <string name="aboutToLeave">¡Apunto de quedarse libre!</string>
     <string name="check_internet">Comprueba tu conexión</string>
 
+    <string name="navigation_drawer_open">Abrir menu</string>
+    <string name="navigation_drawer_close">Cerrar menu</string>
+    <string name="edit_cars">Editar coches</string>
+
 </resources>

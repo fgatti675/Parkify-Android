@@ -56,4 +56,8 @@
     <string name="aboutToLeave">Libero fra poco!</string>
     <string name="check_internet">Controllare la connessione a Internet</string>
 
+    <string name="navigation_drawer_open">Apri menu</string>
+    <string name="navigation_drawer_close">Chiudi menu</string>
+    <string name="edit_cars">Edita le macchine</string>
+
 </resources>

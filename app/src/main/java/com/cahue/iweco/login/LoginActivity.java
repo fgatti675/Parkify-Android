@@ -21,6 +21,7 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.auth.Authenticator;
+import com.cahue.iweco.util.LoadProfileImage;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -269,7 +270,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
          * without signing in
          */
         List<Car> cars = database.retrieveCars(false);
-        for(Car car: cars)
+        for (Car car : cars)
             CarsSync.postCar(car, this, CarDatabase.getInstance(this));
 
         database.save(loginResult.cars);
@@ -311,6 +312,8 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 //        ContentResolver.addPeriodicSync(
 //                account, CarsProvider.CONTENT_AUTHORITY, new Bundle(), CarsProvider.SYNC_FREQUENCY);
 
+        storeProfileInformation();
+
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -323,31 +326,26 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
 
     // Profile pic image size in pixels
-    private final static int PROFILE_PIC_SIZE = 400;
+    private final static int PROFILE_PIC_SIZE = 200;
 
     /**
      * Fetching user's information name, mLoggedEmail, profile pic
      */
-    @Deprecated
-    private void getProfileInformation() {
+    private void storeProfileInformation() {
         try {
-            String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
+            String userEmail = Plus.AccountApi.getAccountName(getGoogleApiClient());
 
-            if (Plus.PeopleApi.getCurrentPerson(getGoogleApiClient()) != null) {
+            Person currentPerson = Plus.PeopleApi.getCurrentPerson(getGoogleApiClient());
 
+            if (currentPerson != null) {
 
-                Person currentPerson = Plus.PeopleApi
-                        .getCurrentPerson(getGoogleApiClient());
                 String personName = currentPerson.getDisplayName();
                 String personPhotoUrl = currentPerson.getImage().getUrl();
                 String personGooglePlusProfile = currentPerson.getUrl();
 
                 Log.e(TAG, "Name: " + personName + ", plusProfile: "
-                        + personGooglePlusProfile + ", email: " + email
+                        + personGooglePlusProfile + ", email: " + userEmail
                         + ", Image: " + personPhotoUrl);
-
-//                txtName.setText(personName);
-//                txtEmail.setText(email);
 
                 // by default the profile url gives 50x50 px image only
                 // we can replace the value with whatever dimension we want by
@@ -356,16 +354,17 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
                         personPhotoUrl.length() - 2)
                         + PROFILE_PIC_SIZE;
 
-//                new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
+                AuthUtils.setLoggedUserDetails(this, personName, userEmail, personPhotoUrl);
+
 
             } else {
-                Toast.makeText(getApplicationContext(),
-                        "Person information is null", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Person information is null");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }
 
 

@@ -137,10 +137,11 @@ public abstract class BaseActivity
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this);
 
-            if (!mSkippedLogin)
+            if (!mSkippedLogin) {
                 builder.addApi(Plus.API)
                         .addScope(Plus.SCOPE_PLUS_LOGIN)
-                        .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
+                        .addScope(Plus.SCOPE_PLUS_PROFILE);
+            }
 
             mGoogleApiClient = builder.build();
 
@@ -269,6 +270,7 @@ public abstract class BaseActivity
             GooglePlayServicesUtil
                     .getErrorDialog(result.getErrorCode(), this, 0)
                     .show();
+            onConnectingStatusChange(false);
             return;
         }
 
@@ -310,34 +312,6 @@ public abstract class BaseActivity
         return mGoogleApiClient;
     }
 
-
-    /**
-     * Background Async task to load user profile picture from url
-     */
-    private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public LoadProfileImage(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
-    }
 
     public boolean isSkippedLogin() {
         return mSkippedLogin;
