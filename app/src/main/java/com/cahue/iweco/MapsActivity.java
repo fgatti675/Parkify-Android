@@ -269,6 +269,10 @@ public class MapsActivity extends BaseActivity
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(mToolbar, 8);
+        if ("wimc".equals(BuildConfig.FLAVOR)) {
+            mToolbar.removeView(findViewById(R.id.logo));
+            mToolbar.setTitle(getString(R.string.app_name));
+        }
 
         setUpNavigationDrawer();
 
