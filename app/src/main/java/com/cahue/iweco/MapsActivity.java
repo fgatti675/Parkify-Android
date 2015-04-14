@@ -268,7 +268,7 @@ public class MapsActivity extends BaseActivity
         }
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(mToolbar, 8);
+        ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
         if ("wimc".equals(BuildConfig.FLAVOR)) {
             mToolbar.removeView(findViewById(R.id.logo));
             mToolbar.setTitle(getString(R.string.app_name));
@@ -442,12 +442,7 @@ public class MapsActivity extends BaseActivity
                     @Override
                     public void onAnimationStart(Animation animation) {
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
-                        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-//                        if (currentApiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1){
-//                            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-//                        } else{
                         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-//                        }
                         myLocationButton.setLayoutParams(params); //causes layout update
                     }
 

@@ -28,10 +28,10 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <permission
-        android:name="com.cahue.iweco.permission.C2D_MESSAGE"
+        android:name="${packageName}.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.cahue.iweco.permission.C2D_MESSAGE" />
+    <uses-permission android:name="${packageName}.permission.C2D_MESSAGE" />
 
     <application
         android:allowBackup="true"
@@ -45,20 +45,20 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name="com.cahue.iweco.MapsActivity">
+        <activity android:name=".MapsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service android:name="com.cahue.iweco.locationServices.ParkedCarService" />
-        <service android:name="com.cahue.iweco.locationServices.CarMovedService" />
+        <service android:name=".locationServices.ParkedCarService" />
+        <service android:name=".locationServices.CarMovedService" />
         <service
             android:name=".locationServices.GeofenceCarService"
             android:enabled="true" />
 
-        <receiver android:name="com.cahue.iweco.util.BluetoothDetector">
+        <receiver android:name=".util.BluetoothDetector">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
@@ -68,53 +68,53 @@
 
         <!-- DEBUG -->
         <activity
-            android:name="com.cahue.iweco.debug.DebugActivity"
-            android:parentActivityName="com.cahue.iweco.MapsActivity">
+            android:name=".debug.DebugActivity"
+            android:parentActivityName=".MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cahue.iweco.MapsActivity" />
+                android:value=".MapsActivity" />
         </activity>
 
-        <service android:name="com.cahue.iweco.debug.DebugCarMovedService" />
-        <service android:name="com.cahue.iweco.debug.DebugParkedCarService" />
+        <service android:name=".debug.DebugCarMovedService" />
+        <service android:name=".debug.DebugParkedCarService" />
 
         <activity
-            android:name="com.cahue.iweco.login.LoginActivity"
+            android:name=".login.LoginActivity"
             android:label="@string/common_signin_button_text"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"></activity>
         <activity
-            android:name="com.cahue.iweco.tutorial.TutorialActivity"
+            android:name=".tutorial.TutorialActivity"
             android:screenOrientation="portrait"
             android:theme="@style/CahueTheme.Dark"></activity>
 
         <service android:name=".activityRecognition.PassiveActivityRecognitionIntentService" />
 
         <receiver
-            android:name="com.cahue.iweco.gcm.GcmBroadcastReceiver"
+            android:name=".gcm.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="com.cahue.iweco" />
+                <category android:name="${packageName}" />
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name="com.cahue.iweco.parkedCar.CarPositionUpdatedReceiver"
+            android:name=".parkedCar.CarPositionUpdatedReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.cahue.iweco.INTENT_CAR_UPDATED" />
+                <action android:name="${packageName}.INTENT_CAR_UPDATED" />
             </intent-filter>
         </receiver>
 
-        <service android:name="com.cahue.iweco.gcm.GcmIntentService" />
+        <service android:name=".gcm.GcmIntentService" />
 
         <activity
-            android:name="com.cahue.iweco.cars.CarManagerActivity"
-            android:parentActivityName="com.cahue.iweco.MapsActivity">
+            android:name=".cars.CarManagerActivity"
+            android:parentActivityName=".MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cahue.iweco.MapsActivity" />
+                android:value=".MapsActivity" />
         </activity>
 
         <provider
