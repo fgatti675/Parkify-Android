@@ -2,7 +2,9 @@
 <resources>
 
     <string name="welcome">Bienvenido</string>
+    <string name="info_parking_text_header">¡Encuentra tu coche!</string>
     <string name="info_parking_text">Esta aplicación guardará automaticamente la posicion de tu coche cuando te alejes de él.\n\nSi quieres establecer la posicion de tu coche manualmente, puedes hacer click largo en cualquier punto del mapa.</string>
+    <string name="info_spots_text_header">¡Aparca!</string>
     <string name="info_spots_text">Pero también te dice donde hay huecos libres, ¡incluso cuando alguien se está acercando a su coche!</string>
     <string name="next">Siguiente</string>
     <string name="previous">Previo</string>
