@@ -31,6 +31,7 @@
     <permission
         android:name="com.whereismycar.permission.C2D_MESSAGE"
         tools:node="replace"
+        tools:replace="android:name"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.whereismycar.permission.C2D_MESSAGE" />

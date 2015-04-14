@@ -2,7 +2,9 @@
 <resources>
 
     <string name="welcome">Welcome</string>
+    <string name="info_parking_text_header">Find your car!</string>
     <string name="info_parking_text">This app will automatically record your car\'s position when you walk away from it.\n\nIf you want to set your car\'s position manually, you can long press in the map.</string>
+    <string name="info_spots_text_header">Park!</string>
     <string name="info_spots_text">But it will also tell you where others left a free parking spot, or even when they are about to leave!</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>

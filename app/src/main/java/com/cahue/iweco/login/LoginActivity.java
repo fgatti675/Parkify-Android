@@ -107,6 +107,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     protected void onSignInRequired() {
+//        setLoading(false);
 //        Toast.makeText(this, R.string.check_internet, Toast.LENGTH_SHORT).show();
     }
 
