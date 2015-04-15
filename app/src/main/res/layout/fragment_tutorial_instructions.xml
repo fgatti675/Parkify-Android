@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_margin="@dimen/default_padding"
-        android:background="@color/background_translucent">
+        android:background="@color/background_translucent"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"

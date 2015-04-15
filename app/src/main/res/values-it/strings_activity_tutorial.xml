@@ -3,7 +3,7 @@
 
     <string name="welcome">Benvenuto</string>
     <string name="info_parking_text_header">Trova la macchina!</string>
-    <string name="info_parking_text">Questa applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\n\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.</string>
+    <string name="info_parking_text">Questa applicazione registra automaticamente la posizione dell\'auto quando ci si allontana.\nSe vuoi impostare la posizione dell\'auto manualmente, puoi premere a lungo nella mappa.</string>
     <string name="info_spots_text_header">Parcheggia!</string>
     <string name="info_spots_text">Ma ti dice pure dove ci sono posti libreri! Pure quando qualcuno sta per andare via!</string>
     <string name="next">Seguente</string>
