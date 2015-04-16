@@ -20,7 +20,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -38,22 +37,20 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
-import com.cahue.iweco.spots.ParkingSpotSender;
-import com.cahue.iweco.login.AuthUtils;
-import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarDelegate;
 import com.cahue.iweco.parkedCar.SetCarPositionDialog;
 import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.Util;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -128,11 +125,6 @@ public class MapsActivity extends BaseActivity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     * Car fragment manager, just there if there are 2 panels
-     */
-    private CarManagerFragment carFragment;
 
     /**
      * Currently recognized activity type (what the user is doing)
@@ -290,8 +282,6 @@ public class MapsActivity extends BaseActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // could be null
-        carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
 
         /**
          * There is no saved instance so we create a few things
@@ -300,8 +290,6 @@ public class MapsActivity extends BaseActivity
 
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
-            if (carFragment != null)
-                carFragment.setRetainInstance(true);
 
         }
 
@@ -345,7 +333,7 @@ public class MapsActivity extends BaseActivity
     private void setUpNavigationDrawer() {
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+                getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mNavigationDrawerFragment.setRetainInstance(true);
 
         // Set up the drawer.
@@ -913,13 +901,10 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onCarEdited(Car car, boolean newCar) {
-        if (carFragment != null)
-            carFragment.onCarEdited(car, newCar);
     }
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
-
     }
 
     /**

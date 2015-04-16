@@ -19,9 +19,8 @@
         <fragment
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/car_manager_fragment"
-            cahue:clickableCars="true"
-            class="com.cahue.iweco.cars.CarManagerFragment" />
+            android:id="@+id/navigation_fragment"
+            class="com.cahue.iweco.NavigationDrawerFragment" />
 
     </LinearLayout>
 

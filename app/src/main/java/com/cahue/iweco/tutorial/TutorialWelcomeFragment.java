@@ -46,7 +46,7 @@ public class TutorialWelcomeFragment extends Fragment {
         alpha.setDuration(1600);
         alpha.setFillAfter(true);
         view.findViewById(R.id.textView).startAnimation(alpha);
-        if (!"wimc".equals(BuildConfig.BUILD_TYPE)) {
+        if (!"wimc".equals(BuildConfig.FLAVOR)) {
             final View logo = view.findViewById(R.id.logo);
             logo.setVisibility(View.INVISIBLE);
             new Handler().postDelayed(new Runnable() {

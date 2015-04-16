@@ -59,5 +59,6 @@
     <string name="navigation_drawer_open">Apri menu</string>
     <string name="navigation_drawer_close">Chiudi menu</string>
     <string name="edit_cars">Edita le macchine</string>
+    <string name="position_not_set">Posizione sconosciuta</string>
 
 </resources>
