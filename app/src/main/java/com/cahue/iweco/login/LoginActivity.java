@@ -17,11 +17,10 @@ import android.widget.Toast;
 import com.cahue.iweco.BaseActivity;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
+import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.auth.Authenticator;
-import com.cahue.iweco.util.LoadProfileImage;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -247,8 +246,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     protected void onConnectingStatusChange(boolean connecting) {
-//        if (!isFinishing())
-//            setLoading(connecting);
+        setLoading(connecting);
     }
 
     @Override

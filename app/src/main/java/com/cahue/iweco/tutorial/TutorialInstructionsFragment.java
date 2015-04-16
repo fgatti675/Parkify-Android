@@ -39,7 +39,7 @@ public class TutorialInstructionsFragment extends Fragment {
     public static TutorialInstructionsFragment newInstance(int headerResId, int textResId, String type) {
         TutorialInstructionsFragment fragment = new TutorialInstructionsFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_TEXT_RES_ID, headerResId);
+        args.putInt(ARG_HEADER_RES_ID, headerResId);
         args.putInt(ARG_TEXT_RES_ID, textResId);
         args.putString(ARG_TYPE, type);
         fragment.setArguments(args);
@@ -67,7 +67,7 @@ public class TutorialInstructionsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tutorial_instructions, container, false);
-        ((TextView) view.findViewById(R.id.header)).setText(textResId);
+        ((TextView) view.findViewById(R.id.header)).setText(headerResId);
         ((TextView) view.findViewById(R.id.textView)).setText(textResId);
         return view;
     }
