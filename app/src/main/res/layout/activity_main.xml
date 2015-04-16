@@ -41,7 +41,9 @@
                 android:layout_alignParentBottom="true"
                 android:visibility="invisible"
                 tools:context="com.cahue.iweco.spots.SpotDetailsFragment"
-                android:layout_margin="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginRight="@dimen/default_padding"
                 android:foreground="?android:attr/selectableItemBackground"
                 cahue:cardCornerRadius="@dimen/cardCornerRadius" />
 

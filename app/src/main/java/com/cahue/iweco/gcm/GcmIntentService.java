@@ -20,6 +20,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 /**
  * Created by Francesco on 15/01/2015.
  */
@@ -67,25 +70,23 @@ public class GcmIntentService extends IntentService {
 //                        extras.toString());
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
 
                 try {
 
                     String updatedCar = extras.getString(UPDATED_CAR);
                     if (updatedCar != null)
-                        saveCar(updatedCar);
+                        saveCar(URLDecoder.decode(updatedCar, "UTF-8"));
 
                     String deletedCarId = extras.getString(DELETED_CAR);
                     if (deletedCarId != null)
-                        deleteCar(deletedCarId);
+                        deleteCar(URLDecoder.decode(deletedCarId, "UTF-8"));
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
 
-                // Post notification of received message.
-//                sendNotification("Received: " + extras.toString());
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }

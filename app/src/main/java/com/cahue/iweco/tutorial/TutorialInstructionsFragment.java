@@ -17,6 +17,7 @@ import com.cahue.iweco.R;
  */
 public class TutorialInstructionsFragment extends Fragment {
 
+    private static final String ARG_HEADER_RES_ID = "ARG_HEADER_RES_ID";
     private static final String ARG_TEXT_RES_ID = "ARG_TEXT_RES_ID";
     private static final String ARG_TYPE = "ARG_TYPE";
 
@@ -24,6 +25,7 @@ public class TutorialInstructionsFragment extends Fragment {
 
     public static final String TYPE_PARKING = "PARKING";
 
+    private int headerResId;
     private int textResId;
 
     private String type;
@@ -34,9 +36,10 @@ public class TutorialInstructionsFragment extends Fragment {
      *
      * @return A new instance of fragment TutorialWelcome.
      */
-    public static TutorialInstructionsFragment newInstance(int textResId, String type) {
+    public static TutorialInstructionsFragment newInstance(int headerResId, int textResId, String type) {
         TutorialInstructionsFragment fragment = new TutorialInstructionsFragment();
         Bundle args = new Bundle();
+        args.putInt(ARG_HEADER_RES_ID, headerResId);
         args.putInt(ARG_TEXT_RES_ID, textResId);
         args.putString(ARG_TYPE, type);
         fragment.setArguments(args);
@@ -52,6 +55,7 @@ public class TutorialInstructionsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
+            headerResId = getArguments().getInt(ARG_HEADER_RES_ID);
             textResId = getArguments().getInt(ARG_TEXT_RES_ID);
             type = getArguments().getString(ARG_TYPE);
         }
@@ -63,8 +67,8 @@ public class TutorialInstructionsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tutorial_instructions, container, false);
-        TextView textView = (TextView) view.findViewById(R.id.textView);
-        textView.setText(textResId);
+        ((TextView) view.findViewById(R.id.header)).setText(headerResId);
+        ((TextView) view.findViewById(R.id.textView)).setText(textResId);
         return view;
     }
 

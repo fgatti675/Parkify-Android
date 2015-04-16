@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
@@ -164,7 +165,7 @@ public class NavigationDrawerFragment extends Fragment {
                     return;
                 }
 
-                getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
             @Override
@@ -173,7 +174,7 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-                getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
 
@@ -320,8 +321,12 @@ public class NavigationDrawerFragment extends Fragment {
                 View.OnClickListener clickListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mCallbacks.onCarClicked(car.id);
-                        mDrawerLayout.closeDrawers();
+                        if(car.location != null) {
+                            mCallbacks.onCarClicked(car.id);
+                            mDrawerLayout.closeDrawers();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 };
                 carViewHolder.cardView.setOnClickListener(clickListener);

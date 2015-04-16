@@ -58,5 +58,6 @@
     <string name="edit_cars">Edit cars</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Search for an address</string>
+    <string name="position_not_set">Car position is not set</string>
 
 </resources>

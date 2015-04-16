@@ -1,32 +1,45 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        wimc {
+            keyAlias 'skitrackerkey'
+            keyPassword 'qazwsx123'
+            storeFile file('C:/Users/francesco/Google Drive/skitracker.keystore')
+            storePassword 'qazwsx123'
+        }
+        iweco {
+            keyAlias 'alias_name'
+            keyPassword 'arrabal675'
+            storeFile file('C:/Users/Francesco/Google Drive/cahue.keystore')
+            storePassword 'arrabal675'
+        }
+    }
     compileSdkVersion 21
     buildToolsVersion '22.0.1'
-
     defaultConfig {
         applicationId "com.cahue.iweco"
         minSdkVersion 16
         targetSdkVersion 21
     }
-
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     productFlavors {
         iweco {
             applicationId "com.cahue.iweco"
             versionCode 8
             versionName "0.4.0"
+            signingConfig signingConfigs.iweco
         }
         wimc {
             applicationId "com.whereismycar"
-            versionCode 25
-            versionName "2.2.4"
+            versionCode 27
+            versionName "2.3.1"
+            signingConfig signingConfigs.wimc
         }
         local {
             applicationId "com.cahue.iweco.local"
@@ -42,7 +55,7 @@ dependencies {
     compile('com.google.maps.android:android-maps-utils:0.3+') {
         exclude group: "com.google.android.gms"
     }
-//    compile 'com.google.code.gson:gson:2.+'
+    //    compile 'com.google.code.gson:gson:2.+'
     compile 'com.android.support:support-v4:21.0.+'
     compile 'com.android.support:appcompat-v7:21.0.+'
     compile 'com.android.support:support-v13:21.0.3'

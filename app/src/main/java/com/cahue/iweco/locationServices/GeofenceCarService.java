@@ -47,7 +47,9 @@ public class GeofenceCarService extends LocationPollerService {
             if (resultCode == GeofenceTransitionsIntentService.SUCCESS_RESULT) {
                 Log.d(TAG, "Geofence result SUCCESS");
                 Location location = resultData.getParcelable(GeofenceTransitionsIntentService.GEOFENCE_TRIGGERING_LOCATION_KEY);
-                notifyApproachingCar(location, getCar());
+
+                if (BuildConfig.DEBUG)
+                    notifyApproachingCar(location, getCar());
 
                 ParkingSpotSender.doPostSpotLocation(GeofenceCarService.this, getCar().location, true, getCar());
             }

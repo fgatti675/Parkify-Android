@@ -60,5 +60,6 @@
     <string name="edit_cars">Editar coches</string>
     <string name="search_title">Busqueda</string>
     <string name="search_hint">Busca una dirección</string>
+    <string name="position_not_set">Ubicación desconocida</string>
 
 </resources>

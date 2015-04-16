@@ -14,8 +14,7 @@ import com.cahue.iweco.R;
 
 
 /**
- * This class is used as a dialog to ask the user if he is sure to store the location in
- * the indicated place.
+ * This class is used as a dialog to ask the user to edit properties like nake or color of the car.
  *
  * @author Francesco
  */

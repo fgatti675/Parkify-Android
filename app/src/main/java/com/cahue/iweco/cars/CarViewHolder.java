@@ -46,12 +46,8 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
     public void bind(Context context, final Car car, Location userLastLocation, BluetoothAdapter btAdapter) {
 
         name.setText(car.name);
-        if (car.location != null && car.time != null) {
-            time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
-            time.setVisibility(View.VISIBLE);
-        } else {
-            time.setVisibility(View.GONE);
-        }
+
+        updateTime(car);
 
         int color = car.color != null ?
                 car.color :
@@ -85,13 +81,25 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
 
         updateDistance(userLastLocation, car.location);
 
+        updateAddress(car);
+
+    }
+
+    private void updateAddress(Car car) {
         if (car.address != null) {
             address.setText(car.address);
-            address.setVisibility(View.VISIBLE);
         } else {
-            address.setVisibility(View.GONE);
+            address.setText(R.string.position_not_set);
         }
+    }
 
+    private void updateTime(Car car) {
+        if (car.location != null && car.time != null) {
+            time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
+            time.setVisibility(View.VISIBLE);
+        } else {
+            time.setVisibility(View.GONE);
+        }
     }
 
     public void updateDistance(Location userLocation, Location carLocation) {

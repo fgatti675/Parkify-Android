@@ -21,7 +21,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -40,6 +39,8 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
+import com.cahue.iweco.spots.ParkingSpotSender;
+import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.locationServices.LocationPollerService;
@@ -55,7 +56,6 @@ import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.Util;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -115,6 +115,8 @@ public class MapsActivity extends BaseActivity
 
     private CarDatabase carDatabase;
 
+    private Toolbar mToolbar;
+
     private FloatingActionButton myLocationButton;
     private CardView detailsContainer;
     private DetailsFragment detailsFragment;
@@ -128,11 +130,6 @@ public class MapsActivity extends BaseActivity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     * Car fragment manager, just there if there are 2 panels
-     */
-    private CarManagerFragment carFragment;
 
     /**
      * Currently recognized activity type (what the user is doing)
@@ -185,7 +182,6 @@ public class MapsActivity extends BaseActivity
     };
 
     private PendingIntent pActivityRecognitionIntent;
-    private Toolbar mToolbar;
 
     @Override
     protected void onPlusClientSignIn() {
@@ -194,10 +190,10 @@ public class MapsActivity extends BaseActivity
                 REQUEST,
                 this);
 
-        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
-        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pActivityRecognitionIntent);
+//        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
+//        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pActivityRecognitionIntent);
 
     }
 
@@ -269,7 +265,7 @@ public class MapsActivity extends BaseActivity
         }
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(mToolbar, 8);
+        ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
         if ("wimc".equals(BuildConfig.FLAVOR)) {
             mToolbar.removeView(findViewById(R.id.logo));
             mToolbar.setTitle(getString(R.string.app_name));
@@ -293,8 +289,6 @@ public class MapsActivity extends BaseActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // could be null
-        carFragment = (CarManagerFragment) getFragmentManager().findFragmentById(R.id.car_manager_fragment);
 
         /**
          * There is no saved instance so we create a few things
@@ -303,8 +297,6 @@ public class MapsActivity extends BaseActivity
 
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
-            if (carFragment != null)
-                carFragment.setRetainInstance(true);
 
         }
 
@@ -348,7 +340,7 @@ public class MapsActivity extends BaseActivity
     private void setUpNavigationDrawer() {
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+                getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mNavigationDrawerFragment.setRetainInstance(true);
 
         // Set up the drawer.
@@ -445,12 +437,7 @@ public class MapsActivity extends BaseActivity
                     @Override
                     public void onAnimationStart(Animation animation) {
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
-                        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-//                        if (currentApiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1){
-//                            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-//                        } else{
                         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-//                        }
                         myLocationButton.setLayoutParams(params); //causes layout update
                     }
 
@@ -598,11 +585,6 @@ public class MapsActivity extends BaseActivity
             unbindService(mBillingServiceConn);
         }
 
-        if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
-            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
-        }
-
         saveMapCameraPosition();
     }
 
@@ -649,6 +631,10 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
+        if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
+//            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
+        }
         unregisterReceiver(carUpdateReceiver);
     }
 
@@ -922,13 +908,10 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onCarEdited(Car car, boolean newCar) {
-        if (carFragment != null)
-            carFragment.onCarEdited(car, newCar);
     }
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
-
     }
 
     /**
