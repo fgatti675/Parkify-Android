@@ -6,7 +6,7 @@
     <dimen name="marker_diameter_red">9dp</dimen>
     <dimen name="marker_diameter_orange">9dp</dimen>
     <dimen name="marker_diameter_yellow">12dp</dimen>
-    <dimen name="marker_diameter_green">16dp</dimen>
+    <dimen name="marker_diameter_green">16dp</dimen>0
     <dimen name="marker_diameter_selected">22dp</dimen>
 
     <dimen name="buttons_margin">20dp</dimen>

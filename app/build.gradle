@@ -8,6 +8,12 @@ android {
             storeFile file('C:/Users/francesco/Google Drive/skitracker.keystore')
             storePassword 'qazwsx123'
         }
+        iweco {
+            keyAlias 'alias_name'
+            keyPassword 'arrabal675'
+            storeFile file('C:/Users/Francesco/Google Drive/cahue.keystore')
+            storePassword 'arrabal675'
+        }
     }
     compileSdkVersion 21
     buildToolsVersion '22.0.1'
@@ -27,6 +33,7 @@ android {
             applicationId "com.cahue.iweco"
             versionCode 8
             versionName "0.4.0"
+            signingConfig signingConfigs.iweco
         }
         wimc {
             applicationId "com.whereismycar"
