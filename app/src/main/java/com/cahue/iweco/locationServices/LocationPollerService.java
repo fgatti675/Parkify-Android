@@ -75,10 +75,20 @@ public abstract class LocationPollerService extends Service implements
      * Flag to indicate that the first precise fix has been notified
      */
     private boolean fixNotified = false;
-    private boolean finalFixNotified = false;
 
     // Is the broadcast receiver listening for activity updates ?
     private boolean listeningActivities = false;
+
+    private Runnable finishTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "Handler finished LocationPoller service");
+            if (bestAccuracyLocation != null)
+                notifyFixLocation(bestAccuracyLocation);
+            else
+                finish();
+        }
+    };
 
     // Use a broadcast receiver to get the detected activities
     BroadcastReceiver activityReceiver = new BroadcastReceiver() {
@@ -113,15 +123,8 @@ public abstract class LocationPollerService extends Service implements
                 Log.e(TAG, "CAR NOT FOUND");
             }
             start();
-            handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Log.d(TAG, "Handler finished LocationPolelr service");
-                                        if (bestAccuracyLocation != null)
-                                            onPreciseFixPolled(LocationPollerService.this, bestAccuracyLocation, car, mGoogleApiClient);
-                                        finish();
-                                    }
-                                },
+
+            handler.postDelayed(finishTimeoutRunnable,
                     PRECISE_FIX_TIMEOUT_MS);
         }
         return START_STICKY_COMPATIBILITY;
@@ -226,12 +229,20 @@ public abstract class LocationPollerService extends Service implements
         finish();
     }
 
+    private boolean finished = false;
 
     protected void finish() {
+
+        Log.d(TAG, "Finish called");
+        if (finished) return;
+
+        Log.w(TAG, mGoogleApiClient.isConnected() + "");
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 //        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
         mGoogleApiClient.disconnect();
         stopSelf();
+        handler.removeCallbacks(finishTimeoutRunnable);
+        finished = true;
     }
 
     /**
