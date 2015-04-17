@@ -62,7 +62,7 @@ public abstract class LocationPollerService extends Service implements
     // Car related to this service
     private Car car;
 
-    private PendingIntent pActivityRecognitionIntent;
+//    private PendingIntent pActivityRecognitionIntent;
 
     /**
      * Best location polled so far
@@ -97,7 +97,7 @@ public abstract class LocationPollerService extends Service implements
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
-                .addApi(ActivityRecognition.API)
+//                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
@@ -216,7 +216,7 @@ public abstract class LocationPollerService extends Service implements
 
     protected void finish() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
+//        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
         mGoogleApiClient.disconnect();
         stopSelf();
     }

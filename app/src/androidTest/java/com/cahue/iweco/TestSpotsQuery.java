@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
+import com.cahue.iweco.spots.query.QueryResult;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.Set;
@@ -25,7 +26,7 @@ public class TestSpotsQuery extends ParkingSpotsQuery {
     }
 
     @Override
-    protected Set<ParkingSpot> doInBackground(Void... voids) {
+    protected QueryResult doInBackground(Void... voids) {
 
         if (latLngBounds == null)
             throw new IllegalStateException("There must be a latLngBound set as a viewport to build the SQL query.");

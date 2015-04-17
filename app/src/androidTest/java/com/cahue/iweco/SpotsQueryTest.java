@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
+import com.cahue.iweco.spots.query.QueryResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -41,7 +42,7 @@ public class SpotsQueryTest extends ActivityTestCase {
                         new LatLng(48.129830, 11.559060),
                         10,
                         new Date(1413928884000L),
-                        future));
+                        false));
             }
         };
 
@@ -50,7 +51,7 @@ public class SpotsQueryTest extends ActivityTestCase {
                 .include(new LatLng(48.123913, 11.553905))
                 .build();
 
-        final List<ParkingSpot> result = new ArrayList<ParkingSpot>();
+        final List<ParkingSpot> spots = new ArrayList<ParkingSpot>();
 
         final ParkingSpotsQuery parkingSpotsQuery = new TestSpotsQuery(
                 getActivity(),
@@ -58,8 +59,8 @@ public class SpotsQueryTest extends ActivityTestCase {
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
 
                     @Override
-                    public void onSpotsUpdate(ParkingSpotsQuery query, Set<ParkingSpot> parkingSpots) {
-                        result.addAll(parkingSpots);
+                    public void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
+                        spots.addAll(result.spots);
                         signal.countDown();
                     }
 
@@ -90,7 +91,7 @@ public class SpotsQueryTest extends ActivityTestCase {
         signal.await(60, TimeUnit.SECONDS);
 
         // The task is done, and now you can assert some things!
-        assertEquals(expectedResult, result);
+        assertEquals(expectedResult, spots);
     }
 
 }

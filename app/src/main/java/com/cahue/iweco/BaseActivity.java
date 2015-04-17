@@ -16,7 +16,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.location.ActivityRecognition;
+//import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
 
@@ -133,7 +133,7 @@ public abstract class BaseActivity
             // Scopes indicate the information about the user your application will be able to access.
             GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
-                    .addApi(ActivityRecognition.API)
+//                    .addApi(ActivityRecognition.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this);
 

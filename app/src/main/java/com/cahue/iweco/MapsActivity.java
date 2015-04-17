@@ -129,7 +129,7 @@ public class MapsActivity extends BaseActivity
     /**
      * Currently recognized activity type (what the user is doing)
      */
-    private DetectedActivity activityType;
+//    private DetectedActivity activityType;
 
     /**
      * If we get a new car position while we are using the app, we update the map
@@ -138,7 +138,7 @@ public class MapsActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            activityType = (DetectedActivity) intent.getExtras().get(ActivityRecognitionUtil.INTENT_EXTRA_ACTIVITY);
+//            activityType = (DetectedActivity) intent.getExtras().get(ActivityRecognitionUtil.INTENT_EXTRA_ACTIVITY);
 
         }
     };
@@ -176,7 +176,7 @@ public class MapsActivity extends BaseActivity
         }
     };
 
-    private PendingIntent pActivityRecognitionIntent;
+//    private PendingIntent pActivityRecognitionIntent;
 
     @Override
     protected void onPlusClientSignIn() {
@@ -252,8 +252,7 @@ public class MapsActivity extends BaseActivity
 
         setContentView(R.layout.activity_main);
 
-        activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
-
+//        activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
         if (BuildConfig.DEBUG) {
             setDebugConfig();
