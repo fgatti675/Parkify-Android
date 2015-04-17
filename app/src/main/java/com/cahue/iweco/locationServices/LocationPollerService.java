@@ -82,11 +82,11 @@ public abstract class LocationPollerService extends Service implements
     private Runnable finishTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            Log.d(TAG, "Handler finished LocationPoller service");
+            Log.d(TAG, "Handler finished " + LocationPollerService.this.getClass().getSimpleName() + " service");
             if (bestAccuracyLocation != null)
                 notifyFixLocation(bestAccuracyLocation);
             else
-                finish();
+                stopSelf();
         }
     };
 
@@ -182,9 +182,14 @@ public abstract class LocationPollerService extends Service implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        Log.d(TAG, getClass().getSimpleName() + " onDestroy");
 //        if (listeningActivities)
 //            unregisterReceiver(activityReceiver);
+//        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
+        if (mGoogleApiClient.isConnected())
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        mGoogleApiClient.disconnect();
+        handler.removeCallbacks(finishTimeoutRunnable);
     }
 
     @Override
@@ -226,24 +231,9 @@ public abstract class LocationPollerService extends Service implements
         Log.i(TAG, "Notifying location polled: " + location);
         onPreciseFixPolled(this, location, car, mGoogleApiClient);
         fixNotified = true;
-        finish();
-    }
-
-    private boolean finished = false;
-
-    protected void finish() {
-
-        Log.d(TAG, "Finish called");
-        if (finished) return;
-
-        Log.w(TAG, mGoogleApiClient.isConnected() + "");
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-//        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
-        mGoogleApiClient.disconnect();
         stopSelf();
-        handler.removeCallbacks(finishTimeoutRunnable);
-        finished = true;
     }
+
 
     /**
      * Called after the first precise enough fix is received, or after {@link #PRECISE_FIX_TIMEOUT_MS}

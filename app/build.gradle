@@ -37,8 +37,8 @@ android {
         }
         wimc {
             applicationId "com.whereismycar"
-            versionCode 29
-            versionName "2.3.3"
+            versionCode 30
+            versionName "2.3.4"
             signingConfig signingConfigs.wimc
         }
         local {
