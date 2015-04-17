@@ -21,6 +21,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -39,9 +42,6 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
-import com.cahue.iweco.spots.ParkingSpotSender;
-import com.cahue.iweco.login.AuthUtils;
-import com.cahue.iweco.locationServices.ActivityRecognitionIntentService;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.locationServices.ParkedCarService;
@@ -259,19 +259,11 @@ public class MapsActivity extends BaseActivity
 
         activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
 
-
         if (BuildConfig.DEBUG) {
             setDebugConfig();
         }
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
-        if ("wimc".equals(BuildConfig.FLAVOR)) {
-            mToolbar.removeView(findViewById(R.id.logo));
-            mToolbar.setTitle(getString(R.string.app_name));
-        }
-        mToolbar.inflateMenu(R.menu.main_menu);
-        mToolbar.setOnMenuItemClickListener(this);
+        setUpToolbar();
 
         setUpNavigationDrawer();
 
@@ -335,6 +327,29 @@ public class MapsActivity extends BaseActivity
          */
         bindBillingService();
 
+        /**
+         * Search
+         */
+        handleSearchIntent(getIntent());
+
+    }
+
+    private void setUpToolbar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
+        if ("wimc".equals(BuildConfig.FLAVOR)) {
+            mToolbar.removeView(findViewById(R.id.logo));
+            mToolbar.setTitle(getString(R.string.app_name));
+        }
+        mToolbar.inflateMenu(R.menu.main_menu);
+        mToolbar.setOnMenuItemClickListener(this);
+
+        Menu menu = mToolbar.getMenu();
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
     }
 
     private void setUpNavigationDrawer() {
@@ -977,15 +992,25 @@ public class MapsActivity extends BaseActivity
         switch (menuItem.getItemId()) {
 
             case R.id.search:
-                // Associate searchable configuration with the SearchView
-                SearchManager searchManager =
-                        (SearchManager) getSystemService(Context.SEARCH_SERVICE);
                 SearchView searchView = (SearchView) menuItem.getActionView();
-                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+                searchView.callOnClick();
                 return true;
 
             default:
                 return super.onOptionsItemSelected(menuItem);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleSearchIntent(intent);
+    }
+
+    private void handleSearchIntent(Intent intent) {
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
         }
     }
 }
