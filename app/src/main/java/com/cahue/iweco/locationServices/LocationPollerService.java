@@ -1,13 +1,12 @@
 package com.cahue.iweco.locationServices;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -15,7 +14,6 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -62,6 +60,8 @@ public abstract class LocationPollerService extends Service implements
     // Car related to this service
     private Car car;
 
+    private Handler handler;
+
 //    private PendingIntent pActivityRecognitionIntent;
 
     /**
@@ -102,16 +102,27 @@ public abstract class LocationPollerService extends Service implements
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        handler = new Handler();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             car = CarDatabase.getInstance(this).find(intent.getExtras().getString(EXTRA_CAR));
-            if(car == null) {
+            if (car == null) {
                 Log.e(TAG, "CAR NOT FOUND");
             }
             start();
+            handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.d(TAG, "Handler finished LocationPolelr service");
+                                        if (bestAccuracyLocation != null)
+                                            onPreciseFixPolled(LocationPollerService.this, bestAccuracyLocation, car, mGoogleApiClient);
+                                        finish();
+                                    }
+                                },
+                    PRECISE_FIX_TIMEOUT_MS);
         }
         return START_STICKY_COMPATIBILITY;
     }
@@ -194,7 +205,9 @@ public abstract class LocationPollerService extends Service implements
 
             if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
                 notifyFixLocation(bestAccuracyLocation);
+                return;
             }
+
         }
     }
 
@@ -224,7 +237,8 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Called after the first precise enough fix is received, or after {@link #PRECISE_FIX_TIMEOUT_MS}
      * is reached.
-     *  @param context
+     *
+     * @param context
      * @param location
      * @param car
      * @param googleApiClient A connected GoogleApiClient
