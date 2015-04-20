@@ -246,6 +246,7 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     @Override
     protected void onConnectingStatusChange(boolean connecting) {
+        Log.d(TAG, "onConnectingStatusChange " + connecting);
         setLoading(connecting);
     }
 

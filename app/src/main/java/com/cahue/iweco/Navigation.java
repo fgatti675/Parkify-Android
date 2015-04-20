@@ -5,7 +5,7 @@ package com.cahue.iweco;
  */
 public interface Navigation {
 
-    void goToLogin();
+    void signOut();
 
     void goToTutorial();
 

@@ -140,7 +140,8 @@ public abstract class BaseActivity
             if (!mSkippedLogin) {
                 builder.addApi(Plus.API)
                         .addScope(Plus.SCOPE_PLUS_LOGIN)
-                        .addScope(Plus.SCOPE_PLUS_PROFILE);
+                        .addScope(Plus.SCOPE_PLUS_PROFILE)
+                        .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
             }
 
             mGoogleApiClient = builder.build();

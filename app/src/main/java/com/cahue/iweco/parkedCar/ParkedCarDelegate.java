@@ -398,6 +398,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         if (cameraManager == null)
             return false;
 
+        if (!isAdded()) return false;
+
         Log.v(TAG, "zoomToSeeBoth");
 
         LatLng carPosition = getCarLatLng();

@@ -383,7 +383,7 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigation.goToLogin();
+                    navigation.signOut();
                 }
             });
         }
