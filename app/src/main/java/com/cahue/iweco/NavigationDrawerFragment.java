@@ -21,7 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,10 +31,8 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.DividerItemDecoration;
 import com.cahue.iweco.util.LoadProfileImage;
-import com.google.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
-import com.google.android.gms.ads.doubleclick.PublisherAdView;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.List;
 
@@ -57,7 +55,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private LinearLayout mDrawerListView;
+    private RelativeLayout mDrawerListView;
 
     private View mFragmentContainerView;
     private RecyclerView recyclerView;
@@ -83,7 +81,7 @@ public class NavigationDrawerFragment extends Fragment {
     private TextView emailTextView;
     private boolean skippedLogin;
 
-    private PublisherAdView adView;
+    private AdView adView;
 
     public NavigationDrawerFragment() {
     }
@@ -95,16 +93,6 @@ public class NavigationDrawerFragment extends Fragment {
         skippedLogin = AuthUtils.isSkippedLogin(getActivity());
         cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
 
-        // Create adView.
-        adView = new PublisherAdView (getActivity());
-        adView.setAdUnitId("ca-app-pub-7749631063131885/9089364458");
-        adView.setAdSizes(AdSize.BANNER);
-
-        // Iniciar una solicitud genérica.
-        PublisherAdRequest adRequest = new PublisherAdRequest.Builder().build();
-
-        // Cargar adView con la solicitud de anuncio.
-        adView.loadAd(adRequest);
     }
 
     @Override
@@ -115,8 +103,11 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mDrawerListView = (LinearLayout) inflater.inflate(
-                R.layout.fragment_navigation_drawer, container, false);
+
+        mDrawerListView = (RelativeLayout) inflater.inflate(
+                R.layout.fragment_navigation_drawer,
+                container,
+                false);
 
         View userDetails = mDrawerListView.findViewById(R.id.user_details);
 
@@ -144,6 +135,14 @@ public class NavigationDrawerFragment extends Fragment {
             setUpUserDetails();
 
         userDetails.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
+
+
+        // Create adView.
+        adView = (AdView) mDrawerListView.findViewById(R.id.adView);
+
+        // Ad request
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
 
         return mDrawerListView;
     }
@@ -269,27 +268,24 @@ public class NavigationDrawerFragment extends Fragment {
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        public static final int AD_TYPE = 0;
-        public static final int CAR_TYPE = 1;
-        public static final int CAR_MANAGER_TYPE = 2;
-        public static final int DONATE_TYPE = 3;
-        public static final int HELP_TYPE = 4;
-        public static final int SIGN_OUT_TYPE = 5;
+        public static final int CAR_TYPE = 0;
+        public static final int CAR_MANAGER_TYPE = 1;
+        public static final int DONATE_TYPE = 2;
+        public static final int HELP_TYPE = 3;
+        public static final int SIGN_OUT_TYPE = 4;
 
         @Override
         public int getItemViewType(int position) {
 
-            if (position == 0)
-                return AD_TYPE;
-            else if (position < cars.size() + 1)
+            if (position < cars.size())
                 return CAR_TYPE;
-            else if (position == cars.size() + 1)
+            else if (position == cars.size())
                 return CAR_MANAGER_TYPE;
-            else if (position == cars.size() + 2)
+            else if (position == cars.size() + 1)
                 return DONATE_TYPE;
-            else if (position == cars.size() + 3)
+            else if (position == cars.size() + 2)
                 return HELP_TYPE;
-            else if (position == cars.size() + 4)
+            else if (position == cars.size() + 3)
                 return SIGN_OUT_TYPE;
             else
                 throw new IllegalStateException("Error in recycler view positions");
@@ -300,15 +296,9 @@ public class NavigationDrawerFragment extends Fragment {
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
             /**
-             * Ads
-             */
-            if (viewType == AD_TYPE) {
-                return new AdViewHolder(adView);
-            }
-            /**
              * Car
              */
-            else if (viewType == CAR_TYPE) {
+            if (viewType == CAR_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
                         inflate(R.layout.layout_car_details,
                                 viewGroup,
@@ -342,7 +332,7 @@ public class NavigationDrawerFragment extends Fragment {
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
-                final Car car = cars.get(position - 1);
+                final Car car = cars.get(position);
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, BluetoothAdapter.getDefaultAdapter());
 
                 /**
@@ -431,17 +421,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return cars.size() + 5;
-        }
-
-        public class AdViewHolder extends RecyclerView.ViewHolder {
-
-            public View itemView;
-
-            public AdViewHolder(View itemView) {
-                super(itemView);
-                this.itemView = itemView;
-            }
+            return cars.size() + 4;
         }
 
         public class MenuViewHolder extends RecyclerView.ViewHolder {
