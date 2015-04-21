@@ -39,6 +39,10 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
         String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
         car = database.find(carId);
 
+        // this should happen only if the user was logged out at that particular moment...
+        if(car == null)
+            return;
+
         /**
          * Location is set but the address isn't, so let's try to fetch it
          */

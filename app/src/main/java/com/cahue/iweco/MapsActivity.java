@@ -3,7 +3,6 @@ package com.cahue.iweco;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,6 +16,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -29,7 +29,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.cahue.iweco.activityRecognition.ActivityRecognitionUtil;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarManagerFragment;
@@ -51,7 +50,9 @@ import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.Util;
-import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -63,6 +64,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.plus.Plus;
 import com.melnykov.fab.FloatingActionButton;
 
 import org.json.JSONException;
@@ -71,7 +73,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends BaseActivity
+public class MapsActivity extends ActionBarActivity
         implements
         LocationListener,
         GoogleMap.OnMapLongClickListener,
@@ -87,7 +89,9 @@ public class MapsActivity extends BaseActivity
         OnMapReadyCallback,
         CameraUpdateRequester,
         OnCarClickedListener,
-        Navigation {
+        Navigation,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     protected static final String TAG = "Maps";
 
@@ -106,6 +110,9 @@ public class MapsActivity extends BaseActivity
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+    // This is the helper object that connects to Google Play Services.
+    private GoogleApiClient mGoogleApiClient;
+
     private AccountManager mAccountManager;
 
     private CarDatabase carDatabase;
@@ -120,6 +127,10 @@ public class MapsActivity extends BaseActivity
     private IInAppBillingService iInAppBillingService;
 
     private boolean cameraFollowing;
+    /**
+     * The user didn't log in, but we still love him
+     */
+    private boolean mSkippedLogin;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -176,31 +187,11 @@ public class MapsActivity extends BaseActivity
         }
     };
 
-//    private PendingIntent pActivityRecognitionIntent;
-
-    @Override
-    protected void onPlusClientSignIn() {
-
-        LocationServices.FusedLocationApi.requestLocationUpdates(getGoogleApiClient(),
-                REQUEST,
-                this);
-
-//        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
-//        pActivityRecognitionIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(getGoogleApiClient(), 5000, pActivityRecognitionIntent);
-
-    }
-
-    @Override
-    protected void onPlusClientSignOut() {
-        goToLogin();
-    }
 
     public void goToLogin() {
         if (!isFinishing()) {
 
-            if (!isSkippedLogin())
+            if (!mSkippedLogin)
                 carDatabase.clearCars();
 
             AuthUtils.setSkippedLogin(this, false);
@@ -217,23 +208,36 @@ public class MapsActivity extends BaseActivity
             mAccountManager.removeAccount(account, null, null);
     }
 
-    @Override
-    protected void onConnectingStatusChange(boolean connecting) {
-
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        mSkippedLogin = AuthUtils.isSkippedLogin(this);
+
+
+        // Create a GoogleApiClient instance
+        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this);
+
+        if (!mSkippedLogin) {
+            builder.addApi(Plus.API)
+                    .addScope(Plus.SCOPE_PLUS_LOGIN)
+                    .addScope(Plus.SCOPE_PLUS_PROFILE)
+                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
+        }
+
+        mGoogleApiClient = builder.build();
+
         carDatabase = CarDatabase.getInstance(this);
 
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
 
-        if (availableAccounts.length == 0 && !isSkippedLogin()) {
+        if (availableAccounts.length == 0 && !mSkippedLogin) {
             goToLogin();
             return;
         }
@@ -496,6 +500,40 @@ public class MapsActivity extends BaseActivity
         myLocationButton.startAnimation(animation);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // Connected to Google Play services!
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                REQUEST,
+                this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection has been interrupted.
+        // Disable any UI components that depend on Google APIs
+        // until onConnected() is called.
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // This callback is important for handling errors that
+        // may occur while attempting to connect with Google.
+        //
+        // More about this in the next section.
+    }
 
     @Override
     public void onBackPressed() {
@@ -562,12 +600,6 @@ public class MapsActivity extends BaseActivity
         }
     }
 
-    @Override
-    protected void onSignInRequired() {
-        Log.d(TAG, "onSignInRequired");
-        goToLogin();
-    }
-
 
     @Override
     protected void onDestroy() {
@@ -598,11 +630,6 @@ public class MapsActivity extends BaseActivity
 
     }
 
-    @Override
-    protected boolean autoConnect() {
-        return true;
-    }
-
     /**
      * Checks whether the device currently has a network connection
      */
@@ -615,6 +642,30 @@ public class MapsActivity extends BaseActivity
         return false;
     }
 
+    /**
+     * Sign out the user (so they can switch to another account).
+     */
+    public void signOut() {
+
+        // We only want to sign out if we're connected.
+        if (mGoogleApiClient.isConnected()) {
+
+            // Clear the default account in order to allow the user to potentially choose a
+            // different account from the account chooser.
+            if (!mSkippedLogin)
+                Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
+
+            // Disconnect from Google Play Services, then reconnect in order to restart the
+            // process from scratch.
+            mGoogleApiClient.disconnect();
+            mGoogleApiClient.connect();
+
+            Log.v(TAG, "Sign out successful!");
+        }
+
+        goToLogin();
+    }
+
     public void goToTutorial() {
         startActivity(new Intent(this, TutorialActivity.class));
         Util.setTutorialShown(this, true);
@@ -623,8 +674,8 @@ public class MapsActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if (getGoogleApiClient() != null && getGoogleApiClient().isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(getGoogleApiClient(), this);
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 //            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
         }
         unregisterReceiver(carUpdateReceiver);
@@ -751,7 +802,7 @@ public class MapsActivity extends BaseActivity
     }
 
     private Location getUserLocation() {
-        return LocationServices.FusedLocationApi.getLastLocation(getGoogleApiClient());
+        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
 
