@@ -41,4 +41,8 @@ public class Constants {
     // updated car
     public static final String INTENT_CAR_UPDATE = BuildConfig.APPLICATION_ID +  ".INTENT_CAR_UPDATED";
     public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ID";
+
+    // billing
+    public static final String INTENT_BILLING_READY = BuildConfig.APPLICATION_ID +  ".INTENT_BILLING_READY";
+    public static final String INTENT_NEW_PURCHASE = BuildConfig.APPLICATION_ID +  ".INTENT_NEW_PURCHASE";
 }
