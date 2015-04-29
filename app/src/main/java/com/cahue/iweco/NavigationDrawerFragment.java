@@ -215,7 +215,7 @@ public class NavigationDrawerFragment extends Fragment {
                 int response = ownedItems.getInt("RESPONSE_CODE");
                 if (response == 0) {
                     ArrayList<?> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-                    Log.d(TAG, "Purchased items: " +  purchaseDataList.toString());
+                    Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
                     displayAd = purchaseDataList.isEmpty();
                 }
 
@@ -249,7 +249,7 @@ public class NavigationDrawerFragment extends Fragment {
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      * @param mToolbar
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout, Toolbar mToolbar) {
+    public void setUpDrawer(int fragmentId, DrawerLayout drawerLayout, Toolbar mToolbar) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
@@ -434,7 +434,8 @@ public class NavigationDrawerFragment extends Fragment {
                     public void onClick(View v) {
                         if (car.location != null) {
                             mCallbacks.onCarClicked(car.id);
-                            mDrawerLayout.closeDrawers();
+                            if (mDrawerLayout != null)
+                                mDrawerLayout.closeDrawers();
                         } else {
                             Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
                         }

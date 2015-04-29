@@ -63,9 +63,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.plus.Plus;
 import com.melnykov.fab.FloatingActionButton;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -332,10 +329,13 @@ public class MapsActivity extends ActionBarActivity
         mNavigationDrawerFragment.setRetainInstance(true);
 
         // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout),
-                mToolbar);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawerLayout != null) {
+            mNavigationDrawerFragment.setUpDrawer(
+                    R.id.navigation_drawer,
+                    drawerLayout,
+                    mToolbar);
+        }
 
     }
 
