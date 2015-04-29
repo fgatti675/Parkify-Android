@@ -88,8 +88,12 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
     private void updateAddress(Car car) {
         if (car.address != null) {
             address.setText(car.address);
-        } else {
+            address.setVisibility(View.VISIBLE);
+        } else if (car.location == null) {
             address.setText(R.string.position_not_set);
+            address.setVisibility(View.VISIBLE);
+        } else {
+            address.setVisibility(View.GONE);
         }
     }
 

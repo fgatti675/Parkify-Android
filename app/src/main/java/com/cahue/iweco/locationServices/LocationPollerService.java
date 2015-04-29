@@ -1,13 +1,12 @@
 package com.cahue.iweco.locationServices;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -15,7 +14,6 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -62,7 +60,9 @@ public abstract class LocationPollerService extends Service implements
     // Car related to this service
     private Car car;
 
-    private PendingIntent pActivityRecognitionIntent;
+    private Handler handler;
+
+//    private PendingIntent pActivityRecognitionIntent;
 
     /**
      * Best location polled so far
@@ -75,10 +75,20 @@ public abstract class LocationPollerService extends Service implements
      * Flag to indicate that the first precise fix has been notified
      */
     private boolean fixNotified = false;
-    private boolean finalFixNotified = false;
 
     // Is the broadcast receiver listening for activity updates ?
     private boolean listeningActivities = false;
+
+    private Runnable finishTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "Handler finished " + LocationPollerService.this.getClass().getSimpleName() + " service");
+            if (bestAccuracyLocation != null)
+                notifyFixLocation(bestAccuracyLocation);
+            else
+                stopSelf();
+        }
+    };
 
     // Use a broadcast receiver to get the detected activities
     BroadcastReceiver activityReceiver = new BroadcastReceiver() {
@@ -97,21 +107,25 @@ public abstract class LocationPollerService extends Service implements
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
-                .addApi(ActivityRecognition.API)
+//                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        handler = new Handler();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             car = CarDatabase.getInstance(this).find(intent.getExtras().getString(EXTRA_CAR));
-            if(car == null) {
+            if (car == null) {
                 Log.e(TAG, "CAR NOT FOUND");
             }
             start();
+
+            handler.postDelayed(finishTimeoutRunnable,
+                    PRECISE_FIX_TIMEOUT_MS);
         }
         return START_STICKY_COMPATIBILITY;
     }
@@ -168,9 +182,14 @@ public abstract class LocationPollerService extends Service implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        Log.d(TAG, getClass().getSimpleName() + " onDestroy");
 //        if (listeningActivities)
 //            unregisterReceiver(activityReceiver);
+//        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
+        if (mGoogleApiClient.isConnected())
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        mGoogleApiClient.disconnect();
+        handler.removeCallbacks(finishTimeoutRunnable);
     }
 
     @Override
@@ -194,7 +213,9 @@ public abstract class LocationPollerService extends Service implements
 
             if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
                 notifyFixLocation(bestAccuracyLocation);
+                return;
             }
+
         }
     }
 
@@ -210,21 +231,15 @@ public abstract class LocationPollerService extends Service implements
         Log.i(TAG, "Notifying location polled: " + location);
         onPreciseFixPolled(this, location, car, mGoogleApiClient);
         fixNotified = true;
-        finish();
-    }
-
-
-    protected void finish() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pActivityRecognitionIntent);
-        mGoogleApiClient.disconnect();
         stopSelf();
     }
+
 
     /**
      * Called after the first precise enough fix is received, or after {@link #PRECISE_FIX_TIMEOUT_MS}
      * is reached.
-     *  @param context
+     *
+     * @param context
      * @param location
      * @param car
      * @param googleApiClient A connected GoogleApiClient

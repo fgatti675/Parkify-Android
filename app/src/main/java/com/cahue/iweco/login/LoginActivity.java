@@ -6,15 +6,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.cahue.iweco.BaseActivity;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.auth.Authenticator;
@@ -24,7 +25,12 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
@@ -35,11 +41,17 @@ import java.util.List;
 /**
  * A login screen that offers login via Google+
  */
-public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginListener {
+public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.LoginListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email";
+    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email";
+
+    // A magic number we will use to know that our sign-in error resolution activity has completed
+    private final static int OUR_REQUEST_CODE = 49404;
+
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     // UI references.
     private View mProgressView;
@@ -50,18 +62,39 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     private CarDatabase database;
     private AccountManager mAccountManager;
 
+    /**
+     * A flag indicating that a PendingIntent is in progress and prevents us
+     * from starting further intents.
+     */
+    private boolean mIntentInProgress;
+
+    private boolean mSigningIn;
+
+    // This is the helper object that connects to Google Play Services.
+    private GoogleApiClient mGoogleApiClient;
+
+    // The saved result from {@link #onConnectionFailed(ConnectionResult)}.  If a connection
+    // attempt has been made, this is non-null.
+    // If this IS null, then the connect method is still running.
+    private ConnectionResult mConnectionResult;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
+        }
+
         setContentView(R.layout.activity_login);
 
-        mButtonsLayout = findViewById(R.id.buttons);
+        setUpGoogleApiClientIfNeeded();
 
         database = CarDatabase.getInstance(this);
-
         mAccountManager = AccountManager.get(this);
+
+        mButtonsLayout = findViewById(R.id.buttons);
 
         // Find the Google+ sign in button.
         mPlusSignInButton = (Button) findViewById(R.id.plus_sign_in_button);
@@ -93,6 +126,27 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
     }
 
+    private void setUpGoogleApiClientIfNeeded() {
+
+        if (mGoogleApiClient == null) {
+
+            // Initialize the PlusClient connection.
+            // Scopes indicate the information about the user your application will be able to access.
+            GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+//                    .addApi(ActivityRecognition.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(Plus.API)
+                    .addScope(Plus.SCOPE_PLUS_LOGIN)
+                    .addScope(Plus.SCOPE_PLUS_PROFILE)
+                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
+
+            mGoogleApiClient = builder.build();
+
+        }
+    }
+
     private void goToMaps() {
         startActivity(new Intent(this, MapsActivity.class));
         finish();
@@ -104,11 +158,29 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         connect();
     }
 
-    @Override
-    protected void onSignInRequired() {
-        setLoading(false);
-//        Toast.makeText(this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+    /**
+     * Try to sign in the user.
+     */
+    public void signIn() {
+
+        if (!mGoogleApiClient.isConnecting()) {
+            // Show the dialog as we are now signing in.
+            mSigningIn = true;
+            resolveSignInError();
+            onConnectingStatusChange(true);
+        }
+
     }
+
+
+    protected void connect() {
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        mGoogleApiClient.connect();
+        onConnectingStatusChange(true);
+    }
+
 
     protected void onGoogleAuthTokenSet(final String authToken) {
         new AsyncTask<Void, Void, String>() {
@@ -163,9 +235,31 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
     }
 
     /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    protected boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Shows the progress UI and hides the login form.
      */
     public void setLoading(final boolean show) {
+
+        Log.i(TAG, "loading " + show);
+
         int animTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
 
         mProgressView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
@@ -191,6 +285,8 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
 
         Log.i(TAG, "requestOauthToken");
 
+        setLoading(true);
+
         new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -201,7 +297,6 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
                 } catch (UserRecoverableAuthException userRecoverableException) {
                     // GooglePlayServices.apk is either old, disabled, or not present
                     // so we need to show the user some UI in the activity to recover.
-                    onSignInRequired();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (GoogleAuthException e) {
@@ -231,28 +326,17 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         setLoading(false);
     }
 
-    @Override
-    protected boolean autoConnect() {
-        return false;
-    }
-
-    @Override
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
-        setLoading(true);
-        String email = Plus.AccountApi.getAccountName(getGoogleApiClient());
+        String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
         requestOauthToken(email);
     }
 
-    @Override
     protected void onConnectingStatusChange(boolean connecting) {
+        Log.d(TAG, "onConnectingStatusChange " + connecting);
         setLoading(connecting);
     }
 
-    @Override
-    protected void onPlusClientSignOut() {
-        Log.d(TAG, "onPlusClientSignOut");
-    }
 
     @Override
     protected void onDestroy() {
@@ -260,6 +344,11 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         Log.d(TAG, "onDestroy");
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean("mIntentInProgress", mIntentInProgress);
+    }
 
     @Override
     public void onBackEndLogin(LoginResultBean loginResult) {
@@ -323,6 +412,103 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
         Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Successfully connected
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.d(TAG, "onConnected");
+        mSigningIn = false;
+        onConnectingStatusChange(false);
+        onPlusClientSignIn();
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
+
+        Log.d(TAG, "onActivityResult " + requestCode + " - " + responseCode);
+
+        if (requestCode == OUR_REQUEST_CODE) {
+            if (responseCode != RESULT_OK) {
+                mSigningIn = false;
+            }
+
+            mIntentInProgress = false;
+
+            if (!mGoogleApiClient.isConnecting()) {
+                mGoogleApiClient.connect();
+            }
+
+            onConnectingStatusChange(responseCode == RESULT_OK);
+        }
+
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "onConnectionSuspended");
+    }
+
+
+    /**
+     * Connection failed for some reason
+     * Try and resolve the result.  Failure here is usually not an indication of a serious error,
+     * just that the user's input is needed.
+     *
+     * @see #onActivityResult(int, int, Intent)
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+
+        Log.d(TAG, "Connection failed: " + result);
+
+        if (!result.hasResolution()) {
+            GooglePlayServicesUtil
+                    .getErrorDialog(result.getErrorCode(), this, 0)
+                    .show();
+            return;
+        }
+
+        if (!mIntentInProgress) {
+            // Store the ConnectionResult for later usage
+            mConnectionResult = result;
+
+            if (mSigningIn) {
+                // The user has already clicked 'sign-in' so we attempt to
+                // resolve all
+                // errors until the user is signed in, or they cancel.
+                resolveSignInError();
+            }
+        }
+
+    }
+
+    /**
+     * Method to resolve any sign in errors
+     */
+    private void resolveSignInError() {
+        if (mConnectionResult != null && mConnectionResult.hasResolution()) {
+            try {
+                mIntentInProgress = true;
+                mConnectionResult.startResolutionForResult(this, OUR_REQUEST_CODE);
+            } catch (IntentSender.SendIntentException e) {
+                mIntentInProgress = false;
+                mGoogleApiClient.connect();
+            }
+        }
+    }
+
 
     // Profile pic image size in pixels
     private final static int PROFILE_PIC_SIZE = 200;
@@ -332,9 +518,9 @@ public class LoginActivity extends BaseActivity implements LoginAsyncTask.LoginL
      */
     private void storeProfileInformation() {
         try {
-            String userEmail = Plus.AccountApi.getAccountName(getGoogleApiClient());
+            String userEmail = Plus.AccountApi.getAccountName(mGoogleApiClient);
 
-            Person currentPerson = Plus.PeopleApi.getCurrentPerson(getGoogleApiClient());
+            Person currentPerson = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
 
             if (currentPerson != null) {
 

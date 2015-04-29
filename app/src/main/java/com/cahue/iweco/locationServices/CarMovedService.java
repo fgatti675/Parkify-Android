@@ -66,7 +66,7 @@ public class CarMovedService extends LocationPollerService {
 
 
 
-    private void clearGeofence(final Car car, GoogleApiClient googleApiClient){
+    private void clearGeofence(final Car car, GoogleApiClient googleApiClient) {
         LocationServices.GeofencingApi.removeGeofences(
                 googleApiClient,
                 Arrays.asList(car.id)
