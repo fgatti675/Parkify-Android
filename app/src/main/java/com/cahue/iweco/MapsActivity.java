@@ -3,26 +3,23 @@ package com.cahue.iweco;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.app.SearchManager;
+import android.content.*;
+import android.database.Cursor;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -30,15 +27,9 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.SearchView;
 import android.widget.Toast;
-
 import com.android.vending.billing.IInAppBillingService;
-import com.cahue.iweco.cars.Car;
-import com.cahue.iweco.cars.CarManagerActivity;
-import com.cahue.iweco.cars.CarManagerFragment;
-import com.cahue.iweco.cars.CarsSync;
-import com.cahue.iweco.cars.EditCarDialog;
+import com.cahue.iweco.cars.*;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
 import com.cahue.iweco.locationServices.CarMovedService;
@@ -54,6 +45,7 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.PlaceAutocompleteAdapter;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -61,17 +53,14 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.plus.Plus;
 import com.melnykov.fab.FloatingActionButton;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -104,6 +93,9 @@ public class MapsActivity extends ActionBarActivity
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     static final int REQUEST_ON_PURCHASE = 1001;
+    public static final int DEFAULT_ZOOM = 15;
+
+    private static final int PREDICTIONS_OFFSET_METERS = 1000000;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -115,6 +107,10 @@ public class MapsActivity extends ActionBarActivity
             .setInterval(5000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+
+    private static final LatLngBounds BOUNDS_EUROPE = new LatLngBounds(
+            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
 
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
@@ -160,6 +156,93 @@ public class MapsActivity extends ActionBarActivity
         }
     };
 
+
+
+    private PlaceAutocompleteAdapter mAdapter;
+
+    /**
+     * Listener that handles selections from suggestions from the AutoCompleteTextView that
+     * displays Place suggestions.
+     * Gets the place id of the selected item and issues a request to the Places Geo Data API
+     * to retrieve more details about the place.
+     *
+     * @see com.google.android.gms.location.places.GeoDataApi#getPlaceById(com.google.android.gms.common.api.GoogleApiClient,
+     * String...)
+     */
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            /*
+             Retrieve the place ID of the selected item from the Adapter.
+             The adapter stores each Place suggestion in a PlaceAutocomplete object from which we
+             read the place ID.
+              */
+            final PlaceAutocompleteAdapter.PlaceAutocomplete item = mAdapter.getItem(position);
+            final String placeId = String.valueOf(item.placeId);
+            Log.i(TAG, "Autocomplete item selected: " + item.description);
+
+            /*
+             Issue a request to the Places Geo Data API to retrieve a Place object with additional
+              details about the place.
+              */
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(mGoogleApiClient, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+
+
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                    .zoom(DEFAULT_ZOOM)
+                    .target(place.getLatLng())
+                    .build());
+
+            onCameraUpdateRequest(cameraUpdate, MapsActivity.this);
+
+            Toast.makeText(getApplicationContext(), "Clicked: " + item.description,
+                    Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Called getPlaceById to get Place details for " + item.placeId);
+        }
+    };
+
+    /**
+     * Callback for results from a Places Geo Data API query that shows the first place result in
+     * the details view on screen.
+     */
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                // Request did not complete successfully
+                Log.e(TAG, "Place query did not complete. Error: " + places.getStatus().toString());
+                places.release();
+                return;
+            }
+            // Get the Place object from the buffer.
+            final Place place = places.get(0);
+
+
+
+            // Format details of the place for display and show it in a TextView.
+            mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(),
+                    place.getId(), place.getAddress(), place.getPhoneNumber(),
+                    place.getWebsiteUri()));
+
+            // Display the third party attributions if set.
+            final CharSequence thirdPartyAttribution = places.getAttributions();
+            if (thirdPartyAttribution == null) {
+                mPlaceDetailsAttribution.setVisibility(View.GONE);
+            } else {
+                mPlaceDetailsAttribution.setVisibility(View.VISIBLE);
+                mPlaceDetailsAttribution.setText(Html.fromHtml(thirdPartyAttribution.toString()));
+            }
+
+            Log.i(TAG, "Place details received: " + place.getName());
+
+            places.release();
+        }
+    };
+
     /**
      * Current logged user
      */
@@ -193,7 +276,6 @@ public class MapsActivity extends ActionBarActivity
         }
     };
 
-
     public void goToLogin() {
         if (!isFinishing()) {
 
@@ -226,6 +308,7 @@ public class MapsActivity extends ActionBarActivity
         // Create a GoogleApiClient instance
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this);
 
@@ -340,6 +423,7 @@ public class MapsActivity extends ActionBarActivity
     }
 
     private void setUpToolbar() {
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
         if ("wimc".equals(BuildConfig.FLAVOR)) {
@@ -351,10 +435,31 @@ public class MapsActivity extends ActionBarActivity
 
         Menu menu = mToolbar.getMenu();
 
+        mAdapter = new PlaceAutocompleteAdapter(this, android.R.layout.simple_list_item_1,
+                BOUNDS_EUROPE, null);
+
         // Associate searchable configuration with the SearchView
+        final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        // Tells your app's SearchView to use this activity's searchable configuration
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setSuggestionsAdapter(mAdapter);
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return true;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                CursorAdapter selectedView = searchView.getSuggestionsAdapter();
+                Cursor cursor = (Cursor) selectedView.getItem(position);
+                int index = cursor.getColumnIndexOrThrow(SearchManager.SUGGEST_COLUMN_TEXT_1);
+                searchView.setQuery(cursor.getString(index), true);
+                return true;
+            }
+        });
+
     }
 
     private void setUpNavigationDrawer() {
@@ -950,7 +1055,7 @@ public class MapsActivity extends ActionBarActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition == null) return;
 
-        float zoom = Math.max(mMap.getCameraPosition().zoom, 15);
+        float zoom = Math.max(mMap.getCameraPosition().zoom, DEFAULT_ZOOM);
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                 .zoom(zoom)
@@ -1038,14 +1143,15 @@ public class MapsActivity extends ActionBarActivity
         });
     }
 
+
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
 
         switch (menuItem.getItemId()) {
 
             case R.id.search:
-                SearchView searchView = (SearchView) menuItem.getActionView();
-                searchView.callOnClick();
+                final SearchView searchView = (SearchView) menuItem.getActionView();
+
                 return true;
 
             default:
@@ -1055,6 +1161,7 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        setIntent(intent);
         handleSearchIntent(intent);
     }
 
@@ -1063,6 +1170,11 @@ public class MapsActivity extends ActionBarActivity
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
+            doMySearch(query);
         }
+    }
+
+    private void doMySearch(String query) {
+        Log.w(TAG, "Search requested : " + query);
     }
 }

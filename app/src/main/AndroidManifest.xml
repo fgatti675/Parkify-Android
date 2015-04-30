@@ -1,164 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cahue.iweco">
+          package="com.cahue.iweco">
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
-    <uses-permission android:name="com.android.vending.BILLING" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
-    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
     <!-- Required to enable our SyncAdapter after it's created. -->
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <!-- Required because we're manually creating a new account. -->
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
 
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
     <permission
-        android:name="${applicationId}.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
+            android:name="${applicationId}.permission.C2D_MESSAGE"
+            android:protectionLevel="signature"/>
 
-    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE"/>
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/CahueTheme">
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:theme="@style/CahueTheme">
         <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+                android:name="com.google.android.gms.version"
+                android:value="@integer/google_play_services_version"/>
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="@string/google_maps_key" />
+                android:name="com.google.android.geo.API_KEY"
+                android:value="@string/google_maps_key"/>
 
-        <activity android:name=".MapsActivity">
+        <activity
+                android:name=".MapsActivity"
+                android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
+
+            <meta-data
+                    android:name="android.app.searchable"
+                    android:resource="@xml/searchable"/>
         </activity>
 
-        <service android:name=".locationServices.ParkedCarService" />
-        <service android:name=".locationServices.CarMovedService" />
+        <service android:name=".locationServices.ParkedCarService"/>
+        <service android:name=".locationServices.CarMovedService"/>
         <service
-            android:name=".locationServices.GeofenceCarService"
-            android:enabled="true" />
+                android:name=".locationServices.GeofenceCarService"
+                android:enabled="true"/>
 
         <receiver android:name=".util.BluetoothDetector">
             <intent-filter>
-                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED"/>
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED"/>
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED"/>
             </intent-filter>
         </receiver>
 
         <!-- DEBUG -->
         <activity
-            android:name=".debug.DebugActivity"
-            android:parentActivityName=".MapsActivity">
+                android:name=".debug.DebugActivity"
+                android:parentActivityName=".MapsActivity">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MapsActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".MapsActivity"/>
         </activity>
 
-        <service android:name=".debug.DebugCarMovedService" />
-        <service android:name=".debug.DebugParkedCarService" />
+        <service android:name=".debug.DebugCarMovedService"/>
+        <service android:name=".debug.DebugParkedCarService"/>
 
         <activity
-            android:name=".login.LoginActivity"
-            android:label="@string/common_signin_button_text"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden"></activity>
+                android:name=".login.LoginActivity"
+                android:label="@string/common_signin_button_text"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="adjustResize|stateHidden"></activity>
         <activity
-            android:name=".tutorial.TutorialActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark"></activity>
+                android:name=".tutorial.TutorialActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/CahueTheme.Dark"></activity>
 
-        <service android:name=".activityRecognition.PassiveActivityRecognitionIntentService" />
+        <service android:name=".activityRecognition.PassiveActivityRecognitionIntentService"/>
 
         <receiver
-            android:name=".gcm.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
+                android:name=".gcm.GcmBroadcastReceiver"
+                android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="${applicationId}" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="${applicationId}"/>
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name=".parkedCar.CarPositionUpdatedReceiver"
-            android:exported="false">
+                android:name=".parkedCar.CarPositionUpdatedReceiver"
+                android:exported="false">
             <intent-filter>
-                <action android:name="${applicationId}.INTENT_CAR_UPDATED" />
+                <action android:name="${applicationId}.INTENT_CAR_UPDATED"/>
             </intent-filter>
         </receiver>
 
-        <service android:name=".gcm.GcmIntentService" />
+        <service android:name=".gcm.GcmIntentService"/>
 
         <activity
-            android:name=".cars.CarManagerActivity"
-            android:parentActivityName=".MapsActivity">
+                android:name=".cars.CarManagerActivity"
+                android:parentActivityName=".MapsActivity">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MapsActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".MapsActivity"/>
         </activity>
 
         <provider
-            android:name="com.cahue.iweco.cars.database.CarsProvider"
-            android:authorities="com.cahue.iweco.cars"
-            android:exported="true"
-            android:syncable="true" />
+                android:name="com.cahue.iweco.cars.database.CarsProvider"
+                android:authorities="com.cahue.iweco.cars"
+                android:exported="true"
+                android:syncable="true"/>
+
+        <provider
+                android:name="com.cahue.iweco.PlacesSuggestionProvider"
+                android:authorities="com.cahue.iweco.search_suggestion_provider"
+                android:syncable="false"/>
 
         <!-- This service implements our SyncAdapter. It needs to be exported, so that the system
         sync framework can access it. -->
         <service
-            android:name="com.cahue.iweco.cars.sync.SyncService"
-            android:exported="true">
+                android:name="com.cahue.iweco.cars.sync.SyncService"
+                android:exported="true">
             <!-- This intent filter is required. It allows the system to launch our sync service
             as needed. -->
             <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
+                <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
             <!-- This points to a required XML file which describes our SyncAdapter. -->
             <meta-data
-                android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
+                    android:name="android.content.SyncAdapter"
+                    android:resource="@xml/syncadapter"/>
         </service>
 
-        <service android:name=".locationServices.ActivityRecognitionIntentService" />
-        <service android:name=".locationServices.GeofenceTransitionsIntentService" />
+        <service android:name=".locationServices.ActivityRecognitionIntentService"/>
+        <service android:name=".locationServices.GeofenceTransitionsIntentService"/>
 
         <service android:name="com.cahue.iweco.auth.IwecoAccountService">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
+                <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
             <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
+                    android:name="android.accounts.AccountAuthenticator"
+                    android:resource="@xml/authenticator"/>
         </service>
 
         <service
-            android:name="com.cahue.iweco.util.FetchAddressIntentService"
-            android:exported="false" />
+                android:name="com.cahue.iweco.util.FetchAddressIntentService"
+                android:exported="false"/>
 
     </application>
 

@@ -14,6 +14,7 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
+import com.cahue.iweco.util.LatLngUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,8 +48,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     private static final String TAG = "SpotsDelegate";
     private static final String QUERY_TAG = "SpotsDelegateQuery";
 
-    // Earth’s radius, sphere
-    private final static double EARTH_RADIUS = 6378137;
 
     // time after we consider the query is outdated and need to repeat
     private final static long TIMEOUT_MS = 60000;
@@ -230,8 +229,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
         // A broader space we want to query so that data is there when we move the camera
         this.extendedViewBounds = LatLngBounds.builder()
-                .include(getOffsetLatLng(viewBounds.northeast, OFFSET_METERS, OFFSET_METERS))
-                .include(getOffsetLatLng(viewBounds.southwest, -OFFSET_METERS, -OFFSET_METERS))
+                .include(LatLngUtil.getOffsetLatLng(viewBounds.northeast, OFFSET_METERS, OFFSET_METERS))
+                .include(LatLngUtil.getOffsetLatLng(viewBounds.southwest, -OFFSET_METERS, -OFFSET_METERS))
                 .build();
 
         /**
@@ -513,20 +512,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
         doDraw();
 
-    }
-
-
-    public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
-
-        // Coordinate offsets in radians
-        double dLat = offsetNorth / EARTH_RADIUS;
-        double dLon = offsetEast / (EARTH_RADIUS * Math.cos(Math.PI * original.latitude / 180));
-
-        // OffsetPosition, decimal degrees
-        double nLat = original.latitude + dLat * 180 / Math.PI;
-        double nLon = original.longitude + dLon * 180 / Math.PI;
-
-        return new LatLng(nLat, nLon);
     }
 
     public interface SpotSelectedListener {
