@@ -191,12 +191,6 @@ public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.L
                     return getGCMRegId();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            onGCMError();
-                        }
-                    });
                     return null;
                 }
             }
@@ -204,6 +198,7 @@ public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.L
             @Override
             protected void onPostExecute(String regId) {
                 if (regId != null) onGCMRegIdSet(regId, authToken);
+                else onGCMError(authToken);
             }
         }.execute();
     }
@@ -212,9 +207,20 @@ public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.L
         new LoginAsyncTask(gcmRegId, authToken, this, this).execute();
     }
 
-    private void onGCMError() {
+    private void onGCMError(String authToken) {
         setLoading(false);
+        clearGoogleToken(authToken);
         Toast.makeText(this, R.string.gcm_error, Toast.LENGTH_SHORT).show();
+    }
+
+    private void clearGoogleToken(String authToken) {
+        try {
+            GoogleAuthUtil.clearToken(this, authToken);
+        } catch (GoogleAuthException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getGCMRegId() throws IOException {
@@ -407,8 +413,9 @@ public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.L
     }
 
     @Override
-    public void onLoginError() {
+    public void onLoginError(String authToken) {
         setLoading(false);
+        clearGoogleToken(authToken);
         Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
     }
 
