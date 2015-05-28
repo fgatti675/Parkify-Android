@@ -2,13 +2,13 @@ package com.cahue.iweco.parkedCar;
 
 import android.app.Activity;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.CameraManager;
 import com.cahue.iweco.CameraUpdateRequester;
+import com.cahue.iweco.DirectionsDelegate;
 import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
@@ -25,27 +25,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
-
-import org.w3c.dom.Document;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Created by francesco on 27.10.2014.
  */
 public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraUpdateRequester {
 
-
     private static final String TAG = ParkedCarDelegate.class.getSimpleName();
 
-    private static final String ARG_CAR_ID = "car";
     private static final int MAX_DIRECTIONS_DISTANCE = 2000;
-    private static final int DIRECTIONS_EXPIRY = 30000;
+
+    private static final String ARG_CAR_ID = "car";
 
     private String carId;
     private Car car;
@@ -70,21 +61,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
      */
     private Marker carMarker;
     private Circle accuracyCircle;
-    private Polyline directionsPolyline;
-
-    /**
-     * Actual lines representing the directions PolyLine
-     */
-    private List<LatLng> directionPoints;
-
-    private AsyncTask<Object, Object, Document> directionsAsyncTask;
-
-    /**
-     * Directions delegate
-     */
-    private GMapV2Direction directionsDelegate;
-
-    private Date lastDirectionsUpdate;
+    private DirectionsDelegate directionsDelegate;
 
 
     /**
@@ -126,9 +103,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        directionPoints = new ArrayList<LatLng>();
         iconGenerator = new IconGenerator(getActivity());
-        directionsDelegate = new GMapV2Direction();
+        directionsDelegate = new DirectionsDelegate();
 
         this.carId = getArguments().getString(ARG_CAR_ID);
         Log.i(TAG, "onCreate " + carId);
@@ -145,22 +121,24 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         this.car = CarDatabase.getInstance(getActivity()).find(carId);
 
-        if (!isResumed()) return;
-
-        directionPoints.clear();
+        if (mMap == null || !isResumed()) return;
 
         if (car == null || car.location == null) {
             clear();
             return;
         }
 
-        fetchDirections(true);
+        setUpColors();
+
+        directionsDelegate.setColor(lightColor);
+
         doDraw();
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
         this.mMap = map;
+        directionsDelegate.setMap(map);
         update();
     }
 
@@ -171,20 +149,20 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     public void doDraw() {
-        if (mMap == null || !isResumed()) return;
 
         Log.i(TAG, "Drawing parked car components");
-        setUpColors();
+
         clear();
         drawCar();
         drawDirections();
+
         updateCameraIfFollowing();
     }
 
     private void clear() {
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
-        if (directionsPolyline != null) directionsPolyline.remove();
+        directionsDelegate.clear();
     }
 
 
@@ -261,31 +239,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         clear();
     }
 
+
     private void drawDirections() {
-
-        if (car == null || car.location == null) {
-            return;
-        }
-
-        Log.d(TAG, "Drawing directions");
-
-        PolylineOptions rectLine = new PolylineOptions().width(10).color(lightColor);
-
-        for (int i = 0; i < directionPoints.size(); i++) {
-            rectLine.add(directionPoints.get(i));
-        }
-
-        directionsPolyline = mMap.addPolyline(rectLine);
-
-    }
-
-
-    private void fetchDirections(boolean restart) {
 
         final LatLng carPosition = getCarLatLng();
         final LatLng userPosition = getUserLatLng();
-
-        directionPoints.clear();
 
         if (carPosition == null || userPosition == null) {
             return;
@@ -296,36 +254,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         // don't set if they are too far
         if (isTooFar()) return;
 
-        /**
-         * Cancel if something is going on
-         */
-        if (directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED) {
-            if (restart)
-                directionsAsyncTask.cancel(true);
-            else
-                return;
-        }
-
-        Log.d(TAG, "Fetching directions");
-
-        directionsAsyncTask = new AsyncTask<Object, Object, Document>() {
-
-            @Override
-            protected Document doInBackground(Object[] objects) {
-                Document doc = directionsDelegate.getDocument(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
-                return doc;
-            }
-
-            @Override
-            protected void onPostExecute(Document doc) {
-                lastDirectionsUpdate = new Date();
-                directionPoints.clear();
-                directionPoints.addAll(directionsDelegate.getDirection(doc));
-                doDraw();
-            }
-
-        };
-        directionsAsyncTask.execute();
+        directionsDelegate.drawDirections(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
     }
 
     private void updateTooFar(LatLng carPosition, LatLng userPosition) {
@@ -350,14 +279,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         return new LatLng(car.location.getLatitude(), car.location.getLongitude());
     }
 
-
     @Override
-    public void onLocationChanged(Location userLocation) {
-        this.userLocation = userLocation;
-
-        if (lastDirectionsUpdate == null || System.currentTimeMillis() - lastDirectionsUpdate.getTime() > DIRECTIONS_EXPIRY)
-            fetchDirections(false);
-
+    protected void onUserLocationChanged(Location userLocation) {
+        drawDirections();
         updateCameraIfFollowing();
     }
 
@@ -370,12 +294,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         updateCameraIfFollowing();
 
-    }
-
-
-    private LatLng getUserLatLng() {
-        if (userLocation == null) return null;
-        return new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
     }
 
 
@@ -411,7 +329,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
                 .include(carPosition)
                 .include(userPosition);
 
-        for (LatLng latLng : directionPoints)
+        for (LatLng latLng : directionsDelegate.getDirectionPoints())
             builder.include(latLng);
 
         cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);

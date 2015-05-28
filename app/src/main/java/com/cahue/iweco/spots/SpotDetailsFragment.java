@@ -4,8 +4,10 @@ import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
+import com.cahue.iweco.parkedCar.ParkedCarDelegate;
 import com.cahue.iweco.util.Util;
 
 
@@ -23,7 +26,7 @@ import com.cahue.iweco.util.Util;
  * Use the {@link SpotDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SpotDetailsFragment extends DetailsFragment {
+public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMenuItemClickListener {
 
     // the fragment initialization parameters
     private static final String ARG_SPOT = "arg_spot";
@@ -35,6 +38,8 @@ public class SpotDetailsFragment extends DetailsFragment {
     private TextView timeAgo;
     private TextView distance;
     private ImageView rectangleImage;
+
+    private SpotsDelegate spotsDelegate;
 
     /**
      * Use this factory method to create a new instance of
@@ -63,6 +68,8 @@ public class SpotDetailsFragment extends DetailsFragment {
             spot = getArguments().getParcelable(ARG_SPOT);
             userLocation = getArguments().getParcelable(ARG_LOCATION);
         }
+
+        spotsDelegate = (SpotsDelegate) getFragmentManager().findFragmentByTag(SpotsDelegate.FRAGMENT_TAG);
     }
 
     @Override
@@ -70,6 +77,10 @@ public class SpotDetailsFragment extends DetailsFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_spot_details, container, false);
         if (spot != null) {
+
+            Toolbar toolbar = (Toolbar) view.findViewById(R.id.spot_toolbar);
+            toolbar.inflateMenu(R.menu.spot_menu);
+            toolbar.setOnMenuItemClickListener(this);
 
             // Set time ago
             timeAgo = (TextView) view.findViewById(R.id.time);
@@ -120,6 +131,8 @@ public class SpotDetailsFragment extends DetailsFragment {
             spotLocation.setLatitude(spot.position.latitude);
             spotLocation.setLongitude(spot.position.longitude);
             float distanceM = spotLocation.distanceTo(userLocation);
+
+            // TODO: add imperial
             distance.setText(String.format("%.1f km", distanceM / 1000));
         }
     }
@@ -132,4 +145,15 @@ public class SpotDetailsFragment extends DetailsFragment {
         }
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.action_follow:
+                spotsDelegate.setFollowing(spot);
+//                updateFollowButtonState();
+                return true;
+            default:
+                return super.onOptionsItemSelected(menuItem);
+        }
+    }
 }

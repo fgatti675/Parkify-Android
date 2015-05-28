@@ -59,5 +59,6 @@
     <string name="navigation_drawer_close">Cerrar menu</string>
     <string name="edit_cars">Editar coches</string>
     <string name="position_not_set">Ubicación desconocida</string>
+    <string name="follow">Seguir</string>
 
 </resources>

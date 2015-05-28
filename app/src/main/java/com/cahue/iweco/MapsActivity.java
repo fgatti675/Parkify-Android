@@ -56,11 +56,8 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -884,7 +881,7 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onCarClicked(String carId) {
         getParkedCarDelegate(carId).setFollowing(true);
-        setDetailsFragment(CarDetailsFragment.newInstance(carId)); // TODO
+        setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }
 
 

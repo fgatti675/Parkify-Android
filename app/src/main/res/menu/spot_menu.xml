@@ -8,10 +8,4 @@
         android:icon="@drawable/ic_action_maps_navigation"
         cahue:showAsAction="always" />
 
-    <item
-        android:id="@+id/action_clear"
-        android:title="@string/remove_location"
-        android:icon="@drawable/ic_action_navigation_close"
-        cahue:showAsAction="never" />
-
 </menu>

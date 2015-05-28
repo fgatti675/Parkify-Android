@@ -10,10 +10,12 @@ import android.widget.Toast;
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.CameraUpdateRequester;
+import com.cahue.iweco.DirectionsDelegate;
 import com.cahue.iweco.R;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
+import com.cahue.iweco.util.GMapV2Direction;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,7 +41,8 @@ import java.util.concurrent.TimeUnit;
  * <p/>
  * Created by Francesco on 21/10/2014.
  */
-public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpotsQuery.ParkingSpotsUpdateListener,
+public class SpotsDelegate extends AbstractMarkerDelegate
+        implements ParkingSpotsQuery.ParkingSpotsUpdateListener,
         CameraUpdateRequester {
 
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -104,6 +107,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
     private float maxZoom;
 
+    /**
+     * Directions delegate
+     */
+    private DirectionsDelegate directionsDelegate;
+
     public static SpotsDelegate newInstance() {
         SpotsDelegate fragment = new SpotsDelegate();
         Bundle args = new Bundle();
@@ -127,6 +135,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
             markerSpotsMap = new HashMap<>();
 
             maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
+
+            directionsDelegate = new DirectionsDelegate();
         }
     }
 
@@ -270,9 +280,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
     @Override
     public synchronized void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
 
-        if(result.moreResults) {
+        if (result.moreResults) {
             Log.d(TAG, "maxZoom set to " + maxZoom);
-            if(BuildConfig.DEBUG)
+            if (BuildConfig.DEBUG)
                 Toast.makeText(getActivity(), "maxZoom set to " + maxZoom, Toast.LENGTH_SHORT).show();
 
             maxZoom = mMap.getCameraPosition().zoom;
@@ -370,6 +380,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
             }
 
         }
+
+        if (selectedSpot != null) {
+            drawDirections();
+        }
+    }
+
+    private void drawDirections() {
+        directionsDelegate.drawDirections(getUserLatLng(), selectedSpot.position, GMapV2Direction.MODE_DRIVING);
     }
 
     private void updateMarker(ParkingSpot parkingSpot, Marker marker, boolean selected) {
@@ -414,6 +432,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         return true;
     }
 
+    @Override
+    protected void onUserLocationChanged(Location userLocation) {
+        drawDirections();
+    }
+
     /**
      * Clear previously selected spot
      */
@@ -427,6 +450,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
                 updateMarker(selectedSpot, previousMarker, false);
             }
         }
+        directionsDelegate.clear();
         selectedSpot = null;
     }
 
@@ -479,16 +503,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
 
 
     @Override
-    public void onLocationChanged(Location userLocation) {
-        LatLng userLatLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-
-//        if (lastNearbyQuery == null || System.currentTimeMillis() - lastNearbyQuery.getTime() > TIMEOUT_MS)
-//            queryClosestSpots(userLatLng);
-//        else
-//            Log.v(TAG, "No need to query for closest points again");
-    }
-
-    @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
         float zoom = mMap.getCameraPosition().zoom;
         Log.v(TAG, "zoom: " + zoom);
@@ -529,8 +543,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate implements ParkingSpot
         return new LatLng(nLat, nLon);
     }
 
+    public void setFollowing(ParkingSpot spot) {
+
+    }
+
     public interface SpotSelectedListener {
         void onSpotClicked(ParkingSpot spot);
     }
+
 
 }
