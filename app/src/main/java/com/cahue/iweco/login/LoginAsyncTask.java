@@ -29,9 +29,9 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
     public interface LoginListener {
 
-        public void onBackEndLogin(LoginResultBean loginResult);
+        void onBackEndLogin(LoginResultBean loginResult);
 
-        public void onLoginError();
+        void onLoginError(String authToken);
     }
 
 
@@ -117,7 +117,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
         if (error) {
             // error
             Log.d(TAG, "Login error");
-            loginResultListener.onLoginError();
+            loginResultListener.onLoginError(authToken);
             return;
         }
 
