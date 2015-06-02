@@ -20,7 +20,6 @@ import java.util.List;
  */
 public class DirectionsDelegate {
 
-
     private static final String TAG = DirectionsDelegate.class.getSimpleName();
 
     private static final int DIRECTIONS_EXPIRY = 15000;
@@ -42,6 +41,8 @@ public class DirectionsDelegate {
      */
     private GMapV2Direction gMapV2Direction;
 
+    public boolean displayed = false;
+
     private Date lastDirectionsUpdate;
     private GoogleMap mMap;
     private int color;
@@ -51,15 +52,24 @@ public class DirectionsDelegate {
         gMapV2Direction = new GMapV2Direction();
     }
 
-    public void clear() {
+    public void hide() {
+        displayed = false;
+        clear();
+    }
+
+    private void clear() {
         if (directionsPolyline != null) directionsPolyline.remove();
     }
 
     private void doDraw() {
 
-        if (directionPoints.isEmpty()) {
+        clear();
+
+        if (!displayed)
             return;
-        }
+
+        if (directionPoints.isEmpty())
+            return;
 
         Log.d(TAG, "Drawing directions");
 
@@ -75,20 +85,21 @@ public class DirectionsDelegate {
 
     /**
      * Fetch directions with the indicated parameters and draw to the map when ready
+     *
      * @param from
      * @param to
      * @param mode
      */
     public void drawDirections(final LatLng from, final LatLng to, final String mode) {
 
-        clear();
-
-        // if there were results before we display them while new ones come
-        doDraw();
+        displayed = true;
 
         if (lastDirectionsUpdate != null && System.currentTimeMillis() - lastDirectionsUpdate.getTime() < DIRECTIONS_EXPIRY) {
             return;
         }
+
+        // if there were results before we display them while new ones come
+        doDraw();
 
         directionPoints.clear();
 

@@ -451,7 +451,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 updateMarker(selectedSpot, previousMarker, false);
             }
         }
-        directionsDelegate.clear();
+        directionsDelegate.hide();
         selectedSpot = null;
     }
 

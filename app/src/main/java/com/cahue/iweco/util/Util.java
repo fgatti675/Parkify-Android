@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Util {
@@ -121,6 +122,11 @@ public class Util {
                 .build());
 
         return update;
+    }
+
+    public boolean isImperialMetricsLocale(Context context){
+        Locale locale = context.getResources().getConfiguration().locale;
+        return locale.getCountry().equals("US");
     }
 
 

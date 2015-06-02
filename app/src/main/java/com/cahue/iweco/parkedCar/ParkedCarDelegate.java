@@ -52,8 +52,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private GoogleMap mMap;
     private OnCarClickedListener carSelectedListener;
 
-    private Location userLocation;
-
     private int lightColor;
 
     /**
@@ -62,7 +60,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private Marker carMarker;
     private Circle accuracyCircle;
     private DirectionsDelegate directionsDelegate;
-
 
     /**
      * Use this factory method to create a new instance of
@@ -162,7 +159,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private void clear() {
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
-        directionsDelegate.clear();
+        directionsDelegate.hide();
     }
 
 

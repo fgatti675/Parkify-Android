@@ -77,7 +77,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_spot_details, container, false);
         if (spot != null) {
-
+//
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.spot_toolbar);
             toolbar.inflateMenu(R.menu.spot_menu);
             toolbar.setOnMenuItemClickListener(this);

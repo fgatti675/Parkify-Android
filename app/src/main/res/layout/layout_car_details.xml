@@ -29,6 +29,7 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/car_toolbar"
             cahue:theme="@style/ActionBar.Details"
+            android:paddingRight="@dimen/default_padding"
             android:clickable="false"
             android:focusable="false"
             android:layout_width="match_parent"
