@@ -81,6 +81,8 @@ public class DirectionsDelegate {
      */
     public void drawDirections(final LatLng from, final LatLng to, final String mode) {
 
+        clear();
+
         // if there were results before we display them while new ones come
         doDraw();
 

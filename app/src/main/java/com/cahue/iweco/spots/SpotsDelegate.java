@@ -387,7 +387,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     private void drawDirections() {
-        directionsDelegate.drawDirections(getUserLatLng(), selectedSpot.position, GMapV2Direction.MODE_DRIVING);
+        if (selectedSpot != null)
+            directionsDelegate.drawDirections(getUserLatLng(), selectedSpot.position, GMapV2Direction.MODE_DRIVING);
     }
 
     private void updateMarker(ParkingSpot parkingSpot, Marker marker, boolean selected) {
@@ -458,6 +459,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public void onMapReady(GoogleMap map) {
         Log.d(TAG, "onMapReady");
         this.mMap = map;
+        directionsDelegate.setMap(map);
+        directionsDelegate.setColor(getResources().getColor(R.color.theme_accent));
         reset(false);
         doDraw();
     }
