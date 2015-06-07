@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,11 +18,12 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +33,10 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.DividerItemDecoration;
 import com.cahue.iweco.util.LoadProfileImage;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,7 +58,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private LinearLayout mDrawerListView;
+    private RelativeLayout mDrawerListView;
 
     private View mFragmentContainerView;
     private RecyclerView recyclerView;
@@ -79,6 +84,18 @@ public class NavigationDrawerFragment extends Fragment {
     private TextView emailTextView;
     private boolean skippedLogin;
 
+    private AdView adView;
+
+    private BillingFragment billingFragment;
+    private BroadcastReceiver billingReadyReceiver;
+
+    private BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            adView.setVisibility(View.GONE);
+        }
+    };
+
     public NavigationDrawerFragment() {
     }
 
@@ -88,6 +105,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         skippedLogin = AuthUtils.isSkippedLogin(getActivity());
         cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
+
     }
 
     @Override
@@ -98,8 +116,11 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mDrawerListView = (LinearLayout) inflater.inflate(
-                R.layout.fragment_navigation_drawer, container, false);
+
+        mDrawerListView = (RelativeLayout) inflater.inflate(
+                R.layout.fragment_navigation_drawer,
+                container,
+                false);
 
         View userDetails = mDrawerListView.findViewById(R.id.user_details);
 
@@ -128,7 +149,93 @@ public class NavigationDrawerFragment extends Fragment {
 
         userDetails.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
 
+        // Create adView.
+        adView = (AdView) mDrawerListView.findViewById(R.id.adView);
+        adView.setVisibility(View.GONE);
+
         return mDrawerListView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
+        if (billingFragment == null)
+            throw new RuntimeException("The billing fragment must be set");
+
+        /**
+         * Set up the ad if the billing service is ready
+         */
+        if (billingFragment.isBillingServiceReady()) {
+            setUpAd();
+        }
+
+        /**
+         * Wait for it otherwise
+         */
+        else {
+            Log.d(TAG, "Witing billing service");
+            billingReadyReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    Log.d(TAG, "Billing ready");
+                    setUpAd();
+                }
+            };
+            getActivity().registerReceiver(billingReadyReceiver, new IntentFilter(Constants.INTENT_BILLING_READY));
+        }
+
+
+        getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (billingReadyReceiver != null)
+            getActivity().unregisterReceiver(billingReadyReceiver);
+        billingReadyReceiver = null;
+        getActivity().unregisterReceiver(newPurchaseReceiver);
+    }
+
+    private void setUpAd() {
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+
+                /**
+                 * Check if the user has purchases. If there is an error we don't display just in case
+                 *
+                 * @return
+                 */
+                boolean displayAd = false;
+                Bundle ownedItems = billingFragment.getPurchases();
+                int response = ownedItems.getInt("RESPONSE_CODE");
+                if (response == 0) {
+                    ArrayList<?> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
+                    Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
+                    displayAd = purchaseDataList.isEmpty();
+                }
+
+                return displayAd;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean displayAd) {
+                Log.d(TAG, "Display ads returned " + displayAd);
+                if (displayAd) {
+                    adView.setVisibility(View.VISIBLE);
+                    // Ad request
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    adView.loadAd(adRequest);
+                } else {
+                    adView.setVisibility(View.GONE);
+                }
+            }
+        }.execute();
+
     }
 
     public boolean isDrawerOpen() {
@@ -142,7 +249,7 @@ public class NavigationDrawerFragment extends Fragment {
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      * @param mToolbar
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout, Toolbar mToolbar) {
+    public void setUpDrawer(int fragmentId, DrawerLayout drawerLayout, Toolbar mToolbar) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
@@ -194,12 +301,14 @@ public class NavigationDrawerFragment extends Fragment {
         super.onResume();
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
+        adView.resume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(carUpdatedReceiver);
+        adView.pause();
     }
 
     @Override
@@ -224,9 +333,11 @@ public class NavigationDrawerFragment extends Fragment {
         mCallbacks = null;
     }
 
+
     @Override
     public void onDestroy() {
         super.onDestroy();
+        adView.destroy();
     }
 
     @Override
@@ -321,9 +432,10 @@ public class NavigationDrawerFragment extends Fragment {
                 View.OnClickListener clickListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(car.location != null) {
+                        if (car.location != null) {
                             mCallbacks.onCarClicked(car.id);
-                            mDrawerLayout.closeDrawers();
+                            if (mDrawerLayout != null)
+                                mDrawerLayout.closeDrawers();
                         } else {
                             Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
                         }
@@ -425,5 +537,6 @@ public class NavigationDrawerFragment extends Fragment {
         emailTextView.setText(AuthUtils.getEmail(getActivity()));
         new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
     }
+
 
 }

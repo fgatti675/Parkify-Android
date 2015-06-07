@@ -4,16 +4,13 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -28,7 +25,6 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.android.vending.billing.IInAppBillingService;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarManagerFragment;
@@ -64,9 +60,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.plus.Plus;
 import com.melnykov.fab.FloatingActionButton;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,8 +87,6 @@ public class MapsActivity extends ActionBarActivity
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
-    static final int REQUEST_ON_PURCHASE = 1001;
-
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     List<AbstractMarkerDelegate> delegates = new ArrayList();
@@ -121,7 +112,6 @@ public class MapsActivity extends ActionBarActivity
     private DetailsFragment detailsFragment;
     private boolean detailsDisplayed = false;
 
-    private IInAppBillingService iInAppBillingService;
 
     private boolean cameraFollowing;
     /**
@@ -172,18 +162,6 @@ public class MapsActivity extends ActionBarActivity
         }
     };
 
-    private ServiceConnection mBillingServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            iInAppBillingService = null;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
-        }
-    };
-
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -213,6 +191,10 @@ public class MapsActivity extends ActionBarActivity
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
+        /**
+         * Bind service used for donations
+         */
+        setUpBillingFragment();
 
         // Create a GoogleApiClient instance
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
@@ -265,6 +247,7 @@ public class MapsActivity extends ActionBarActivity
             mToolbar.removeView(findViewById(R.id.logo));
             mToolbar.setTitle(getString(R.string.app_name));
         }
+
 
         setUpNavigationDrawer();
 
@@ -323,11 +306,17 @@ public class MapsActivity extends ActionBarActivity
         detailsContainer = (CardView) findViewById(R.id.marker_details_container);
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-        /**
-         * Bind service used for donations
-         */
-        bindBillingService();
 
+
+    }
+
+    private void setUpBillingFragment() {
+        Log.d(TAG, "Creating new BillingFragment");
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        BillingFragment spotsDelegate = BillingFragment.newInstance();
+        spotsDelegate.setRetainInstance(true);
+        transaction.add(spotsDelegate, BillingFragment.FRAGMENT_TAG);
+        transaction.commit();
     }
 
     private void setUpNavigationDrawer() {
@@ -337,10 +326,13 @@ public class MapsActivity extends ActionBarActivity
         mNavigationDrawerFragment.setRetainInstance(true);
 
         // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout),
-                mToolbar);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawerLayout != null) {
+            mNavigationDrawerFragment.setUpDrawer(
+                    R.id.navigation_drawer,
+                    drawerLayout,
+                    mToolbar);
+        }
 
     }
 
@@ -566,46 +558,17 @@ public class MapsActivity extends ActionBarActivity
 
     }
 
-    private void bindBillingService() {
-        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
-    }
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        // element purchase
-        if (requestCode == REQUEST_ON_PURCHASE) {
-
-            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-
-            if (resultCode == RESULT_OK) {
-                try {
-                    JSONObject jo = new JSONObject(purchaseData);
-                    String sku = jo.getString("productId");
-                    Util.createUpperToast(this, getString(R.string.thanks), Toast.LENGTH_LONG); // do string
-                } catch (JSONException e) {
-                    Util.createUpperToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
+        billingFragment.onActivityResult(requestCode, resultCode, data);
     }
-
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if (iInAppBillingService != null) {
-            unbindService(mBillingServiceConn);
-        }
-
         saveMapCameraPosition();
     }
 
@@ -704,7 +667,6 @@ public class MapsActivity extends ActionBarActivity
 
     public void openDonationDialog() {
         DonateDialog dialog = new DonateDialog();
-        dialog.setIInAppBillingService(iInAppBillingService);
         dialog.show(getFragmentManager(), "DonateDialog");
     }
 

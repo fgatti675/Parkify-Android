@@ -17,5 +17,5 @@
     <dimen name="elevation_small">2dp</dimen>
     <dimen name="cardCornerRadius">2dp</dimen>
 
-    <dimen name="navigation_drawer_width">300dp</dimen>
+    <dimen name="navigation_drawer_width">320dp</dimen>
 </resources>

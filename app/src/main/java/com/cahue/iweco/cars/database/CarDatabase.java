@@ -302,9 +302,6 @@ public class CarDatabase {
 
             if (cursor.getCount() == 0) return null;
 
-            if (cursor.getCount() > 1)
-                throw new IllegalStateException("Can't have more than 1 car with the same ID");
-
             cursor.moveToFirst();
 
             car = cursorToCar(cursor);
@@ -331,9 +328,6 @@ public class CarDatabase {
                     null, null, null, null);
 
             if (cursor.getCount() == 0) return null;
-
-            if (cursor.getCount() > 1)
-                throw new IllegalStateException("Can't have more than 1 car with the same BT address");
 
             cursor.moveToFirst();
 

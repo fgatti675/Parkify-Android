@@ -29,7 +29,7 @@
     <string name="cancel">Cancelar</string>
 
     <!-- Donations -->
-    <string name="donation_intro">Esta aplicación se financia solo a través de donaciones.</string>
+    <string name="donation_intro">¡Cualquier donación eliminará la publicidad!</string>
     <string name="donation_1">1 euro</string>
     <string name="donation_2">2 euros</string>
     <string name="donation_5">5 euros</string>
