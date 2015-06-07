@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.ColorUtil;
+import com.cahue.iweco.util.Util;
 
 /**
  * Created by Francesco on 08/03/2015.
@@ -79,7 +80,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
             linkedDevice.setVisibility(View.GONE);
         }
 
-        updateDistance(userLastLocation, car.location);
+        updateDistance(context, userLastLocation, car.location);
 
         updateAddress(car);
 
@@ -106,10 +107,14 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    public void updateDistance(Location userLocation, Location carLocation) {
+    public void updateDistance(Context context, Location userLocation, Location carLocation) {
         if (userLocation != null && carLocation != null) {
             float distanceM = carLocation.distanceTo(userLocation);
-            distance.setText(String.format("%.1f km", distanceM / 1000));
+            if (Util.isImperialMetricsLocale(context)) {
+                distance.setText(String.format("%.1f miles", distanceM / 1609.34));
+            } else {
+                distance.setText(String.format("%.1f km", distanceM / 1000));
+            }
             distance.setVisibility(View.VISIBLE);
         } else {
             distance.setVisibility(View.GONE);

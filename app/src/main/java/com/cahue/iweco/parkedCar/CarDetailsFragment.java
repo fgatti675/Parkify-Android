@@ -170,7 +170,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         this.userLocation = userLocation;
         View view = getView();
         if (view != null ) {
-            carViewHolder.updateDistance(userLocation, car.location);
+            carViewHolder.updateDistance(getActivity(), userLocation, car.location);
         }
     }
 
@@ -214,7 +214,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         // Handle presses on the action bar items
         switch (menuItem.getItemId()) {
             case R.id.action_follow:
-                parkedCarDelegate.setFollowing(true);
+                parkedCarDelegate.setCameraFollowing(true);
                 updateFollowButtonState();
                 return true;
             case R.id.action_clear:

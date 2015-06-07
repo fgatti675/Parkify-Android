@@ -11,9 +11,12 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -27,9 +30,7 @@ import android.widget.Toast;
 
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
-import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.cars.CarsSync;
-import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
 import com.cahue.iweco.locationServices.CarMovedService;
@@ -45,6 +46,7 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,18 +54,22 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.plus.Plus;
-import com.melnykov.fab.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-public class MapsActivity extends ActionBarActivity
+public class MapsActivity extends AppCompatActivity
         implements
         LocationListener,
         GoogleMap.OnMapLongClickListener,
@@ -73,8 +79,6 @@ public class MapsActivity extends ActionBarActivity
         SpotsDelegate.SpotSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
         SetCarPositionDialog.Callbacks,
-        CarManagerFragment.Callbacks,
-        EditCarDialog.CarEditedListener,
         CameraManager,
         OnMapReadyCallback,
         CameraUpdateRequester,
@@ -229,7 +233,7 @@ public class MapsActivity extends ActionBarActivity
             mAccount = availableAccounts[0];
 
         // show help dialog only on first run of the app
-        if (!Util.isTutorialShown(this)) {
+        if (!PreferencesUtil.isTutorialShown(this)) {
             goToTutorial();
         }
 
@@ -252,6 +256,8 @@ public class MapsActivity extends ActionBarActivity
         setUpNavigationDrawer();
 
         myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
+        ViewCompat.setElevation(myLocationButton, getResources().getDimension(R.dimen.elevation));
+        myLocationButton.setBackgroundTintList(getResources().getColorStateList(R.color.button_states));
         myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -307,6 +313,7 @@ public class MapsActivity extends ActionBarActivity
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
 
+        registerCameraUpdater(this);
 
     }
 
@@ -352,7 +359,7 @@ public class MapsActivity extends ActionBarActivity
          * Initial zoom
          */
         if (!mapInitialised) {
-            CameraUpdate update = Util.getLastCameraPosition(this);
+            CameraUpdate update = PreferencesUtil.getLastCameraPosition(this);
             if (update != null)
                 mMap.moveCamera(update);
             mapInitialised = true;
@@ -449,6 +456,8 @@ public class MapsActivity extends ActionBarActivity
 
     private void setMapPadding(int bottomPadding) {
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
+        for (CameraUpdateRequester requester : cameraUpdateRequesterList)
+            requester.onMapResized();
     }
 
     private void hideDetails() {
@@ -556,6 +565,30 @@ public class MapsActivity extends ActionBarActivity
 
         setInitialCamera();
 
+        alertIfNoCars();
+
+    }
+
+    private void alertIfNoCars() {
+
+        if (carDatabase.isEmpty()) {
+            Snackbar.make(findViewById(R.id.main_container), R.string.nocars, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.create, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            goToCarManager();
+                        }
+                    })
+                    .show();
+        }
+
+
+    }
+
+    private void bindBillingService() {
+        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -569,12 +602,15 @@ public class MapsActivity extends ActionBarActivity
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+        if (iInAppBillingService != null) {
+            unbindService(mBillingServiceConn);
+        }
         saveMapCameraPosition();
     }
 
     private void saveMapCameraPosition() {
         if (mMap != null) {
-            Util.saveCameraPosition(this, mMap.getCameraPosition());
+            PreferencesUtil.saveCameraPosition(this, mMap.getCameraPosition());
         }
     }
 
@@ -628,7 +664,7 @@ public class MapsActivity extends ActionBarActivity
 
     public void goToTutorial() {
         startActivity(new Intent(this, TutorialActivity.class));
-        Util.setTutorialShown(this, true);
+        PreferencesUtil.setTutorialShown(this, true);
     }
 
     @Override
@@ -639,6 +675,8 @@ public class MapsActivity extends ActionBarActivity
 //            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
         }
         unregisterReceiver(carUpdateReceiver);
+
+        saveMapCameraPosition();
     }
 
     /**
@@ -765,22 +803,29 @@ public class MapsActivity extends ActionBarActivity
     }
 
 
+    /**
+     * This is called when the user moves the camera but also when it is triggered programatically.
+     * @param cameraPosition
+     */
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
 
         if (mMap == null) return;
 
-        if (cameraUpdateRequester != this)
+        if (lastCameraUpdateRequester != this)
             setCameraFollowing(false);
 
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onCameraChange(cameraPosition, cameraUpdateRequester);
+            if(lastCameraUpdateRequester != delegate) {
+                delegate.setCameraFollowing(false);
+                delegate.onCameraChange(cameraPosition, lastCameraUpdateRequester);
+            }
         }
 
         if (detailsFragment != null && detailsFragment.isResumed())
             detailsFragment.onCameraUpdate();
 
-        cameraUpdateRequester = null;
+        lastCameraUpdateRequester = null;
 
     }
 
@@ -789,7 +834,7 @@ public class MapsActivity extends ActionBarActivity
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.onMarkerClick(marker);
         }
-        return false;
+        return true;
     }
 
 
@@ -842,23 +887,44 @@ public class MapsActivity extends ActionBarActivity
 
     @Override
     public void onCarClicked(String carId) {
-        getParkedCarDelegate(carId).setFollowing(true);
+        getParkedCarDelegate(carId).setCameraFollowing(true);
         setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }
 
 
-    private CameraUpdateRequester cameraUpdateRequester;
+    /**
+     * Last component to request a camera update
+     */
+    private CameraUpdateRequester lastCameraUpdateRequester;
+
+    /**
+     *
+     */
+    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
+
+    @Override
+    public void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
+        cameraUpdateRequesterList.add(cameraUpdateRequester);
+    }
 
     @Override
     public void onCameraUpdateRequest(CameraUpdate cameraUpdate, final CameraUpdateRequester cameraUpdateRequester) {
 
         if (mMap == null) return;
 
+        if (!cameraUpdateRequesterList.contains(cameraUpdateRequester))
+            throw new IllegalStateException("Register this camera updater before requesting camera updates");
+
+        // tell the rest not to perform more updates
+        for (CameraUpdateRequester requester : cameraUpdateRequesterList)
+            if (requester != cameraUpdateRequester) requester.setCameraFollowing(false);
+
+        // perform animation
         mMap.animateCamera(cameraUpdate,
                 new GoogleMap.CancelableCallback() {
                     @Override
                     public void onFinish() {
-                        MapsActivity.this.cameraUpdateRequester = cameraUpdateRequester;
+                        MapsActivity.this.lastCameraUpdateRequester = cameraUpdateRequester;
                     }
 
                     @Override
@@ -867,15 +933,20 @@ public class MapsActivity extends ActionBarActivity
                 });
     }
 
-    private void setCameraFollowing(boolean cameraFollowing) {
+    public void setCameraFollowing(boolean cameraFollowing) {
         this.cameraFollowing = cameraFollowing;
         if (cameraFollowing) {
             zoomToMyLocation();
-            myLocationButton.setImageResource(R.drawable.ic_action_maps_my_location_accent);
+            myLocationButton.setImageResource(R.drawable.crosshairs_gps_accent);
         } else {
-            myLocationButton.setImageResource(R.drawable.ic_action_maps_my_location);
+            myLocationButton.setImageResource(R.drawable.crosshairs_gps);
         }
 
+    }
+
+    @Override
+    public void onMapResized() {
+        if (cameraFollowing) zoomToMyLocation();
     }
 
     private void zoomToMyLocation() {
@@ -901,15 +972,6 @@ public class MapsActivity extends ActionBarActivity
     @Override
     public void onCarPositionUpdate(String carId) {
         onCarClicked(carId);
-    }
-
-    @Override
-    public void devicesBeingLoaded(boolean loading) {
-        // Do nothing
-    }
-
-    @Override
-    public void onCarEdited(Car car, boolean newCar) {
     }
 
     @Override

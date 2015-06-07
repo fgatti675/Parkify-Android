@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.melnykov.fab.FloatingActionButton xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.FloatingActionButton xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:cahue="http://schemas.android.com/apk/res-auto"
-    cahue:fab_colorNormal="@color/white"
-    cahue:fab_colorPressed="@color/theme_accent"
-    cahue:fab_colorRipple="@color/light_grey"
-    android:src="@drawable/ic_action_maps_my_location"
+    android:elevation="@dimen/elevation"
+    android:src="@drawable/crosshairs_gps"
     android:id="@+id/my_location"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content" />

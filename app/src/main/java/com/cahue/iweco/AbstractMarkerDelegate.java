@@ -15,10 +15,14 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     protected Location userLocation;
 
+    // too far from the car to calculate directions
+    private boolean tooFar = false;
+
     public abstract void doDraw();
 
     /**
      * Called when the map is ready to be used
+     *
      * @param mMap
      */
     public void onMapReady(GoogleMap mMap) {
@@ -38,9 +42,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
      * @param marker
      * @return
      */
-    public boolean onMarkerClick(Marker marker) {
-        return false;
-    }
+    public abstract boolean onMarkerClick(Marker marker);
 
     @Override
     public final void onLocationChanged(Location userLocation) {
@@ -55,4 +57,26 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         return new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
     }
 
+    protected final void updateTooFar(LatLng firstLocation, LatLng secondLocation) {
+
+        if (firstLocation == null || secondLocation == null) {
+            return;
+        }
+
+        float distances[] = new float[3];
+        Location.distanceBetween(
+                firstLocation.latitude,
+                firstLocation.longitude,
+                secondLocation.latitude,
+                secondLocation.longitude,
+                distances);
+
+        tooFar = distances[0] > getDirectionsMaxDistance();
+    }
+
+    public abstract float getDirectionsMaxDistance();
+
+    public boolean isTooFar() {
+        return tooFar;
+    }
 }

@@ -41,9 +41,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private String carId;
     private Car car;
 
-    // too far from the car to calculate directions
-    private boolean tooFar = false;
-
     private boolean following = false;
 
     private IconGenerator iconGenerator;
@@ -83,6 +80,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         try {
             this.cameraManager = (CameraManager) activity;
+            cameraManager.registerCameraUpdater(this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement " + CameraManager.class.getName());
@@ -159,7 +157,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private void clear() {
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
-        directionsDelegate.hide();
+        directionsDelegate.hide(false);
     }
 
 
@@ -254,22 +252,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         directionsDelegate.drawDirections(userPosition, carPosition, GMapV2Direction.MODE_WALKING);
     }
 
-    private void updateTooFar(LatLng carPosition, LatLng userPosition) {
-
-        if (carPosition == null || userPosition == null) {
-            return;
-        }
-
-        float distances[] = new float[3];
-        Location.distanceBetween(
-                carPosition.latitude,
-                carPosition.longitude,
-                userPosition.latitude,
-                userPosition.longitude,
-                distances);
-
-        tooFar = distances[0] > MAX_DIRECTIONS_DISTANCE;
-    }
 
     private LatLng getCarLatLng() {
         if (car.location == null) return null;
@@ -282,15 +264,25 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         updateCameraIfFollowing();
     }
 
-    public void setFollowing(boolean following) {
+    @Override
+    public float getDirectionsMaxDistance() {
+        return MAX_DIRECTIONS_DISTANCE;
+    }
 
-        if (this.following != following)
-            Log.i(TAG, "Setting camera following mode to " + following);
+    @Override
+    public void setCameraFollowing(boolean following) {
+
+        Log.v(TAG, "Setting camera following mode to " + following);
 
         this.following = following;
 
         updateCameraIfFollowing();
 
+    }
+
+    @Override
+    public void onMapResized() {
+        updateCameraIfFollowing();
     }
 
 
@@ -361,13 +353,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
             following = false;
     }
 
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
             carSelectedListener.onCarClicked(carId);
         } else {
-            setFollowing(false);
+            setCameraFollowing(false);
         }
         return false;
     }
@@ -376,7 +367,4 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         return following;
     }
 
-    public boolean isTooFar() {
-        return tooFar;
-    }
 }

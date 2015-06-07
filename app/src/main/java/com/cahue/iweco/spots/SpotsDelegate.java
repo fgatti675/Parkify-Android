@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.BuildConfig;
+import com.cahue.iweco.CameraManager;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DirectionsDelegate;
 import com.cahue.iweco.R;
@@ -16,6 +17,7 @@ import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
 import com.cahue.iweco.util.GMapV2Direction;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -29,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -66,6 +67,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public static final int OFFSET_METERS = 2000;
     public static final String FRAGMENT_TAG = "SPOTS_DELEGATE";
 
+    private static final float MAX_DIRECTIONS_DISTANCE = 40000; // 40 km
+
     private final Handler handler = new Handler();
 
     /**
@@ -92,6 +95,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private Date lastResetTaskRequestTime;
     private ScheduledFuture scheduledResetTask;
 
+    private boolean following = false;
+
     /**
      * If markers shouldn't be displayed (like zoom is too far)
      */
@@ -111,6 +116,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * Directions delegate
      */
     private DirectionsDelegate directionsDelegate;
+
+    private CameraManager cameraManager;
 
     public static SpotsDelegate newInstance() {
         SpotsDelegate fragment = new SpotsDelegate();
@@ -150,6 +157,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement SpotSelectedListener");
+        }
+
+        try {
+            this.cameraManager = (CameraManager) activity;
+            cameraManager.registerCameraUpdater(this);
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement CameraManager");
         }
     }
 
@@ -230,7 +245,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public synchronized boolean queryCameraView() {
 
         // What the user is actually seeing right now
-
         setUpViewBounds();
 
 //        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
@@ -311,6 +325,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         spots.addAll(parkingSpots);
 
+        if (selectedSpot != null && !parkingSpots.contains(selectedSpot)) {
+            directionsDelegate.hide(true);
+            selectedSpot = null;
+        }
+
         doDraw();
     }
 
@@ -387,8 +406,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     private void drawDirections() {
-        if (selectedSpot != null)
+        if (selectedSpot != null) {
+
+            updateTooFar(getSpotLatLng(), getUserLatLng());
+
+            // don't set if they are too far
+            if (isTooFar()) return;
+
             directionsDelegate.drawDirections(getUserLatLng(), selectedSpot.position, GMapV2Direction.MODE_DRIVING);
+        }
     }
 
     private void updateMarker(ParkingSpot parkingSpot, Marker marker, boolean selected) {
@@ -422,11 +448,12 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         // apply new style and tell listener
         selectedSpot = markerSpotsMap.get(marker);
+
         if (selectedSpot != null) {
             Marker selectedMarker = spotMarkersMap.get(selectedSpot);
 
             updateMarker(selectedSpot, selectedMarker, true);
-            selectedMarker.showInfoWindow();
+            drawDirections();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
         }
@@ -442,6 +469,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * Clear previously selected spot
      */
     private void clearSelectedSpot() {
+
+        Log.d(TAG, "Clearing selected spot");
+
         // clear previous selection
         if (selectedSpot != null) {
             Marker previousMarker = spotMarkersMap.get(selectedSpot);
@@ -451,7 +481,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 updateMarker(selectedSpot, previousMarker, false);
             }
         }
-        directionsDelegate.hide();
+        directionsDelegate.hide(true);
         selectedSpot = null;
     }
 
@@ -477,8 +507,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public void onDetailsClosed() {
         clearSelectedSpot();
     }
-
-    Random random = new Random();
 
     private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {
 
@@ -510,6 +538,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         float zoom = mMap.getCameraPosition().zoom;
         Log.v(TAG, "zoom: " + zoom);
 
+//        if (requester != this)
+//            following = false;
+
         /**
          * Query for current camera position
          */
@@ -532,6 +563,21 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     }
 
+    @Override
+    public void onMapResized() {
+        updateCameraIfFollowing();
+    }
+
+    public boolean updateCameraIfFollowing() {
+
+        if (mMap == null || !isResumed()) return false;
+
+        if (following) {
+            return zoomToSeeBoth();
+        }
+
+        return false;
+    }
 
     public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
 
@@ -546,8 +592,55 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         return new LatLng(nLat, nLon);
     }
 
-    public void setFollowing(ParkingSpot spot) {
+    public void setCameraFollowing(boolean following) {
+        Log.v(TAG, "Setting camera following mode to " + following);
 
+        this.following = following;
+
+        updateCameraIfFollowing();
+    }
+
+    /**
+     * This method zooms to see both user and the car.
+     */
+    protected boolean zoomToSeeBoth() {
+
+        if (cameraManager == null)
+            return false;
+
+        if (!isAdded()) return false;
+
+        Log.v(TAG, "zoomToSeeBoth");
+
+        LatLng carPosition = getSpotLatLng();
+        LatLng userPosition = getUserLatLng();
+
+        if (carPosition == null || userPosition == null) return false;
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder()
+                .include(carPosition)
+                .include(userPosition);
+
+        for (LatLng latLng : directionsDelegate.getDirectionPoints())
+            builder.include(latLng);
+
+        cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
+
+        return true;
+    }
+
+    @Override
+    public float getDirectionsMaxDistance() {
+        return MAX_DIRECTIONS_DISTANCE;
+    }
+
+    private LatLng getSpotLatLng() {
+        if (selectedSpot == null) return null;
+        return selectedSpot.position;
+    }
+
+    public boolean isFollowing() {
+        return following;
     }
 
     public interface SpotSelectedListener {

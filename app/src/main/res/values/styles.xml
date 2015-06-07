@@ -3,6 +3,7 @@
     <!-- Base application theme. -->
     <style name="CahueTheme" parent="Theme.AppCompat.Light">
 
+        <!-- Both of these are needed -->
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
 

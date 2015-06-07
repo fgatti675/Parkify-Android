@@ -60,5 +60,7 @@
     <string name="edit_cars">Editar coches</string>
     <string name="position_not_set">Ubicación desconocida</string>
     <string name="follow">Seguir</string>
+    <string name="nocars">No has añadido ningún coche</string>
+    <string name="create">Añadir</string>
 
 </resources>

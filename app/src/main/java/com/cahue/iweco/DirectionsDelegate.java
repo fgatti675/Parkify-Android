@@ -52,7 +52,10 @@ public class DirectionsDelegate {
         gMapV2Direction = new GMapV2Direction();
     }
 
-    public void hide() {
+    public void hide(boolean reset) {
+        Log.d(TAG, "Hiding directions");
+        if(reset)
+            reset();
         displayed = false;
         clear();
     }
@@ -83,6 +86,10 @@ public class DirectionsDelegate {
 
     }
 
+    private void reset() {
+        lastDirectionsUpdate = null;
+    }
+
     /**
      * Fetch directions with the indicated parameters and draw to the map when ready
      *
@@ -101,8 +108,6 @@ public class DirectionsDelegate {
         // if there were results before we display them while new ones come
         doDraw();
 
-        directionPoints.clear();
-
         /**
          * Cancel if something is going on
          */
@@ -116,6 +121,7 @@ public class DirectionsDelegate {
 
             @Override
             protected Document doInBackground(Object[] objects) {
+                Log.d(TAG, "Fetching directions");
                 Document doc = gMapV2Direction.getDocument(from, to, mode);
                 return doc;
             }

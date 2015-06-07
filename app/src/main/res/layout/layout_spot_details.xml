@@ -17,51 +17,43 @@
         android:paddingTop="@dimen/large_padding"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
-        android:scaleType="fitStart"/>
+        android:scaleType="fitStart" />
 
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/spot_toolbar"
+        cahue:theme="@style/ActionBar.Details"
+        android:paddingRight="@dimen/default_padding"
+        android:clickable="false"
+        android:focusable="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/spot_image"
-        android:layout_toRightOf="@+id/spot_image">
+        android:layout_gravity="center">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/spot_toolbar"
-            cahue:theme="@style/ActionBar.Details"
-            android:paddingRight="@dimen/default_padding"
-            android:clickable="false"
-            android:focusable="false"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/time"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 tools:text="TIME"
                 android:textColor="@color/body_text_1" />
 
-        </android.support.v7.widget.Toolbar>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingLeft="@dimen/large_padding"
-            android:paddingBottom="@dimen/large_padding"
-            android:paddingRight="@dimen/large_padding">
-
             <TextView
                 android:id="@+id/distance_time"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="DISTANCE"
-                android:textColor="@color/abc_secondary_text_material_light" />
-        </LinearLayout>
+                android:textColor="@color/abc_secondary_text_material_light"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
 
-    </LinearLayout>
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+
 
 </LinearLayout>
 

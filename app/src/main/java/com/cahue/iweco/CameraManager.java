@@ -7,6 +7,9 @@ import com.google.android.gms.maps.CameraUpdate;
  */
 public interface CameraManager {
 
+
+    void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester);
+
     /**
      *
      * @param cameraUpdate

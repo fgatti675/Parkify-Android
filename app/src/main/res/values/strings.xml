@@ -58,5 +58,7 @@
     <string name="edit_cars">Edit cars</string>
     <string name="position_not_set">Car position is not set</string>
     <string name="follow">Follow</string>
+    <string name="nocars">You didn\'t add a car yet</string>
+    <string name="create">Add</string>
 
 </resources>

@@ -408,4 +408,22 @@ public class CarDatabase {
         }
     }
 
+    /**
+     * Check if there is at least one car
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
+        try {
+            Cursor cursor = database.query(Car.TABLE_NAME,
+                    new String[]{Car.COLUMN_ID},
+                    null, null, null, null, null);
+
+            return cursor.getCount() == 0;
+        } finally {
+            database.close();
+        }
+    }
 }

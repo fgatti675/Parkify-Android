@@ -17,6 +17,16 @@ public interface CameraUpdateRequester {
      * @param cameraPosition new position of the camera
      * @param requester the requester of the camera update, null if the camera was moved by the user.
      */
-    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester);
+    void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester);
 
+    /**
+     * Tell this camera updater to follow or not
+     */
+    void setCameraFollowing(boolean following);
+
+    /**
+     * Called when the dimensions of the map change (like when details are displayed).
+     * If the component is following it should trigger an update
+     */
+    void onMapResized();
 }

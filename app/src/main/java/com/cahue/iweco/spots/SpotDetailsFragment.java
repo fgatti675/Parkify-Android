@@ -40,6 +40,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     private ImageView rectangleImage;
 
     private SpotsDelegate spotsDelegate;
+    private Toolbar toolbar;
 
     /**
      * Use this factory method to create a new instance of
@@ -62,6 +63,11 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     }
 
     @Override
+    public void onCameraUpdate() {
+        updateFollowButtonState();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -78,7 +84,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
         View view = inflater.inflate(R.layout.layout_spot_details, container, false);
         if (spot != null) {
 //
-            Toolbar toolbar = (Toolbar) view.findViewById(R.id.spot_toolbar);
+            toolbar = (Toolbar) view.findViewById(R.id.spot_toolbar);
             toolbar.inflateMenu(R.menu.spot_menu);
             toolbar.setOnMenuItemClickListener(this);
 
@@ -105,6 +111,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
         updateDistance();
         updateImage();
         updateTimeAgo();
+        updateFollowButtonState();
     }
 
     @Override
@@ -113,6 +120,19 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
         View view = getView();
         if (view != null) {
             updateDistance();
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        // Handle presses on the action bar items
+        switch (menuItem.getItemId()) {
+            case R.id.action_follow:
+                spotsDelegate.setCameraFollowing(true);
+                updateFollowButtonState();
+                return true;
+            default:
+                return super.onOptionsItemSelected(menuItem);
         }
     }
 
@@ -132,8 +152,11 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
             spotLocation.setLongitude(spot.position.longitude);
             float distanceM = spotLocation.distanceTo(userLocation);
 
-            // TODO: add imperial
-            distance.setText(String.format("%.1f km", distanceM / 1000));
+            if (Util.isImperialMetricsLocale(getActivity())) {
+                distance.setText(String.format("%.1f miles", distanceM / 1609.34));
+            } else {
+                distance.setText(String.format("%.1f km", distanceM / 1000));
+            }
         }
     }
 
@@ -145,15 +168,16 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
         }
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.action_follow:
-                spotsDelegate.setFollowing(spot);
-//                updateFollowButtonState();
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
-        }
+    private void updateFollowButtonState() {
+
+        boolean selected = spotsDelegate.isFollowing();
+
+        MenuItem item = toolbar.getMenu().findItem(R.id.action_follow);
+        item.setIcon(getResources().getDrawable(
+                selected
+                        ? R.drawable.ic_action_maps_navigation_accent
+                        : R.drawable.ic_action_maps_navigation));
+
     }
+
 }

@@ -61,5 +61,7 @@
     <string name="edit_cars">Edita le macchine</string>
     <string name="position_not_set">Posizione sconosciuta</string>
     <string name="follow">Segui</string>
+    <string name="nocars">Non hai aggiunto nessuna macchina</string>
+    <string name="create">Aggiungi</string>
 
 </resources>

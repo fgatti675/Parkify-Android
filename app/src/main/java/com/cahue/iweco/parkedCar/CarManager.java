@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.cahue.iweco.cars.Car;
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 /**
  * Created by francesco on 16.09.2014.
@@ -42,7 +44,7 @@ public class CarManager {
      * @param car
      */
     public static void saveCar(Context context, Car car) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         SharedPreferences.Editor editor = prefs.edit();
 
@@ -73,7 +75,7 @@ public class CarManager {
     }
 
     public static String getLastCarSavedId(Context context){
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(PREF_LAST_CAR_SAVED, null);
     }
 
@@ -112,14 +114,14 @@ public class CarManager {
     public static final String PREF_BT_DEVICE_ADDRESSES = "PREF_BT_DEVICE_ADDRESSES";
 
     public static Set<String> getPairedDevices(Context context) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         HashSet result = new HashSet();
         result.addAll(prefs.getStringSet(PREF_BT_DEVICE_ADDRESSES, new HashSet<String>()));
         return result;
     }
 
     public static void setPairedDevices(Context context, Set<String> selectedDeviceAddresses) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putStringSet(PREF_BT_DEVICE_ADDRESSES, selectedDeviceAddresses).apply();
     }
 
@@ -136,7 +138,7 @@ public class CarManager {
 
     private static Car getStoredBTCar(Context context, String btAddress, Set<BluetoothDevice> bondedBTDevices) {
 
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         Car car = new Car();
         car.btAddress = btAddress;
@@ -177,7 +179,7 @@ public class CarManager {
     }
 
     public static void removeStoredLocation(Context context, Car car) {
-        SharedPreferences prefs = Util.getSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         SharedPreferences.Editor editor = prefs.edit();
 
