@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="CahueTheme" parent="Theme.AppCompat.Light">
+    <style name="CahueTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
         <!-- Both of these are needed -->
         <item name="windowActionBar">false</item>
@@ -51,8 +51,6 @@
         <!--<item name="colorControlNormal">?actionBarIconColor</item>-->
         <!--<item name="colorControlHighlight">@color/white</item>-->
     </style>
-
-    <style name="ActionBarPopupThemeOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 
     <style name="ActionBar.TitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">#fff</item>

@@ -144,7 +144,10 @@ public class Car implements Parcelable {
         try {
             Car car = new Car();
             car.id = carJSON.getString("id");
-            car.name = carJSON.getString("name");
+
+            if (carJSON.has("name")) {
+                car.name = carJSON.getString("name");
+            }
 
             if (carJSON.has("btAddress")) {
                 car.btAddress = carJSON.getString("btAddress");

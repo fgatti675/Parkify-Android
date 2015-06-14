@@ -72,4 +72,14 @@ public class Util {
         return locale.getCountry().equals("US");
     }
 
+    public static boolean isPackageInstalled(String packageName, Context context) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
 }

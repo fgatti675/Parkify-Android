@@ -11,7 +11,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
@@ -46,7 +45,9 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -87,7 +88,7 @@ public class MapsActivity extends AppCompatActivity
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    protected static final String TAG = "Maps";
+    protected static final String TAG = MapsActivity.class.getSimpleName();
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
@@ -315,6 +316,36 @@ public class MapsActivity extends AppCompatActivity
 
         registerCameraUpdater(this);
 
+        checkIweco();
+        checkWIMC();
+
+    }
+
+    public void checkIweco() {
+        if ("wimc".equals(BuildConfig.FLAVOR)) {
+
+            if (Util.isPackageInstalled("com.cahue.iweco", this)) {
+                if (!PreferencesUtil.isWIMCUninstallDialogShown(this)) {
+                    UninstallWIMCDialog dialog = new UninstallWIMCDialog();
+                    dialog.show(getFragmentManager(), "UninstallWIMCDialog");
+                }
+            } else {
+                if (IwecoPromoDialog.shouldBeShown(this)) {
+                    IwecoPromoDialog dialog = new IwecoPromoDialog();
+                    dialog.show(getFragmentManager(), "IwecoPromoDialog");
+                }
+            }
+
+        }
+    }
+
+    private void checkWIMC() {
+        if ("iweco".equals(BuildConfig.FLAVOR)
+                && Util.isPackageInstalled("com.whereismycar", this)
+                && !PreferencesUtil.isWIMCUninstallDialogShown(this)) {
+            UninstallWIMCDialog dialog = new UninstallWIMCDialog();
+            dialog.show(getFragmentManager(), "UninstallWIMCDialog");
+        }
     }
 
     private void setUpBillingFragment() {
@@ -558,11 +589,6 @@ public class MapsActivity extends AppCompatActivity
         // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
 
-//        List<String> carIds = carDatabase.getCarIds();
-//        for (String id : carIds) {
-//            getParkedCarDelegate(id).update();
-//        }
-
         setInitialCamera();
 
         alertIfNoCars();
@@ -585,11 +611,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void bindBillingService() {
-        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -602,9 +623,7 @@ public class MapsActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if (iInAppBillingService != null) {
-            unbindService(mBillingServiceConn);
-        }
+
         saveMapCameraPosition();
     }
 
@@ -655,6 +674,8 @@ public class MapsActivity extends AppCompatActivity
             // process from scratch.
             mGoogleApiClient.disconnect();
             mGoogleApiClient.connect();
+
+            PreferencesUtil.clear(this);
 
             Log.v(TAG, "Sign out successful!");
         }
@@ -805,6 +826,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is called when the user moves the camera but also when it is triggered programatically.
+     *
      * @param cameraPosition
      */
     @Override
@@ -816,7 +838,7 @@ public class MapsActivity extends AppCompatActivity
             setCameraFollowing(false);
 
         for (AbstractMarkerDelegate delegate : delegates) {
-            if(lastCameraUpdateRequester != delegate) {
+            if (lastCameraUpdateRequester != delegate) {
                 delegate.setCameraFollowing(false);
                 delegate.onCameraChange(cameraPosition, lastCameraUpdateRequester);
             }
@@ -826,6 +848,8 @@ public class MapsActivity extends AppCompatActivity
             detailsFragment.onCameraUpdate();
 
         lastCameraUpdateRequester = null;
+
+        Log.v(TAG, "onCameraChange");
 
     }
 

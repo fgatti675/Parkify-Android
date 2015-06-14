@@ -63,4 +63,11 @@
     <string name="nocars">No has añadido ningún coche</string>
     <string name="create">Añadir</string>
 
+
+    <string name="install">Instalar</string>
+    <string name="uninstall_WIMC">Si has instalado iweco, ya no necesitas ¿Dónde está mi coche?. ¿Desinstalar?</string>
+    <string name="uninstall">Desinstalar</string>
+    <string name="iweco_promo">¡Prueba ahora IWECO! ¡No sólo te dice dónde has aparcado sino también dónde hay huecos libres!\nUna buena nota y hacer correr la voz nos ayudaría muchisimo ;)</string>
+    <string name="new_app">Nueva app!</string>
+
 </resources>

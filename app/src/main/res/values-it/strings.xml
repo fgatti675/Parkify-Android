@@ -64,4 +64,10 @@
     <string name="nocars">Non hai aggiunto nessuna macchina</string>
     <string name="create">Aggiungi</string>
 
+    <string name="install">Installare</string>
+    <string name="uninstall_WIMC">Se iweco è installato non è più necessaria Where is my car?. Disinstallare?</string>
+    <string name="uninstall">Disinstallare</string>
+    <string name="iweco_promo">Prova adesso IWECO! Ti dirà pure dove trovare parcheggio!</string>
+    <string name="new_app" >Nuova app!</string>
+
 </resources>

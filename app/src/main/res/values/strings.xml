@@ -61,4 +61,10 @@
     <string name="nocars">You didn\'t add a car yet</string>
     <string name="create">Add</string>
 
+    <string name="install">Install</string>
+    <string name="uninstall_WIMC">After installing iweco you don\'t need Where is my Car? anymore. Would you like to uninstall?</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="iweco_promo">Check now IWECO! Not only it will tell you where you parked, also where there are available parking spots! ;)</string>
+    <string name="new_app" >New app!</string>
+
 </resources>

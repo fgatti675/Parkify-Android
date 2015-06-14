@@ -14,7 +14,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.cahue.iweco.Endpoints;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -72,7 +71,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     @Override
                     public void onResponse(JSONArray response) {
                         Set<Car> cars = Car.fromJSONArray(response);
-                        database.save(cars);
+                        database.saveAndBroadcast(cars);
                     }
                 },
                 new Response.ErrorListener() {

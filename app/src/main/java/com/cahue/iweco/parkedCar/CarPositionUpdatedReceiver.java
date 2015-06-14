@@ -25,7 +25,6 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
     private Context context;
     private CarDatabase database;
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context = context;
@@ -40,7 +39,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
         car = database.find(carId);
 
         // this should happen only if the user was logged out at that particular moment...
-        if(car == null)
+        if (car == null)
             return;
 
         /**

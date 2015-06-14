@@ -3,7 +3,7 @@ package com.cahue.iweco.cars;
 
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +15,7 @@ import com.cahue.iweco.R;
  * This activity is in charge of wrapping a {@link com.cahue.iweco.cars.CarManagerFragment}
  */
 public class CarManagerActivity
-        extends ActionBarActivity
+        extends AppCompatActivity
         implements CarManagerFragment.Callbacks,
         EditCarDialog.CarEditedListener {
 
@@ -38,7 +38,7 @@ public class CarManagerActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         toolbar.setTitle(R.string.cars);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
-        ViewCompat.setElevation(toolbar, 8);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.elevation));
         setSupportActionBar(toolbar);
 
         progressBar = (ProgressBar) toolbar.findViewById(R.id.progress_bar);

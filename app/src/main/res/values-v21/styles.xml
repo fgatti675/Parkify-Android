@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="CahueTheme" parent="Theme.AppCompat.Light">
+    <style name="CahueTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
@@ -26,8 +26,6 @@
 
     </style>
 
-    <style name="ActionBarPopupThemeOverlay" parent="android:ThemeOverlay.Material.Dark.ActionBar" />
-
     <style name="ActionBarThemeOverlay" parent="CahueTheme">
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
@@ -49,7 +47,7 @@
     </style>
 
     <!-- Base application theme. -->
-    <style name="CahueTheme.Dark" parent="android:Theme.Material">
+    <style name="CahueTheme.Dark" parent="Theme.AppCompat">
 
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>

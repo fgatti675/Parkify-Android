@@ -63,7 +63,7 @@ public class CarDatabase {
      *
      * @param cars
      */
-    public void save(Collection<Car> cars) {
+    public void saveAndBroadcast(Collection<Car> cars) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();

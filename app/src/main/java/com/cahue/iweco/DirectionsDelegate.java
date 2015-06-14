@@ -87,6 +87,7 @@ public class DirectionsDelegate {
     }
 
     private void reset() {
+        directionPoints.clear();
         lastDirectionsUpdate = null;
     }
 
@@ -99,14 +100,16 @@ public class DirectionsDelegate {
      */
     public void drawDirections(final LatLng from, final LatLng to, final String mode) {
 
-        displayed = true;
+        Log.d(TAG, "drawDirections " + directionPoints.size());
 
-        if (lastDirectionsUpdate != null && System.currentTimeMillis() - lastDirectionsUpdate.getTime() < DIRECTIONS_EXPIRY) {
-            return;
-        }
+        displayed = true;
 
         // if there were results before we display them while new ones come
         doDraw();
+
+        if (!directionPoints.isEmpty() && lastDirectionsUpdate != null && System.currentTimeMillis() - lastDirectionsUpdate.getTime() < DIRECTIONS_EXPIRY) {
+            return;
+        }
 
         /**
          * Cancel if something is going on

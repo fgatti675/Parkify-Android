@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * A login screen that offers login via Google+
  */
-public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.LoginListener, GoogleApiClient.ConnectionCallbacks,
+public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.LoginListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
@@ -367,7 +367,7 @@ public class LoginActivity extends ActionBarActivity implements LoginAsyncTask.L
         for (Car car : cars)
             CarsSync.postCar(car, this, CarDatabase.getInstance(this));
 
-        database.save(loginResult.cars);
+        database.saveAndBroadcast(loginResult.cars);
 
         final Intent resultIntent = new Intent();
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email);
