@@ -17,13 +17,13 @@ android {
     productFlavors {
         iweco {
             applicationId "com.cahue.iweco"
-            versionCode 11
-            versionName "1.0.1"
+            versionCode 12
+            versionName "1.0.2"
         }
         wimc {
             applicationId "com.whereismycar"
-            versionCode 36
-            versionName "2.6.2"
+            versionCode 37
+            versionName "2.6.3"
         }
         local {
             applicationId "com.cahue.iweco.local"
