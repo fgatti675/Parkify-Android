@@ -16,12 +16,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -77,6 +80,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
+    private Tracker tracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,9 +124,17 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             @Override
             public void onClick(View v) {
                 AuthUtils.setSkippedLogin(LoginActivity.this, true);
+                tracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("UX")
+                        .setAction("click")
+                        .setLabel("Skip Login")
+                        .build());
                 goToMaps();
             }
         });
+
+        tracker = ((IwecoApp) getApplication()).getTracker();
+        tracker.setScreenName("Login");
 
     }
 
@@ -156,6 +168,12 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         setLoading(true);
         signIn();
         connect();
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory("UX")
+                .setAction("click")
+                .setLabel("Google Login")
+                .build());
+
     }
 
     /**
@@ -376,6 +394,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
         finishLogin(resultIntent, loginResult.userId);
+
+
 
         goToMaps();
     }

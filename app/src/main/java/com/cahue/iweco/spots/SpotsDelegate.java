@@ -12,11 +12,14 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.CameraManager;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DirectionsDelegate;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
 import com.cahue.iweco.util.GMapV2Direction;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -273,6 +276,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
+        Tracker tracker = getTracker();
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory("IO")
+                .setAction("query")
+                .setLabel("Spots area query")
+                .build());
+
         ParkingSpotsQuery areaQuery = new AreaSpotsQuery(getActivity(), extendedViewBounds, this);
 
         Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
@@ -408,12 +418,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private void drawDirections() {
         if (selectedSpot != null) {
 
-            updateTooFar(getSpotLatLng(), getUserLatLng());
+            LatLng userLatLng = getUserLatLng();
+            updateTooFar(getSpotLatLng(), userLatLng);
 
             // don't set if they are too far
             if (isTooFar()) return;
 
-            directionsDelegate.drawDirections(getUserLatLng(), selectedSpot.position, GMapV2Direction.MODE_DRIVING);
+            if (userLatLng != null)
+                directionsDelegate.drawDirections(userLatLng, selectedSpot.position, GMapV2Direction.MODE_DRIVING);
         }
     }
 
@@ -456,8 +468,21 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             drawDirections();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
+
+            Tracker tracker = getTracker();
+            tracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("UX")
+                    .setAction("click")
+                    .setLabel("Spot clicked")
+                    .build());
         }
         return true;
+    }
+
+    private Tracker getTracker() {
+        Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+        tracker.setScreenName(TAG);
+        return tracker;
     }
 
     @Override

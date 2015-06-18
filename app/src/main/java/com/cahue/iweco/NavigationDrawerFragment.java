@@ -35,6 +35,8 @@ import com.cahue.iweco.util.DividerItemDecoration;
 import com.cahue.iweco.util.LoadProfileImage;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -278,9 +280,19 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+
                 if (!isAdded()) {
                     return;
                 }
+
+                Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+                tracker.setScreenName(TAG);
+                tracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("UX")
+                        .setAction("click")
+                        .setLabel("Drawer open")
+                        .build());
+
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };

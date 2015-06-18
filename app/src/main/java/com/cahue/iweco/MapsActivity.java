@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
@@ -230,8 +231,11 @@ public class MapsActivity extends AppCompatActivity
             Log.w(TAG, "Multiple accounts found");
         }
 
-        if (availableAccounts.length > 0)
+        if (availableAccounts.length > 0) {
             mAccount = availableAccounts[0];
+            String userId = mAccountManager.getUserData(mAccount, Authenticator.USER_ID);
+            ((IwecoApp) getApplication()).setId(userId);
+        }
 
         // show help dialog only on first run of the app
         if (!PreferencesUtil.isTutorialShown(this)) {
@@ -675,10 +679,13 @@ public class MapsActivity extends AppCompatActivity
             mGoogleApiClient.disconnect();
             mGoogleApiClient.connect();
 
-            PreferencesUtil.clear(this);
-
-            Log.v(TAG, "Sign out successful!");
         }
+
+        ((IwecoApp) getApplication()).setId(null);
+
+        PreferencesUtil.clear(this);
+
+        Log.v(TAG, "Sign out successful!");
 
         goToLogin();
     }

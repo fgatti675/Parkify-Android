@@ -9,12 +9,15 @@ import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.CameraManager;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DirectionsDelegate;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -181,6 +184,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
             if (car.color != getResources().getColor(R.color.car_white))
                 lightColor = brightColor ? car.color : ColorUtil.getSemiTransparent(car.color);
         }
+    }
+
+    private Tracker getTracker() {
+        Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+        tracker.setScreenName(TAG);
+        return tracker;
     }
 
     /**
@@ -357,6 +366,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
             carSelectedListener.onCarClicked(carId);
+            Tracker tracker = getTracker();
+            tracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("UX")
+                    .setAction("click")
+                    .setLabel("Car clicked")
+                    .build());
         } else {
             setCameraFollowing(false);
         }
