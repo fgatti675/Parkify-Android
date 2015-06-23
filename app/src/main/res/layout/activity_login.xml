@@ -39,6 +39,13 @@
                 android:theme="@style/CahueTheme.Button.Google"
                 android:text="@string/common_signin_button_text_long" />
 
+            <Button
+                android:id="@+id/facebook_login_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/CahueTheme.Button.Google"
+                android:text="@string/common_signin_button_text_long" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

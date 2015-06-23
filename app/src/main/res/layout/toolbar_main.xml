@@ -16,7 +16,7 @@
 
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:cahue="http://schemas.android.com/apk/res-auto"
-    cahue:theme="@style/ActionBarThemeOverlay"
+    android:theme="@style/ActionBarThemeOverlay"
     android:background="@color/theme_primary"
     cahue:titleTextAppearance="@style/ActionBar.TitleText"
     android:layout_width="match_parent"

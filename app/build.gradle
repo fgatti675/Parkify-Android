@@ -55,4 +55,5 @@ dependencies {
     compile 'com.android.support:design:22.2.0'
     compile 'de.hdodenhof:circleimageview:1.2.2'
     compile 'com.mcxiaoke.volley:library:1.0.+@aar'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 }

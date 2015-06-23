@@ -2,10 +2,9 @@ package com.cahue.iweco;
 
 import android.app.Application;
 
+import com.facebook.FacebookSdk;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
-
-import java.util.HashMap;
 
 /**
  * Created by Francesco on 14/06/2015.
@@ -18,6 +17,8 @@ public class IwecoApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
 
         analytics = GoogleAnalytics.getInstance(this);
         analytics.setLocalDispatchPeriod(1800);

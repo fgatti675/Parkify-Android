@@ -7,9 +7,12 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,6 +26,12 @@ import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.auth.GoogleAuthException;
@@ -38,6 +47,9 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -55,37 +67,50 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private final static int OUR_REQUEST_CODE = 49404;
 
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
+    // Profile pic image size in pixels
+    private final static int PROFILE_PIC_SIZE = 200;
     // UI references.
     private View mProgressView;
     private View mButtonsLayout;
-
     private Button mPlusSignInButton;
+    private Button mFacebookLoginButton;
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
     private AccountManager mAccountManager;
-
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
      * from starting further intents.
      */
     private boolean mIntentInProgress;
-
     private boolean mSigningIn;
-
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
-
     // The saved result from {@link #onConnectionFailed(ConnectionResult)}.  If a connection
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
     private Tracker tracker;
+    private CallbackManager mFacebookCallbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        gcm = GoogleCloudMessaging.getInstance(this);
+
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo("com.cahue.iweco", PackageManager.GET_SIGNATURES);
+            for (android.content.pm.Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                String sign = Base64.encodeToString(md.digest(), Base64.DEFAULT);
+                Log.e("MY KEY HASH:", sign);
+                //  Toast.makeText(getApplicationContext(),sign,     Toast.LENGTH_LONG).show();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+        } catch (NoSuchAlgorithmException e) {
+        }
 
         if (savedInstanceState != null) {
             mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
@@ -109,7 +134,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             mPlusSignInButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    login();
+                    googleLogin();
                 }
             });
         } else {
@@ -119,6 +144,46 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             mPlusSignInButton.setVisibility(View.GONE);
             return;
         }
+
+        mFacebookLoginButton = (Button) findViewById(R.id.facebook_login_button);
+
+        // Callback registration
+        mFacebookCallbackManager = CallbackManager.Factory.create();
+
+        final LoginManager loginManager = LoginManager.getInstance();
+        mFacebookLoginButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginManager.logInWithReadPermissions(LoginActivity.this, Arrays.asList("user_friends", "email"));
+                setLoading(true);
+            }
+        });
+
+        loginManager.registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                // App code
+
+                String facebookToken = loginResult.getAccessToken().getToken();
+                onAuthTokenSet(facebookToken, LoginType.Facebook);
+                Log.d(TAG, facebookToken);
+            }
+
+            @Override
+            public void onCancel() {
+                // App code
+                Log.d(TAG, "cancel");
+                setLoading(false);
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                // App code
+                Log.d(TAG, exception.toString());
+                setLoading(false);
+            }
+        });
+
         Button noSingIn = (Button) findViewById(R.id.no_sign_in);
         noSingIn.setOnClickListener(new OnClickListener() {
             @Override
@@ -164,22 +229,9 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         finish();
     }
 
-    private void login() {
+    private void googleLogin() {
+
         setLoading(true);
-        signIn();
-        connect();
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory("UX")
-                .setAction("click")
-                .setLabel("Google Login")
-                .build());
-
-    }
-
-    /**
-     * Try to sign in the user.
-     */
-    public void signIn() {
 
         if (!mGoogleApiClient.isConnecting()) {
             // Show the dialog as we are now signing in.
@@ -188,19 +240,22 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             onConnectingStatusChange(true);
         }
 
-    }
-
-
-    protected void connect() {
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
         mGoogleApiClient.connect();
+
         onConnectingStatusChange(true);
+
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory("UX")
+                .setAction("click")
+                .setLabel("Google Login")
+                .build());
+
     }
 
-
-    protected void onGoogleAuthTokenSet(final String authToken) {
+    protected void onAuthTokenSet(final String authToken, final LoginType type) {
         new AsyncTask<Void, Void, String>() {
 
             @Override
@@ -215,14 +270,14 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
             @Override
             protected void onPostExecute(String regId) {
-                if (regId != null) onGCMRegIdSet(regId, authToken);
+                if (regId != null) onGCMRegIdSet(regId, authToken, type);
                 else onGCMError(authToken);
             }
         }.execute();
     }
 
-    private void onGCMRegIdSet(String gcmRegId, String authToken) {
-        new LoginAsyncTask(gcmRegId, authToken, this, this).execute();
+    private void onGCMRegIdSet(String gcmRegId, String authToken, LoginType type) {
+        new LoginAsyncTask(gcmRegId, authToken, this, this, type).execute();
     }
 
     private void onGCMError(String authToken) {
@@ -243,19 +298,17 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     private String getGCMRegId() throws IOException {
 
-        gcm = GoogleCloudMessaging.getInstance(this);
+        String gcmDeviceId = GCMUtil.getRegistrationId(this);
 
-        String regId = GCMUtil.getRegistrationId(this);
-
-        if (regId.isEmpty()) {
-            regId = gcm.register(GCMUtil.SENDER_ID); // TODO: this can crash
-            Log.d(TAG, "Device registered, registration ID: " + regId);
+        if (gcmDeviceId.isEmpty()) {
+            gcmDeviceId = gcm.register(GCMUtil.SENDER_ID); // TODO: this can crash
+            Log.d(TAG, "Device registered, registration ID: " + gcmDeviceId);
 
             // Persist the regID - no need to register again.
-            GCMUtil.storeRegistrationId(this, regId);
+            GCMUtil.storeRegistrationId(this, gcmDeviceId);
         }
 
-        return regId;
+        return gcmDeviceId;
     }
 
     /**
@@ -305,9 +358,9 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 });
     }
 
-    private void requestOauthToken(final String email) {
+    private void requestGoogleOauthToken(final String email) {
 
-        Log.i(TAG, "requestOauthToken");
+        Log.i(TAG, "requestGoogleOauthToken");
 
         setLoading(true);
 
@@ -336,7 +389,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                     // TODO: nicer
                     onTokenRetrieveError();
                 } else {
-                    onGoogleAuthTokenSet(authToken);
+                    onAuthTokenSet(authToken, LoginType.Google);
                 }
             }
 
@@ -353,14 +406,13 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
         String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-        requestOauthToken(email);
+        requestGoogleOauthToken(email);
     }
 
     protected void onConnectingStatusChange(boolean connecting) {
         Log.d(TAG, "onConnectingStatusChange " + connecting);
         setLoading(connecting);
     }
-
 
     @Override
     protected void onDestroy() {
@@ -394,7 +446,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
         finishLogin(resultIntent, loginResult.userId);
-
 
 
         goToMaps();
@@ -450,7 +501,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         onPlusClientSignIn();
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -458,7 +508,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             mGoogleApiClient.disconnect();
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
@@ -479,14 +528,15 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             onConnectingStatusChange(responseCode == RESULT_OK);
         }
 
-    }
+        // FB
+        mFacebookCallbackManager.onActivityResult(requestCode, responseCode, intent);
 
+    }
 
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "onConnectionSuspended");
     }
-
 
     /**
      * Connection failed for some reason
@@ -535,10 +585,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
         }
     }
-
-
-    // Profile pic image size in pixels
-    private final static int PROFILE_PIC_SIZE = 200;
 
     /**
      * Fetching user's information name, mLoggedEmail, profile pic

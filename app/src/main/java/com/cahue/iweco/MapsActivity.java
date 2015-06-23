@@ -50,6 +50,7 @@ import com.cahue.iweco.util.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
@@ -671,9 +672,10 @@ public class MapsActivity extends AppCompatActivity
 
             // Clear the default account in order to allow the user to potentially choose a
             // different account from the account chooser.
-            if (!mSkippedLogin)
+            if (!mSkippedLogin) {
                 Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
-
+                LoginManager.getInstance().logOut();
+            }
             // Disconnect from Google Play Services, then reconnect in order to restart the
             // process from scratch.
             mGoogleApiClient.disconnect();

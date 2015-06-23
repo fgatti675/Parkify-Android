@@ -182,11 +182,11 @@ public class Requests {
     }
 
     @Deprecated
-    public static HttpPost createHttpPost(Context context, String url) {
+    public static HttpPost createHttpFormPost(Context context, String url) {
 
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
-        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
         for (Map.Entry<String, String> header : generateHeaders(context).entrySet()) {
             httpPost.addHeader(header.getKey(), header.getValue());
         }
