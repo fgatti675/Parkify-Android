@@ -130,13 +130,13 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
         }
 
         Log.d(TAG, "Login ok");
-        loginResultListener.onBackEndLogin(response);
+        loginResultListener.onBackEndLogin(response, type);
 
     }
 
     public interface LoginListener {
 
-        void onBackEndLogin(LoginResultBean loginResult);
+        void onBackEndLogin(LoginResultBean loginResult, LoginType type);
 
         void onLoginError(String authToken);
     }

@@ -34,6 +34,8 @@ public class Constants {
      * Intents
      */
 
+    public static final String INTENT_USER_INFO_UPDATE = BuildConfig.APPLICATION_ID +  ".INTENT_USER_INFO_UPDATE";
+
     // updated address
     public static final String INTENT_ADDRESS_UPDATE = BuildConfig.APPLICATION_ID + ".INTENT_ADDRESS_UPDATE";
     public static final String INTENT_EXTRA_ADDRESS = BuildConfig.APPLICATION_ID + ".EXTRA_ADDRESS";

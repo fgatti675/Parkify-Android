@@ -34,7 +34,7 @@ public class IwecoApp extends Application {
         return tracker;
     }
 
-    public void setId(String id){
+    public void setTrackerUserId(String id){
         tracker.set("&uid", id);
     }
 }

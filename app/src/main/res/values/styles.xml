@@ -84,12 +84,19 @@
 
     </style>
 
-    <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
-        <item name="android:background">@color/theme_accent</item>
+    <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
+        <item name="colorButtonNormal">@color/theme_accent</item>
+        <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
-    <style name="CahueTheme.Button.Google" parent="CahueTheme.Dark">
-        <item name="android:background">@color/google_red</item>
+    <style name="CahueTheme.Button.Google" parent="Widget.AppCompat.Button">
+        <item name="colorButtonNormal">@color/google_red</item>
+        <item name="android:textColor">@color/body_text_1_inverse</item>
+    </style>
+
+    <style name="CahueTheme.Button.Facebook" parent="Widget.AppCompat.Button">
+        <item name="colorButtonNormal">@color/facebook_blue</item>
+        <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
     <!--<style name="CahueTheme.BorderLessButton" parent="Widget.Material.Button.Borderless">-->

@@ -4,5 +4,10 @@
     <string name="disconnect">Desconectar</string>
 
     <string name="login_benefits">para permitir que los coches se almacenen en la nube y la sincronización entre dispositivos, o...</string>
+
+
+    <string name="sign_in">Iniciar sesión</string>
+    <string name="google_sign_in">Iniciar sesión con Google</string>
+    <string name="facebook_sign_in">Iniciar sesión con Facebook</string>
     <string name="no_sign_in">Continua sin registrarte</string>
 </resources>

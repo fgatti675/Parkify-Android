@@ -19,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
@@ -26,12 +27,14 @@ import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.auth.GoogleAuthException;
@@ -45,6 +48,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -69,13 +75,16 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     // Profile pic image size in pixels
     private final static int PROFILE_PIC_SIZE = 200;
+
     // UI references.
     private View mProgressView;
     private View mButtonsLayout;
     private Button mPlusSignInButton;
     private Button mFacebookLoginButton;
+
     private GoogleCloudMessaging gcm;
     private CarDatabase database;
+
     private AccountManager mAccountManager;
     /**
      * A flag indicating that a PendingIntent is in progress and prevents us
@@ -85,6 +94,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private boolean mSigningIn;
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
+
     // The saved result from {@link #onConnectionFailed(ConnectionResult)}.  If a connection
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
@@ -92,25 +102,14 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private Tracker tracker;
     private CallbackManager mFacebookCallbackManager;
 
+    private AccessToken facebookAccessToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         gcm = GoogleCloudMessaging.getInstance(this);
-
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo("com.cahue.iweco", PackageManager.GET_SIGNATURES);
-            for (android.content.pm.Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                String sign = Base64.encodeToString(md.digest(), Base64.DEFAULT);
-                Log.e("MY KEY HASH:", sign);
-                //  Toast.makeText(getApplicationContext(),sign,     Toast.LENGTH_LONG).show();
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-        } catch (NoSuchAlgorithmException e) {
-        }
 
         if (savedInstanceState != null) {
             mIntentInProgress = savedInstanceState.getBoolean("mIntentInProgress");
@@ -162,23 +161,20 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         loginManager.registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                // App code
-
-                String facebookToken = loginResult.getAccessToken().getToken();
+                facebookAccessToken = loginResult.getAccessToken();
+                String facebookToken = facebookAccessToken.getToken();
                 onAuthTokenSet(facebookToken, LoginType.Facebook);
                 Log.d(TAG, facebookToken);
             }
 
             @Override
             public void onCancel() {
-                // App code
-                Log.d(TAG, "cancel");
+                Log.d(TAG, "onCancel");
                 setLoading(false);
             }
 
             @Override
             public void onError(FacebookException exception) {
-                // App code
                 Log.d(TAG, exception.toString());
                 setLoading(false);
             }
@@ -427,7 +423,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     @Override
-    public void onBackEndLogin(LoginResultBean loginResult) {
+    public void onBackEndLogin(LoginResultBean loginResult, LoginType type) {
 
         /**
          * Maybe there was some data there already due to that the app was being used
@@ -445,13 +441,12 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
-        finishLogin(resultIntent, loginResult.userId);
-
+        finishLogin(resultIntent, loginResult, type);
 
         goToMaps();
     }
 
-    private void finishLogin(Intent intent, String userId) {
+    private void finishLogin(Intent intent, LoginResultBean loginResult, LoginType type) {
 
         String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 
@@ -464,7 +459,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         // Creating the account on the device and setting the auth token we got
         // (Not setting the auth token will cause another call to the server to authenticate the user)
         Bundle bundle = new Bundle();
-        bundle.putString(Authenticator.USER_ID, userId);
+        bundle.putString(Authenticator.USER_ID, loginResult.userId);
+        bundle.putString(Authenticator.LOGIN_TYPE, type.toString());
         mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
         mAccountManager.setAuthToken(account, authTokenType, authToken);
 
@@ -477,7 +473,14 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 //        ContentResolver.addPeriodicSync(
 //                account, CarsProvider.CONTENT_AUTHORITY, new Bundle(), CarsProvider.SYNC_FREQUENCY);
 
-        storeProfileInformation();
+        switch (type) {
+            case Facebook:
+                storeFacebookProfileInformation();
+                break;
+            case Google:
+                storeGoogleProfileInformation();
+                break;
+        }
 
         setResult(RESULT_OK, intent);
         finish();
@@ -514,6 +517,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         Log.d(TAG, "onActivityResult " + requestCode + " - " + responseCode);
 
+        // Google
         if (requestCode == OUR_REQUEST_CODE) {
             if (responseCode != RESULT_OK) {
                 mSigningIn = false;
@@ -589,7 +593,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     /**
      * Fetching user's information name, mLoggedEmail, profile pic
      */
-    private void storeProfileInformation() {
+    private void storeGoogleProfileInformation() {
         try {
             String userEmail = Plus.AccountApi.getAccountName(mGoogleApiClient);
 
@@ -621,6 +625,36 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Fetching user's information name, mLoggedEmail, profile pic
+     */
+    private void storeFacebookProfileInformation() {
+        GraphRequest request = GraphRequest.newMeRequest(
+                facebookAccessToken,
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(
+                            JSONObject object,
+                            GraphResponse response) {
+                        Log.d(TAG, "Facebook result : " + object.toString());
+                        try {
+                            AuthUtils.setLoggedUserDetails(LoginActivity.this,
+                                    object.getString("name"),
+                                    object.getString("email"),
+                                    String.format("https://graph.facebook.com/%s/picture", object.getString("id")));
+                            Intent intent = new Intent(Constants.INTENT_USER_INFO_UPDATE);
+                            sendBroadcast(intent);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,email");
+        request.setParameters(parameters);
+        request.executeAsync();
     }
 
 }

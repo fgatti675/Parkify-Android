@@ -41,6 +41,10 @@
         <item name="android:colorButtonNormal">@color/google_red</item>
     </style>
 
+    <style name="CahueTheme.Button.Facebook" parent="CahueTheme.Dark">
+        <item name="android:colorButtonNormal">@color/facebook_blue</item>
+    </style>
+
     <style name="ActionBar.TitleText" parent="android:TextAppearance.DeviceDefault.Widget.ActionBar.Title">
         <item name="android:textColor">#fff</item>
         <item name="android:textSize">18sp</item>

@@ -4,5 +4,9 @@
     <string name="disconnect">Uscire</string>
 
     <string name="login_benefits">per sincronizzare le macchine online, o...</string>
+
+    <string name="sign_in">Registrati</string>
+    <string name="google_sign_in">Registrati con Google</string>
+    <string name="facebook_sign_in">Registrati con Facebook</string>
     <string name="no_sign_in">Continua senza registrarti</string>
 </resources>

@@ -98,6 +98,13 @@ public class NavigationDrawerFragment extends Fragment {
         }
     };
 
+    private BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setUpUserDetails();
+        }
+    };
+
     public NavigationDrawerFragment() {
     }
 
@@ -190,6 +197,8 @@ public class NavigationDrawerFragment extends Fragment {
 
 
         getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
+
+        getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
     }
 
     @Override
@@ -199,6 +208,7 @@ public class NavigationDrawerFragment extends Fragment {
             getActivity().unregisterReceiver(billingReadyReceiver);
         billingReadyReceiver = null;
         getActivity().unregisterReceiver(newPurchaseReceiver);
+        getActivity().unregisterReceiver(userInfoReceiver);
     }
 
     private void setUpAd() {
@@ -502,7 +512,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         private void bindSignOut(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(skippedLogin ? R.string.common_signin_button_text_long : R.string.disconnect);
+            menuViewHolder.title.setText(skippedLogin ? R.string.sign_in : R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
