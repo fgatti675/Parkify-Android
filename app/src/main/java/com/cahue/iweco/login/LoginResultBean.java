@@ -43,8 +43,9 @@ public class LoginResultBean {
             }
 
             if (userObject.has("facebookUser")) {
-                loginResultBean.email = userObject.getJSONObject("facebookUser").getString("email");
-                loginResultBean.facebookId = userObject.getJSONObject("facebookUser").getString("facebookId");
+                JSONObject facebookUser = userObject.getJSONObject("facebookUser");
+                loginResultBean.email = facebookUser.optString("email");
+                loginResultBean.facebookId = facebookUser.getString("facebookId");
             }
 
             if (json.has("cars")) {

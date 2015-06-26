@@ -47,11 +47,14 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
+import com.facebook.share.model.AppInviteContent;
+import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
@@ -327,6 +330,8 @@ public class MapsActivity extends AppCompatActivity
 
         checkIweco();
         checkWIMC();
+
+        showFacebookAppInvite();
 
     }
 
@@ -987,6 +992,17 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+    }
+
+    private void showFacebookAppInvite(){
+
+        if(!PreferencesUtil.isFacebookInvitesShown(this)
+                && System.currentTimeMillis() - AuthUtils.getLoginDate(this) >  24 * 60 * 60 * 1000
+                && AppInviteDialog.canShow()) {
+            FacebookAppInvitesDialog dialog = new FacebookAppInvitesDialog();
+            dialog.show(getFragmentManager(), "FacebookAppInvitesDialog");
+            PreferencesUtil.setFacebookInvitesShown(this, true);
+        }
     }
 
     /**

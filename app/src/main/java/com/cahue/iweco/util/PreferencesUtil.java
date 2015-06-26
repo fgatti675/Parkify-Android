@@ -20,6 +20,7 @@ public class PreferencesUtil {
      * Shared preferences constants
      */
     public static final String PREF_TUTORIAL_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
+    public static final String PREF_FACEBOOK_INVITES_DIALOG_SHOWN = "PREF_FACEBOOK_INVITES_DIALOG_SHOWN";
     public static final String PREF_UNINSTALL_WIMC_SHOWN = "PREF_UNINSTALL_WIMC_SHOWN";
     public static final String PREF_IWECO_PROMO_DATE = "PREF_IWECO_PROMO_DATE";
     public static final String PREF_CAMERA_ZOOM = "PREF_CAMERA_ZOOM";
@@ -35,6 +36,17 @@ public class PreferencesUtil {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putBoolean(PREF_TUTORIAL_DIALOG_SHOWN, shown).apply();
     }
+
+    public static boolean isFacebookInvitesShown(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_FACEBOOK_INVITES_DIALOG_SHOWN, false);
+    }
+
+    public static void setFacebookInvitesShown(Context context, boolean shown) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_FACEBOOK_INVITES_DIALOG_SHOWN, shown).apply();
+    }
+
 
     public static void saveCameraPosition(Context context, CameraPosition cameraPosition) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -76,6 +88,7 @@ public class PreferencesUtil {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit()
                 .remove(PREF_IWECO_PROMO_DATE)
+                .remove(PREF_FACEBOOK_INVITES_DIALOG_SHOWN)
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
                 .remove(PREF_TUTORIAL_DIALOG_SHOWN)
                 .apply();
