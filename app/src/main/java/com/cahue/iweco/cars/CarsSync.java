@@ -33,6 +33,7 @@ public class CarsSync {
     private static final String TAG = CarsSync.class.getSimpleName();
 
     public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
+        Log.i(TAG, "Storing car " + car);
         carDatabase.saveAndBroadcast(car);
         if (!AuthUtils.isSkippedLogin(context))
             postCar(car, context, carDatabase);

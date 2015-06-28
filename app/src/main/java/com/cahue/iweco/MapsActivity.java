@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.cahue.iweco.activityRecognition.ParkedCarRequestedService;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
@@ -34,8 +35,7 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.debug.DebugActivity;
 import com.cahue.iweco.locationServices.CarMovedService;
-import com.cahue.iweco.locationServices.LocationPollerService;
-import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
@@ -53,7 +53,6 @@ import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
-import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -103,17 +102,7 @@ public class MapsActivity extends AppCompatActivity
             .setInterval(2000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    /**
-     * If we get a new car position while we are using the app, we update the map
-     */
-    private final BroadcastReceiver activityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
 
-//            activityType = (DetectedActivity) intent.getExtras().get(ActivityRecognitionUtil.INTENT_EXTRA_ACTIVITY);
-
-        }
-    };
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -252,9 +241,8 @@ public class MapsActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-//        activityType = ActivityRecognitionUtil.getLastDetectedActivity(this);
-
         if (BuildConfig.DEBUG) {
+            setDebugConfig();
             setDebugConfig();
         }
 
@@ -597,7 +585,7 @@ public class MapsActivity extends AppCompatActivity
         super.onResume();
 
         // when our activity resumes, we want to register for car updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
 
         setInitialCamera();
 
@@ -705,7 +693,6 @@ public class MapsActivity extends AppCompatActivity
         super.onPause();
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-//            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(getGoogleApiClient(), pActivityRecognitionIntent);
         }
         unregisterReceiver(carUpdateReceiver);
 
@@ -1014,8 +1001,8 @@ public class MapsActivity extends AppCompatActivity
         if (debugLayout == null) return;
         debugLayout.setVisibility(View.VISIBLE);
 
+
         Button refresh = (Button) findViewById(R.id.refresh);
-        refresh.setVisibility(View.VISIBLE);
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1028,31 +1015,38 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
+        Button actRecog = (Button) findViewById(R.id.act_recog);
+        actRecog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, ParkedCarRequestedService.class);
+                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carDatabase.retrieveCars(false).iterator().next().id);
+                startService(intent);
+            }
+        });
+
         Button carParked = (Button) findViewById(R.id.park);
-        carParked.setVisibility(View.VISIBLE);
         carParked.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(LocationPollerService.EXTRA_CAR, carDatabase.retrieveCars(false).iterator().next().id);
+                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carDatabase.retrieveCars(false).iterator().next().id);
                 startService(intent);
             }
         });
 
         Button carMoved = (Button) findViewById(R.id.driveOff);
-        carMoved.setVisibility(View.VISIBLE);
         carMoved.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
                 Car car = carDatabase.retrieveCars(false).iterator().next();
-                intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
                 startService(intent);
             }
         });
 
         Button approachingCar = (Button) findViewById(R.id.approaching);
-        approachingCar.setVisibility(View.VISIBLE);
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

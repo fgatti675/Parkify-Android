@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -145,7 +146,7 @@ public class SetCarPositionDialog extends DialogFragment {
          */
         if (BuildConfig.DEBUG) {
             Intent intent = new Intent(getActivity(), GeofenceCarService.class);
-            intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+            intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
             getActivity().startService(intent);
         }
     }

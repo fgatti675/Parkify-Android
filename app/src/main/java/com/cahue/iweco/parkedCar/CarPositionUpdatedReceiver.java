@@ -70,16 +70,6 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;
 
-            // check the address hasn't changed
-//            Car currentCar = database.find(car.id);
-//            if (currentCar == null) return;
-//
-//            if (currentCar.location.getLatitude() != car.location.getLatitude()
-//                    || currentCar.location.getLongitude() != car.location.getLongitude()) {
-//                fetchAddress(context, currentCar);
-//                return;
-//            }
-
             // Display the address string
             // or an error message sent from the intent service.
             car.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
@@ -89,7 +79,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
 
             Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
             intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
-            intent.putExtra(Constants.INTENT_EXTRA_ADDRESS, car.address);
+            intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, car.address);
             context.sendBroadcast(intent);
 
         }

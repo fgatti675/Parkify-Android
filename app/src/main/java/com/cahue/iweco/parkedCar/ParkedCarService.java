@@ -1,11 +1,7 @@
-package com.cahue.iweco.locationServices;
+package com.cahue.iweco.parkedCar;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -13,6 +9,8 @@ import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
+import com.cahue.iweco.locationServices.GeofenceCarService;
+import com.cahue.iweco.locationServices.LocationPollerService;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -59,12 +57,7 @@ public class ParkedCarService extends LocationPollerService {
          * If the location of the car is good enough we can set a geofence afterwards.
          */
         if (car.location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-            Intent intent = new Intent(this, GeofenceCarService.class);
-            intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
-            PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
-            AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            Log.i(TAG, "Starting delayed geofence service");
-            alarm.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 60 * 1000, pIntent);
+            GeofenceCarService.startDelayedGeofenceService(context, car.id);
         }
 
     }

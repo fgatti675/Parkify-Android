@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.locationServices.CarMovedService;
-import com.cahue.iweco.locationServices.LocationPollerService;
-import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 
@@ -59,7 +59,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, CarMovedService.class);
-        intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         context.startService(intent);
 
     }
@@ -71,7 +71,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, ParkedCarService.class);
-        intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         context.startService(intent);
 
     }

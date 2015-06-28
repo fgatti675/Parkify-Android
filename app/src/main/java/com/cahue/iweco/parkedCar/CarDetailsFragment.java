@@ -104,7 +104,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         super.onResume();
 
         Log.d(TAG, "Register receiver");
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
 
         updateLayout();

@@ -9,7 +9,7 @@ import android.util.Log;
 
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 /**

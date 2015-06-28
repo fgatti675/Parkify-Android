@@ -73,5 +73,6 @@
 
     <string name="share">Invita</string>
     <string name="share_promo">Perche non condividere con i tuoi amici di Facebook? :)</string>
+    <string name="ask_just_parked">Hai appena parcheggiato?</string>
 
 </resources>

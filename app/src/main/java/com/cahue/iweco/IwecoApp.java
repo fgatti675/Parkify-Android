@@ -1,7 +1,9 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.content.Intent;
 
+import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
@@ -18,8 +20,20 @@ public class IwecoApp extends Application {
     public void onCreate() {
         super.onCreate();
 
+        /**
+         * Start activity recognition
+         */
+        Intent intent = new Intent(this, ActivityRecognitionService.class);
+        startService(intent);
+
+        /**
+         * Start Facebook SDK
+         */
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        /**
+         * Start Google analytics
+         */
         analytics = GoogleAnalytics.getInstance(this);
         analytics.setLocalDispatchPeriod(1800);
 

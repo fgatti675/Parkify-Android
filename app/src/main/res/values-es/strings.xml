@@ -71,5 +71,6 @@
 
     <string name="share">Invitar</string>
     <string name="share_promo">¿Por qué no les dices a tus amigos de Facebook que ya no tienes problemas de aparcamiento? :)</string>
+    <string name="ask_just_parked">¿Acabas de aparcar?</string>
 
 </resources>
