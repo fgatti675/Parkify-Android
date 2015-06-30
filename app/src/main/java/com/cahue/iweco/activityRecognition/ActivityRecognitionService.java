@@ -96,7 +96,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v(TAG, "onStartCommand");
         mGoogleApiClient.connect();
-        return Service.START_STICKY;
+        return Service.START_STICKY_COMPATIBILITY;
     }
 
     @Override

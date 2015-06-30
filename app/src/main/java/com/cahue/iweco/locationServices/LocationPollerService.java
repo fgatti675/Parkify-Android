@@ -86,18 +86,21 @@ public abstract class LocationPollerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
 
-            String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
-            if (carId != null) {
-                car = CarDatabase.getInstance(this).find(carId);
-                if (car == null) {
-                    Log.e(TAG, "Car not found");
+            if(intent.getExtras() != null) {
+                String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
+                if (carId != null) {
+                    car = CarDatabase.getInstance(this).find(carId);
+                    if (car == null) {
+                        Log.e(TAG, "Car not found");
+                    }
                 }
             }
+
             start();
 
-            handler.postDelayed(finishTimeoutRunnable,
-                    SERVICE_TIMEOUT_MS);
         }
+        handler.postDelayed(finishTimeoutRunnable, SERVICE_TIMEOUT_MS);
+
         return START_STICKY_COMPATIBILITY;
     }
 

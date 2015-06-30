@@ -89,8 +89,7 @@ public class ParkedCarRequestedService extends LocationPollerService {
                         .setContentIntent(pendingIntent)
                         .setSmallIcon(R.drawable.ic_car_white_48dp)
                         .setContentTitle(getString(R.string.ask_just_parked))
-//                        .setStyle(new NotificationCompat.InboxStyle().addLine(address))
-                        .setContentInfo(address);
+                        .setContentText(address);
 
         List<Car> cars = carDatabase.retrieveCars(false);
         int numberActions = Math.min(cars.size(), 3);
