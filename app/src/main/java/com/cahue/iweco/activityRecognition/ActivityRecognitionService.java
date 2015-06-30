@@ -23,7 +23,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.DetectedActivityCreator;
 
 
 /**
@@ -131,22 +130,19 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         DetectedActivity mostProbableActivity = result.getMostProbableActivity();
 
-        if (!isMovementRelated(mostProbableActivity))
+        if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
             return;
 
-
-        if (previousActivity == null ||
-                (mostProbableActivity.getType() != previousActivity.getType() && mostProbableActivity.getConfidence() > 90)) {
+        if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
+                && mostProbableActivity.getConfidence() > 90) {
 
             if (BuildConfig.DEBUG) {
                 showDebugNotification(result, mostProbableActivity);
             }
 
-            if(mostProbableActivity.getType() == DetectedActivity.ON_FOOT &&
-                    previousActivity.getType() == DetectedActivity.IN_VEHICLE){
+            if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity)) {
                 // we create an intent to start the location poller service, as declared in manifest
-                Intent intent = new Intent();
-                intent.setClass(this, ParkedCarRequestedService.class);
+                Intent intent = new Intent(this, ParkedCarRequestedService.class);
                 this.startService(intent);
             }
 
@@ -205,7 +201,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
             return "";
     }
 
-    private boolean isMovementRelated(DetectedActivity detectedActivity) {
+    private boolean isVehicleRelated(DetectedActivity detectedActivity) {
         switch (detectedActivity.getType()) {
             case DetectedActivity.IN_VEHICLE:
             case DetectedActivity.ON_BICYCLE:
@@ -214,6 +210,10 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
             default:
                 return false;
         }
+    }
+
+    private boolean isOnFoot(DetectedActivity detectedActivity) {
+        return detectedActivity.getType() == DetectedActivity.ON_FOOT;
     }
 
 
@@ -225,7 +225,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                 .apply();
     }
 
-    private DetectedActivity getStoredDetectedActivity(){
+    private DetectedActivity getStoredDetectedActivity() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, DetectedActivity.UNKNOWN);
         int confidence = prefs.getInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, 0);

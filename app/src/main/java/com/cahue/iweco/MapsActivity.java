@@ -1020,7 +1020,6 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ParkedCarRequestedService.class);
-                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carDatabase.retrieveCars(false).iterator().next().id);
                 startService(intent);
             }
         });
