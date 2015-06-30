@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -67,18 +68,29 @@ public class ParkedCarRequestedService extends LocationPollerService {
     /**
      * When the address is fetched, we display a notification asking the user to save the location,
      * assigning it to a car
+     *
      * @param address
      */
     private void onAddressFetched(String address) {
 
         long[] pattern = {0, 100, 1000};
+
+        // Intent to start the activity and show a just parked dialog
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_UPDATE_REQUEST, true);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, location);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_ONE_SHOT);
+
+
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setVibrate(pattern)
+                        .setContentIntent(pendingIntent)
                         .setSmallIcon(R.drawable.ic_car_white_48dp)
                         .setContentTitle(getString(R.string.ask_just_parked))
-                        .setStyle(new NotificationCompat.InboxStyle().addLine(address));
+//                        .setStyle(new NotificationCompat.InboxStyle().addLine(address))
+                        .setContentInfo(address);
 
         List<Car> cars = carDatabase.retrieveCars(false);
         int numberActions = Math.min(cars.size(), 3);

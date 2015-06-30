@@ -36,6 +36,9 @@ public class Constants {
     // a car was updated
     public static final String INTENT_CAR_UPDATED = BuildConfig.APPLICATION_ID + ".INTENT_CAR_UPDATED";
 
+
+    public static final String INTENT_CAR_EXTRA_UPDATE_REQUEST = BuildConfig.APPLICATION_ID + ".EXTRA_UPDATE_REQUEST";
+
     // extra fields
     public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ID";
     public static final String INTENT_CAR_EXTRA_ADDRESS = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ADDRESS";
