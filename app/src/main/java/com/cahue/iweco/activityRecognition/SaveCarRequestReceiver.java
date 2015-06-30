@@ -10,6 +10,8 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 
+import java.util.Date;
+
 /**
  * Broadcast receiver in charge of saving a car, after if is requested by a action taken from a
  * notification
@@ -29,6 +31,7 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
 
         car.location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
         car.address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
+        car.time = (Date) intent.getSerializableExtra(Constants.INTENT_CAR_EXTRA_TIME);
 
         CarsSync.storeCar(database, context, car);
 

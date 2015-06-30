@@ -8,8 +8,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -21,6 +23,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.location.DetectedActivityCreator;
 
 
 /**
@@ -30,6 +33,10 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
     public static final long DETECTION_INTERVAL_IN_MILLISECONDS = 2000;
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
+
+    private static final String PREF_PREVIOUS_ACTIVITY_TYPE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
+    private static final String PREF_PREVIOUS_ACTIVITY_CONFIDENCE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
+
 
     private BroadcastReceiver mBroadcastReceiver;
     private GoogleApiClient mGoogleApiClient;
@@ -51,6 +58,8 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     public void onCreate() {
 
         Log.v(TAG, "onCreate");
+
+        previousActivity = getStoredDetectedActivity();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -142,9 +151,11 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
             }
 
             previousActivity = mostProbableActivity;
+            savePreviousActivity(previousActivity);
         }
 
     }
+
 
     private void showDebugNotification(ActivityRecognitionResult result, DetectedActivity mostProbableActivity) {
         String typeString = getActivityString(mostProbableActivity.getType());
@@ -197,10 +208,28 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     private boolean isMovementRelated(DetectedActivity detectedActivity) {
         switch (detectedActivity.getType()) {
             case DetectedActivity.IN_VEHICLE:
+            case DetectedActivity.ON_BICYCLE:
             case DetectedActivity.ON_FOOT:
                 return true;
             default:
                 return false;
         }
     }
+
+
+    private void savePreviousActivity(DetectedActivity previousActivity) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit()
+                .putInt(PREF_PREVIOUS_ACTIVITY_TYPE, previousActivity.getType())
+                .putInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, previousActivity.getConfidence())
+                .apply();
+    }
+
+    private DetectedActivity getStoredDetectedActivity(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, DetectedActivity.UNKNOWN);
+        int confidence = prefs.getInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, 0);
+        return new DetectedActivity(type, confidence);
+    }
+
 }

@@ -40,6 +40,7 @@ public class Constants {
     public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ID";
     public static final String INTENT_CAR_EXTRA_ADDRESS = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ADDRESS";
     public static final String INTENT_CAR_EXTRA_LOCATION = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_LOCATION";
+    public static final String INTENT_CAR_EXTRA_TIME = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_TIME";
 
 
     public static final String EXTRA_START_TIME = BuildConfig.APPLICATION_ID + "EXTRA_START_TIME";
