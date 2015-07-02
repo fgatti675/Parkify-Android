@@ -120,7 +120,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     private DirectionsDelegate directionsDelegate;
 
-    private CameraManager cameraManager;
 
     public static SpotsDelegate newInstance() {
         SpotsDelegate fragment = new SpotsDelegate();
@@ -160,14 +159,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement SpotSelectedListener");
-        }
-
-        try {
-            this.cameraManager = (CameraManager) activity;
-            cameraManager.registerCameraUpdater(this);
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement CameraManager");
         }
     }
 
@@ -468,6 +459,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             drawDirections();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
+
+            detailsViewManager.setDetailsFragment(SpotDetailsFragment.newInstance(selectedSpot, userLocation));
 
             Tracker tracker = getTracker();
             tracker.send(new HitBuilders.EventBuilder()

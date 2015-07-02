@@ -48,7 +48,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private IconGenerator iconGenerator;
 
-    private CameraManager cameraManager;
     private GoogleMap mMap;
     private OnCarClickedListener carSelectedListener;
 
@@ -80,14 +79,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-        try {
-            this.cameraManager = (CameraManager) activity;
-            cameraManager.registerCameraUpdater(this);
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement " + CameraManager.class.getName());
-        }
 
         try {
             this.carSelectedListener = (OnCarClickedListener) activity;
@@ -365,7 +356,12 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
+
             carSelectedListener.onCarClicked(carId);
+
+            setCameraFollowing(true);
+            detailsViewManager.setDetailsFragment(CarDetailsFragment.newInstance(carId));
+
             Tracker tracker = getTracker();
             tracker.send(new HitBuilders.EventBuilder()
                     .setCategory("UX")

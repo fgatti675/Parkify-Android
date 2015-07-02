@@ -91,7 +91,7 @@ public class MapsActivity extends AppCompatActivity
         OnCarClickedListener,
         Navigation,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, DetailsViewManager {
 
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -867,7 +867,6 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onSpotClicked(ParkingSpot spot) {
-        setDetailsFragment(SpotDetailsFragment.newInstance(spot, getUserLocation()));
     }
 
     /**
@@ -875,7 +874,8 @@ public class MapsActivity extends AppCompatActivity
      *
      * @param fragment
      */
-    private void setDetailsFragment(DetailsFragment fragment) {
+    @Override
+    public void setDetailsFragment(DetailsFragment fragment) {
 
         if (isFinishing()) return;
 
@@ -901,8 +901,6 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onCarClicked(String carId) {
-        getParkedCarDelegate(carId).setCameraFollowing(true);
-        setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }
 
     @Override
