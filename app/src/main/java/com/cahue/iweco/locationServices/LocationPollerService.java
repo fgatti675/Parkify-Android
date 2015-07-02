@@ -207,12 +207,12 @@ public abstract class LocationPollerService extends Service implements
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i(TAG, "GoogleApiClient connection has been suspend");
+        Log.w(TAG, "GoogleApiClient connection has been suspend");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(TAG, "GoogleApiClient connection has failed");
+        Log.w(TAG, "GoogleApiClient connection has failed");
         stopSelf();
     }
 

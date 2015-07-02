@@ -105,12 +105,12 @@ public class ParkedCarRequestedService extends LocationPollerService {
 
 
     private NotificationCompat.Action createCarSaveAction(Car car, String address) {
-        Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST);
+        Intent intent = new Intent(this, SaveCarRequestReceiver.class);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_LOCATION, location);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, address);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, new Date().getTime());
-        PendingIntent pIntent = PendingIntent.getBroadcast(this, car.id.hashCode(), intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_ONE_SHOT);
         return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, car.name, pIntent);
     }
 

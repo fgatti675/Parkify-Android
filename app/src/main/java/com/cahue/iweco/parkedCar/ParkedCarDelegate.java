@@ -359,8 +359,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
             carSelectedListener.onCarClicked(carId);
 
-            setCameraFollowing(true);
-            detailsViewManager.setDetailsFragment(CarDetailsFragment.newInstance(carId));
+            onCarMarkerClicked();
 
             Tracker tracker = getTracker();
             tracker.send(new HitBuilders.EventBuilder()
@@ -372,6 +371,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
             setCameraFollowing(false);
         }
         return false;
+    }
+
+    public void onCarMarkerClicked() {
+        setCameraFollowing(true);
+        detailsViewManager.setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }
 
     public boolean isFollowing() {

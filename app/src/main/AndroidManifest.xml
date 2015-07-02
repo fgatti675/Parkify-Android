@@ -151,11 +151,7 @@
         <service android:name=".locationServices.GeofenceTransitionsIntentService" />
 
         <receiver
-            android:name=".activityRecognition.SaveCarRequestReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST" />
-            </intent-filter>
+            android:name=".activityRecognition.SaveCarRequestReceiver">
         </receiver>
 
         <service android:name="com.cahue.iweco.auth.IwecoAccountService">

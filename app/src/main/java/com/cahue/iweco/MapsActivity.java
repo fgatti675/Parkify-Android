@@ -781,7 +781,7 @@ public class MapsActivity extends AppCompatActivity
             // One parked car
             if (closeCars.size() == 1) {
                 Car car = closeCars.get(0);
-                onCarClicked(car.id);
+                getParkedCarDelegate(car.id).onCarMarkerClicked();
             }
             // zoom to user otherwise
             else {

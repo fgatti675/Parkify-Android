@@ -139,6 +139,7 @@ public class SetCarPositionDialog extends DialogFragment {
         // If ok, we just send and intent and leave the location receivers to do all the work
         CarDatabase carDatabase = CarDatabase.getInstance(getActivity());
         CarsSync.storeCar(carDatabase, getActivity(), car);
+
         mCallbacks.onCarPositionUpdate(car.id);
 
         /**
