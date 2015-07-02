@@ -87,7 +87,7 @@ public class ParkedCarRequestedService extends LocationPollerService {
                 new NotificationCompat.Builder(this)
                         .setVibrate(pattern)
                         .setContentIntent(pendingIntent)
-                        .setColor(R.color.theme_primary)
+                        .setColor(getResources().getColor(R.color.theme_primary))
                         .setSmallIcon(R.drawable.ic_car_white_48dp)
                         .setContentTitle(getString(R.string.ask_just_parked))
                         .setContentText(address);
