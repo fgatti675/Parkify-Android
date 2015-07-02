@@ -36,7 +36,6 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     private static final String PREF_PREVIOUS_ACTIVITY_TYPE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
     private static final String PREF_PREVIOUS_ACTIVITY_CONFIDENCE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
 
-
     private BroadcastReceiver mBroadcastReceiver;
     private GoogleApiClient mGoogleApiClient;
 
@@ -119,8 +118,12 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
     }
 
-
     private void handleDetectedActivities(ActivityRecognitionResult result) {
+
+        DetectedActivity mostProbableActivity = result.getMostProbableActivity();
+
+        if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
+            return;
 
         // Log each activity.
         Log.d(TAG, "Activities detected");
@@ -128,18 +131,14 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
             Log.v(TAG, getActivityString(da.getType()) + " " + da.getConfidence() + "%");
         }
 
-        DetectedActivity mostProbableActivity = result.getMostProbableActivity();
-
-        if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
-            return;
-
         if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                && mostProbableActivity.getConfidence() > 90) {
+                && mostProbableActivity.getConfidence() == 100) {
 
             if (BuildConfig.DEBUG) {
                 showDebugNotification(result, mostProbableActivity);
             }
 
+            // If switched to on foot, previously in vehicle
             if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity)) {
                 // we create an intent to start the location poller service, as declared in manifest
                 Intent intent = new Intent(this, ParkedCarRequestedService.class);
@@ -175,8 +174,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                         .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
                         .setContentText(previousText);
 
-        int id = (int) Math.random();
-        mNotifyMgr.notify("" + id, id, mBuilder.build());
+        mNotifyMgr.notify(null, 7908772, mBuilder.build());
     }
 
 
@@ -202,14 +200,9 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     }
 
     private boolean isVehicleRelated(DetectedActivity detectedActivity) {
-        switch (detectedActivity.getType()) {
-            case DetectedActivity.IN_VEHICLE:
-            case DetectedActivity.ON_BICYCLE:
-            case DetectedActivity.ON_FOOT:
-                return true;
-            default:
-                return false;
-        }
+        if (BuildConfig.DEBUG && detectedActivity.getType() == DetectedActivity.ON_BICYCLE)
+            return true;
+        return detectedActivity.getType() == DetectedActivity.IN_VEHICLE;
     }
 
     private boolean isOnFoot(DetectedActivity detectedActivity) {

@@ -4,7 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationManagerCompat;
+import android.widget.Toast;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
@@ -26,12 +28,15 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
         Car car = database.find(carId);
 
         // this should happen only if the user was logged out at that particular moment...
-        if (car == null)
+        if (car == null){
+            if(BuildConfig.DEBUG)
+                Toast.makeText(context, "Trying to save null car", Toast.LENGTH_LONG);
             return;
+        }
 
         car.location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
         car.address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
-        car.time = (Date) intent.getSerializableExtra(Constants.INTENT_CAR_EXTRA_TIME);
+        car.time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, 0));
 
         CarsSync.storeCar(database, context, car);
 
