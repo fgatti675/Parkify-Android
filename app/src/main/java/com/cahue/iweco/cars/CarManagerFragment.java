@@ -337,7 +337,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 enableBTButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+                        mBtAdapter.enable();
+//                        startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+
+                        updateEnableBTButton();
                     }
                 });
                 updateEnableBTButton();
