@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.cahue.iweco.Endpoints;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.Requests;
 
@@ -27,29 +26,28 @@ import java.io.IOException;
  */
 public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
-    public interface LoginListener {
-
-        void onBackEndLogin(LoginResultBean loginResult);
-
-        void onLoginError(String authToken);
-    }
-
-
     private static final String TAG = LoginAsyncTask.class.getSimpleName();
-
-    boolean error = false;
-
     private final LoginListener loginResultListener;
-
     private final String registrationId;
     private final String authToken;
+    boolean error = false;
     private Context context;
+    private LoginType type;
 
-    public LoginAsyncTask(String gcmId, String authToken, LoginListener loginResultListener, Context context) {
+    public LoginAsyncTask(String gcmId, String authToken, LoginListener loginResultListener, Context context, LoginType type) {
         this.registrationId = gcmId;
         this.authToken = authToken;
         this.loginResultListener = loginResultListener;
         this.context = context;
+        this.type = type;
+    }
+
+    private static String createGoogleRegistrationForm(String regId, String authToken) {
+        return String.format("deviceRegId=%s&googleAuthToken=%s", regId, authToken);
+    }
+
+    private static String createFacebookRegistrationForm(String regId, String authToken) {
+        return String.format("deviceRegId=%s&facebookAuthToken=%s", regId, authToken);
     }
 
     @Override
@@ -66,13 +64,23 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
             Uri.Builder builder = new Uri.Builder();
             builder.scheme("https")
                     .authority(context.getResources().getString(R.string.baseURL))
-                    .appendPath(context.getResources().getString(R.string.usersPath))
-                    .appendPath(context.getResources().getString(R.string.createGooglePath));
+                    .appendPath(context.getResources().getString(R.string.usersPath));
 
-            HttpPost httpPost = Requests.createHttpPost(context, builder.build().toString());
-            String json = createRegistrationJSON(registrationId, authToken);
-            Log.d(TAG, json);
-            httpPost.setEntity(new StringEntity(json));
+            String body;
+
+            if (type == LoginType.Google) {
+                builder.appendPath(context.getResources().getString(R.string.googlePath));
+                body = createGoogleRegistrationForm(registrationId, authToken);
+            } else if (type == LoginType.Facebook) {
+                builder.appendPath(context.getResources().getString(R.string.facebookPath));
+                body = createFacebookRegistrationForm(registrationId, authToken);
+            } else {
+                throw new IllegalStateException("What did you do?");
+            }
+
+            HttpPost httpPost = Requests.createHttpFormPost(context, builder.build().toString());
+            Log.d(TAG, body);
+            httpPost.setEntity(new StringEntity(body));
             HttpClient httpclient = new DefaultHttpClient();
 
             response = httpclient.execute(httpPost);
@@ -122,19 +130,14 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
         }
 
         Log.d(TAG, "Login ok");
-        loginResultListener.onBackEndLogin(response);
+        loginResultListener.onBackEndLogin(response, type);
 
     }
 
-    private static String createRegistrationJSON(String regId, String authToken) {
-        try {
-            JSONObject obj = new JSONObject();
-            obj.put("deviceRegId", regId);
-            obj.put("googleAuthToken", authToken);
-            return obj.toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public interface LoginListener {
+
+        void onBackEndLogin(LoginResultBean loginResult, LoginType type);
+
+        void onLoginError(String authToken);
     }
 }

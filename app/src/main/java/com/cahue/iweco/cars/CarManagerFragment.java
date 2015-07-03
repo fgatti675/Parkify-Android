@@ -30,8 +30,11 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -256,6 +259,14 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
          * DB and server update
          */
         CarsSync.storeCar(carDatabase, getActivity(), car);
+
+        Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+        tracker.setScreenName(TAG);
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory("UX")
+                .setAction("edit")
+                .setLabel("Car edited")
+                .build());
     }
 
     public void onCarRemoved(Car car) {

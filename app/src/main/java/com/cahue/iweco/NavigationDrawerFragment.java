@@ -35,6 +35,8 @@ import com.cahue.iweco.util.DividerItemDecoration;
 import com.cahue.iweco.util.LoadProfileImage;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,6 +95,13 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             adView.setVisibility(View.GONE);
+        }
+    };
+
+    private BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setUpUserDetails();
         }
     };
 
@@ -188,6 +197,8 @@ public class NavigationDrawerFragment extends Fragment {
 
 
         getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
+
+        getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
     }
 
     @Override
@@ -197,6 +208,7 @@ public class NavigationDrawerFragment extends Fragment {
             getActivity().unregisterReceiver(billingReadyReceiver);
         billingReadyReceiver = null;
         getActivity().unregisterReceiver(newPurchaseReceiver);
+        getActivity().unregisterReceiver(userInfoReceiver);
     }
 
     private void setUpAd() {
@@ -278,9 +290,19 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+
                 if (!isAdded()) {
                     return;
                 }
+
+                Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+                tracker.setScreenName(TAG);
+                tracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("UX")
+                        .setAction("click")
+                        .setLabel("Drawer open")
+                        .build());
+
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -490,7 +512,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         private void bindSignOut(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(skippedLogin ? R.string.common_signin_button_text_long : R.string.disconnect);
+            menuViewHolder.title.setText(skippedLogin ? R.string.sign_in : R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

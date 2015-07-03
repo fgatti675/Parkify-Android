@@ -54,7 +54,7 @@ public class DirectionsDelegate {
 
     public void hide(boolean reset) {
         Log.d(TAG, "Hiding directions");
-        if(reset)
+        if (reset)
             reset();
         displayed = false;
         clear();
@@ -99,6 +99,9 @@ public class DirectionsDelegate {
      * @param mode
      */
     public void drawDirections(final LatLng from, final LatLng to, final String mode) {
+
+        if (from == null || to == null)
+            return;
 
         Log.d(TAG, "drawDirections " + directionPoints.size());
 

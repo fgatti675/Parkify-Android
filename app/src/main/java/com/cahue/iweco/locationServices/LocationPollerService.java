@@ -46,10 +46,13 @@ public abstract class LocationPollerService extends Service implements
      */
     private final static int PRECISE_FIX_TIMEOUT_MS = 18500;
 
+
+    private final static int SERVICE_TIMEOUT_MS = 60000;
+
     /**
      * Minimum desired accuracy
      */
-    private final static int ACCURACY_THRESHOLD_M = 18;
+    private final static int ACCURACY_THRESHOLD_M = 22;
 
     private final static String TAG = LocationPollerService.class.getSimpleName();
 
@@ -71,14 +74,17 @@ public abstract class LocationPollerService extends Service implements
 
     private List<DetectedActivity> detectedActivities;
 
-    /**
-     * Flag to indicate that the first precise fix has been notified
-     */
-    private boolean fixNotified = false;
-
+    // Use a broadcast receiver to get the detected activities
+    BroadcastReceiver activityReceiver = new BroadcastReceiver() {
+        @Override
+        public synchronized void onReceive(Context context, Intent intent) {
+            DetectedActivity detectedActivity = intent.getParcelableExtra(ActivityRecognitionIntentService.DETECTED_ACTIVITY_DATA_KEY);
+            Log.d(TAG, "Received : " + detectedActivity);
+            detectedActivities.add(detectedActivity);
+        }
+    };
     // Is the broadcast receiver listening for activity updates ?
     private boolean listeningActivities = false;
-
     private Runnable finishTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -89,17 +95,6 @@ public abstract class LocationPollerService extends Service implements
                 stopSelf();
         }
     };
-
-    // Use a broadcast receiver to get the detected activities
-    BroadcastReceiver activityReceiver = new BroadcastReceiver() {
-        @Override
-        public synchronized void onReceive(Context context, Intent intent) {
-            DetectedActivity detectedActivity = intent.getParcelableExtra(ActivityRecognitionIntentService.DETECTED_ACTIVITY_DATA_KEY);
-            Log.d(TAG, "Received : " + detectedActivity);
-            detectedActivities.add(detectedActivity);
-        }
-    };
-
 
     @Override
     public void onCreate() {
@@ -125,7 +120,7 @@ public abstract class LocationPollerService extends Service implements
             start();
 
             handler.postDelayed(finishTimeoutRunnable,
-                    PRECISE_FIX_TIMEOUT_MS);
+                    SERVICE_TIMEOUT_MS);
         }
         return START_STICKY_COMPATIBILITY;
     }
@@ -197,26 +192,22 @@ public abstract class LocationPollerService extends Service implements
 
         Date now = new Date();
 
-        /**
-         * If the precise fix wasn't yet sent.
-         */
-        if (!fixNotified) {
+        Log.v(TAG, location.toString());
 
-            if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
-                notifyFixLocation(location);
-                return;
-            }
-
-            if (bestAccuracyLocation == null || location.getAccuracy() < bestAccuracyLocation.getAccuracy()) {
-                bestAccuracyLocation = location;
-            }
-
-            if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
-                notifyFixLocation(bestAccuracyLocation);
-                return;
-            }
-
+        if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
+            notifyFixLocation(location);
+            return;
         }
+
+        if (bestAccuracyLocation == null || location.getAccuracy() < bestAccuracyLocation.getAccuracy()) {
+            bestAccuracyLocation = location;
+        }
+
+        if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
+            notifyFixLocation(bestAccuracyLocation);
+            return;
+        }
+
     }
 
     /**
@@ -229,8 +220,8 @@ public abstract class LocationPollerService extends Service implements
         extras.putSerializable(EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
+        Log.i(TAG, "\tafter " + (System.currentTimeMillis() - startTime.getTime()) + " ms") ;
         onPreciseFixPolled(this, location, car, mGoogleApiClient);
-        fixNotified = true;
         stopSelf();
     }
 

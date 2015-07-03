@@ -191,7 +191,7 @@ public class CarDatabase {
             values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
             values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
             values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
-            values.put(Car.COLUMN_TIME, car.time.getTime());
+            values.put(Car.COLUMN_TIME, car.time != null ? car.time.getTime() : null);
             values.put(Car.COLUMN_ADDRESS, car.address);
         }
 

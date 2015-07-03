@@ -13,12 +13,15 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.database.CarsProvider;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.Singleton;
 import com.cahue.iweco.util.Requests;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import org.json.JSONObject;
 
@@ -42,7 +45,7 @@ public class CarsSync {
      */
     public static void clearLocation(CarDatabase carDatabase, Context context, Car car) {
 
-        car.spotId =  null;
+        car.spotId = null;
         car.time = null;
         car.location = null;
         car.address = null;
@@ -136,7 +139,6 @@ public class CarsSync {
                         error.printStackTrace();
                     }
                 });
-
 
         // Add the request to the RequestQueue.
         queue.add(carSyncRequest);

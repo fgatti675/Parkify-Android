@@ -9,9 +9,12 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;
@@ -43,6 +46,14 @@ public class ParkedCarService extends LocationPollerService {
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);
         CarsSync.storeCar(carDatabase, context, car);
+
+        Tracker tracker = ((IwecoApp) getApplication()).getTracker();
+        tracker.setScreenName(TAG);
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory("IO")
+                .setAction("post")
+                .setLabel("Car update")
+                .build());
 
         /**
          * If the location of the car is good enough we can set a geofence afterwards.

@@ -20,6 +20,8 @@ public class LoginResultBean {
 
     String googleId;
 
+    String facebookId;
+
     Set<Car> cars = new HashSet<>();
 
     String refreshToken;
@@ -32,9 +34,19 @@ public class LoginResultBean {
 
             loginResultBean.authToken = json.getString("authToken");
             loginResultBean.refreshToken = json.getString("refreshToken");
-            loginResultBean.userId = json.getJSONObject("user").getString("id");
-            loginResultBean.email = json.getJSONObject("user").getJSONObject("googleUser").getString("email");
-            loginResultBean.googleId = json.getJSONObject("user").getJSONObject("googleUser").getString("googleId");
+            JSONObject userObject = json.getJSONObject("user");
+            loginResultBean.userId = userObject.getString("id");
+
+            if (userObject.has("googleUser")) {
+                loginResultBean.email = userObject.getJSONObject("googleUser").getString("email");
+                loginResultBean.googleId = userObject.getJSONObject("googleUser").getString("googleId");
+            }
+
+            if (userObject.has("facebookUser")) {
+                JSONObject facebookUser = userObject.getJSONObject("facebookUser");
+                loginResultBean.email = facebookUser.optString("email");
+                loginResultBean.facebookId = facebookUser.getString("facebookId");
+            }
 
             if (json.has("cars")) {
                 JSONArray carsArray = json.getJSONArray("cars");

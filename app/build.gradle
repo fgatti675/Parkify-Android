@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 21
@@ -17,13 +18,13 @@ android {
     productFlavors {
         iweco {
             applicationId "com.cahue.iweco"
-            versionCode 11
-            versionName "1.0.1"
+            versionCode 14
+            versionName "1.1.1"
         }
         wimc {
             applicationId "com.whereismycar"
-            versionCode 36
-            versionName "2.6.2"
+            versionCode 39
+            versionName "2.7.1"
         }
         local {
             applicationId "com.cahue.iweco.local"
@@ -42,17 +43,18 @@ dependencies {
     //    compile 'com.google.code.gson:gson:2.+'
     compile 'com.android.support:support-v4:22.2.0'
     compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:support-v13:21.0.3'
-    compile 'com.android.support:cardview-v7:21.0.+'
-    compile 'com.android.support:recyclerview-v7:21.0.+'
-    compile 'com.google.android.gms:play-services-plus:7.3.0'
-    compile 'com.google.android.gms:play-services-maps:7.3.0'
-    compile 'com.google.android.gms:play-services-location:7.3.0'
-    compile 'com.google.android.gms:play-services-wallet:7.3.0'
-    compile 'com.google.android.gms:play-services-gcm:7.3.0'
-    compile 'com.google.android.gms:play-services-ads:7.3.0'
+    compile 'com.android.support:support-v13:22.2.0'
+    compile 'com.android.support:cardview-v7:22.2.0'
+    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.google.android.gms:play-services-plus:7.5.0'
+    compile 'com.google.android.gms:play-services-maps:7.5.0'
+    compile 'com.google.android.gms:play-services-location:7.5.0'
+    compile 'com.google.android.gms:play-services-wallet:7.5.0'
+    compile 'com.google.android.gms:play-services-gcm:7.5.0'
+    compile 'com.google.android.gms:play-services-ads:7.5.0'
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:design:22.2.0'
     compile 'de.hdodenhof:circleimageview:1.2.2'
     compile 'com.mcxiaoke.volley:library:1.0.+@aar'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 }

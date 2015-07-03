@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
@@ -37,6 +38,7 @@ import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.locationServices.ParkedCarService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
+import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarDelegate;
 import com.cahue.iweco.parkedCar.SetCarPositionDialog;
@@ -45,10 +47,14 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
+import com.facebook.login.LoginManager;
+import com.facebook.share.model.AppInviteContent;
+import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
@@ -91,49 +97,12 @@ public class MapsActivity extends AppCompatActivity
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
-
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
-    List<AbstractMarkerDelegate> delegates = new ArrayList();
-
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(5000)         // 5 seconds
+            .setInterval(2000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-    // This is the helper object that connects to Google Play Services.
-    private GoogleApiClient mGoogleApiClient;
-
-    private AccountManager mAccountManager;
-
-    private CarDatabase carDatabase;
-
-    private Toolbar mToolbar;
-
-    private FloatingActionButton myLocationButton;
-    private CardView detailsContainer;
-    private DetailsFragment detailsFragment;
-    private boolean detailsDisplayed = false;
-
-
-    private boolean cameraFollowing;
-    /**
-     * The user didn't log in, but we still love him
-     */
-    private boolean mSkippedLogin;
-
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     * Currently recognized activity type (what the user is doing)
-     */
-//    private DetectedActivity activityType;
-
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -145,12 +114,6 @@ public class MapsActivity extends AppCompatActivity
 
         }
     };
-
-    /**
-     * Current logged user
-     */
-    private Account mAccount;
-
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -166,7 +129,47 @@ public class MapsActivity extends AppCompatActivity
 
         }
     };
+    List<AbstractMarkerDelegate> delegates = new ArrayList();
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    // This is the helper object that connects to Google Play Services.
+    private GoogleApiClient mGoogleApiClient;
+    private AccountManager mAccountManager;
+    private CarDatabase carDatabase;
+    private Toolbar mToolbar;
+    private FloatingActionButton myLocationButton;
+    private CardView detailsContainer;
+    private DetailsFragment detailsFragment;
+    private boolean detailsDisplayed = false;
+    private boolean cameraFollowing;
 
+    /**
+     * Currently recognized activity type (what the user is doing)
+     */
+//    private DetectedActivity activityType;
+    /**
+     * The user didn't log in, but we still love him
+     */
+    private boolean mSkippedLogin;
+
+    private LoginType loginType;
+    /**
+     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     */
+    private NavigationDrawerFragment mNavigationDrawerFragment;
+    /**
+     * Current logged user
+     */
+    private Account mAccount;
+    private boolean mapInitialised = false;
+    private boolean initialCameraSet = false;
+    /**
+     * Last component to request a camera update
+     */
+    private CameraUpdateRequester lastCameraUpdateRequester;
+    /**
+     *
+     */
+    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -188,7 +191,6 @@ public class MapsActivity extends AppCompatActivity
             mAccountManager.removeAccount(account, null, null);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -200,21 +202,6 @@ public class MapsActivity extends AppCompatActivity
          * Bind service used for donations
          */
         setUpBillingFragment();
-
-        // Create a GoogleApiClient instance
-        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this);
-
-        if (!mSkippedLogin) {
-            builder.addApi(Plus.API)
-                    .addScope(Plus.SCOPE_PLUS_LOGIN)
-                    .addScope(Plus.SCOPE_PLUS_PROFILE)
-                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
-        }
-
-        mGoogleApiClient = builder.build();
 
         carDatabase = CarDatabase.getInstance(this);
 
@@ -230,8 +217,33 @@ public class MapsActivity extends AppCompatActivity
             Log.w(TAG, "Multiple accounts found");
         }
 
-        if (availableAccounts.length > 0)
+        loginType = LoginType.Google;
+
+        if (availableAccounts.length > 0) {
             mAccount = availableAccounts[0];
+
+            String userId = mAccountManager.getUserData(mAccount, Authenticator.USER_ID);
+            ((IwecoApp) getApplication()).setTrackerUserId(userId);
+
+            String typeString = mAccountManager.getUserData(mAccount, Authenticator.LOGIN_TYPE);
+            if(typeString != null)
+                loginType = LoginType.valueOf(typeString);
+        }
+
+        // Create a GoogleApiClient instance
+        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this);
+
+        if (!mSkippedLogin && loginType == LoginType.Google) {
+            builder.addApi(Plus.API)
+                    .addScope(Plus.SCOPE_PLUS_LOGIN)
+                    .addScope(Plus.SCOPE_PLUS_PROFILE)
+                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
+        }
+
+        mGoogleApiClient = builder.build();
 
         // show help dialog only on first run of the app
         if (!PreferencesUtil.isTutorialShown(this)) {
@@ -319,6 +331,8 @@ public class MapsActivity extends AppCompatActivity
         checkIweco();
         checkWIMC();
 
+        showFacebookAppInvite();
+
     }
 
     public void checkIweco() {
@@ -374,8 +388,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private boolean mapInitialised = false;
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -423,7 +435,6 @@ public class MapsActivity extends AppCompatActivity
         }
         return spotsDelegate;
     }
-
 
     /**
      * @param carId
@@ -547,6 +558,7 @@ public class MapsActivity extends AppCompatActivity
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 REQUEST,
                 this);
+        Log.w(TAG, "onConnected");
     }
 
     @Override
@@ -554,14 +566,13 @@ public class MapsActivity extends AppCompatActivity
         // The connection has been interrupted.
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
+        Log.w(TAG, "onConnectionSuspended");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        // This callback is important for handling errors that
-        // may occur while attempting to connect with Google.
-        //
-        // More about this in the next section.
+        Log.w(TAG, "onConnectionFailed");
+        goToLogin();
     }
 
     @Override
@@ -579,7 +590,6 @@ public class MapsActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
 
     @Override
     protected void onResume() {
@@ -610,7 +620,6 @@ public class MapsActivity extends AppCompatActivity
 
 
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -667,18 +676,21 @@ public class MapsActivity extends AppCompatActivity
 
             // Clear the default account in order to allow the user to potentially choose a
             // different account from the account chooser.
-            if (!mSkippedLogin)
+            if (!mSkippedLogin && loginType == LoginType.Google) {
                 Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
-
-            // Disconnect from Google Play Services, then reconnect in order to restart the
-            // process from scratch.
-            mGoogleApiClient.disconnect();
-            mGoogleApiClient.connect();
-
-            PreferencesUtil.clear(this);
-
-            Log.v(TAG, "Sign out successful!");
+            }
         }
+
+        // Facebook disconnect
+        final LoginManager loginManager = LoginManager.getInstance();
+        loginManager.logOut();
+
+        ((IwecoApp) getApplication()).setTrackerUserId(null);
+
+        PreferencesUtil.clear(this);
+        AuthUtils.clearLoggedUserDetails(this);
+
+        Log.v(TAG, "Sign out successful!");
 
         goToLogin();
     }
@@ -715,14 +727,12 @@ public class MapsActivity extends AppCompatActivity
         mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
     }
 
-
     private void setUpMapListeners() {
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraChangeListener(this);
     }
-
 
     public void openDonationDialog() {
         DonateDialog dialog = new DonateDialog();
@@ -743,6 +753,8 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
 
+        Log.v(TAG, "New location");
+
         if (mMap == null) return;
 
         if (cameraFollowing)
@@ -760,9 +772,6 @@ public class MapsActivity extends AppCompatActivity
          */
         setInitialCamera();
     }
-
-
-    private boolean initialCameraSet = false;
 
     private void setInitialCamera() {
 
@@ -823,7 +832,6 @@ public class MapsActivity extends AppCompatActivity
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
-
     /**
      * This is called when the user moves the camera but also when it is triggered programatically.
      *
@@ -861,23 +869,19 @@ public class MapsActivity extends AppCompatActivity
         return true;
     }
 
-
     @Override
     public void onMapClick(LatLng point) {
 
     }
 
-
     private void goToDebug() {
         startActivity(new Intent(this, DebugActivity.class));
     }
-
 
     @Override
     public void onSpotClicked(ParkingSpot spot) {
         setDetailsFragment(SpotDetailsFragment.newInstance(spot, getUserLocation()));
     }
-
 
     /**
      * Set the details fragment
@@ -908,23 +912,11 @@ public class MapsActivity extends AppCompatActivity
         hideDetails();
     }
 
-
     @Override
     public void onCarClicked(String carId) {
         getParkedCarDelegate(carId).setCameraFollowing(true);
         setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }
-
-
-    /**
-     * Last component to request a camera update
-     */
-    private CameraUpdateRequester lastCameraUpdateRequester;
-
-    /**
-     *
-     */
-    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
 
     @Override
     public void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
@@ -1000,6 +992,17 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+    }
+
+    private void showFacebookAppInvite(){
+
+        if(!PreferencesUtil.isFacebookInvitesShown(this)
+                && System.currentTimeMillis() - AuthUtils.getLoginDate(this) >  24 * 60 * 60 * 1000
+                && AppInviteDialog.canShow()) {
+            FacebookAppInvitesDialog dialog = new FacebookAppInvitesDialog();
+            dialog.show(getFragmentManager(), "FacebookAppInvitesDialog");
+            PreferencesUtil.setFacebookInvitesShown(this, true);
+        }
     }
 
     /**
