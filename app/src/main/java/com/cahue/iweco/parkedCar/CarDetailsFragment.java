@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.DetailsFragment;
+import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;

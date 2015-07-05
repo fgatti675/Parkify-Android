@@ -1,4 +1,4 @@
-package com.cahue.iweco.spots;
+package com.cahue.iweco;
 
 import android.app.Activity;
 import android.location.Location;
@@ -7,13 +7,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cahue.iweco.AbstractMarkerDelegate;
-import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.CameraManager;
-import com.cahue.iweco.CameraUpdateRequester;
-import com.cahue.iweco.DirectionsDelegate;
-import com.cahue.iweco.IwecoApp;
-import com.cahue.iweco.R;
+import com.cahue.iweco.spots.MarkerFactory;
+import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;

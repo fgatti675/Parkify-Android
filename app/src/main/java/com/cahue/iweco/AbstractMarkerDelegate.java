@@ -98,7 +98,9 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         tooFar = distances[0] > getDirectionsMaxDistance();
     }
 
-    public abstract float getDirectionsMaxDistance();
+    public float getDirectionsMaxDistance(){
+        return -1;
+    }
 
     public boolean isTooFar() {
         return tooFar;

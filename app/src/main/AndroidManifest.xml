@@ -50,7 +50,9 @@
             android:value="@string/facebook_app_id" />
 
 
-        <activity android:name=".MapsActivity" android:launchMode="singleInstance">
+        <activity
+            android:name=".MapsActivity"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -150,8 +152,7 @@
             android:exported="false" />
         <service android:name=".locationServices.GeofenceTransitionsIntentService" />
 
-        <receiver
-            android:name=".activityRecognition.SaveCarRequestReceiver">
+        <receiver android:name=".activityRecognition.SaveCarRequestReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.0" />
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.1" />

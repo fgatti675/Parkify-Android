@@ -1,19 +1,13 @@
-package com.cahue.iweco.parkedCar;
+package com.cahue.iweco;
 
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.cahue.iweco.AbstractMarkerDelegate;
-import com.cahue.iweco.CameraManager;
-import com.cahue.iweco.CameraUpdateRequester;
-import com.cahue.iweco.DirectionsDelegate;
-import com.cahue.iweco.IwecoApp;
-import com.cahue.iweco.OnCarClickedListener;
-import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
 import com.google.android.gms.analytics.HitBuilders;
@@ -359,7 +353,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
             carSelectedListener.onCarClicked(carId);
 
-            onCarMarkerClicked();
+            onCarClicked();
 
             Tracker tracker = getTracker();
             tracker.send(new HitBuilders.EventBuilder()
@@ -373,7 +367,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         return false;
     }
 
-    public void onCarMarkerClicked() {
+    public void onCarClicked() {
         setCameraFollowing(true);
         detailsViewManager.setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }

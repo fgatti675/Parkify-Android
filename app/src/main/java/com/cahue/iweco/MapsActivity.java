@@ -40,12 +40,9 @@ import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
-import com.cahue.iweco.parkedCar.ParkedCarDelegate;
 import com.cahue.iweco.parkedCar.SetCarPositionDialog;
 import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.ParkingSpotSender;
-import com.cahue.iweco.spots.SpotDetailsFragment;
-import com.cahue.iweco.spots.SpotsDelegate;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.IwecoPromoDialog;
@@ -781,7 +778,7 @@ public class MapsActivity extends AppCompatActivity
             // One parked car
             if (closeCars.size() == 1) {
                 Car car = closeCars.get(0);
-                getParkedCarDelegate(car.id).onCarMarkerClicked();
+                getParkedCarDelegate(car.id).onCarClicked();
             }
             // zoom to user otherwise
             else {
@@ -972,7 +969,7 @@ public class MapsActivity extends AppCompatActivity
      */
     @Override
     public void onCarPositionUpdate(String carId) {
-        onCarClicked(carId);
+        getParkedCarDelegate(carId).onCarClicked();
     }
 
     @Override

@@ -34,6 +34,7 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
             return;
         }
 
+        car.spotId = null;
         car.location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
         car.address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
         car.time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, 0));
