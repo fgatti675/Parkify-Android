@@ -461,6 +461,10 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Bundle bundle = new Bundle();
         bundle.putString(Authenticator.USER_ID, loginResult.userId);
         bundle.putString(Authenticator.LOGIN_TYPE, type.toString());
+        bundle.putLong(Authenticator.LOGIN_DATE, System.currentTimeMillis());
+
+        AuthUtils.setLoginDate(this, System.currentTimeMillis());
+
         mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
         mAccountManager.setAuthToken(account, authTokenType, authToken);
 
@@ -481,6 +485,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 storeGoogleProfileInformation();
                 break;
         }
+
 
         setResult(RESULT_OK, intent);
         finish();

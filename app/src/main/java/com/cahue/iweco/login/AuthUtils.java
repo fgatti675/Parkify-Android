@@ -44,7 +44,6 @@ public class AuthUtils {
                 .putString(PREF_USER_NAME, username)
                 .putString(PREF_USER_EMAIL, email)
                 .putString(PREF_USER_PICTURE_URL, pictureURL)
-                .putLong(PREF_LOGIN_DATE, new Date().getTime())
                 .apply();
     }
 
@@ -64,8 +63,13 @@ public class AuthUtils {
     }
 
 
+    public static void setLoginDate(Context context, long time) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putLong(PREF_LOGIN_DATE, time).apply();
+    }
+
     public static long getLoginDate(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getLong(PREF_LOGIN_DATE, 0);
+        return prefs.getLong(PREF_LOGIN_DATE, System.currentTimeMillis());
     }
 }
