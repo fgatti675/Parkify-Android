@@ -1,6 +1,5 @@
 package com.cahue.iweco.activityRecognition;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +20,6 @@ import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.util.FetchAddressIntentService;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -81,7 +79,6 @@ public class ParkedCarRequestedService extends LocationPollerService {
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, location);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
@@ -96,7 +93,7 @@ public class ParkedCarRequestedService extends LocationPollerService {
         int numberActions = Math.min(cars.size(), 3);
         for (int i = 0; i < numberActions; i++) {
             Car car = cars.get(i);
-            NotificationCompat.Action saveAction = createCarSaveAction(car, address);
+            NotificationCompat.Action saveAction = createCarSaveAction(car, address, i);
             mBuilder.addAction(saveAction);
         }
 
@@ -104,13 +101,15 @@ public class ParkedCarRequestedService extends LocationPollerService {
     }
 
 
-    private NotificationCompat.Action createCarSaveAction(Car car, String address) {
-        Intent intent = new Intent(this, SaveCarRequestReceiver.class);
+    private NotificationCompat.Action createCarSaveAction(Car car, String address, int index) {
+
+        Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_LOCATION, location);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, address);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, new Date().getTime());
-        PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_ONE_SHOT);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis());
+
+        PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, car.name, pIntent);
     }
 

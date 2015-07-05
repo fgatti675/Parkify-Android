@@ -1,18 +1,17 @@
 package com.cahue.iweco.activityRecognition;
 
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -28,15 +27,14 @@ import com.google.android.gms.location.DetectedActivity;
 /**
  * Created by Francesco on 27/06/2015.
  */
-public class ActivityRecognitionService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class ActivityRecognitionService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    public static final long DETECTION_INTERVAL_IN_MILLISECONDS = 2000;
+    public static final long DETECTION_INTERVAL_IN_MILLISECONDS = 10000;
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
 
     private static final String PREF_PREVIOUS_ACTIVITY_TYPE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
     private static final String PREF_PREVIOUS_ACTIVITY_CONFIDENCE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
 
-    private BroadcastReceiver mBroadcastReceiver;
     private GoogleApiClient mGoogleApiClient;
 
     private DetectedActivity previousActivity;
@@ -46,6 +44,14 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      */
     private PendingIntent mActivityDetectionPendingIntent;
 
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     *
+     */
+    public ActivityRecognitionService() {
+        super("ActivityRecognitionService");
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, "onBind");
@@ -53,9 +59,17 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     }
 
     @Override
+    protected void onHandleIntent(Intent intent) {
+        if (ActivityRecognitionResult.hasResult(intent)) {
+            ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
+            handleDetectedActivities(result);
+        }
+    }
+
+    @Override
     public void onCreate() {
 
-        Log.v(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
 
         previousActivity = getStoredDetectedActivity();
 
@@ -65,23 +79,14 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                 .addApi(ActivityRecognition.API)
                 .build();
 
-        // Get a receiver for broadcasts from ActivityDetectionIntentService.
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                ActivityRecognitionResult result = (ActivityRecognitionResult) intent.getExtras().get(Constants.INTENT_EXTRA_ACTIVITIES_RESULT);
-                handleDetectedActivities(result);
-            }
-        };
 
-        Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
+        Intent intent = new Intent(this, getClass());
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
         // requestActivityUpdates() and removeActivityUpdates().
         mActivityDetectionPendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(Constants.INTENT_ACTIVITY_RECOGNIZED));
+
     }
 
     @Override

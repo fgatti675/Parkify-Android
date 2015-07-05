@@ -152,6 +152,11 @@
 
         <receiver
             android:name=".activityRecognition.SaveCarRequestReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.0" />
+                <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.1" />
+                <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.2" />
+            </intent-filter>
         </receiver>
 
         <service android:name="com.cahue.iweco.auth.IwecoAccountService">
