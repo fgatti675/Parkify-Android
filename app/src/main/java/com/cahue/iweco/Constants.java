@@ -40,9 +40,9 @@ public class Constants {
     public static final String INTENT_CAR_EXTRA_UPDATE_REQUEST = BuildConfig.APPLICATION_ID + ".EXTRA_UPDATE_REQUEST";
 
     // extra fields
-    public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ID";
-    public static final String INTENT_CAR_EXTRA_ADDRESS = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_ADDRESS";
-    public static final String INTENT_CAR_EXTRA_LOCATION = BuildConfig.APPLICATION_ID + ".EXTRA_CAR_LOCATION";
+    public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_ID";
+    public static final String INTENT_CAR_EXTRA_ADDRESS = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_ADDRESS";
+    public static final String INTENT_CAR_EXTRA_LOCATION = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_LOCATION";
     public static final String INTENT_CAR_EXTRA_TIME = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_TIME";
 
 
