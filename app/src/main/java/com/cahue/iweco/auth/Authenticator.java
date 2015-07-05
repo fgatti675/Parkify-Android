@@ -31,6 +31,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     public static final String AUTH_TOKEN_TYPE = "iweco_cars";
     public static final String USER_ID = "user_id";
     public static final String LOGIN_TYPE = "login_type";
+    public static final String LOGIN_DATE = "login_time";
 
     private IwecoAccountService iwecoAccountService;
     private Context mContext;
