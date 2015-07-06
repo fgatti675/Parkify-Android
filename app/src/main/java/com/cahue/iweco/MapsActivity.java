@@ -724,7 +724,6 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
     }
 
     private void setUpMapListeners() {
@@ -874,9 +873,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void goToDebug() {
-        startActivity(new Intent(this, DebugActivity.class));
-    }
 
     @Override
     public void onSpotClicked(ParkingSpot spot) {
