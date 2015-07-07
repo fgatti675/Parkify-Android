@@ -733,6 +733,10 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnCameraChangeListener(this);
     }
 
+    public void openShareDialog() {
+        AppInviteDialog.show(this, FacebookAppInvitesDialog.getFacebookAppInvites(this));
+    }
+
     public void openDonationDialog() {
         DonateDialog dialog = new DonateDialog();
         dialog.show(getFragmentManager(), "DonateDialog");

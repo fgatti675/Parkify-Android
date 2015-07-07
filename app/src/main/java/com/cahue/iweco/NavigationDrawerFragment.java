@@ -33,6 +33,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.DividerItemDecoration;
 import com.cahue.iweco.util.LoadProfileImage;
+import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.analytics.HitBuilders;
@@ -67,6 +68,8 @@ public class NavigationDrawerFragment extends Fragment {
     private LinearLayoutManager layoutManager;
     private RecyclerViewDrawerAdapter adapter;
     private List<Car> cars;
+
+    private boolean canShareOnFacebook;
 
     private Location mLastUserLocation;
 
@@ -114,6 +117,8 @@ public class NavigationDrawerFragment extends Fragment {
 
         skippedLogin = AuthUtils.isSkippedLogin(getActivity());
         cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
+
+        canShareOnFacebook = AppInviteDialog.canShow();
 
     }
 
@@ -383,9 +388,10 @@ public class NavigationDrawerFragment extends Fragment {
 
         public static final int CAR_TYPE = 0;
         public static final int CAR_MANAGER_TYPE = 1;
-        public static final int DONATE_TYPE = 2;
-        public static final int HELP_TYPE = 3;
-        public static final int SIGN_OUT_TYPE = 4;
+        public static final int SHARE_TYPE = 2;
+        public static final int DONATE_TYPE = 3;
+        public static final int HELP_TYPE = 4;
+        public static final int SIGN_OUT_TYPE = 5;
 
         @Override
         public int getItemViewType(int position) {
@@ -395,10 +401,12 @@ public class NavigationDrawerFragment extends Fragment {
             else if (position == cars.size())
                 return CAR_MANAGER_TYPE;
             else if (position == cars.size() + 1)
-                return DONATE_TYPE;
+                return canShareOnFacebook ? SHARE_TYPE : DONATE_TYPE;
             else if (position == cars.size() + 2)
-                return HELP_TYPE;
+                return canShareOnFacebook ? DONATE_TYPE : HELP_TYPE;
             else if (position == cars.size() + 3)
+                return canShareOnFacebook ? HELP_TYPE : SIGN_OUT_TYPE;
+            else if (position == cars.size() + 4)
                 return SIGN_OUT_TYPE;
             else
                 throw new IllegalStateException("Error in recycler view positions");
@@ -419,6 +427,7 @@ public class NavigationDrawerFragment extends Fragment {
 
                 return new CarViewHolder(itemView);
             } else if (viewType == CAR_MANAGER_TYPE
+                    || viewType == SHARE_TYPE
                     || viewType == DONATE_TYPE
                     || viewType == HELP_TYPE
                     || viewType == SIGN_OUT_TYPE) {
@@ -471,6 +480,7 @@ public class NavigationDrawerFragment extends Fragment {
                 carViewHolder.toolbar.setOnClickListener(clickListener);
 
             } else if (viewType == CAR_MANAGER_TYPE
+                    || viewType == SHARE_TYPE
                     || viewType == DONATE_TYPE
                     || viewType == HELP_TYPE
                     || viewType == SIGN_OUT_TYPE) {
@@ -478,6 +488,8 @@ public class NavigationDrawerFragment extends Fragment {
                 MenuViewHolder menuViewHolder = (MenuViewHolder) viewHolder;
                 if (viewType == CAR_MANAGER_TYPE) {
                     bindCarManager(menuViewHolder);
+                } else if (viewType == SHARE_TYPE) {
+                    bindShare(menuViewHolder);
                 } else if (viewType == DONATE_TYPE) {
                     bindDonate(menuViewHolder);
                 } else if (viewType == HELP_TYPE) {
@@ -496,6 +508,17 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.goToCarManager();
+                }
+            });
+        }
+
+        private void bindShare(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.share);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_facebook_box_grey600_24dp);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.openShareDialog();
                 }
             });
         }
@@ -535,7 +558,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return cars.size() + 4;
+            return cars.size() + (canShareOnFacebook ? 5 : 4);
         }
 
         public class MenuViewHolder extends RecyclerView.ViewHolder {
