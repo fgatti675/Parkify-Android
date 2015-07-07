@@ -349,6 +349,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                     @Override
                     public void onClick(View v) {
                         mBtAdapter.enable();
+                        updateEnableBTButton();
                     }
                 });
                 updateEnableBTButton();
