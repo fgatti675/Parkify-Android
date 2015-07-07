@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
     android:layout_gravity="center_horizontal"
+    android:orientation="vertical"
     android:stateListAnimator="@anim/abc_fade_in">
 
     <pl.droidsonroids.gif.GifImageView
@@ -13,9 +14,17 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:adjustViewBounds="true"
-        android:padding="40dp"
         android:src="@drawable/weco_anim"
         tools:showIn="@layout/activity_login" />
 
+    <ImageView
+        android:id="@+id/logo"
+        android:src="@drawable/iweco_logo_white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/large_padding"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="@dimen/large_padding">
+    </ImageView>
 
 </LinearLayout>

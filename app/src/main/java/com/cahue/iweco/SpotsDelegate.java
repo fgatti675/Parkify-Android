@@ -470,7 +470,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     private Tracker getTracker() {
         Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-        tracker.setScreenName(TAG);
         return tracker;
     }
 
