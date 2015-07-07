@@ -96,11 +96,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public void onResume() {
         super.onResume();
-        update();
+        update(true);
         Log.i(TAG, "c " + carId);
     }
 
-    public void update() {
+    public void update(boolean resetDirections) {
 
         this.car = CarDatabase.getInstance(getActivity()).find(carId);
 
@@ -114,6 +114,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         setUpColors();
 
         directionsDelegate.setColor(lightColor);
+        if(resetDirections)
+            directionsDelegate.hide(true);
 
         doDraw();
     }
@@ -122,7 +124,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public void onMapReady(GoogleMap map) {
         this.mMap = map;
         directionsDelegate.setMap(map);
-        update();
+        update(true);
     }
 
     @Override
@@ -361,6 +363,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
                     .setAction("click")
                     .setLabel("Car clicked")
                     .build());
+            return true;
         } else {
             setCameraFollowing(false);
         }

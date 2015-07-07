@@ -73,6 +73,14 @@ public class BillingFragment extends Fragment {
         bindBillingService();
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (iInAppBillingService != null) {
+            getActivity().unbindService(mBillingServiceConn);
+        }
+    }
+
     private void bindBillingService() {
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
@@ -83,10 +91,6 @@ public class BillingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if (iInAppBillingService != null) {
-            getActivity().unbindService(mBillingServiceConn);
-        }
-
     }
 
     public Bundle queryAvailableItems() {

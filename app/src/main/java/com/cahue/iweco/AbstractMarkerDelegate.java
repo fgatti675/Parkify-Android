@@ -64,7 +64,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
      * Called when a marker is clicked
      *
      * @param marker
-     * @return
+     * @return true if the delegate has consumed the event
      */
     public abstract boolean onMarkerClick(Marker marker);
 

@@ -33,14 +33,12 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.debug.DebugActivity;
 import com.cahue.iweco.locationServices.CarMovedService;
-import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
-import com.cahue.iweco.setCarLocation.SetCarDetailsFragment;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.setCarLocation.SetCarLocationDelegate;
 import com.cahue.iweco.setCarLocation.SetCarPositionDialog;
 import com.cahue.iweco.spots.ParkingSpot;
@@ -113,7 +111,7 @@ public class MapsActivity extends AppCompatActivity
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId != null) {
                 Log.i(TAG, "Car update received: " + carId);
-                getParkedCarDelegate(carId).update();
+                getParkedCarDelegate(carId).update(true);
             }
 
         }
@@ -215,7 +213,7 @@ public class MapsActivity extends AppCompatActivity
             ((IwecoApp) getApplication()).setTrackerUserId(userId);
 
             String typeString = mAccountManager.getUserData(mAccount, Authenticator.LOGIN_TYPE);
-            if(typeString != null)
+            if (typeString != null)
                 loginType = LoginType.valueOf(typeString);
         }
 
@@ -332,7 +330,7 @@ public class MapsActivity extends AppCompatActivity
         if (intent.hasExtra(Constants.INTENT_CAR_EXTRA_UPDATE_REQUEST)) {
             Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
             Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
-            String address = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
+            String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
             getSetCarLocationDelegate().setRequestLocation(location, time, address);
         }
     }
@@ -484,6 +482,8 @@ public class MapsActivity extends AppCompatActivity
                 TranslateAnimation animation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
                 int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                 animation.setDuration(mediumAnimTime);
+
+                setMapPadding(height);
                 animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -495,7 +495,6 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        setMapPadding(height);
                     }
 
                     @Override
@@ -603,7 +602,10 @@ public class MapsActivity extends AppCompatActivity
         }
 
         if (detailsDisplayed) {
-            for (AbstractMarkerDelegate delegate : delegates) delegate.onDetailsClosed();
+            for (AbstractMarkerDelegate delegate : delegates) {
+                delegate.onDetailsClosed();
+                delegate.setCameraFollowing(false);
+            }
             hideDetails();
         } else {
             super.onBackPressed();
@@ -836,8 +838,6 @@ public class MapsActivity extends AppCompatActivity
         location.setLongitude(latLng.longitude);
         location.setAccuracy(10);
 
-        hideDetails();
-
         getSetCarLocationDelegate().setRequestLocation(location, new Date(), null);
 //        SetCarPositionDialog dialog = SetCarPositionDialog.newInstance(location);
 //        dialog.show(getFragmentManager(), "SetCarPositionDialog");
@@ -886,10 +886,12 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        boolean consumeEvent = false;
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onMarkerClick(marker);
+            if(delegate.onMarkerClick(marker))
+                consumeEvent = true;
         }
-        return true;
+        return consumeEvent;
     }
 
     @Override
@@ -1017,10 +1019,10 @@ public class MapsActivity extends AppCompatActivity
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
     }
 
-    private void showFacebookAppInvite(){
+    private void showFacebookAppInvite() {
 
-        if(!PreferencesUtil.isFacebookInvitesShown(this)
-                && System.currentTimeMillis() - AuthUtils.getLoginDate(this) >  24 * 60 * 60 * 1000
+        if (!PreferencesUtil.isFacebookInvitesShown(this)
+                && System.currentTimeMillis() - AuthUtils.getLoginDate(this) > 24 * 60 * 60 * 1000
                 && AppInviteDialog.canShow()) {
             FacebookAppInvitesDialog dialog = new FacebookAppInvitesDialog();
             dialog.show(getFragmentManager(), "FacebookAppInvitesDialog");

@@ -5,5 +5,6 @@
     android:elevation="@dimen/elevation"
     android:src="@drawable/crosshairs_gps"
     android:id="@+id/my_location"
+    cahue:borderWidth="0dp"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content" />

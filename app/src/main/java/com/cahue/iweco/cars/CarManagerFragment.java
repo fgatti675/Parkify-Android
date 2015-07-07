@@ -14,7 +14,6 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -373,10 +372,11 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
              * Add car button
              */
             else if (viewType == ADD_BUTTON_TYPE) {
-                View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.button_add_device,
+                Button itemView = (Button) LayoutInflater.from(viewGroup.getContext()).
+                        inflate(R.layout.button_borderless,
                                 viewGroup,
                                 false);
+                itemView.setText(R.string.add_car_no_bt);
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
