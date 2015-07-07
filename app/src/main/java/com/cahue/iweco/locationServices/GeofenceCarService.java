@@ -25,6 +25,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * This service is in charge of detecting if the user is far away enough after parking, and if so,
@@ -108,7 +109,7 @@ public class GeofenceCarService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         if (car.location == null) return;
 

@@ -40,7 +40,9 @@ import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
-import com.cahue.iweco.parkedCar.SetCarPositionDialog;
+import com.cahue.iweco.setCarLocation.SetCarDetailsFragment;
+import com.cahue.iweco.setCarLocation.SetCarLocationDelegate;
+import com.cahue.iweco.setCarLocation.SetCarPositionDialog;
 import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
@@ -68,6 +70,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.plus.Plus;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -298,6 +301,8 @@ public class MapsActivity extends AppCompatActivity
         if (!"wimc".equals(BuildConfig.FLAVOR))
             delegates.add(getSpotsDelegate());
 
+        delegates.add(getSetCarLocationDelegate());
+
         List<String> carIds = carDatabase.getCarIds();
         for (String id : carIds) {
             delegates.add(getParkedCarDelegate(id));
@@ -318,6 +323,18 @@ public class MapsActivity extends AppCompatActivity
 
         showFacebookAppInvite();
 
+        handleIntent();
+
+    }
+
+    private void handleIntent() {
+        Intent intent = getIntent();
+        if (intent.hasExtra(Constants.INTENT_CAR_EXTRA_UPDATE_REQUEST)) {
+            Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
+            Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
+            String address = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
+            getSetCarLocationDelegate().setRequestLocation(location, time, address);
+        }
     }
 
     public void checkIweco() {
@@ -438,6 +455,22 @@ public class MapsActivity extends AppCompatActivity
         return parkedCarDelegate;
     }
 
+    /**
+     * @return
+     */
+    private SetCarLocationDelegate getSetCarLocationDelegate() {
+        SetCarLocationDelegate setCarLocationDelegate = (SetCarLocationDelegate) getFragmentManager().findFragmentByTag(SetCarLocationDelegate.FRAGMENT_TAG);
+        if (setCarLocationDelegate == null) {
+            Log.d(TAG, "Creating new SetCarLocationDelegate");
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            setCarLocationDelegate = SetCarLocationDelegate.newInstance();
+            setCarLocationDelegate.setRetainInstance(true);
+            transaction.add(setCarLocationDelegate, SetCarLocationDelegate.FRAGMENT_TAG);
+            transaction.commit();
+        }
+        return setCarLocationDelegate;
+    }
+
     private void showDetails() {
 
         detailsContainer.setVisibility(View.VISIBLE);
@@ -487,7 +520,8 @@ public class MapsActivity extends AppCompatActivity
             requester.onMapResized();
     }
 
-    private void hideDetails() {
+    @Override
+    public void hideDetails() {
 
         if (!detailsDisplayed) return;
 
@@ -799,10 +833,12 @@ public class MapsActivity extends AppCompatActivity
         location.setLongitude(latLng.longitude);
         location.setAccuracy(10);
 
-        SetCarPositionDialog dialog = SetCarPositionDialog.newInstance(location);
-        dialog.show(getFragmentManager(), "SetCarPositionDialog");
-
         hideDetails();
+
+        getSetCarLocationDelegate().setRequestLocation(location, new Date(), null);
+//        SetCarPositionDialog dialog = SetCarPositionDialog.newInstance(location);
+//        dialog.show(getFragmentManager(), "SetCarPositionDialog");
+
 
     }
 
@@ -864,6 +900,11 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onSpotClicked(ParkingSpot spot) {
+    }
+
+    @Override
+    public DetailsFragment getDetailsFragment() {
+        return detailsFragment;
     }
 
     /**

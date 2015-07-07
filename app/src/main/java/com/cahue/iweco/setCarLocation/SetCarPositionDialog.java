@@ -1,4 +1,4 @@
-package com.cahue.iweco.parkedCar;
+package com.cahue.iweco.setCarLocation;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,7 +18,6 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.locationServices.GeofenceCarService;
-import com.cahue.iweco.locationServices.LocationPollerService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +30,7 @@ import java.util.List;
  *
  * @author Francesco
  */
+@Deprecated
 public class SetCarPositionDialog extends DialogFragment {
 
     private Callbacks mCallbacks;
@@ -109,7 +109,7 @@ public class SetCarPositionDialog extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder
-                .setTitle(R.string.car_dialog_text)
+                .setTitle(R.string.what_car_is_parked)
                 .setSingleChoiceItems(optionsArray, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

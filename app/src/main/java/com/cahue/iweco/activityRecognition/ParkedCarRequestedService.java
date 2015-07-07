@@ -20,12 +20,15 @@ import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.util.FetchAddressIntentService;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.Date;
 import java.util.List;
 
 /**
  * This service fetches the current location and ask the user if the car was set there.
  * It is started from the activity recognition service, when it detects that the user steps out of
- * a vehicle
+ * a vehicle.
+ *
+ * When the location is retrieved the user gets a notification asking him whan car he has parked.
  *
  * @author Francesco
  */
@@ -39,14 +42,17 @@ public class ParkedCarRequestedService extends LocationPollerService {
 
     private Location location;
 
+    private Date time;
+
     @Override
     protected boolean checkPreconditions(Car car) {
         return true;
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
         this.location = location;
+        this.time = startTime;
 
         Log.i(TAG, "Received : " + location);
 
@@ -76,7 +82,9 @@ public class ParkedCarRequestedService extends LocationPollerService {
         // Intent to start the activity and show a just parked dialog
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_UPDATE_REQUEST, true);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, location);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_LOCATION, location);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, address);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, time.getTime());
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);

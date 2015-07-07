@@ -188,7 +188,7 @@ public abstract class LocationPollerService extends Service implements
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
         Log.i(TAG, "\tafter " + (System.currentTimeMillis() - startTime.getTime()) + " ms");
-        onPreciseFixPolled(this, location, car, mGoogleApiClient);
+        onPreciseFixPolled(this, location, car, startTime, mGoogleApiClient);
         stopSelf();
     }
 
@@ -198,11 +198,16 @@ public abstract class LocationPollerService extends Service implements
      * is reached.
      *
      * @param context
-     * @param location
-     * @param car
+     * @param location The location fetched as a result
+     * @param car The car associated with this request (can be null)
+     * @param startTime The time this request startes
      * @param googleApiClient A connected GoogleApiClient
      */
-    public abstract void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient);
+    public abstract void onPreciseFixPolled(Context context,
+                                            Location location,
+                                            Car car,
+                                            Date startTime,
+                                            GoogleApiClient googleApiClient);
 
 
     @Override

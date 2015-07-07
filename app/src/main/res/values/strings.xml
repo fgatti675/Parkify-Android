@@ -23,7 +23,7 @@
     <string name="bt_not_available">Bluetooth is not available</string>
     <string name="bt_linked_to">Car location will be stored on disconnection from %1$s</string>
     <string name="car_was_here">Car was here %s</string>
-    <string name="car_dialog_text">Would you like to set the car position here?</string>
+    <string name="what_car_is_parked">What car is parked here?</string>
     <string name="no_cars">No cars!</string>
     <string name="no_cars_long">You didn\'t set up any cars. Create one now\?</string>
     <string name="car">Car</string>
@@ -70,5 +70,6 @@
     <string name="share">Invite</string>
     <string name="share_promo">How about inviting your Facebook friends and telling them their parking needs could be solved by sharing this app? :)</string>
     <string name="ask_just_parked">Did you just park?</string>
+    <string name="free_spot">Free parking spot</string>
 
 </resources>

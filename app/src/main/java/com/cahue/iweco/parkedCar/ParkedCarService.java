@@ -33,7 +33,7 @@ public class ParkedCarService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         Log.i(TAG, "Received : " + location);
 

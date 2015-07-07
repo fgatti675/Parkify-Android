@@ -24,7 +24,7 @@
     <string name="bt_not_available">El bluetooth esta desactivado.</string>
     <string name="bt_linked_to">Se guardará la posicion del coche al desconectarse de %1$s.</string>
     <string name="car_was_here">El coche estaba aqui %s.</string>
-    <string name="car_dialog_text">¿Quieres establecer la posicion del coche aqui?</string>
+    <string name="what_car_is_parked">¿Qué coche está aparcado aquí?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
 
@@ -72,5 +72,6 @@
     <string name="share">Invitar</string>
     <string name="share_promo">¿Por qué no les dices a tus amigos de Facebook que ya no tienes problemas de aparcamiento? :)</string>
     <string name="ask_just_parked">¿Acabas de aparcar?</string>
+    <string name="free_spot">Hueco libre</string>
 
 </resources>
