@@ -464,8 +464,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                     .setAction("click")
                     .setLabel("Spot clicked")
                     .build());
+            return true;
         }
-        return true;
+        return false;
     }
 
     private Tracker getTracker() {

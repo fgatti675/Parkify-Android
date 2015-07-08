@@ -464,9 +464,14 @@ public class NavigationDrawerFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         if (car.location != null) {
+
+                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id)).onCarClicked();
+
                             mCallbacks.onCarClicked(car.id);
+
                             if (mDrawerLayout != null)
                                 mDrawerLayout.closeDrawers();
+
                         } else {
                             Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
                         }

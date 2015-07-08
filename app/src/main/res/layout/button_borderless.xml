@@ -3,6 +3,5 @@
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="@string/add_car_no_bt"
-    style="@android:style/Widget.Material.Button.Borderless"
+    style="?android:attr/borderlessButtonStyle"
     android:id="@+id/button"/>

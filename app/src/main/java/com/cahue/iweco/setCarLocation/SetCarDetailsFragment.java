@@ -1,35 +1,32 @@
 package com.cahue.iweco.setCarLocation;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.ResultReceiver;
-import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cahue.iweco.DetailsFragment;
-import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.spots.ParkingSpot;
-import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.util.FetchAddressIntentService;
 import com.cahue.iweco.util.Util;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -54,6 +51,7 @@ public class SetCarDetailsFragment extends DetailsFragment {
 
     private Location userLocation;
 
+    private CarSelectedListener carSelectedListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -70,6 +68,18 @@ public class SetCarDetailsFragment extends DetailsFragment {
             args.putString(ARG_ADDRESS, address);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            this.carSelectedListener = (CarSelectedListener) getFragmentManager().findFragmentByTag(SetCarLocationDelegate.FRAGMENT_TAG);
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement " + CarSelectedListener.class.getName());
+        }
     }
 
     @Override
@@ -108,23 +118,10 @@ public class SetCarDetailsFragment extends DetailsFragment {
             address = (TextView) view.findViewById(R.id.address);
             updateAddress();
 
-            LinearLayout buttonsLayout = (LinearLayout) view.findViewById(R.id.car_buttons);
+            GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
             List<Car> cars = carDatabase.retrieveCars(false);
-            for (final Car car : cars) {
-                Button button = new Button(getActivity());
-                button.setText(car.name);
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        car.location = location;
-                        car.spotId = null;
-                        car.address = addressString;
-                        car.time = time;
-                        CarsSync.storeCar(carDatabase, getActivity(), car);
-                    }
-                });
-                buttonsLayout.addView(button);
-            }
+            buttonsLayout.setAdapter(new ImageAdapter( cars));
+
 
             Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
             view.startAnimation(fadeInAnimation);
@@ -136,9 +133,11 @@ public class SetCarDetailsFragment extends DetailsFragment {
     public void setUserLocation(Location userLocation) {
 
         this.userLocation = userLocation;
-        updateDistance();
+        View view = getView();
+        if (view != null) {
+            updateDistance();
+        }
     }
-
 
     private void updateDistance() {
         if (userLocation != null) {
@@ -172,6 +171,10 @@ public class SetCarDetailsFragment extends DetailsFragment {
         getActivity().startService(fetchAddressIntent);
     }
 
+    public interface CarSelectedListener {
+        void onCarButtonClicked(String carId);
+    }
+
     class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver() {
             super(new Handler());
@@ -187,6 +190,54 @@ public class SetCarDetailsFragment extends DetailsFragment {
 
             updateAddress();
 
+        }
+    }
+
+    public class ImageAdapter extends BaseAdapter {
+        private List<Car> cars;
+
+        public ImageAdapter( List<Car> cars) {
+            this.cars = cars;
+        }
+
+        public int getCount() {
+            return cars.size();
+        }
+
+        public Object getItem(int position) {
+            return cars.get(position);
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        // create a new ImageView for each item referenced by the Adapter
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Button button;
+            final Car car = cars.get(position);
+            if (convertView == null) {
+                button = (Button) LayoutInflater.from(parent.getContext()).
+                        inflate(R.layout.button_borderless,
+                                parent,
+                                false);
+
+            } else {
+                button = (Button) convertView;
+            }
+            button.setText(car.name);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    car.location = location;
+                    car.spotId = null;
+                    car.address = addressString;
+                    car.time = time;
+                    CarsSync.storeCar(carDatabase, getActivity(), car);
+                    carSelectedListener.onCarButtonClicked(car.id);
+                }
+            });
+            return button;
         }
     }
 }

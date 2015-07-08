@@ -7,6 +7,8 @@ import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -20,7 +22,7 @@ import java.util.Date;
 /**
  * Created by Francesco on 06/07/2015.
  */
-public class SetCarLocationDelegate extends AbstractMarkerDelegate {
+public class SetCarLocationDelegate extends AbstractMarkerDelegate implements SetCarDetailsFragment.CarSelectedListener {
 
     public static final String FRAGMENT_TAG = "SET_CAR_LOCATION_DELEGATE";
 
@@ -46,6 +48,7 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate {
 
         iconGenerator = new IconGenerator(getActivity());
         iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+        iconGenerator.setTextAppearance(R.style.SetCarPositionMarkerStyle);
         int color = getResources().getColor(R.color.theme_accent);
         iconGenerator.setColor(color);
     }
@@ -61,6 +64,13 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate {
                 .snippet("")
                 .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("?")))
                 .anchor(iconGenerator.getAnchorU(), iconGenerator.getAnchorV()));
+
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                .zoom(15)
+                .target(latLng)
+                .build());
+
+        cameraManager.onCameraUpdateRequest(cameraUpdate, this);
     }
 
     @Override
@@ -105,9 +115,20 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate {
 
     }
 
+    @Override
+    public void onDetailsClosed() {
+        clearMarker();
+    }
+
     public void setRequestLocation(Location requestLocation, Date time, String address) {
         this.requestLocation = requestLocation;
-        doDraw();
         detailsViewManager.setDetailsFragment(SetCarDetailsFragment.newInstance(requestLocation, time, address));
+        doDraw();
+    }
+
+    @Override
+    public void onCarButtonClicked(String carId) {
+        clearMarker();
+        detailsViewManager.hideDetails();
     }
 }

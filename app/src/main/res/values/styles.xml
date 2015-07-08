@@ -110,6 +110,12 @@
         <item name="android:textColorSecondary">@color/abc_secondary_text_material_light</item>
     </style>
 
+    <style name="SetCarPositionMarkerStyle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/body_text_1_inverse</item>
+    </style>
+
     <style name="GreenMarkerStyle">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/body_text_1_inverse</item>

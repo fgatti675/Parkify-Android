@@ -38,6 +38,7 @@
             android:textColor="@color/body_text_1" />
 
         <RelativeLayout
+            android:paddingTop="@dimen/default_padding"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -71,15 +72,17 @@
             android:textColor="@color/body_text_3"
             tools:text="Lindwurmstr. 143" />
 
-
-        <LinearLayout
+        <GridView
             android:id="@+id/car_buttons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="@dimen/large_padding" />
+            android:layout_height="match_parent"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:stretchMode="columnWidth"
+            android:paddingTop="@dimen/default_padding"
+            android:gravity="center"            />
+
 
     </LinearLayout>
 
