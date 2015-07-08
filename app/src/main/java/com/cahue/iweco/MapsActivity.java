@@ -695,6 +695,11 @@ public class MapsActivity extends AppCompatActivity
         goToLogin();
     }
 
+    @Override
+    public void goToPreferences() {
+        startActivity(new Intent(this, IwecoPreferencesActivity.class));
+    }
+
     public void goToTutorial() {
         startActivity(new Intent(this, TutorialActivity.class));
         PreferencesUtil.setTutorialShown(this, true);

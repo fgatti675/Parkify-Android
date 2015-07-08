@@ -7,6 +7,8 @@ public interface Navigation {
 
     void signOut();
 
+    void goToPreferences();
+
     void goToTutorial();
 
     void openShareDialog();

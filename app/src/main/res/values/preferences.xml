@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+
+    <string name="preferences">Preferences</string>
+
     <string name="units">Units</string>
     <string name="use_miles">Distances in miles</string>
     <string name="use_miles_description">Use miles instead of kilometers</string>

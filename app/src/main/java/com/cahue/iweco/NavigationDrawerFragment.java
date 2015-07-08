@@ -390,8 +390,9 @@ public class NavigationDrawerFragment extends Fragment {
         public static final int CAR_MANAGER_TYPE = 1;
         public static final int SHARE_TYPE = 2;
         public static final int DONATE_TYPE = 3;
-        public static final int HELP_TYPE = 4;
-        public static final int SIGN_OUT_TYPE = 5;
+        public static final int PREFERENCES_TYPE = 4;
+        public static final int HELP_TYPE = 5;
+        public static final int SIGN_OUT_TYPE = 6;
 
         @Override
         public int getItemViewType(int position) {
@@ -403,10 +404,12 @@ public class NavigationDrawerFragment extends Fragment {
             else if (position == cars.size() + 1)
                 return canShareOnFacebook ? SHARE_TYPE : DONATE_TYPE;
             else if (position == cars.size() + 2)
-                return canShareOnFacebook ? DONATE_TYPE : HELP_TYPE;
+                return canShareOnFacebook ? DONATE_TYPE : PREFERENCES_TYPE;
             else if (position == cars.size() + 3)
-                return canShareOnFacebook ? HELP_TYPE : SIGN_OUT_TYPE;
+                return canShareOnFacebook ? PREFERENCES_TYPE : HELP_TYPE;
             else if (position == cars.size() + 4)
+                return canShareOnFacebook ? HELP_TYPE : SIGN_OUT_TYPE;
+            else if (position == cars.size() + 5)
                 return SIGN_OUT_TYPE;
             else
                 throw new IllegalStateException("Error in recycler view positions");
@@ -429,6 +432,7 @@ public class NavigationDrawerFragment extends Fragment {
             } else if (viewType == CAR_MANAGER_TYPE
                     || viewType == SHARE_TYPE
                     || viewType == DONATE_TYPE
+                    || viewType == PREFERENCES_TYPE
                     || viewType == HELP_TYPE
                     || viewType == SIGN_OUT_TYPE) {
 
@@ -482,6 +486,7 @@ public class NavigationDrawerFragment extends Fragment {
             } else if (viewType == CAR_MANAGER_TYPE
                     || viewType == SHARE_TYPE
                     || viewType == DONATE_TYPE
+                    || viewType == PREFERENCES_TYPE
                     || viewType == HELP_TYPE
                     || viewType == SIGN_OUT_TYPE) {
 
@@ -492,8 +497,10 @@ public class NavigationDrawerFragment extends Fragment {
                     bindShare(menuViewHolder);
                 } else if (viewType == DONATE_TYPE) {
                     bindDonate(menuViewHolder);
-                } else if (viewType == HELP_TYPE) {
+                } else if (viewType == PREFERENCES_TYPE) {
                     bindHelp(menuViewHolder);
+                } else if (viewType == HELP_TYPE) {
+                    bindPreferences(menuViewHolder);
                 } else if (viewType == SIGN_OUT_TYPE) {
                     bindSignOut(menuViewHolder);
                 }
@@ -519,6 +526,17 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.openShareDialog();
+                }
+            });
+        }
+
+        private void bindPreferences(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.preferences);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_facebook_box_grey600_24dp);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.goToPreferences();
                 }
             });
         }
