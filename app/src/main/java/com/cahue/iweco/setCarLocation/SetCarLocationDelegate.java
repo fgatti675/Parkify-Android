@@ -59,11 +59,18 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
         LatLng latLng = new LatLng(requestLocation.getLatitude(), requestLocation.getLongitude());
 
-        marker= mMap.addMarker(new MarkerOptions()
+        marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .snippet("")
                 .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("?")))
                 .anchor(iconGenerator.getAnchorU(), iconGenerator.getAnchorV()));
+
+        centerCameraOnMarker();
+    }
+
+    private void centerCameraOnMarker() {
+
+        LatLng latLng = new LatLng(requestLocation.getLatitude(), requestLocation.getLongitude());
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                 .zoom(15)
@@ -87,10 +94,15 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
         if (requester != this) {
             clearMarker();
-            DetailsFragment detailsFragment = detailsViewManager.getDetailsFragment();
-            if (detailsFragment != null && detailsFragment instanceof SetCarDetailsFragment)
+            if (isDisplayed())
                 detailsViewManager.hideDetails();
         }
+    }
+
+    private boolean isDisplayed() {
+
+        DetailsFragment detailsFragment = detailsViewManager.getDetailsFragment();
+        return detailsFragment != null && detailsFragment instanceof SetCarDetailsFragment;
     }
 
     @Override
@@ -112,7 +124,8 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
     @Override
     public void onMapResized() {
-
+        if (isDisplayed())
+            centerCameraOnMarker();
     }
 
     @Override

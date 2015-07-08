@@ -483,7 +483,8 @@ public class MapsActivity extends AppCompatActivity
                 int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                 animation.setDuration(mediumAnimTime);
 
-                setMapPadding(height);
+                setMapPaddingAndNotify(height);
+
                 animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -513,7 +514,7 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void setMapPadding(int bottomPadding) {
+    private void setMapPaddingAndNotify(int bottomPadding) {
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
         for (CameraUpdateRequester requester : cameraUpdateRequesterList)
             requester.onMapResized();
@@ -526,7 +527,7 @@ public class MapsActivity extends AppCompatActivity
 
         detailsDisplayed = false;
 
-        setMapPadding(0);
+        setMapPaddingAndNotify(0);
 
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -535,7 +536,7 @@ public class MapsActivity extends AppCompatActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                setMapPadding(0);
+                setMapPaddingAndNotify(0);
             }
 
             @Override
