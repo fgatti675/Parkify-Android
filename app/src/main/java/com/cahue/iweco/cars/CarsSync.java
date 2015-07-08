@@ -16,12 +16,8 @@ import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.cars.database.CarsProvider;
 import com.cahue.iweco.login.AuthUtils;
-import com.cahue.iweco.util.Singleton;
 import com.cahue.iweco.util.Requests;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import org.json.JSONObject;
 
@@ -56,7 +52,7 @@ public class CarsSync {
 
     public static void remove(final Context context, final Car car, final CarDatabase database) {
         // Instantiate the RequestQueue.
-        RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
+        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
 
         Log.i(TAG, "Removing car " + car);
 
@@ -107,7 +103,7 @@ public class CarsSync {
     public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
+        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
 
         Log.i(TAG, "Posting car");
 
