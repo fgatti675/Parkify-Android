@@ -13,9 +13,9 @@ import android.text.TextUtils;
 
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.login.LoginActivity;
-import com.cahue.iweco.util.Singleton;
 
 import java.util.concurrent.ExecutionException;
 
@@ -130,7 +130,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest request = new StringRequest(builder.build().toString(), future, future);
-        Singleton.getInstance(mContext).getRequestQueue().add(request);
+        IwecoApp.getIwecoApp().getRequestQueue().add(request);
 
         try {
             return future.get(); // this will block
