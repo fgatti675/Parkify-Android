@@ -182,10 +182,13 @@
         <service android:name="com.google.android.gms.analytics.CampaignTrackingService" />
 
         <activity android:name="com.facebook.FacebookActivity"
-            android:configChanges=
-                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:label="@string/app_name" />
+        android:configChanges=
+            "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:label="@string/app_name" />
+
+        <activity android:name=".IwecoPreferencesActivity" />
+
     </application>
 
 </manifest>

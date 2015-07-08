@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/units">
+
+        <SwitchPreference
+            android:key="USE_MILES"
+            android:title="@string/use_miles"
+            android:summary="@string/use_miles_description" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/movement_recognition">
+
+        <CheckBoxPreference
+            android:key="checkbox_preference"
+            android:title="@string/bt_on_vehicle"
+            android:summary="@string/bt_on_vehicle_description" />
+
+        <CheckBoxPreference
+            android:key="checkbox_preference"
+            android:title="@string/bt_off_vehicle"
+            android:summary="@string/bt_off_vehicle_description" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
