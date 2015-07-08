@@ -9,6 +9,8 @@ public interface Navigation {
 
     void goToTutorial();
 
+    void openShareDialog();
+
     void openDonationDialog();
 
     void goToCarManager();

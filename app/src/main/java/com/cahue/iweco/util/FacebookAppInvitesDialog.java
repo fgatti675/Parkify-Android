@@ -7,6 +7,7 @@ package com.cahue.iweco.util;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -25,16 +26,7 @@ public class FacebookAppInvitesDialog extends DialogFragment {
                 .setIcon(R.drawable.iweco_logo_small)
                 .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String appLinkUrl, previewImageUrl;
-
-                        appLinkUrl = getString(R.string.facebook_app_link);
-                        previewImageUrl = getString(R.string.facebook_app_image_url);
-
-                        AppInviteContent content = new AppInviteContent.Builder()
-                                .setApplinkUrl(appLinkUrl)
-                                .setPreviewImageUrl(previewImageUrl)
-                                .build();
-                        AppInviteDialog.show(getActivity(), content);
+                        AppInviteDialog.show(getActivity(), getFacebookAppInvites(getActivity()));
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -44,5 +36,17 @@ public class FacebookAppInvitesDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+    public static AppInviteContent getFacebookAppInvites(Context context) {
+        String appLinkUrl, previewImageUrl;
+
+        appLinkUrl = context.getString(R.string.facebook_app_link);
+        previewImageUrl = context.getString(R.string.facebook_app_image_url);
+
+        return new AppInviteContent.Builder()
+                .setApplinkUrl(appLinkUrl)
+                .setPreviewImageUrl(previewImageUrl)
+                .build();
     }
 }

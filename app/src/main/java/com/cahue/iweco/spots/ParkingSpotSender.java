@@ -9,10 +9,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.util.Requests;
-import com.cahue.iweco.util.Singleton;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONObject;
@@ -37,7 +37,7 @@ public class ParkingSpotSender {
     private static void postSpot(Context context, ParkingSpot spot, final Car car) {
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = Singleton.getInstance(context).getRequestQueue();
+        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
 
         Log.i(TAG, "Posting parking spot ");
 

@@ -742,7 +742,6 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
     }
 
     private void setUpMapListeners() {
@@ -750,6 +749,10 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraChangeListener(this);
+    }
+
+    public void openShareDialog() {
+        AppInviteDialog.show(this, FacebookAppInvitesDialog.getFacebookAppInvites(this));
     }
 
     public void openDonationDialog() {
@@ -894,9 +897,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void goToDebug() {
-        startActivity(new Intent(this, DebugActivity.class));
-    }
 
     @Override
     public void onSpotClicked(ParkingSpot spot) {

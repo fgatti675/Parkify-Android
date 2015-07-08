@@ -14,11 +14,11 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.Requests;
-import com.cahue.iweco.util.Singleton;
 
 import org.json.JSONArray;
 
@@ -48,7 +48,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "Sync in progress");
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = Singleton.getInstance(getContext()).getRequestQueue();
+        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")

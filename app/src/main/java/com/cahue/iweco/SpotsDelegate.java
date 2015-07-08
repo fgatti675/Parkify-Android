@@ -232,7 +232,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      *
      * @return
      */
-    public synchronized boolean queryCameraView() {
+    public boolean queryCameraView() {
 
         // What the user is actually seeing right now
         setUpViewBounds();
@@ -289,7 +289,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * @param result
      */
     @Override
-    public synchronized void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
+    public void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
 
         if (result.moreResults) {
             Log.d(TAG, "maxZoom set to " + maxZoom);
@@ -470,7 +470,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     private Tracker getTracker() {
         Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-        tracker.setScreenName(TAG);
         return tracker;
     }
 
