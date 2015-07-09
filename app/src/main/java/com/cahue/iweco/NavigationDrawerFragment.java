@@ -298,7 +298,6 @@ public class NavigationDrawerFragment extends Fragment {
                 }
 
                 Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-                tracker.setScreenName(TAG);
                 tracker.send(new HitBuilders.EventBuilder()
                         .setCategory("UX")
                         .setAction("click")
@@ -378,6 +377,11 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void closeDrawers() {
         mDrawerLayout.closeDrawers();
+    }
+
+    public void setUserLocation(Location userLocation) {
+        this.mLastUserLocation = userLocation;
+        recyclerView.getAdapter().notifyDataSetChanged();
     }
 
 
