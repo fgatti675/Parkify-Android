@@ -71,11 +71,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         if (ActivityRecognitionResult.hasResult(intent)) {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             handleDetectedActivities(result);
-//            Intent localIntent = new Intent(Constants.INTENT_ACTIVITY_RECOGNIZED);
-//            localIntent.putExtra(Constants.INTENT_EXTRA_ACTIVITIES_RESULT, result);
-//
-//            // Broadcast the list of detected activities.
-//            LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
         }
     }
 
@@ -84,14 +79,14 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         DetectedActivity mostProbableActivity = result.getMostProbableActivity();
 
+        if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
+            return;
+
         // Log each activity.
         Log.d(TAG, "Activities detected");
         for (DetectedActivity da : result.getProbableActivities()) {
             Log.v(TAG, getActivityString(da.getType()) + " " + da.getConfidence() + "%");
         }
-
-        if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
-            return;
 
         if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
                 && mostProbableActivity.getConfidence() == 100) {
@@ -108,6 +103,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
 
             previousActivity = mostProbableActivity;
+
             savePreviousActivity(previousActivity);
         }
 

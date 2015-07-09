@@ -40,7 +40,6 @@ import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.setCarLocation.SetCarLocationDelegate;
-import com.cahue.iweco.setCarLocation.SetCarPositionDialog;
 import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
@@ -54,6 +53,7 @@ import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -82,7 +82,6 @@ public class MapsActivity extends AppCompatActivity
         GoogleMap.OnMarkerClickListener,
         SpotsDelegate.SpotSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
-        SetCarPositionDialog.Callbacks,
         CameraManager,
         OnMapReadyCallback,
         CameraUpdateRequester,
@@ -117,22 +116,23 @@ public class MapsActivity extends AppCompatActivity
         }
     };
     List<AbstractMarkerDelegate> delegates = new ArrayList();
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
     private AccountManager mAccountManager;
+
     private CarDatabase carDatabase;
+
     private Toolbar mToolbar;
     private FloatingActionButton myLocationButton;
     private CardView detailsContainer;
     private DetailsFragment detailsFragment;
+
     private boolean detailsDisplayed = false;
     private boolean cameraFollowing;
 
-    /**
-     * Currently recognized activity type (what the user is doing)
-     */
-//    private DetectedActivity activityType;
     /**
      * The user didn't log in, but we still love him
      */
@@ -220,6 +220,7 @@ public class MapsActivity extends AppCompatActivity
         // Create a GoogleApiClient instance
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
+                .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this);
 
@@ -840,9 +841,6 @@ public class MapsActivity extends AppCompatActivity
         location.setAccuracy(10);
 
         getSetCarLocationDelegate().setRequestLocation(location, new Date(), null);
-//        SetCarPositionDialog dialog = SetCarPositionDialog.newInstance(location);
-//        dialog.show(getFragmentManager(), "SetCarPositionDialog");
-
 
     }
 
@@ -1006,14 +1004,6 @@ public class MapsActivity extends AppCompatActivity
                 .build());
 
         onCameraUpdateRequest(cameraUpdate, this);
-    }
-
-    /**
-     * Called when the user sets the car manually
-     */
-    @Override
-    public void onCarPositionUpdate(String carId) {
-        getParkedCarDelegate(carId).onCarClicked();
     }
 
     @Override

@@ -52,10 +52,6 @@ public class Constants {
     public static final String INTENT_BILLING_READY = BuildConfig.APPLICATION_ID + ".INTENT_BILLING_READY";
     public static final String INTENT_NEW_PURCHASE = BuildConfig.APPLICATION_ID + ".INTENT_NEW_PURCHASE";
 
-    // activity recognition
-    public static final String INTENT_ACTIVITY_RECOGNIZED = BuildConfig.APPLICATION_ID + ".INTENT_ACTIVITY_RECOGNIZED";
-    public static final String INTENT_EXTRA_ACTIVITIES_RESULT = BuildConfig.APPLICATION_ID + ".INTENT_EXTRA_ACTIVITIES_RESULT";
-
     /**
      * Average walking speed
      */
