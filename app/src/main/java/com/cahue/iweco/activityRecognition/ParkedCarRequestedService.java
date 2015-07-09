@@ -85,6 +85,8 @@ public class ParkedCarRequestedService extends LocationPollerService {
         intent.putExtra(Constants.INTENT_CAR_EXTRA_LOCATION, location);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, address);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, time.getTime());
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);

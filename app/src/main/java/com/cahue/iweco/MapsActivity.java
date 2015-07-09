@@ -484,7 +484,7 @@ public class MapsActivity extends AppCompatActivity
                 int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                 animation.setDuration(mediumAnimTime);
 
-                setMapPaddingAndNotify(height);
+                setMapPaddingAndNotify(height, true);
 
                 animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
                 animation.setAnimationListener(new Animation.AnimationListener() {
@@ -515,10 +515,11 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void setMapPaddingAndNotify(int bottomPadding) {
+    private void setMapPaddingAndNotify(int bottomPadding, boolean notify) {
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
-        for (CameraUpdateRequester requester : cameraUpdateRequesterList)
-            requester.onMapResized();
+        if (notify)
+            for (CameraUpdateRequester requester : cameraUpdateRequesterList)
+                requester.onMapResized();
     }
 
     @Override
@@ -528,7 +529,7 @@ public class MapsActivity extends AppCompatActivity
 
         detailsDisplayed = false;
 
-        setMapPaddingAndNotify(0);
+        setMapPaddingAndNotify(0, false);
 
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -537,7 +538,7 @@ public class MapsActivity extends AppCompatActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                setMapPaddingAndNotify(0);
+
             }
 
             @Override
@@ -558,6 +559,8 @@ public class MapsActivity extends AppCompatActivity
 
         detailsContainer.startAnimation(animation);
         myLocationButton.startAnimation(animation);
+
+        detailsFragment = null;
     }
 
     @Override
@@ -887,7 +890,7 @@ public class MapsActivity extends AppCompatActivity
     public boolean onMarkerClick(Marker marker) {
         boolean consumeEvent = false;
         for (AbstractMarkerDelegate delegate : delegates) {
-            if(delegate.onMarkerClick(marker))
+            if (delegate.onMarkerClick(marker))
                 consumeEvent = true;
         }
         return consumeEvent;
