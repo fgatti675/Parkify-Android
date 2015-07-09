@@ -400,7 +400,7 @@ public class NavigationDrawerFragment extends Fragment {
             itemTypes = new int[totalElements];
 
             int i = 0;
-            for (Car car : cars) {
+            for (;i<cars.size();) {
                 itemTypes[i++] = CAR_TYPE;
             }
 
