@@ -1,5 +1,6 @@
 package com.cahue.iweco.setCarLocation;
 
+import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -40,6 +41,11 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
     }
 
     @Override

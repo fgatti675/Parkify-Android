@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -181,6 +182,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
         super.onCreate(savedInstanceState);
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
@@ -321,17 +323,26 @@ public class MapsActivity extends AppCompatActivity
 
         showFacebookAppInvite();
 
-        handleIntent();
+    }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
+        Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
+        String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
+        getSetCarLocationDelegate().setRequestLocation(location, time, address);
+
+        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
+        mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
     }
 
     private void handleIntent() {
         Intent intent = getIntent();
         if (intent.hasExtra(Constants.INTENT_CAR_EXTRA_UPDATE_REQUEST)) {
-            Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
-            Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
-            String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
-            getSetCarLocationDelegate().setRequestLocation(location, time, address);
+
+
+            setIntent(null);
+
         }
     }
 
@@ -627,7 +638,6 @@ public class MapsActivity extends AppCompatActivity
         setInitialCamera();
 
         alertIfNoCars();
-
     }
 
     private void alertIfNoCars() {
