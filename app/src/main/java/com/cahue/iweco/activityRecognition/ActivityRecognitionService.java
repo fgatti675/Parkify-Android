@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.cahue.iweco.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -27,6 +28,8 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      * Used when requesting or removing activity detection updates.
      */
     private PendingIntent mActivityDetectionPendingIntent;
+    private Intent intent;
+    private int startId;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -45,38 +48,64 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                 .addApi(ActivityRecognition.API)
                 .build();
 
-        Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
-
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
-        // requestActivityUpdates() and removeActivityUpdates().
-        mActivityDetectionPendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        mGoogleApiClient.connect();
 
     }
 
     @Override
     public void onDestroy() {
         Log.v(TAG, "onDestroy");
-        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, mActivityDetectionPendingIntent);
         mGoogleApiClient.disconnect();
     }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        this.intent = intent;
+        this.startId = startId;
+
         Log.v(TAG, "onStartCommand");
-        return Service.START_STICKY_COMPATIBILITY;
+
+        if (intent.getAction() != null)
+            mGoogleApiClient.connect();
+
+        return Service.START_NOT_STICKY;
     }
 
     @Override
     public void onConnected(Bundle bundle) {
+
         Log.v(TAG, "onConnected");
+
+        if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION)) {
+            startActivityRecognition();
+        } else if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION)) {
+            stopActivityDetection();
+        } else {
+            throw new RuntimeException("ActivityRecognitionService must be started with a valid  action");
+        }
+
+        stopSelf(startId);
+    }
+
+    private void startActivityRecognition() {
+
+        Log.i(TAG, "Starting activity recognition");
+
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(
                 mGoogleApiClient,
                 DETECTION_INTERVAL_IN_MILLISECONDS,
-                mActivityDetectionPendingIntent
+                getActivityDetectionPendingIntent()
         );
+
+    }
+
+    private void stopActivityDetection() {
+
+        Log.i(TAG, "Stopping activity recognition");
+
+        ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
+
     }
 
     @Override
@@ -87,6 +116,16 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    private PendingIntent getActivityDetectionPendingIntent() {
+        if (mActivityDetectionPendingIntent == null) {
+            Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
+            // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
+            // requestActivityUpdates() and removeActivityUpdates().
+            mActivityDetectionPendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        return mActivityDetectionPendingIntent;
     }
 
 
