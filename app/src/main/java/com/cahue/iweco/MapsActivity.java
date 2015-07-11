@@ -485,6 +485,13 @@ public class MapsActivity extends AppCompatActivity
         return setCarLocationDelegate;
     }
 
+
+    private void setMapPadding(int bottomPadding) {
+        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
+
+    }
+
+
     private void showDetails() {
 
         detailsContainer.setVisibility(View.VISIBLE);
@@ -499,6 +506,10 @@ public class MapsActivity extends AppCompatActivity
                 int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                 animation.setDuration(mediumAnimTime);
 
+                setMapPadding(height);
+                for (CameraUpdateRequester requester : cameraUpdateRequesterList)
+                    requester.onMapResized();
+
                 animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -510,9 +521,6 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        setMapPadding(height);
-                        for (CameraUpdateRequester requester : cameraUpdateRequesterList)
-                            requester.onMapResized();
                     }
 
                     @Override
@@ -531,10 +539,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void setMapPadding(int bottomPadding) {
-        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
-
-    }
 
     @Override
     public void hideDetails() {
@@ -552,13 +556,13 @@ public class MapsActivity extends AppCompatActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                setMapPadding(0);
+
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.removeAllViews();
                 detailsContainer.setVisibility(View.INVISIBLE);
+                detailsContainer.removeAllViews();
 
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
                 params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -574,6 +578,7 @@ public class MapsActivity extends AppCompatActivity
         detailsContainer.startAnimation(animation);
         myLocationButton.startAnimation(animation);
 
+        detailsFragment = null;
     }
 
     @Override
