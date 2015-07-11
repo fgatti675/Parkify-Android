@@ -99,6 +99,7 @@ public abstract class LocationPollerService extends Service implements
             start();
 
         }
+
         handler.postDelayed(finishTimeoutRunnable, SERVICE_TIMEOUT_MS);
 
         return START_STICKY_COMPATIBILITY;

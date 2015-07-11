@@ -3,6 +3,7 @@ package com.cahue.iweco;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityRecognition.ParkedCarRequestedService;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
@@ -158,6 +160,8 @@ public class MapsActivity extends AppCompatActivity
      *
      */
     private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
+
+    private BluetoothAdapter mBtAdapter;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -323,6 +327,16 @@ public class MapsActivity extends AppCompatActivity
         checkWIMC();
 
         showFacebookAppInvite();
+
+        /**
+         * If BT is not enabled, start activity recognition service
+         */
+        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!mBtAdapter.isEnabled()) {
+            Intent intent = new Intent(this, ActivityRecognitionService.class);
+            intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
+            this.startService(intent);
+        }
 
     }
 

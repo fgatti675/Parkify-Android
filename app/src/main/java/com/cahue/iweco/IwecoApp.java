@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
@@ -28,12 +27,6 @@ public class IwecoApp extends Application {
 
         iwecoApp = this;
         
-        /**
-         * Start activity recognition
-         */
-        Intent intent = new Intent(this, ActivityRecognitionService.class);
-        startService(intent);
-
         /**
          * Start Facebook SDK
          */

@@ -21,10 +21,10 @@ public class Constants {
     public static final float PARKED_DISTANCE_THRESHOLD = 90;
     public static final float GEOFENCE_RADIUS_IN_METERS = 60;
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 8 * 60 * 60 * 1000;
+
     /**
      * Intents
      */
-
     public static final String INTENT_USER_INFO_UPDATE = BuildConfig.APPLICATION_ID + ".INTENT_USER_INFO_UPDATE";
 
     // updated address
@@ -51,6 +51,10 @@ public class Constants {
     // billing
     public static final String INTENT_BILLING_READY = BuildConfig.APPLICATION_ID + ".INTENT_BILLING_READY";
     public static final String INTENT_NEW_PURCHASE = BuildConfig.APPLICATION_ID + ".INTENT_NEW_PURCHASE";
+
+    // Activity detection
+    public static final String ACTION_START_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".ACTION_START_ACTIVITY_RECOGNITION";
+    public static final String INTENT_STOP_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".INTENT_STOP_ACTIVITY_RECOGNITION";
 
     /**
      * Average walking speed
