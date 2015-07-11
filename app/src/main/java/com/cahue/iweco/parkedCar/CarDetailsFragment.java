@@ -2,11 +2,9 @@ package com.cahue.iweco.parkedCar;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -38,18 +36,12 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     // the fragment initialization parameter
     private static final String ARG_CAR_ID = "car_ID";
-
+    CarViewHolder carViewHolder;
+    ParkedCarDelegate parkedCarDelegate;
     private Location userLocation;
-
     private String carId;
     private Car car;
-
     private OnCarPositionDeletedListener mListener;
-
-    CarViewHolder carViewHolder;
-
-    ParkedCarDelegate parkedCarDelegate;
-
     private CarDatabase carDatabase;
 
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
@@ -66,6 +58,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     };
 
+    public CarDetailsFragment() {
+        // Required empty public constructor
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -78,10 +74,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         args.putString(ARG_CAR_ID, carId);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public CarDetailsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -120,7 +112,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private void updateLayout() {
 
-        if(car == null){
+        if (car == null) {
             mListener.onCarRemoved(carId);
             return;
         }
@@ -146,31 +138,18 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         return view;
     }
 
-    private void showClearDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.remove_car_confirm)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        if (mListener != null) {
-                            mListener.onCarRemoved(carId);
-                        }
-                        CarsSync.clearLocation(carDatabase, getActivity(), car);
-                        parkedCarDelegate.removeCar();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
-        // Create the AlertDialog object and return it
-        builder.create().show();
+    private void removeCarLocation() {
+        if (mListener != null) {
+            mListener.onCarRemoved(carId);
+        }
+        CarsSync.clearLocation(carDatabase, getActivity(), car);
+        parkedCarDelegate.removeCar();
     }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
-        if (view != null ) {
+        if (view != null) {
             carViewHolder.updateDistance(getActivity(), userLocation, car.location);
         }
     }
@@ -219,7 +198,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
                 updateFollowButtonState();
                 return true;
             case R.id.action_clear:
-                showClearDialog();
+                removeCarLocation();
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);

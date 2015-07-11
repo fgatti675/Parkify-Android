@@ -49,6 +49,8 @@ import java.util.List;
  */
 public class NavigationDrawerFragment extends Fragment {
 
+    private static final boolean ADS_ENABLED = false;
+
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
     /**
      * A pointer to the current callbacks instance (the Activity).
@@ -214,6 +216,8 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void setUpAd() {
+
+        if(!ADS_ENABLED) return;
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override

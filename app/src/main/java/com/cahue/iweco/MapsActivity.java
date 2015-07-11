@@ -186,7 +186,6 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
         super.onCreate(savedInstanceState);
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
@@ -247,7 +246,6 @@ public class MapsActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         if (BuildConfig.DEBUG) {
-            setDebugConfig();
             setDebugConfig();
         }
 
@@ -351,15 +349,7 @@ public class MapsActivity extends AppCompatActivity
         mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
     }
 
-    private void handleIntent() {
-        Intent intent = getIntent();
-        if (intent.hasExtra(Constants.INTENT_CAR_EXTRA_UPDATE_REQUEST)) {
 
-
-            setIntent(null);
-
-        }
-    }
 
     public void checkIweco() {
         if ("wimc".equals(BuildConfig.FLAVOR)) {
@@ -509,8 +499,6 @@ public class MapsActivity extends AppCompatActivity
                 int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                 animation.setDuration(mediumAnimTime);
 
-                setMapPaddingAndNotify(height, true);
-
                 animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -522,6 +510,9 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
+                        setMapPadding(height);
+                        for (CameraUpdateRequester requester : cameraUpdateRequesterList)
+                            requester.onMapResized();
                     }
 
                     @Override
@@ -540,11 +531,9 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void setMapPaddingAndNotify(int bottomPadding, boolean notify) {
+    private void setMapPadding(int bottomPadding) {
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
-        if (notify)
-            for (CameraUpdateRequester requester : cameraUpdateRequesterList)
-                requester.onMapResized();
+
     }
 
     @Override
@@ -554,7 +543,7 @@ public class MapsActivity extends AppCompatActivity
 
         detailsDisplayed = false;
 
-        setMapPaddingAndNotify(0, false);
+        setMapPadding(0);
 
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -563,13 +552,13 @@ public class MapsActivity extends AppCompatActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
+                setMapPadding(0);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.setVisibility(View.INVISIBLE);
                 detailsContainer.removeAllViews();
+                detailsContainer.setVisibility(View.INVISIBLE);
 
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
                 params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -585,7 +574,6 @@ public class MapsActivity extends AppCompatActivity
         detailsContainer.startAnimation(animation);
         myLocationButton.startAnimation(animation);
 
-        detailsFragment = null;
     }
 
     @Override
@@ -946,6 +934,8 @@ public class MapsActivity extends AppCompatActivity
     public void setDetailsFragment(DetailsFragment fragment) {
 
         if (isFinishing()) return;
+
+        detailsContainer.removeAllViews();
 
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 

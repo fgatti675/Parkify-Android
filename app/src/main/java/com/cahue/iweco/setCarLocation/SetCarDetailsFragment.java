@@ -120,8 +120,9 @@ public class SetCarDetailsFragment extends DetailsFragment {
 
             GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
             List<Car> cars = carDatabase.retrieveCars(false);
-            buttonsLayout.setAdapter(new ImageAdapter( cars));
 
+            if(!cars.isEmpty())
+                buttonsLayout.setAdapter(new ButtonAdapter(cars));
 
             Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
             view.startAnimation(fadeInAnimation);
@@ -193,10 +194,11 @@ public class SetCarDetailsFragment extends DetailsFragment {
         }
     }
 
-    public class ImageAdapter extends BaseAdapter {
+    public class ButtonAdapter extends BaseAdapter {
+
         private List<Car> cars;
 
-        public ImageAdapter( List<Car> cars) {
+        public ButtonAdapter(List<Car> cars) {
             this.cars = cars;
         }
 
@@ -212,7 +214,7 @@ public class SetCarDetailsFragment extends DetailsFragment {
             return position;
         }
 
-        // create a new ImageView for each item referenced by the Adapter
+        // create a new Button for each item referenced by the Adapter
         public View getView(int position, View convertView, ViewGroup parent) {
             Button button;
             final Car car = cars.get(position);
@@ -221,7 +223,7 @@ public class SetCarDetailsFragment extends DetailsFragment {
                         inflate(R.layout.button_borderless,
                                 parent,
                                 false);
-
+//                button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_car_grey600_24dp, 0, 0, 0);
             } else {
                 button = (Button) convertView;
             }
