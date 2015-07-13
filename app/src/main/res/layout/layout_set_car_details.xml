@@ -1,0 +1,89 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:cahue="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/car_image"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false"
+        android:background="@color/theme_accent"
+        android:cropToPadding="false"
+        android:padding="@dimen/large_padding"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_help_circle_white_24dp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="@dimen/large_padding">
+
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/what_car_is_parked"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/body_text_1" />
+
+        <RelativeLayout
+            android:paddingTop="@dimen/default_padding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:singleLine="false"
+                android:textColor="@color/body_text_2"
+                tools:text="Hace 2 horas" />
+
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:paddingLeft="@dimen/default_padding"
+                android:singleLine="true"
+                android:textColor="@color/body_text_2"
+                tools:text="1477.3 km" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/body_text_3"
+            tools:text="Lindwurmstr. 143" />
+
+        <GridView
+            android:id="@+id/car_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:stretchMode="columnWidth"
+            android:paddingTop="@dimen/default_padding"
+            android:gravity="center"            />
+
+
+    </LinearLayout>
+
+</LinearLayout>

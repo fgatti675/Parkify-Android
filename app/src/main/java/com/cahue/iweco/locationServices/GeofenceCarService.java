@@ -1,5 +1,6 @@
 package com.cahue.iweco.locationServices;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -23,6 +25,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * This service is in charge of detecting if the user is far away enough after parking, and if so,
@@ -35,6 +38,21 @@ public class GeofenceCarService extends LocationPollerService {
     private PendingIntent mGeofencePendingIntent;
 
     private GoogleApiClient mGeofenceApiClient;
+
+    /**
+     * Start the GeoFence service after 2 minutes
+     * @param context
+     * @param carId
+     */
+    public static void startDelayedGeofenceService(Context context, String carId){
+        Intent intent = new Intent(context, GeofenceCarService.class);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carId);
+        PendingIntent pIntent = PendingIntent.getService(context, 0, intent, 0);
+        AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Log.i(TAG, "Starting delayed geofence service");
+        alarm.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 60 * 1000, pIntent);
+    }
+
     /**
      * Result receiver that will send a notification when we are approaching a parked car.
      */
@@ -91,7 +109,7 @@ public class GeofenceCarService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         if (car.location == null) return;
 
@@ -195,7 +213,7 @@ public class GeofenceCarService extends LocationPollerService {
         }
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        intent.putExtra(EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         intent.putExtra(GeofenceTransitionsIntentService.RECEIVER, geofenceResultReceiver);
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when

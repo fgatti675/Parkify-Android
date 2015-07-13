@@ -4,12 +4,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.cahue.iweco.Endpoints;
 import com.cahue.iweco.R;
-import com.cahue.iweco.spots.ParkingSpot;
 import com.google.android.gms.maps.model.LatLngBounds;
-
-import java.util.Set;
 
 /**
  * Created by francesco on 11.12.2014.

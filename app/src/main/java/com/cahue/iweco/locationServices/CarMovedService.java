@@ -16,6 +16,7 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * This class is in charge of uploading the location of the car to the server when BT connects
@@ -40,7 +41,7 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location spotLocation, Car car, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, Location spotLocation, Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);
 

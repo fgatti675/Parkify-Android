@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
-import com.cahue.iweco.parkedCar.ParkedCarDelegate;
+import com.cahue.iweco.SpotsDelegate;
 import com.cahue.iweco.util.Util;
 
 

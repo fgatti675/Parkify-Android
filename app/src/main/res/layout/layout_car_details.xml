@@ -19,7 +19,7 @@
         android:scaleType="fitStart" />
 
     <LinearLayout
-        android:id="@+id/infoLayout"
+        android:id="@+id/info_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -45,7 +45,7 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    tools:text="NAME"
+                    tools:text="Alfa Romeo Mito"
                     android:textColor="@color/body_text_1" />
 
                 <TextView
@@ -53,7 +53,7 @@
                     android:id="@+id/linked_device"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:text="DEVICE"
+                    tools:text="Blue&amp;Me"
                     android:textColor="@color/body_text_3" />
 
             </LinearLayout>
@@ -99,7 +99,7 @@
                 android:id="@+id/address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="ADDRESS"
+                tools:text="Lindwurmstr. 143"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/body_text_3" />
         </LinearLayout>

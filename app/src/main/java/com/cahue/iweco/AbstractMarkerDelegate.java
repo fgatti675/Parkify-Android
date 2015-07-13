@@ -1,5 +1,6 @@
 package com.cahue.iweco;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.location.Location;
 
@@ -20,6 +21,29 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     public abstract void doDraw();
 
+    protected DetailsViewManager detailsViewManager;
+
+    protected CameraManager cameraManager;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            this.cameraManager = (CameraManager) activity;
+            cameraManager.registerCameraUpdater(this);
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement " + CameraManager.class.getName());
+        }
+
+        try {
+            this.detailsViewManager = (DetailsViewManager) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement " + DetailsViewManager.class.getName());
+        }
+    }
     /**
      * Called when the map is ready to be used
      *
@@ -40,7 +64,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
      * Called when a marker is clicked
      *
      * @param marker
-     * @return
+     * @return true if the delegate has consumed the event
      */
     public abstract boolean onMarkerClick(Marker marker);
 
@@ -74,7 +98,9 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         tooFar = distances[0] > getDirectionsMaxDistance();
     }
 
-    public abstract float getDirectionsMaxDistance();
+    public float getDirectionsMaxDistance(){
+        return -1;
+    }
 
     public boolean isTooFar() {
         return tooFar;

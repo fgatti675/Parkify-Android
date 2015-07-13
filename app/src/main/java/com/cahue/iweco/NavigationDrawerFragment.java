@@ -49,6 +49,8 @@ import java.util.List;
  */
 public class NavigationDrawerFragment extends Fragment {
 
+    private static final boolean ADS_ENABLED = false;
+
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
     /**
      * A pointer to the current callbacks instance (the Activity).
@@ -68,8 +70,6 @@ public class NavigationDrawerFragment extends Fragment {
     private LinearLayoutManager layoutManager;
     private RecyclerViewDrawerAdapter adapter;
     private List<Car> cars;
-
-    private boolean canShareOnFacebook;
 
     private Location mLastUserLocation;
 
@@ -118,7 +118,6 @@ public class NavigationDrawerFragment extends Fragment {
         skippedLogin = AuthUtils.isSkippedLogin(getActivity());
         cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
 
-        canShareOnFacebook = AppInviteDialog.canShow();
 
     }
 
@@ -218,6 +217,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void setUpAd() {
 
+        if(!ADS_ENABLED) return;
+
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -301,7 +302,6 @@ public class NavigationDrawerFragment extends Fragment {
                 }
 
                 Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-                tracker.setScreenName(TAG);
                 tracker.send(new HitBuilders.EventBuilder()
                         .setCategory("UX")
                         .setAction("click")
@@ -326,7 +326,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
         adView.resume();
     }
@@ -383,6 +383,11 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.closeDrawers();
     }
 
+    public void setUserLocation(Location userLocation) {
+        this.mLastUserLocation = userLocation;
+        recyclerView.getAdapter().notifyDataSetChanged();
+    }
+
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -394,25 +399,31 @@ public class NavigationDrawerFragment extends Fragment {
         public static final int HELP_TYPE = 5;
         public static final int SIGN_OUT_TYPE = 6;
 
+        // each entry represents an item in the drawer
+        private int[] itemTypes;
+
+        public RecyclerViewDrawerAdapter() {
+
+            int totalElements = cars.size() + (AppInviteDialog.canShow() ? 5 : 4);
+
+            itemTypes = new int[totalElements];
+
+            int i = 0;
+            for (;i<cars.size();) {
+                itemTypes[i++] = CAR_TYPE;
+            }
+
+            itemTypes[i++] = CAR_MANAGER_TYPE;
+            if (AppInviteDialog.canShow()) itemTypes[i++] = SHARE_TYPE;
+            itemTypes[i++] = DONATE_TYPE;
+            itemTypes[i++] = HELP_TYPE;
+            itemTypes[i++] = SIGN_OUT_TYPE;
+        }
+
         @Override
         public int getItemViewType(int position) {
 
-            if (position < cars.size())
-                return CAR_TYPE;
-            else if (position == cars.size())
-                return CAR_MANAGER_TYPE;
-            else if (position == cars.size() + 1)
-                return canShareOnFacebook ? SHARE_TYPE : DONATE_TYPE;
-            else if (position == cars.size() + 2)
-                return canShareOnFacebook ? DONATE_TYPE : PREFERENCES_TYPE;
-            else if (position == cars.size() + 3)
-                return canShareOnFacebook ? PREFERENCES_TYPE : HELP_TYPE;
-            else if (position == cars.size() + 4)
-                return canShareOnFacebook ? HELP_TYPE : SIGN_OUT_TYPE;
-            else if (position == cars.size() + 5)
-                return SIGN_OUT_TYPE;
-            else
-                throw new IllegalStateException("Error in recycler view positions");
+            return itemTypes[position];
 
         }
 
@@ -468,9 +479,14 @@ public class NavigationDrawerFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         if (car.location != null) {
+
+                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id)).onCarClicked();
+
                             mCallbacks.onCarClicked(car.id);
+
                             if (mDrawerLayout != null)
                                 mDrawerLayout.closeDrawers();
+
                         } else {
                             Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
                         }
@@ -576,7 +592,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return cars.size() + (canShareOnFacebook ? 5 : 4);
+            return itemTypes.length;
         }
 
         public class MenuViewHolder extends RecyclerView.ViewHolder {

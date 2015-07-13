@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationServices.LocationPollerService;
@@ -61,7 +62,7 @@ public class DebugActivity extends Activity implements ServiceListener {
         Intent intent = new Intent(this, DebugCarMovedService.class);
 
         Car car = CarDatabase.getInstance(this).retrieveCars(false).iterator().next(); // TODO
-        intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         bindService(intent, mCarMovedConnection, Context.BIND_AUTO_CREATE);
 
         locationTextView.setText("Polling...");
@@ -72,7 +73,7 @@ public class DebugActivity extends Activity implements ServiceListener {
         Intent intent = new Intent(this, DebugParkedCarService.class);
 
         Car car = CarDatabase.getInstance(this).retrieveCars(false).iterator().next(); // TODO
-        intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         bindService(intent, mCarParkedConnection, Context.BIND_AUTO_CREATE);
 
         locationTextView.setText("Polling...");
@@ -142,7 +143,7 @@ public class DebugActivity extends Activity implements ServiceListener {
     @Override
     public void onNewLocation(Location location) {
         String string = location.toString();
-        Date startTime = (Date) location.getExtras().getSerializable(LocationPollerService.EXTRA_START_TIME);
+        Date startTime = (Date) location.getExtras().getSerializable(Constants.EXTRA_START_TIME);
         string += "\n" + (System.currentTimeMillis() - startTime.getTime()) + "ms";
         Log.d("debug", "Debug new location " + string);
         locationTextView.setText(string);
