@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:alpha="0"
         android:text="@string/previous"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@android:style/Widget.Material.Button.Borderless"
         android:id="@+id/previous"
         android:layout_alignParentBottom="true" />
 
