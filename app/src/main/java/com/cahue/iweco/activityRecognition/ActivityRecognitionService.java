@@ -2,12 +2,15 @@ package com.cahue.iweco.activityRecognition;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -30,6 +33,18 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     private PendingIntent mActivityDetectionPendingIntent;
     private Intent intent;
     private int startId;
+
+    /**
+     * Only fetch updates if BT is off and the user has requested so
+     * @param context
+     */
+    public static void startIfNecessary(Context context){
+        if (!BluetoothAdapter.getDefaultAdapter().isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context)) {
+            Intent intent = new Intent(context, ActivityRecognitionService.class);
+            intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
+            context.startService(intent);
+        }
+    }
 
     @Override
     public IBinder onBind(Intent intent) {

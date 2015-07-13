@@ -161,8 +161,6 @@ public class MapsActivity extends AppCompatActivity
      */
     private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
 
-    private BluetoothAdapter mBtAdapter;
-
     public void goToLogin() {
         if (!isFinishing()) {
 
@@ -329,12 +327,7 @@ public class MapsActivity extends AppCompatActivity
         /**
          * If BT is not enabled, start activity recognition service
          */
-        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!mBtAdapter.isEnabled()) {
-            Intent intent = new Intent(this, ActivityRecognitionService.class);
-            intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
-            this.startService(intent);
-        }
+        ActivityRecognitionService.startIfNecessary(this);
 
     }
 

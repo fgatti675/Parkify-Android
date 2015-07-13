@@ -19,6 +19,7 @@ package com.cahue.iweco.activityRecognition;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -26,6 +27,7 @@ import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
@@ -97,9 +99,9 @@ public class DetectedActivitiesIntentService extends IntentService {
 
             // If switched to on foot, previously in vehicle
             if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity)) {
-                // we create an intent to start the location poller service, as declared in manifest
-                Intent intent = new Intent(this, ParkedCarRequestedService.class);
-                this.startService(intent);
+                handleVehicleToFoot();
+            } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
+                handleFootToVehicle();
             }
 
             previousActivity = mostProbableActivity;
@@ -107,6 +109,20 @@ public class DetectedActivitiesIntentService extends IntentService {
             savePreviousActivity(previousActivity);
         }
 
+    }
+
+    private void handleVehicleToFoot() {
+        // we create an intent to start the location poller service, as declared in manifest
+        Intent intent = new Intent(this, ParkedCarRequestedService.class);
+        this.startService(intent);
+
+        if (PreferencesUtil.isBtOffLeavingVehicleEnabled(this))
+            BluetoothAdapter.getDefaultAdapter().disable();
+    }
+
+    private void handleFootToVehicle() {
+        if (PreferencesUtil.isBtOnEnteringVehicleEnabled(this))
+            BluetoothAdapter.getDefaultAdapter().enable();
     }
 
 

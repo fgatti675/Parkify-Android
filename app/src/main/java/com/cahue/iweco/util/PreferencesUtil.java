@@ -27,6 +27,12 @@ public class PreferencesUtil {
     public static final String PREF_CAMERA_LAT = "PREF_CAMERA_LAT";
     public static final String PREF_CAMERA_LONG = "PREF_CAMERA_LONG";
 
+
+    public static final String PREF_USE_MILES = "PREF_USE_MILES";
+    public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
+    public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
+    public static final String PREF_BT_OFF_LEAVE_VEHICLE = "PREF_BT_OFF_LEAVE_VEHICLE";
+
     public static boolean isTutorialShown(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_TUTORIAL_DIALOG_SHOWN, false);
@@ -105,5 +111,28 @@ public class PreferencesUtil {
         if(!prefs.contains(PREF_IWECO_PROMO_DATE))
             return  null;
         return new Date(prefs.getLong(PREF_IWECO_PROMO_DATE, 0));
+    }
+
+    public static boolean isUseMiles(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_USE_MILES, false);
+    }
+
+    public static void setUseMiles(Context context, boolean use) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_USE_MILES, use).apply();
+    }
+
+    public static boolean isMovementRecognitionEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION, false);
+    }
+    public static boolean isBtOnEnteringVehicleEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_BT_ON_ENTER_VEHICLE, false);
+    }
+    public static boolean isBtOffLeavingVehicleEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_BT_OFF_LEAVE_VEHICLE, false);
     }
 }

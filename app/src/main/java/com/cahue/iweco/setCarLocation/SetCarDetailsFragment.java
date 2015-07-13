@@ -25,6 +25,7 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.FetchAddressIntentService;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 
 import java.util.Date;
@@ -144,7 +145,7 @@ public class SetCarDetailsFragment extends DetailsFragment {
         if (userLocation != null) {
             float distanceM = location.distanceTo(userLocation);
 
-            if (Util.isImperialMetricsLocale(getActivity())) {
+            if (PreferencesUtil.isUseMiles(getActivity())) {
                 distance.setText(String.format("%.1f miles", distanceM / 1609.34));
             } else {
                 distance.setText(String.format("%.1f km", distanceM / 1000));

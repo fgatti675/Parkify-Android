@@ -27,6 +27,8 @@ import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.Util;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -486,6 +488,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 break;
         }
 
+        // set default miles use
+        PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
 
         setResult(RESULT_OK, intent);
         finish();

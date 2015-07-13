@@ -76,9 +76,8 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Start activity recognition
          */
-        Intent intent = new Intent(context, ActivityRecognitionService.class);
-        intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
-        context.startService(intent);
+
+        ActivityRecognitionService.startIfNecessary(context);
     }
 
     public void onBtConnected(Context context, Car car) {
