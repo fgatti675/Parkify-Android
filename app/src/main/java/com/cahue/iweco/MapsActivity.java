@@ -502,14 +502,13 @@ public class MapsActivity extends AppCompatActivity
 
                 final int height = detailsContainer.getMeasuredHeight();
 
-                TranslateAnimation animation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
-                int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-                animation.setDuration(mediumAnimTime);
-
                 setMapPadding(height);
                 for (CameraUpdateRequester requester : cameraUpdateRequesterList)
                     requester.onMapResized();
 
+                TranslateAnimation animation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
+                int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                animation.setDuration(mediumAnimTime);
                 animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -556,7 +555,7 @@ public class MapsActivity extends AppCompatActivity
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
+                setMapPadding(0);
             }
 
             @Override
@@ -577,8 +576,6 @@ public class MapsActivity extends AppCompatActivity
 
         detailsContainer.startAnimation(animation);
         myLocationButton.startAnimation(animation);
-
-        detailsFragment = null;
     }
 
     @Override
@@ -939,8 +936,6 @@ public class MapsActivity extends AppCompatActivity
     public void setDetailsFragment(DetailsFragment fragment) {
 
         if (isFinishing()) return;
-
-        detailsContainer.removeAllViews();
 
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
