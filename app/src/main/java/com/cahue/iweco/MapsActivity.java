@@ -1056,7 +1056,7 @@ public class MapsActivity extends AppCompatActivity
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
                 else
-                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT);
+                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT).show();
             }
         });
 

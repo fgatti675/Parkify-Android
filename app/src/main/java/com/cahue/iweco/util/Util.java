@@ -1,5 +1,6 @@
 package com.cahue.iweco.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -27,6 +28,7 @@ public class Util {
 
     public static final String TAPPED_PROVIDER = "Tapped";
 
+    @SuppressLint("SimpleDateFormat")
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     static {

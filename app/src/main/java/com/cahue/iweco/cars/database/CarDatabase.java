@@ -421,7 +421,9 @@ public class CarDatabase {
                     new String[]{Car.COLUMN_ID},
                     null, null, null, null, null);
 
-            return cursor.getCount() == 0;
+            boolean res = cursor.getCount() == 0;
+            cursor.close();
+            return res;
         } finally {
             database.close();
         }
