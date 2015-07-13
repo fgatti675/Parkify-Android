@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.ColorUtil;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 
 /**
@@ -110,7 +111,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
     public void updateDistance(Context context, Location userLocation, Location carLocation) {
         if (userLocation != null && carLocation != null) {
             float distanceM = carLocation.distanceTo(userLocation);
-            if (Util.isImperialMetricsLocale(context)) {
+            if (PreferencesUtil.isUseMiles(context)) {
                 distance.setText(String.format("%.1f miles", distanceM / 1609.34));
             } else {
                 distance.setText(String.format("%.1f km", distanceM / 1000));

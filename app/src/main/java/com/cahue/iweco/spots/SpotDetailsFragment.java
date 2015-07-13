@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
 import com.cahue.iweco.SpotsDelegate;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 
 
@@ -152,7 +153,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
             spotLocation.setLongitude(spot.position.longitude);
             float distanceM = spotLocation.distanceTo(userLocation);
 
-            if (Util.isImperialMetricsLocale(getActivity())) {
+            if (PreferencesUtil.isUseMiles(getActivity())) {
                 distance.setText(String.format("%.1f miles", distanceM / 1609.34));
             } else {
                 distance.setText(String.format("%.1f km", distanceM / 1000));

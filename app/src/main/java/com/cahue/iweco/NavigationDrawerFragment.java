@@ -404,7 +404,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         public RecyclerViewDrawerAdapter() {
 
-            int totalElements = cars.size() + (AppInviteDialog.canShow() ? 5 : 4);
+            int totalElements = cars.size() + (AppInviteDialog.canShow() ? 6 : 5);
 
             itemTypes = new int[totalElements];
 
@@ -416,6 +416,7 @@ public class NavigationDrawerFragment extends Fragment {
             itemTypes[i++] = CAR_MANAGER_TYPE;
             if (AppInviteDialog.canShow()) itemTypes[i++] = SHARE_TYPE;
             itemTypes[i++] = DONATE_TYPE;
+            itemTypes[i++] = PREFERENCES_TYPE;
             itemTypes[i++] = HELP_TYPE;
             itemTypes[i++] = SIGN_OUT_TYPE;
         }

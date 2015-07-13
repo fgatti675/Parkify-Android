@@ -1,11 +1,14 @@
 package com.cahue.iweco;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Button;
+
+import com.cahue.iweco.util.PreferencesUtil;
 
 import java.util.List;
 
@@ -18,26 +21,26 @@ public class IwecoPreferencesActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Add a button to the header list.
-        if (hasHeaders()) {
-            Button button = new Button(this);
-            button.setText("Some action");
-            setListFooter(button);
-        }
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new PreferencesFragment())
+                .commit();
     }
 
-    /**
-     * Populate the activity with the top-level headers.
-     */
-    @Override
-    public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.preference_headers, target);
-    }
+//    /**
+//     * Populate the activity with the top-level headers.
+//     */
+//    @Override
+//    public void onBuildHeaders(List<Header> target) {
+//        loadHeadersFromResource(R.xml.preference_headers, target);
+//    }
+//
 
     /**
      * This fragment shows the preferences for the first header.
      */
-    public static class Prefs1Fragment extends PreferenceFragment {
+    public static class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -50,6 +53,36 @@ public class IwecoPreferencesActivity extends PreferenceActivity {
 
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.fragmented_preferences);
+            updateBtPreferencesState(PreferencesUtil.isMovementRecognitionEnabled(getActivity()));
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                                              String key) {
+
+            if (key.equals(PreferencesUtil.PREF_MOVEMENT_RECOGNITION)) {
+                boolean enableBtPreferences = sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true);
+                updateBtPreferencesState(enableBtPreferences);
+            }
+        }
+
+        private void updateBtPreferencesState(boolean enableBtPreferences) {
+            getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableBtPreferences);
+            getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_OFF_LEAVE_VEHICLE).setEnabled(enableBtPreferences);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            getPreferenceScreen().getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            getPreferenceScreen().getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(this);
         }
     }
 
