@@ -17,7 +17,7 @@
 
     <item >
         <bitmap
-            android:id="@+id/Idofbg2"
+            android:id="@+id/Idofbg1"
             android:gravity="center"
             android:src="@drawable/bg_spots" />
     </item>

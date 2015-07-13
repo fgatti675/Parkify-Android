@@ -37,7 +37,7 @@ public class Constants {
     public static final String INTENT_CAR_UPDATED = BuildConfig.APPLICATION_ID + ".INTENT_CAR_UPDATED";
 
 
-    public static final String INTENT_CAR_EXTRA_UPDATE_REQUEST = BuildConfig.APPLICATION_ID + ".EXTRA_UPDATE_REQUEST";
+    public static final String ACTION_CAR_EXTRA_UPDATE_REQUEST = BuildConfig.APPLICATION_ID + ".EXTRA_UPDATE_REQUEST";
 
     // extra fields
     public static final String INTENT_CAR_EXTRA_ID = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_ID";
@@ -54,7 +54,7 @@ public class Constants {
 
     // Activity detection
     public static final String ACTION_START_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".ACTION_START_ACTIVITY_RECOGNITION";
-    public static final String INTENT_STOP_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".INTENT_STOP_ACTIVITY_RECOGNITION";
+    public static final String ACTION_STOP_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".ACTION_STOP_ACTIVITY_RECOGNITION";
 
     /**
      * Average walking speed

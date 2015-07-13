@@ -46,6 +46,12 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         }
     }
 
+    public static void stop(Context context){
+            Intent intent = new Intent(context, ActivityRecognitionService.class);
+            intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
+            context.startService(intent);
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, "onBind");

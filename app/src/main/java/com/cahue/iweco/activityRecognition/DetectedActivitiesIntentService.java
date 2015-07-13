@@ -115,14 +115,13 @@ public class DetectedActivitiesIntentService extends IntentService {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent(this, ParkedCarRequestedService.class);
         this.startService(intent);
-
-        if (PreferencesUtil.isBtOffLeavingVehicleEnabled(this))
-            BluetoothAdapter.getDefaultAdapter().disable();
     }
 
     private void handleFootToVehicle() {
-        if (PreferencesUtil.isBtOnEnteringVehicleEnabled(this))
+        if (PreferencesUtil.isBtOnEnteringVehicleEnabled(this)) {
             BluetoothAdapter.getDefaultAdapter().enable();
+            ActivityRecognitionService.stop(this);
+        }
     }
 
 

@@ -31,7 +31,6 @@ public class PreferencesUtil {
     public static final String PREF_USE_MILES = "PREF_USE_MILES";
     public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
     public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
-    public static final String PREF_BT_OFF_LEAVE_VEHICLE = "PREF_BT_OFF_LEAVE_VEHICLE";
 
     public static boolean isTutorialShown(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -127,12 +126,9 @@ public class PreferencesUtil {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION, false);
     }
+
     public static boolean isBtOnEnteringVehicleEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_BT_ON_ENTER_VEHICLE, false);
-    }
-    public static boolean isBtOffLeavingVehicleEnabled(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PREF_BT_OFF_LEAVE_VEHICLE, false);
     }
 }

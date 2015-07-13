@@ -549,7 +549,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         private void bindPreferences(MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.preferences);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_facebook_box_grey600_24dp);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_settings_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

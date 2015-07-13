@@ -4,13 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.widget.Button;
 
 import com.cahue.iweco.util.PreferencesUtil;
-
-import java.util.List;
 
 /**
  * Created by f.gatti.gomez on 08/07/15.
@@ -53,7 +48,6 @@ public class IwecoPreferencesActivity extends PreferenceActivity {
 
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.fragmented_preferences);
-            updateBtPreferencesState(PreferencesUtil.isMovementRecognitionEnabled(getActivity()));
         }
 
         @Override
@@ -68,14 +62,16 @@ public class IwecoPreferencesActivity extends PreferenceActivity {
 
         private void updateBtPreferencesState(boolean enableBtPreferences) {
             getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableBtPreferences);
-            getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_OFF_LEAVE_VEHICLE).setEnabled(enableBtPreferences);
         }
 
         @Override
         public void onResume() {
             super.onResume();
-            getPreferenceScreen().getSharedPreferences()
-                    .registerOnSharedPreferenceChangeListener(this);
+            SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+
+            updateBtPreferencesState(sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, false));
         }
 
         @Override

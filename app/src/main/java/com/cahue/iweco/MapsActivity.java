@@ -3,7 +3,6 @@ package com.cahue.iweco;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -333,15 +332,16 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
-        Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
-        String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
-        getSetCarLocationDelegate().setRequestLocation(location, time, address);
+        if (intent.getAction().equals(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST)) {
+            Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
+            Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
+            String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
+            getSetCarLocationDelegate().setRequestLocation(location, time, address);
 
-        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-        mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
+            NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
+            mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
+        }
     }
-
 
 
     public void checkIweco() {

@@ -26,13 +26,6 @@
             android:summary="@string/bt_on_vehicle_description"
             android:title="@string/bt_on_vehicle" />
 
-        <SwitchPreference
-            android:id="@+id/bt_off"
-            android:defaultValue="false"
-            android:key="PREF_BT_OFF_LEAVE_VEHICLE"
-            android:summary="@string/bt_off_vehicle_description"
-            android:title="@string/bt_off_vehicle" />
-
     </PreferenceCategory>
 
 </PreferenceScreen>
