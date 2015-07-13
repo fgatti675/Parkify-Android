@@ -775,6 +775,8 @@ public class MapsActivity extends AppCompatActivity
         if (detailsFragment != null)
             detailsFragment.setUserLocation(location);
 
+        mNavigationDrawerFragment.setUserLocation(location);
+
         /**
          * Set initial zoom level
          */
