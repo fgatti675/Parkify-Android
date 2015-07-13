@@ -69,18 +69,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- DEBUG -->
-        <activity
-            android:name=".debug.DebugActivity"
-            android:parentActivityName=".MapsActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MapsActivity" />
-        </activity>
-
-        <service android:name=".debug.DebugCarMovedService" />
-        <service android:name=".debug.DebugParkedCarService" />
-
         <activity
             android:name=".login.LoginActivity"
             android:label="@string/common_signin_button_text"

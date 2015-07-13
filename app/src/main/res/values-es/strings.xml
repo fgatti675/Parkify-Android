@@ -6,7 +6,7 @@
     <!-- DeviceListActivity -->
     <string name="scanning">Buscando dispositivos...</string>
     <string name="select_device_long">Todo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte.\nNecesitarás tener el Bluetooth disponible y los servicios de localizacion activados</string>
-    <string name="none_paired">No se ha vinculado ningun dispositivo.</string>
+    <string name="none_paired">No se ha vinculado ningún dispositivo.</string>
     <string name="none_found">No se han encontrado dispositivos.</string>
     <string name="button_scan">Busca otros dispositivos</string>
     <string name="remove_link">Quitar vinculo</string>
@@ -23,8 +23,8 @@
     <string name="car_not_found">La posicion del coche no ha sido establecida.</string>
     <string name="bt_not_available">El bluetooth esta desactivado.</string>
     <string name="bt_linked_to">Se guardará la posicion del coche al desconectarse de %1$s.</string>
-    <string name="car_was_here">El coche estaba aqui %s.</string>
-    <string name="car_dialog_text">¿Quieres establecer la posicion del coche aqui?</string>
+    <string name="car_was_here">El coche estaba aquí %s.</string>
+    <string name="car_dialog_text">¿Quieres establecer la posicion del coche aquí?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
 

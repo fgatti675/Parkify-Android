@@ -32,7 +32,6 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.debug.DebugActivity;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.locationServices.ParkedCarService;
@@ -1026,7 +1025,7 @@ public class MapsActivity extends AppCompatActivity
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
                 else
-                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT);
+                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT).show();
             }
         });
 
