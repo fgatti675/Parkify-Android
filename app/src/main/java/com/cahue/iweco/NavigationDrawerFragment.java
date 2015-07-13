@@ -49,6 +49,8 @@ import java.util.List;
  */
 public class NavigationDrawerFragment extends Fragment {
 
+    private static final boolean ADS_ENABLED = false;
+
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
     /**
      * A pointer to the current callbacks instance (the Activity).
@@ -215,6 +217,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void setUpAd() {
 
+        if(!ADS_ENABLED) return;
+
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -322,7 +326,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATE));
+        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
         adView.resume();
     }
@@ -475,9 +479,14 @@ public class NavigationDrawerFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         if (car.location != null) {
+
+                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id)).onCarClicked();
+
                             mCallbacks.onCarClicked(car.id);
+
                             if (mDrawerLayout != null)
                                 mDrawerLayout.closeDrawers();
+
                         } else {
                             Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
                         }

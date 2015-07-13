@@ -13,6 +13,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -29,7 +30,13 @@ public class CarsSync {
     private static final String TAG = CarsSync.class.getSimpleName();
 
     public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
+        Log.i(TAG, "Storing car " + car);
+
+        if(BuildConfig.DEBUG)
+            Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
+
         carDatabase.saveAndBroadcast(car);
+
         if (!AuthUtils.isSkippedLogin(context))
             postCar(car, context, carDatabase);
     }

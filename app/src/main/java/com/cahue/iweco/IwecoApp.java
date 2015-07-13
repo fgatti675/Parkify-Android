@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -26,8 +27,14 @@ public class IwecoApp extends Application {
 
         iwecoApp = this;
         
+        /**
+         * Start Facebook SDK
+         */
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        /**
+         * Start Google analytics
+         */
         analytics = GoogleAnalytics.getInstance(this);
         analytics.setLocalDispatchPeriod(1800);
 

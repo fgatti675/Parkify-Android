@@ -10,10 +10,7 @@
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/large_padding"
-        android:paddingRight="@dimen/large_padding"
-        android:paddingTop="@dimen/default_padding"
-        android:paddingBottom="@dimen/default_padding"
+        android:padding="@dimen/large_padding"
         android:src="@drawable/ic_heart_white_36dp" />
 
     <TextView
@@ -21,12 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:text="Title"
-        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:textColor="@color/body_text_1"
-        android:paddingLeft="@dimen/large_padding"
-        android:paddingRight="@dimen/large_padding"
-        android:paddingTop="@dimen/default_padding"
-        android:paddingBottom="@dimen/default_padding"
+        android:padding="@dimen/large_padding"
         android:layout_gravity="center" />
 
 </LinearLayout>

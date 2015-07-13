@@ -9,6 +9,7 @@
     <string name="none_found">No devices found</string>
     <string name="button_scan">Scan for devices</string>
     <string name="remove_link">Remove link</string>
+    <string name="activate_bluetooth">Activate Bluetooth</string>
     <string name="link_removed">Bluetooth device link removed</string>
     <string name="link_device">Link device</string>
     <string name="help">Help</string>
@@ -22,7 +23,7 @@
     <string name="bt_not_available">Bluetooth is not available</string>
     <string name="bt_linked_to">Car location will be stored on disconnection from %1$s</string>
     <string name="car_was_here">Car was here %s</string>
-    <string name="car_dialog_text">Would you like to set the car position here?</string>
+    <string name="what_car_is_parked">What car is parked here?</string>
     <string name="no_cars">No cars!</string>
     <string name="no_cars_long">You didn\'t set up any cars. Create one now\?</string>
     <string name="car">Car</string>
@@ -39,7 +40,6 @@
     <string name="purchase_account_error">You need a user account associated</string>
     <string name="pick_account">You must select an account in order to use this application</string>
     <string name="other">Other</string>
-    <string name="activate_bluetooth">Activate Bluetooth</string>
 
     <string name="car_name_select">Car name</string>
     <string name="edit">Edit</string>
@@ -69,5 +69,7 @@
 
     <string name="share">Invite your friends</string>
     <string name="share_promo">How about inviting your Facebook friends and telling them their parking needs could be solved by sharing this app? :)</string>
+    <string name="ask_just_parked">Did you just park?</string>
+    <string name="free_spot">Free parking spot</string>
 
 </resources>

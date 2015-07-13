@@ -15,31 +15,34 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="REFRESH"
+        android:text="Refresh"
         android:id="@+id/refresh" />
 
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableTop="@drawable/ic_car_white_24dp"
+        android:id="@+id/act_recog"
+        android:text="Act. recog."
+        android:textColor="@color/white"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/approaching"
         android:text="Approaching"
-        android:textColor="@color/white"
-        android:layout_above="@+id/park" />
+        android:textColor="@color/white" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableTop="@drawable/ic_car_white_24dp"
         android:id="@+id/park"
         android:text="Park"
-        android:textColor="@color/white"
-        android:layout_above="@+id/driveOff" />
+        android:textColor="@color/white" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableTop="@drawable/ic_car_white_24dp"
         android:id="@+id/driveOff"
         android:text="Drive off"
         android:textColor="@color/white" />

@@ -23,7 +23,7 @@
     <string name="bt_not_available">Bluetooth non è disponibile</string>
     <string name="bt_linked_to">La posizione della macchina verrà registrata in disconnessione da %1$s</string>
     <string name="car_was_here">La macchina era qui %s</string>
-    <string name="car_dialog_text">Ti piacerebbe impostare la posizione della macchina qui?</string>
+    <string name="what_car_is_parked">Quale macchina e parcheggiata qui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancella</string>
 
@@ -73,5 +73,7 @@
 
     <string name="share">Invita i tuoi amici</string>
     <string name="share_promo">Perche non condividere con i tuoi amici di Facebook? :)</string>
+    <string name="ask_just_parked">Hai appena parcheggiato?</string>
+    <string name="free_spot">Posto libero</string>
 
 </resources>

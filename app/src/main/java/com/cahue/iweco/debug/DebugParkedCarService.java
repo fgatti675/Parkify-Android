@@ -9,8 +9,10 @@ import android.util.Log;
 
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.Date;
 
 /**
 * Created by Francesco on 17/10/2014.
@@ -22,9 +24,9 @@ public class DebugParkedCarService extends ParkedCarService {
     ServiceListener serviceListener;
 
     @Override
-    public void onPreciseFixPolled(Context context, Location spotLocation, Car car, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, Location spotLocation, Car car, Date startTime, GoogleApiClient googleApiClient) {
         car = CarDatabase.getInstance(context).retrieveCars(false).iterator().next(); // TODO
-        super.onPreciseFixPolled(context, spotLocation, car, googleApiClient);
+        super.onPreciseFixPolled(context, spotLocation, car, startTime, googleApiClient);
         serviceListener.onNewLocation(spotLocation);
     }
 

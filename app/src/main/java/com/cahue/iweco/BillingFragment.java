@@ -35,6 +35,8 @@ public class BillingFragment extends Fragment {
     private static String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
     private static String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
 
+    private String packageName;
+
     public static BillingFragment newInstance() {
         BillingFragment fragment = new BillingFragment();
         Bundle args = new Bundle();
@@ -70,7 +72,16 @@ public class BillingFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        packageName = activity.getPackageName();
         bindBillingService();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (iInAppBillingService != null) {
+            getActivity().unbindService(mBillingServiceConn);
+        }
     }
 
     private void bindBillingService() {
@@ -83,10 +94,6 @@ public class BillingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if (iInAppBillingService != null) {
-            getActivity().unbindService(mBillingServiceConn);
-        }
-
     }
 
     public Bundle queryAvailableItems() {
@@ -105,7 +112,7 @@ public class BillingFragment extends Fragment {
             skuList.add(PRODUCT_DONATION_5_ADMINISTERED);
             Bundle querySkus = new Bundle();
             querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
-            return iInAppBillingService.getSkuDetails(3, getActivity().getPackageName(), "inapp", querySkus);
+            return iInAppBillingService.getSkuDetails(3, packageName, "inapp", querySkus);
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
@@ -118,7 +125,7 @@ public class BillingFragment extends Fragment {
 
     public Bundle getPurchases() {
         try {
-            Bundle bundle = iInAppBillingService.getPurchases(3, getActivity().getPackageName(), "inapp", null);
+            Bundle bundle = iInAppBillingService.getPurchases(3, packageName, "inapp", null);
             return bundle;
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -157,7 +164,7 @@ public class BillingFragment extends Fragment {
         try {
 
             Bundle buyIntentBundle = iInAppBillingService.getBuyIntent(3,
-                    getActivity().getPackageName(),
+                    packageName,
                     sku,
                     "inapp",
                     UUID.randomUUID().toString());

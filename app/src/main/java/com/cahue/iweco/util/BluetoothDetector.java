@@ -1,14 +1,16 @@
 package com.cahue.iweco.util;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.cahue.iweco.Constants;
+import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.locationServices.CarMovedService;
-import com.cahue.iweco.locationServices.LocationPollerService;
-import com.cahue.iweco.locationServices.ParkedCarService;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 
@@ -16,7 +18,6 @@ import java.util.Set;
 
 public class BluetoothDetector extends BroadcastReceiver {
 
-    BluetoothDevice device;
 
     /**
      * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
@@ -24,32 +25,60 @@ public class BluetoothDetector extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+        if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+            if(state == BluetoothAdapter.STATE_ON) {
+                onBtTurnedOn(context);
+            } else if(state == BluetoothAdapter.STATE_OFF) {
+                onBtTurnedOff(context);
+            }
+        } else {
 
-        String address = device.getAddress();
-        String name = device.getName();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-        Log.d("Bluetooth", "Bluetooth: " + intent.getAction());
-        Log.d("Bluetooth", device.getName() + " " + address);
+            String address = device.getAddress();
+            String name = device.getName();
 
-        // we need to get which BT device the user chose as the one of his car
+            Log.d("Bluetooth", "Bluetooth: " + intent.getAction());
+            Log.d("Bluetooth", device.getName() + " " + address);
 
-        CarDatabase carDatabase = CarDatabase.getInstance(context);
-        Set<String> storedAddress = carDatabase.getPairedBTAddresses();
+            // we need to get which BT device the user chose as the one of his car
 
-        // If the device we just disconnected from is our chosen one
-        if (storedAddress.contains(address)) {
+            CarDatabase carDatabase = CarDatabase.getInstance(context);
+            Set<String> storedAddress = carDatabase.getPairedBTAddresses();
 
-            Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
+            // If the device we just disconnected from is our chosen one
+            if (storedAddress.contains(address)) {
 
-            Car car = carDatabase.findByBTAddress(address);
+                Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
-            if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                onBtDisconnected(context, car);
-            } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-                onBtConnected(context, car);
+                Car car = carDatabase.findByBTAddress(address);
+
+                if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                    onBtDisconnected(context, car);
+                } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
+                    onBtConnected(context, car);
+                }
             }
         }
+    }
+
+    private void onBtTurnedOn(Context context) {
+        /**
+         * Stop activity recognition
+         */
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        intent.setAction(Constants.INTENT_STOP_ACTIVITY_RECOGNITION);
+        context.startService(intent);
+    }
+
+    private void onBtTurnedOff(Context context) {
+        /**
+         * Start activity recognition
+         */
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
+        context.startService(intent);
     }
 
     public void onBtConnected(Context context, Car car) {
@@ -59,7 +88,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, CarMovedService.class);
-        intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         context.startService(intent);
 
     }
@@ -71,7 +100,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, ParkedCarService.class);
-        intent.putExtra(LocationPollerService.EXTRA_CAR, car.id);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
         context.startService(intent);
 
     }
