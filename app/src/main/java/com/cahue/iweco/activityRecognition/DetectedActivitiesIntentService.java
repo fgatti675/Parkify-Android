@@ -87,7 +87,7 @@ public class DetectedActivitiesIntentService extends IntentService {
         // Log each activity.
         Log.d(TAG, "Activities detected");
         for (DetectedActivity da : result.getProbableActivities()) {
-            Log.v(TAG, getActivityString(da.getType()) + " " + da.getConfidence() + "%");
+            Log.v(TAG, da.toString());
         }
 
         if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
@@ -127,15 +127,13 @@ public class DetectedActivitiesIntentService extends IntentService {
 
 
     private void showDebugNotification(ActivityRecognitionResult result, DetectedActivity mostProbableActivity) {
-        String typeString = getActivityString(mostProbableActivity.getType());
-
         String previousText = previousActivity != null ?
-                "Previous: " + getActivityString(previousActivity.getType()) + " (" + previousActivity.getConfidence() + "%)\n" :
+                "Previous: " + previousActivity.toString() + "\n" :
                 "Previous unknown\n";
 
         StringBuilder stringBuilder = new StringBuilder(previousText);
         for (DetectedActivity detectedActivity : result.getProbableActivities()) {
-            stringBuilder.append(getActivityString(detectedActivity.getType()) + " (" + detectedActivity.getConfidence() + "%)\n");
+            stringBuilder.append(detectedActivity.toString() + "\n");
         }
 
         long[] pattern = {0, 100, 1000};
@@ -144,34 +142,13 @@ public class DetectedActivitiesIntentService extends IntentService {
                 new Notification.Builder(this)
                         .setVibrate(pattern)
                         .setSmallIcon(R.drawable.ic_navigation_cancel)
-                        .setContentTitle(typeString + " (" + mostProbableActivity.getConfidence() + "%)")
+                        .setContentTitle(mostProbableActivity.toString())
                         .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
                         .setContentText(previousText);
 
         mNotifyMgr.notify(null, 7908772, mBuilder.build());
     }
 
-
-    private String getActivityString(int type) {
-        if (type == DetectedActivity.UNKNOWN)
-            return "Unknown";
-        else if (type == DetectedActivity.IN_VEHICLE)
-            return "In Vehicle";
-        else if (type == DetectedActivity.ON_BICYCLE)
-            return "On Bicycle";
-        else if (type == DetectedActivity.ON_FOOT)
-            return "On Foot";
-        else if (type == DetectedActivity.STILL)
-            return "Still";
-        else if (type == DetectedActivity.TILTING)
-            return "Tilting";
-        else if (type == DetectedActivity.WALKING)
-            return "Walking";
-        else if (type == DetectedActivity.RUNNING)
-            return "Running";
-        else
-            return "";
-    }
 
     private boolean isVehicleRelated(DetectedActivity detectedActivity) {
         if (BuildConfig.DEBUG && detectedActivity.getType() == DetectedActivity.ON_BICYCLE)
