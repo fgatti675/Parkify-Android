@@ -45,6 +45,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
 
     private static DetectedActivity previousActivity;
+    private static DetectedActivity previousPreviousActivity;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -97,13 +98,16 @@ public class DetectedActivitiesIntentService extends IntentService {
                 showDebugNotification(result, mostProbableActivity);
             }
 
-            // If switched to on foot, previously in vehicle
-            if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity)) {
-                handleVehicleToFoot();
-            } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
-                handleFootToVehicle();
+            if (previousActivity != null) {
+                // If switched to on foot, previously in vehicle
+                if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity)) {
+                    handleVehicleToFoot();
+                } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
+                    handleFootToVehicle();
+                }
             }
 
+            previousPreviousActivity = previousActivity;
             previousActivity = mostProbableActivity;
 
             savePreviousActivity(previousActivity);
@@ -148,6 +152,10 @@ public class DetectedActivitiesIntentService extends IntentService {
         mNotifyMgr.notify(null, 7908772, mBuilder.build());
     }
 
+    private boolean isInteresting(DetectedActivity detectedActivity) {
+        return (detectedActivity.getType() == DetectedActivity.IN_VEHICLE && detectedActivity.getConfidence() > 95)
+                || (detectedActivity.getType() == DetectedActivity.ON_FOOT && detectedActivity.getConfidence() > 100);
+    }
 
     private boolean isVehicleRelated(DetectedActivity detectedActivity) {
         if (BuildConfig.DEBUG && detectedActivity.getType() == DetectedActivity.ON_BICYCLE)

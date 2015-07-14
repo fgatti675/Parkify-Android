@@ -12,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -560,6 +559,8 @@ public class MapsActivity extends AppCompatActivity
                 params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 myLocationButton.setLayoutParams(params); //causes layout update
 
+                checkIfNoCars();
+
             }
 
             @Override
@@ -635,22 +636,14 @@ public class MapsActivity extends AppCompatActivity
 
         setInitialCamera();
 
-        alertIfNoCars();
+        checkIfNoCars();
     }
 
-    private void alertIfNoCars() {
+    private void checkIfNoCars() {
 
-        if (carDatabase.isEmpty()) {
-            Snackbar.make(findViewById(R.id.main_container), R.string.nocars, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.create, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            goToCarManager();
-                        }
-                    })
-                    .show();
+        if (carDatabase.isEmpty() && !detailsDisplayed) {
+            setDetailsFragment(NoCarsFragment.newInstance());
         }
-
 
     }
 

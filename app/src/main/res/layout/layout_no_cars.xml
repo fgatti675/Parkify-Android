@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground"
+    android:layout_centerVertical="true">
+
+    <ImageView
+        android:layout_width="56dp"
+        android:layout_height="72dp"
+        android:src="@drawable/ic_car_grey600_24dp"
+        android:paddingBottom="@dimen/large_padding"
+        android:paddingLeft="@dimen/large_padding"
+        android:paddingTop="@dimen/large_padding"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="fitStart" />
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/no_cars_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/no_cars"
+                android:textColor="@color/body_text_1" />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_car_instructions"/>
+
+            <Button
+                android:id="@+id/add_car"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add"
+                android:theme="@style/CahueTheme.Button.Accent"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
+
+</LinearLayout>
+

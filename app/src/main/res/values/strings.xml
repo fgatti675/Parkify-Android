@@ -24,8 +24,6 @@
     <string name="bt_linked_to">Car location will be stored on disconnection from %1$s</string>
     <string name="car_was_here">Car was here %s</string>
     <string name="what_car_is_parked">What car is parked here?</string>
-    <string name="no_cars">No cars!</string>
-    <string name="no_cars_long">You didn\'t set up any cars. Create one now\?</string>
     <string name="car">Car</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -58,8 +56,9 @@
     <string name="edit_cars">Edit cars</string>
     <string name="position_not_set">Car position is not set</string>
     <string name="follow">Follow</string>
-    <string name="nocars">You didn\'t add a car yet</string>
-    <string name="create">Add</string>
+    <string name="no_cars">You didn\'t add a car yet!</string>
+    <string name="add_car_instructions">Add a new car to get automatic parking updates</string>
+    <string name="add">Add</string>
 
     <string name="install">Install</string>
     <string name="uninstall_WIMC">After installing iweco you don\'t need Where is my Car? anymore. Would you like to uninstall?</string>
@@ -70,6 +69,6 @@
     <string name="share">Invite your friends</string>
     <string name="share_promo">How about inviting your Facebook friends and telling them their parking needs could be solved by sharing this app? :)</string>
     <string name="ask_just_parked">Did you just park?</string>
-    <string name="free_spot">Free parking spot</string>
+    <string name="free_spot">Available parking spot</string>
 
 </resources>

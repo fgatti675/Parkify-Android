@@ -44,8 +44,6 @@
     <string name="edit">Cambia</string>
     <string name="pick_color">Scegli il colore della macchina</string>
     <string name="gcm_error" >Error retrieving device ID</string>
-    <string name="no_cars_long">Non ci sono macchine registrate. Registrare una adesso?</string>
-    <string name="no_cars">Senza macchine!</string>
     <string name="add_car_no_bt">Agiungi macchina senza Bluetooth</string>
     <string name="delete_car">Elimina macchina</string>
     <string name="delete_car_confirmation">Sicuro che vuoi eliminare questa macchina?</string>
@@ -61,8 +59,9 @@
     <string name="edit_cars">Edita le macchine</string>
     <string name="position_not_set">Posizione sconosciuta</string>
     <string name="follow">Segui</string>
-    <string name="nocars">Non hai aggiunto nessuna macchina</string>
-    <string name="create">Aggiungi</string>
+    <string name="no_cars">Non hai aggiunto nessuna macchina</string>
+    <string name="add_car_instructions">Se lo fai, saprai sempre dov\'è parcheggiata!</string>
+    <string name="add">Aggiungi</string>
 
     <string name="install">Installare</string>
     <string name="uninstall_WIMC">Se iweco è installato non è più necessaria Where is my car?. Disinstallare?</string>
