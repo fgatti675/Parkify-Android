@@ -116,9 +116,6 @@ public class NavigationDrawerFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         skippedLogin = AuthUtils.isSkippedLogin(getActivity());
-        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
-
-
     }
 
     @Override
@@ -150,6 +147,8 @@ public class NavigationDrawerFragment extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+
+        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
 
         adapter = new RecyclerViewDrawerAdapter();
         recyclerView.setAdapter(adapter);
@@ -326,6 +325,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
         adView.resume();

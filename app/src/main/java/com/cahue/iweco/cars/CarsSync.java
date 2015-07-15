@@ -63,43 +63,47 @@ public class CarsSync {
 
         Log.i(TAG, "Removing car " + car);
 
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("https")
-                .authority(context.getResources().getString(R.string.baseURL))
-                .appendPath(context.getResources().getString(R.string.carsPath))
-                .appendPath(car.id);
+        if (!AuthUtils.isSkippedLogin(context)) {
 
-        /**
-         * Send a Json with the cars contained in this phone
-         */
-        Request removeRequest = new Requests.DeleteRequest(
-                context,
-                builder.toString(),
-                new Response.Listener<String>() {
-                    /**
-                     * Here we are receiving cars that were modified by other clients and
-                     * their state is outdated here
-                     *
-                     * @param response
-                     */
-                    @Override
-                    public void onResponse(String response) {
-                        Log.i(TAG, "Car deleted : " + response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
-                        database.saveAndBroadcast(car);
-                        error.printStackTrace();
-                    }
-                });
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("https")
+                    .authority(context.getResources().getString(R.string.baseURL))
+                    .appendPath(context.getResources().getString(R.string.carsPath))
+                    .appendPath(car.id);
+
+            /**
+             * Send a Json with the cars contained in this phone
+             */
+            Request removeRequest = new Requests.DeleteRequest(
+                    context,
+                    builder.toString(),
+                    new Response.Listener<String>() {
+                        /**
+                         * Here we are receiving cars that were modified by other clients and
+                         * their state is outdated here
+                         *
+                         * @param response
+                         */
+                        @Override
+                        public void onResponse(String response) {
+                            Log.i(TAG, "Car deleted : " + response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
+                            database.saveAndBroadcast(car);
+                            error.printStackTrace();
+                        }
+                    });
+
+            // Add the request to the RequestQueue.
+            queue.add(removeRequest);
+        }
 
         database.delete(car);
 
-        // Add the request to the RequestQueue.
-        queue.add(removeRequest);
     }
 
     /**

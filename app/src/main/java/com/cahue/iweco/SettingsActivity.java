@@ -4,23 +4,31 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.Toolbar;
 
 import com.cahue.iweco.util.PreferencesUtil;
 
 /**
  * Created by f.gatti.gomez on 08/07/15.
  */
-public class IwecoPreferencesActivity extends PreferenceActivity {
+public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_preferences);
 
-        // Display the fragment as the main content.
-        getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new PreferencesFragment())
-                .commit();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        toolbar.setTitle(R.string.preferences);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.elevation));
+
+//        // Display the fragment as the main content.
+//        getFragmentManager().beginTransaction()
+//                .replace(android.R.id.content, new PreferencesFragment())
+//                .commit();
     }
 
 //    /**

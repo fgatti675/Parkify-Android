@@ -1,7 +1,6 @@
 package com.cahue.iweco;
 
 import android.app.Application;
-import android.content.Intent;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -16,17 +15,19 @@ public class IwecoApp extends Application {
 
     public static GoogleAnalytics analytics;
     public static Tracker tracker;
-
+    private static IwecoApp iwecoApp;
     private RequestQueue mRequestQueue;
 
-    private static IwecoApp iwecoApp;
+    public static IwecoApp getIwecoApp() {
+        return iwecoApp;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         iwecoApp = this;
-        
+
         /**
          * Start Facebook SDK
          */
@@ -39,10 +40,11 @@ public class IwecoApp extends Application {
         analytics.setLocalDispatchPeriod(1800);
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
-        tracker.enableExceptionReporting(true);
-        tracker.enableAdvertisingIdCollection(true);
-        tracker.enableAutoActivityTracking(true);
-
+        if (!BuildConfig.DEBUG) {
+            tracker.enableExceptionReporting(true);
+            tracker.enableAdvertisingIdCollection(true);
+            tracker.enableAutoActivityTracking(true);
+        }
     }
 
     public synchronized Tracker getTracker() {
@@ -60,9 +62,5 @@ public class IwecoApp extends Application {
             mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         }
         return mRequestQueue;
-    }
-
-    public static IwecoApp getIwecoApp() {
-        return iwecoApp;
     }
 }

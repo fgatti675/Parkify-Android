@@ -4,7 +4,7 @@
     <string name="app_name">iweco</string>
 
     <!-- DeviceListActivity -->
-    <string name="scanning">Buscando dispositivos...</string>
+    <string name="scanning">Buscando dispositivos…</string>
     <string name="select_device_long">Todo lo que tienes que hacer es seleccionar el dispositivo Bluetooth de tu coche y olvidarte.\nNecesitarás tener el Bluetooth disponible y los servicios de localizacion activados</string>
     <string name="none_paired">No se ha vinculado ningún dispositivo.</string>
     <string name="none_found">No se han encontrado dispositivos.</string>
@@ -59,7 +59,7 @@
     <string name="position_not_set">Ubicación desconocida</string>
     <string name="follow">Seguir</string>
     <string name="no_cars">No has registrado ningún coche</string>
-    <string name="add_car_instructions">Si lo haces, sabrás siempre dónde está aparcado. ¿Hacerlo ahora?</string>
+    <string name="add_car_instructions">Si lo haces, ¡siempre sabrás dónde está aparcado y dejarás de dar vueltas a la manzana!</string>
     <string name="add">Añadir</string>
 
     <string name="install">Instalar</string>

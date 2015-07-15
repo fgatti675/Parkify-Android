@@ -1,48 +1,43 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:id="@+id/contentLayout"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/large_padding"
-    android:baselineAligned="false">
+    android:layout_centerVertical="true"
+    android:layout_weight="1"
+    android:baselineAligned="false"
+    android:orientation="vertical"
+    android:padding="@dimen/large_padding">
 
-    <LinearLayout
-        android:id="@+id/contentLayout"
-        android:layout_width="0dp"
+
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_centerVertical="true">
+        android:padding="@dimen/abc_control_inset_material"
+        android:text="@string/car_name_select"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:padding="@dimen/abc_control_inset_material"
-            android:text="@string/car_name_select" />
+    <EditText
+        android:id="@+id/name_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/car_name_select"
+        android:inputType="textNoSuggestions|textCapWords" />
 
-        <EditText
-            android:id="@+id/name_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/car_name_select"
-            android:inputType="textNoSuggestions|textCapWords" />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_control_inset_material" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/abc_control_inset_material"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/abc_control_inset_material"
+        android:text="@string/pick_color"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:padding="@dimen/abc_control_inset_material"
-            android:text="@string/pick_color" />
+    <Spinner
+        android:id="@+id/color_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <Spinner
-            android:id="@+id/color_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
 
 </LinearLayout>

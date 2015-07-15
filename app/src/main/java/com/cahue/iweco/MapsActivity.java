@@ -271,7 +271,6 @@ public class MapsActivity extends AppCompatActivity
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
         /**
          * There is no saved instance so we create a few things
          */
@@ -314,18 +313,7 @@ public class MapsActivity extends AppCompatActivity
         detailsContainer = (CardView) findViewById(R.id.marker_details_container);
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-
         registerCameraUpdater(this);
-
-        checkIweco();
-        checkWIMC();
-
-        showFacebookAppInvite();
-
-        /**
-         * If BT is not enabled, start activity recognition service
-         */
-        ActivityRecognitionService.startIfNecessary(this);
 
     }
 
@@ -383,7 +371,7 @@ public class MapsActivity extends AppCompatActivity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mNavigationDrawerFragment.setRetainInstance(true);
+//        mNavigationDrawerFragment.setRetainInstance(true);
 
         // Set up the drawer.
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -479,8 +467,8 @@ public class MapsActivity extends AppCompatActivity
 
 
     private void setMapPadding(int bottomPadding) {
+        if (mMap == null) return;
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
-
     }
 
 
@@ -536,9 +524,18 @@ public class MapsActivity extends AppCompatActivity
 
         if (!detailsDisplayed) return;
 
+        if (carDatabase.isEmpty()) {
+            setNoCars();
+            return;
+        }
+
         detailsDisplayed = false;
 
         setMapPadding(0);
+
+        if (carDatabase.isEmpty()) {
+            setNoCars();
+        }
 
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -558,8 +555,6 @@ public class MapsActivity extends AppCompatActivity
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
                 params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 myLocationButton.setLayoutParams(params); //causes layout update
-
-                checkIfNoCars();
 
             }
 
@@ -620,7 +615,12 @@ public class MapsActivity extends AppCompatActivity
                 delegate.onDetailsClosed();
                 delegate.setCameraFollowing(false);
             }
-            hideDetails();
+
+            if (detailsFragment instanceof NoCarsFragment) {
+                super.onBackPressed();
+            } else {
+                hideDetails();
+            }
         } else {
             super.onBackPressed();
         }
@@ -631,20 +631,35 @@ public class MapsActivity extends AppCompatActivity
 
         super.onResume();
 
+        /**
+         * Show some dialogs in case the user is bored
+         */
+        checkIweco();
+        checkWIMC();
+        showFacebookAppInvite();
+
+        /**
+         * If BT is not enabled, start activity recognition service (if enabled)
+         */
+        ActivityRecognitionService.startIfNecessary(this);
+
+        /**
+         * Set no cars details if database is empty
+         */
+        if (carDatabase.isEmpty()) {
+            setNoCars();
+        } else {
+            if(detailsFragment instanceof NoCarsFragment) hideDetails();
+        }
+
         // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
 
         setInitialCamera();
-
-        checkIfNoCars();
     }
 
-    private void checkIfNoCars() {
-
-        if (carDatabase.isEmpty() && !detailsDisplayed) {
-            setDetailsFragment(NoCarsFragment.newInstance());
-        }
-
+    private void setNoCars() {
+        setDetailsFragment(NoCarsFragment.newInstance());
     }
 
     @Override
@@ -723,7 +738,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void goToPreferences() {
-        startActivity(new Intent(this, IwecoPreferencesActivity.class));
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     public void goToTutorial() {
@@ -843,6 +858,9 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapLongClick(LatLng latLng) {
         Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
+
+        if(carDatabase.isEmpty())
+            return;
 
         Location location = new Location(Util.TAPPED_PROVIDER);
         location.setLatitude(latLng.latitude);

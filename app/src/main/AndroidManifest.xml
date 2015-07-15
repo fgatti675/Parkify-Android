@@ -196,7 +196,7 @@
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <activity android:name=".IwecoPreferencesActivity" />
+        <activity android:name=".SettingsActivity" />
 
         <receiver android:name="com.cahue.iweco.util.BootReceiver">
             <intent-filter>

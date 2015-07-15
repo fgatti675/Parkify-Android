@@ -5,13 +5,12 @@
     android:background="?android:attr/selectableItemBackground"
     android:layout_centerVertical="true">
 
+
     <ImageView
-        android:layout_width="56dp"
-        android:layout_height="72dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="@dimen/large_padding"
         android:src="@drawable/ic_car_grey600_24dp"
-        android:paddingBottom="@dimen/large_padding"
-        android:paddingLeft="@dimen/large_padding"
-        android:paddingTop="@dimen/large_padding"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
         android:scaleType="fitStart" />
@@ -20,7 +19,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="@dimen/large_padding">
 
             <TextView
                 android:id="@+id/no_cars_title"
@@ -34,6 +34,8 @@
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingTop="@dimen/default_padding"
+                android:paddingBottom="@dimen/default_padding"
                 android:text="@string/add_car_instructions"/>
 
             <Button

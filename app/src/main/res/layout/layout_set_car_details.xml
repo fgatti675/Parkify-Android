@@ -32,7 +32,6 @@
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/what_car_is_parked"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/body_text_1" />

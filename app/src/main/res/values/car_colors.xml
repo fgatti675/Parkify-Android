@@ -29,6 +29,7 @@
         <item>@string/car_gold</item>
         <item>@string/car_orange</item>
         <item>@string/car_pink</item>
+        <item>@string/car_olive</item>
     </array>
 
     <string name="car_white">White</string>

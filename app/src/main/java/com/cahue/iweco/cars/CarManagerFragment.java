@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -259,13 +260,15 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
          */
         CarsSync.storeCar(carDatabase, getActivity(), car);
 
-        Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-        tracker.setScreenName(TAG);
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory("UX")
-                .setAction("edit")
-                .setLabel("Car edited")
-                .build());
+        if(!BuildConfig.DEBUG) {
+            Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+            tracker.setScreenName(TAG);
+            tracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("UX")
+                    .setAction("edit")
+                    .setLabel("Car edited")
+                    .build());
+        }
     }
 
     public void onCarRemoved(Car car) {

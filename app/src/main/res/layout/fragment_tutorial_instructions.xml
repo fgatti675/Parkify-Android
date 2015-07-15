@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:paddingTop="@dimen/large_padding"
+            android:paddingTop="@dimen/default_padding"
             android:text="@string/info_parking_text_header"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:id="@+id/header"

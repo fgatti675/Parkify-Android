@@ -3,7 +3,7 @@
     <!-- Strings related to login -->
     <string name="disconnect">Uscire</string>
 
-    <string name="login_benefits">per sincronizzare le macchine online, o...</string>
+    <string name="login_benefits">per sincronizzare le macchine online, o…</string>
 
     <string name="sign_in">Registrati</string>
     <string name="google_sign_in">Registrati con Google</string>

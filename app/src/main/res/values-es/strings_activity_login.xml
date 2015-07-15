@@ -3,7 +3,7 @@
     <!-- Strings related to login -->
     <string name="disconnect">Desconectar</string>
 
-    <string name="login_benefits">para permitir que los coches se almacenen en la nube y la sincronización entre dispositivos, o...</string>
+    <string name="login_benefits">para permitir que los coches se almacenen en la nube y la sincronización entre dispositivos, o…</string>
 
 
     <string name="sign_in">Iniciar sesión</string>
