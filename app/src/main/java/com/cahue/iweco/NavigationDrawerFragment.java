@@ -31,7 +31,6 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
-import com.cahue.iweco.util.DividerItemDecoration;
 import com.cahue.iweco.util.LoadProfileImage;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.ads.AdRequest;
@@ -146,9 +145,8 @@ public class NavigationDrawerFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+//        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
 
         adapter = new RecyclerViewDrawerAdapter();
         recyclerView.setAdapter(adapter);
@@ -171,6 +169,9 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
+        adapter.setUpElements();
 
         billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
         if (billingFragment == null)
@@ -216,7 +217,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void setUpAd() {
 
-        if(!ADS_ENABLED) return;
+        if (!ADS_ENABLED) return;
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override
@@ -300,12 +301,14 @@ public class NavigationDrawerFragment extends Fragment {
                     return;
                 }
 
-                Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-                tracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("UX")
-                        .setAction("click")
-                        .setLabel("Drawer open")
-                        .build());
+                if (BuildConfig.DEBUG) {
+                    Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+                    tracker.send(new HitBuilders.EventBuilder()
+                            .setCategory("UX")
+                            .setAction("click")
+                            .setLabel("Drawer open")
+                            .build());
+                }
 
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
@@ -388,6 +391,11 @@ public class NavigationDrawerFragment extends Fragment {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 
+    private void setUpUserDetails() {
+        usernameTextView.setText(AuthUtils.getLoggedUsername(getActivity()));
+        emailTextView.setText(AuthUtils.getEmail(getActivity()));
+        new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
+    }
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -402,14 +410,14 @@ public class NavigationDrawerFragment extends Fragment {
         // each entry represents an item in the drawer
         private int[] itemTypes;
 
-        public RecyclerViewDrawerAdapter() {
+        public void setUpElements() {
 
             int totalElements = cars.size() + (AppInviteDialog.canShow() ? 6 : 5);
 
             itemTypes = new int[totalElements];
 
             int i = 0;
-            for (;i<cars.size();) {
+            for (; i < cars.size(); ) {
                 itemTypes[i++] = CAR_TYPE;
             }
 
@@ -609,13 +617,6 @@ public class NavigationDrawerFragment extends Fragment {
                 title = (TextView) itemView.findViewById(R.id.title);
             }
         }
-    }
-
-
-    private void setUpUserDetails() {
-        usernameTextView.setText(AuthUtils.getLoggedUsername(getActivity()));
-        emailTextView.setText(AuthUtils.getEmail(getActivity()));
-        new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
     }
 
 

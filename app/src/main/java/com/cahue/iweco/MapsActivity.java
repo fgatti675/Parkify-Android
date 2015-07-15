@@ -51,6 +51,7 @@ import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
@@ -184,6 +185,10 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+
+        Tracker tracker = ((IwecoApp) getApplication()).getTracker();
+        tracker.setScreenName(TAG);
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
@@ -326,7 +331,6 @@ public class MapsActivity extends AppCompatActivity
         for (String id : carIds) {
             delegates.add(getParkedCarDelegate(id));
         }
-
 
         /**
          * Show some dialogs in case the user is bored
@@ -508,7 +512,6 @@ public class MapsActivity extends AppCompatActivity
 
 
     private void setMapPadding(int bottomPadding) {
-        if (mMap == null) return;
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
     }
 

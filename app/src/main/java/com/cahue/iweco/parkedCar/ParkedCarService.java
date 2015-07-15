@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.cars.Car;
@@ -45,13 +46,15 @@ public class ParkedCarService extends LocationPollerService {
         CarDatabase carDatabase = CarDatabase.getInstance(context);
         CarsSync.storeCar(carDatabase, context, car);
 
-        Tracker tracker = ((IwecoApp) getApplication()).getTracker();
-        tracker.setScreenName(TAG);
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory("IO")
-                .setAction("post")
-                .setLabel("Car update")
-                .build());
+        if (BuildConfig.DEBUG) {
+            Tracker tracker = ((IwecoApp) getApplication()).getTracker();
+            tracker.setScreenName(TAG);
+            tracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("IO")
+                    .setAction("post")
+                    .setLabel("Car update")
+                    .build());
+        }
 
         /**
          * If the location of the car is good enough we can set a geofence afterwards.

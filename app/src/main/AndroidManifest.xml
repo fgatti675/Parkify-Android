@@ -110,6 +110,15 @@
                 android:value=".MapsActivity" />
         </activity>
 
+        <activity
+            android:name=".SettingsActivity"
+            android:parentActivityName=".MapsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MapsActivity" />
+        </activity>
+
+
         <provider
             android:name="com.cahue.iweco.cars.database.CarsProvider"
             android:authorities="com.cahue.iweco.cars"
@@ -195,8 +204,6 @@
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-        <activity android:name=".SettingsActivity" />
 
         <receiver android:name="com.cahue.iweco.util.BootReceiver">
             <intent-filter>

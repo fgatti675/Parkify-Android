@@ -19,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.MapsActivity;
@@ -111,6 +112,9 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         super.onCreate(savedInstanceState);
 
+        tracker = ((IwecoApp) getApplication()).getTracker();
+        tracker.setScreenName("Login");
+
         gcm = GoogleCloudMessaging.getInstance(this);
 
         if (savedInstanceState != null) {
@@ -196,9 +200,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
         });
 
-        tracker = ((IwecoApp) getApplication()).getTracker();
-        tracker.setScreenName("Login");
-
     }
 
     private void setUpGoogleApiClientIfNeeded() {
@@ -245,12 +246,13 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         onConnectingStatusChange(true);
 
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory("UX")
-                .setAction("click")
-                .setLabel("Google Login")
-                .build());
-
+        if (BuildConfig.DEBUG) {
+            tracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("UX")
+                    .setAction("click")
+                    .setLabel("Google Login")
+                    .build());
+        }
     }
 
     protected void onAuthTokenSet(final String authToken, final LoginType type) {

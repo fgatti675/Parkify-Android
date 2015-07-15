@@ -30,8 +30,6 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
     Location requestLocation;
 
     Marker marker;
-    private GoogleMap mMap;
-
 
     private IconGenerator iconGenerator;
 
@@ -65,7 +63,7 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
         LatLng latLng = new LatLng(requestLocation.getLatitude(), requestLocation.getLongitude());
 
-        marker = mMap.addMarker(new MarkerOptions()
+        marker = getMap().addMarker(new MarkerOptions()
                 .position(latLng)
                 .snippet("")
                 .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("?")))
@@ -113,7 +111,7 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
     @Override
     public void onMapReady(GoogleMap map) {
-        this.mMap = map;
+        super.onMapReady(map);
     }
 
 

@@ -42,7 +42,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private IconGenerator iconGenerator;
 
-    private GoogleMap mMap;
     private OnCarClickedListener carSelectedListener;
 
     private int lightColor;
@@ -104,7 +103,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         this.car = CarDatabase.getInstance(getActivity()).find(carId);
 
-        if (mMap == null || !isResumed()) return;
+        if (getMap() == null || !isResumed()) return;
 
         if (car == null || car.location == null) {
             clear();
@@ -122,16 +121,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     @Override
     public void onMapReady(GoogleMap map) {
-        this.mMap = map;
+        super.onMapReady(map);
         directionsDelegate.setMap(map);
         update(true);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        this.mMap = null;
-    }
 
     public void doDraw() {
 
@@ -175,7 +169,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private Tracker getTracker() {
         Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-        tracker.setScreenName(TAG);
         return tracker;
     }
 
@@ -204,7 +197,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         if (name == null)
             name = getActivity().getResources().getText(R.string.car).toString();
 
-        carMarker = mMap.addMarker(new MarkerOptions()
+        carMarker = getMap().addMarker(new MarkerOptions()
                 .position(carLatLng)
                 .snippet("")
                 .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(name.toUpperCase())))
@@ -217,7 +210,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
                 .strokeColor(lightColor)
                 .strokeWidth(0);
 
-        accuracyCircle = mMap.addCircle(circleOptions);
+        accuracyCircle = getMap().addCircle(circleOptions);
 
     }
 
@@ -284,7 +277,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     public boolean updateCameraIfFollowing() {
 
-        if (mMap == null || !isResumed()) return false;
+        if (getMap() == null || !isResumed()) return false;
 
         if (following) {
             return zoomToSeeBoth();
@@ -357,12 +350,14 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
             onCarClicked();
 
-            Tracker tracker = getTracker();
-            tracker.send(new HitBuilders.EventBuilder()
-                    .setCategory("UX")
-                    .setAction("click")
-                    .setLabel("Car clicked")
-                    .build());
+            if (BuildConfig.DEBUG) {
+                Tracker tracker = getTracker();
+                tracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("UX")
+                        .setAction("click")
+                        .setLabel("Car clicked")
+                        .build());
+            }
             return true;
         } else {
             setCameraFollowing(false);

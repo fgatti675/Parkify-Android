@@ -6,6 +6,7 @@ import android.location.Location;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -15,15 +16,13 @@ import com.google.android.gms.maps.model.Marker;
 public abstract class AbstractMarkerDelegate extends Fragment implements CameraUpdateRequester, LocationListener {
 
     protected Location userLocation;
-
+    protected DetailsViewManager detailsViewManager;
+    protected CameraManager cameraManager;
     // too far from the car to calculate directions
     private boolean tooFar = false;
+    private GoogleMap mMap;
 
     public abstract void doDraw();
-
-    protected DetailsViewManager detailsViewManager;
-
-    protected CameraManager cameraManager;
 
     @Override
     public void onAttach(Activity activity) {
@@ -56,13 +55,19 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         cameraManager.unregisterCameraUpdater(this);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mMap = null;
+    }
+
     /**
      * Called when the map is ready to be used
      *
      * @param mMap
      */
     public void onMapReady(GoogleMap mMap) {
-
+        this.mMap = mMap;
     }
 
     /**
@@ -110,11 +115,18 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         tooFar = distances[0] > getDirectionsMaxDistance();
     }
 
-    public float getDirectionsMaxDistance(){
+    public float getDirectionsMaxDistance() {
         return -1;
     }
 
     public boolean isTooFar() {
         return tooFar;
+    }
+
+    protected GoogleMap getMap() {
+        if (mMap == null) {
+            onMapReady(((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap());
+        }
+        return mMap;
     }
 }
