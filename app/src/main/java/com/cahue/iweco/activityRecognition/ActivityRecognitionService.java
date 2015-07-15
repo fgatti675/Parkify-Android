@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,7 +40,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      * @param context
      */
     public static void startIfNecessary(Context context){
-        if (!BluetoothAdapter.getDefaultAdapter().isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context)) {
+        if (!BluetoothAdapter.getDefaultAdapter().isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context) && !CarDatabase.getInstance(context).isEmpty()) {
             Intent intent = new Intent(context, ActivityRecognitionService.class);
             intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
             context.startService(intent);
@@ -100,7 +101,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION)) {
             startActivityRecognition();
-        } else if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION)) {
+        } else if (intent.getAction().equals(Constants.ACTION_STOP_ACTIVITY_RECOGNITION)) {
             stopActivityDetection();
         } else {
             throw new RuntimeException("ActivityRecognitionService must be started with a valid  action");

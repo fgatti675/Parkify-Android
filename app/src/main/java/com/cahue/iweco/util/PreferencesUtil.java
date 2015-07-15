@@ -19,6 +19,7 @@ public class PreferencesUtil {
     /*
      * Shared preferences constants
      */
+    public static final String PREF_LONG_CLICK_SHOWN = "PREF_LONG_CLICK_SHOWN";
     public static final String PREF_TUTORIAL_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
     public static final String PREF_FACEBOOK_INVITES_DIALOG_SHOWN = "PREF_FACEBOOK_INVITES_DIALOG_SHOWN";
     public static final String PREF_UNINSTALL_WIMC_SHOWN = "PREF_UNINSTALL_WIMC_SHOWN";
@@ -27,10 +28,19 @@ public class PreferencesUtil {
     public static final String PREF_CAMERA_LAT = "PREF_CAMERA_LAT";
     public static final String PREF_CAMERA_LONG = "PREF_CAMERA_LONG";
 
-
     public static final String PREF_USE_MILES = "PREF_USE_MILES";
     public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
     public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
+
+    public static boolean isLongClickToastShown(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_LONG_CLICK_SHOWN, true);
+    }
+
+    public static void setLongClickToastShown(Context context, boolean shown) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_LONG_CLICK_SHOWN, shown).apply();
+    }
 
     public static boolean isTutorialShown(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -96,6 +106,7 @@ public class PreferencesUtil {
                 .remove(PREF_FACEBOOK_INVITES_DIALOG_SHOWN)
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
                 .remove(PREF_TUTORIAL_DIALOG_SHOWN)
+                .remove(PREF_LONG_CLICK_SHOWN)
                 .apply();
     }
 

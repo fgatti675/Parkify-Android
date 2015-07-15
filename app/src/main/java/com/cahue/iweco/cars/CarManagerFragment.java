@@ -4,6 +4,7 @@ package com.cahue.iweco.cars;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -31,8 +32,11 @@ import android.widget.TextView;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
+import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -226,6 +230,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
              */
             carPosition = cars.size() - 1;
             adapter.notifyItemInserted(carPosition);
+
+            PreferencesUtil.setLongClickToastShown(getActivity(), false);
+            ActivityRecognitionService.startIfNecessary(getActivity());
+
         } else {
             for (Car existingCar : cars) {
                 if (car == existingCar) break;
@@ -262,7 +270,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         if(!BuildConfig.DEBUG) {
             Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-            tracker.setScreenName(TAG);
             tracker.send(new HitBuilders.EventBuilder()
                     .setCategory("UX")
                     .setAction("edit")

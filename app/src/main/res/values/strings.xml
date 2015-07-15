@@ -70,5 +70,6 @@
     <string name="share_promo">How about inviting your Facebook friends and telling them their parking needs could be solved by sharing this app? :)</string>
     <string name="ask_just_parked">Did you just park?</string>
     <string name="free_spot">Available parking spot</string>
+    <string name="long_click_instructions">Long click to set your car\'s position. Next time will be automatic!</string>
 
 </resources>

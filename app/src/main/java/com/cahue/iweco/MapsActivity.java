@@ -70,6 +70,7 @@ import com.google.android.gms.plus.Plus;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,7 +117,7 @@ public class MapsActivity extends AppCompatActivity
 
         }
     };
-    List<AbstractMarkerDelegate> delegates = new ArrayList();
+    List<AbstractMarkerDelegate> delegates;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -157,7 +158,7 @@ public class MapsActivity extends AppCompatActivity
     /**
      *
      */
-    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
+    private Set<CameraUpdateRequester> cameraUpdateRequesterList;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -294,6 +295,26 @@ public class MapsActivity extends AppCompatActivity
         }
 
         /**
+         * Details
+         */
+        detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
+        detailsContainer = (CardView) findViewById(R.id.marker_details_container);
+        detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
+
+        cameraUpdateRequesterList = new HashSet<>();
+        registerCameraUpdater(this);
+
+    }
+
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        delegates = new ArrayList();
+
+        /**
          * Add delegates
          */
         if (!"wimc".equals(BuildConfig.FLAVOR))
@@ -306,16 +327,36 @@ public class MapsActivity extends AppCompatActivity
             delegates.add(getParkedCarDelegate(id));
         }
 
+
         /**
-         * Details
+         * Show some dialogs in case the user is bored
          */
-        detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
-        detailsContainer = (CardView) findViewById(R.id.marker_details_container);
-        detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
+        checkIweco();
+        checkWIMC();
+        showFacebookAppInvite();
 
-        registerCameraUpdater(this);
+        /**
+         * If BT is not enabled, start activity recognition service (if enabled)
+         */
+        ActivityRecognitionService.startIfNecessary(this);
 
+        /**
+         * Set no cars details if database is empty
+         */
+        if (carDatabase.isEmpty()) {
+            setNoCars();
+        } else {
+            if (detailsFragment instanceof NoCarsFragment) hideDetails();
+        }
+
+        // when our activity resumes, we want to register for car updates
+        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
+
+        setInitialCamera();
+
+        showOnLongClickToast();
     }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -567,6 +608,15 @@ public class MapsActivity extends AppCompatActivity
         myLocationButton.startAnimation(animation);
     }
 
+    private void showOnLongClickToast() {
+        if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmpty())
+            return;
+
+        Toast.makeText(this, R.string.long_click_instructions, Toast.LENGTH_LONG).show();
+
+        PreferencesUtil.setLongClickToastShown(this, true);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -626,37 +676,6 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
-        /**
-         * Show some dialogs in case the user is bored
-         */
-        checkIweco();
-        checkWIMC();
-        showFacebookAppInvite();
-
-        /**
-         * If BT is not enabled, start activity recognition service (if enabled)
-         */
-        ActivityRecognitionService.startIfNecessary(this);
-
-        /**
-         * Set no cars details if database is empty
-         */
-        if (carDatabase.isEmpty()) {
-            setNoCars();
-        } else {
-            if(detailsFragment instanceof NoCarsFragment) hideDetails();
-        }
-
-        // when our activity resumes, we want to register for car updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
-
-        setInitialCamera();
-    }
 
     private void setNoCars() {
         setDetailsFragment(NoCarsFragment.newInstance());
@@ -847,7 +866,7 @@ public class MapsActivity extends AppCompatActivity
             }
             // zoom to user otherwise
             else {
-                setCameraFollowing(cameraFollowing);
+                setCameraFollowing(true);
             }
 
             initialCameraSet = true;
@@ -859,7 +878,7 @@ public class MapsActivity extends AppCompatActivity
     public void onMapLongClick(LatLng latLng) {
         Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
 
-        if(carDatabase.isEmpty())
+        if (carDatabase.isEmpty())
             return;
 
         Location location = new Location(Util.TAPPED_PROVIDER);
@@ -972,6 +991,11 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
         cameraUpdateRequesterList.add(cameraUpdateRequester);
+    }
+
+    @Override
+    public void unregisterCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
+        cameraUpdateRequesterList.remove(cameraUpdateRequester);
     }
 
     @Override

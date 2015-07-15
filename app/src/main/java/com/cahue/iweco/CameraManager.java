@@ -10,6 +10,9 @@ public interface CameraManager {
 
     void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester);
 
+
+    void unregisterCameraUpdater(CameraUpdateRequester cameraUpdateRequester);
+
     /**
      *
      * @param cameraUpdate

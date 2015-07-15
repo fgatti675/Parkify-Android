@@ -31,7 +31,6 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
         try {
             this.cameraManager = (CameraManager) activity;
-            cameraManager.registerCameraUpdater(this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement " + CameraManager.class.getName());
@@ -44,6 +43,19 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
                     + " must implement " + DetailsViewManager.class.getName());
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        cameraManager.registerCameraUpdater(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        cameraManager.unregisterCameraUpdater(this);
+    }
+
     /**
      * Called when the map is ready to be used
      *

@@ -74,5 +74,6 @@
     <string name="share_promo">Perche non condividere con i tuoi amici di Facebook? :)</string>
     <string name="ask_just_parked">Hai appena parcheggiato?</string>
     <string name="free_spot">Posto libero</string>
+    <string name="long_click_instructions">Click lungo per impostare la posizione della macchina!</string>
 
 </resources>
