@@ -577,10 +577,6 @@ public class MapsActivity extends AppCompatActivity
 
         setMapPadding(0);
 
-        if (carDatabase.isEmpty()) {
-            setNoCars();
-        }
-
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         animation.setDuration(mediumAnimTime);
