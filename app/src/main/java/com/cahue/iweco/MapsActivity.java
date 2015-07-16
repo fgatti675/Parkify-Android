@@ -772,6 +772,12 @@ public class MapsActivity extends AppCompatActivity
 
         if (mMap == null) return;
 
+        /**
+         * Set initial zoom level
+         */
+        setInitialCamera();
+
+
         if (cameraFollowing)
             zoomToMyLocation();
 
@@ -784,10 +790,6 @@ public class MapsActivity extends AppCompatActivity
 
         mNavigationDrawerFragment.setUserLocation(location);
 
-        /**
-         * Set initial zoom level
-         */
-        setInitialCamera();
     }
 
 
@@ -1056,7 +1058,7 @@ public class MapsActivity extends AppCompatActivity
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
                 else
-                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT);
             }
         });
 

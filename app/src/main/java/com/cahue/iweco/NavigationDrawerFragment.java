@@ -381,7 +381,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void setUserLocation(Location userLocation) {
         this.mLastUserLocation = userLocation;
-        recyclerView.getAdapter().notifyDataSetChanged();
+//        recyclerView.getAdapter().notifyDataSetChanged();
     }
 
 
