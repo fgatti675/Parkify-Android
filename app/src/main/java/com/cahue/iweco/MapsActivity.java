@@ -96,12 +96,49 @@ public class MapsActivity extends AppCompatActivity
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
+
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
+    List<AbstractMarkerDelegate> delegates = new ArrayList();
+
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(2000)         // 5 seconds
+            .setInterval(5000)         // 5 seconds
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+    // This is the helper object that connects to Google Play Services.
+    private GoogleApiClient mGoogleApiClient;
+
+    private AccountManager mAccountManager;
+
+    private CarDatabase carDatabase;
+
+    private Toolbar mToolbar;
+
+    private FloatingActionButton myLocationButton;
+    private CardView detailsContainer;
+    private DetailsFragment detailsFragment;
+    private boolean detailsDisplayed = false;
+
+
+    private boolean cameraFollowing;
+    /**
+     * The user didn't log in, but we still love him
+     */
+    private boolean mSkippedLogin;
+
+    /**
+     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     */
+    private NavigationDrawerFragment mNavigationDrawerFragment;
+
+    /**
+     * Currently recognized activity type (what the user is doing)
+     */
+//    private DetectedActivity activityType;
+
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -113,6 +150,12 @@ public class MapsActivity extends AppCompatActivity
 
         }
     };
+
+    /**
+     * Current logged user
+     */
+    private Account mAccount;
+
     /**
      * If we get a new car position while we are using the app, we update the map
      */
@@ -128,47 +171,9 @@ public class MapsActivity extends AppCompatActivity
 
         }
     };
-    List<AbstractMarkerDelegate> delegates = new ArrayList();
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    // This is the helper object that connects to Google Play Services.
-    private GoogleApiClient mGoogleApiClient;
-    private AccountManager mAccountManager;
-    private CarDatabase carDatabase;
-    private Toolbar mToolbar;
-    private FloatingActionButton myLocationButton;
-    private CardView detailsContainer;
-    private DetailsFragment detailsFragment;
-    private boolean detailsDisplayed = false;
-    private boolean cameraFollowing;
-
-    /**
-     * Currently recognized activity type (what the user is doing)
-     */
-//    private DetectedActivity activityType;
-    /**
-     * The user didn't log in, but we still love him
-     */
-    private boolean mSkippedLogin;
 
     private LoginType loginType;
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    /**
-     * Current logged user
-     */
-    private Account mAccount;
-    private boolean mapInitialised = false;
-    private boolean initialCameraSet = false;
-    /**
-     * Last component to request a camera update
-     */
-    private CameraUpdateRequester lastCameraUpdateRequester;
-    /**
-     *
-     */
-    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
+
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -202,19 +207,9 @@ public class MapsActivity extends AppCompatActivity
          */
         setUpBillingFragment();
 
-        carDatabase = CarDatabase.getInstance(this);
 
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
-
-        if (availableAccounts.length == 0 && !mSkippedLogin) {
-            goToLogin();
-            return;
-        }
-        // There should be just one account
-        else if (availableAccounts.length > 1) {
-            Log.w(TAG, "Multiple accounts found");
-        }
 
         loginType = LoginType.Google;
 
@@ -243,6 +238,17 @@ public class MapsActivity extends AppCompatActivity
         }
 
         mGoogleApiClient = builder.build();
+
+        carDatabase = CarDatabase.getInstance(this);
+
+        if (availableAccounts.length == 0 && !mSkippedLogin) {
+            goToLogin();
+            return;
+        }
+        // There should be just one account
+        else if (availableAccounts.length > 1) {
+            Log.w(TAG, "Multiple accounts found");
+        }
 
         // show help dialog only on first run of the app
         if (!PreferencesUtil.isTutorialShown(this)) {
@@ -387,6 +393,8 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
+    private boolean mapInitialised = false;
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -434,6 +442,7 @@ public class MapsActivity extends AppCompatActivity
         }
         return spotsDelegate;
     }
+
 
     /**
      * @param carId
@@ -590,6 +599,7 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+
     @Override
     protected void onResume() {
 
@@ -619,6 +629,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -723,7 +734,9 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
     }
+
 
     private void setUpMapListeners() {
         mMap.setOnMarkerClickListener(this);
@@ -776,6 +789,9 @@ public class MapsActivity extends AppCompatActivity
          */
         setInitialCamera();
     }
+
+
+    private boolean initialCameraSet = false;
 
     private void setInitialCamera() {
 
@@ -836,6 +852,7 @@ public class MapsActivity extends AppCompatActivity
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
+
     /**
      * This is called when the user moves the camera but also when it is triggered programatically.
      *
@@ -873,6 +890,7 @@ public class MapsActivity extends AppCompatActivity
         return true;
     }
 
+
     @Override
     public void onMapClick(LatLng point) {
 
@@ -883,6 +901,7 @@ public class MapsActivity extends AppCompatActivity
     public void onSpotClicked(ParkingSpot spot) {
         setDetailsFragment(SpotDetailsFragment.newInstance(spot, getUserLocation()));
     }
+
 
     /**
      * Set the details fragment
@@ -913,11 +932,23 @@ public class MapsActivity extends AppCompatActivity
         hideDetails();
     }
 
+
     @Override
     public void onCarClicked(String carId) {
         getParkedCarDelegate(carId).setCameraFollowing(true);
         setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }
+
+
+    /**
+     * Last component to request a camera update
+     */
+    private CameraUpdateRequester lastCameraUpdateRequester;
+
+    /**
+     *
+     */
+    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new LinkedHashSet<>();
 
     @Override
     public void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
