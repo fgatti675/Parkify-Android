@@ -9,7 +9,7 @@
     <string name="use_miles_description">Utilizar millas en lugar de kilómetros</string>
 
     <string name="motion_recognition">Detección de movimiento</string>
-    <string name="motion_recognition_description">Detectar cuando subes o bajas del coche aunque el Bluetooth esté desactivado</string>
+    <string name="motion_recognition_description">Detectar cuando aparcas coche aunque el Bluetooth esté desactivado</string>
 
     <string name="bt_on_vehicle">Auto BlueTooth encendido</string>
     <string name="bt_on_vehicle_description">Conectar el Bluetooth automaticamente al entrar en un coche</string>

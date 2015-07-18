@@ -147,7 +147,7 @@ public class BillingFragment extends Fragment {
 //                try {
 //                    JSONObject jo = new JSONObject(purchaseData);
 //                    String sku = jo.getString("productId");
-                Util.createUpperToast(getActivity(), getString(R.string.thanks), Toast.LENGTH_LONG); // do string
+                Util.createUpperToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
 //                } catch (JSONException e) {
 //                    Util.createUpperToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
 //                    e.printStackTrace();

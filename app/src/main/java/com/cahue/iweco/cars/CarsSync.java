@@ -19,6 +19,7 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.Requests;
+import com.cahue.iweco.util.Util;
 
 import org.json.JSONObject;
 
@@ -92,7 +93,7 @@ public class CarsSync {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, R.string.delete_error, Toast.LENGTH_SHORT).show();
+                            Util.createUpperToast(context, R.string.delete_error, Toast.LENGTH_SHORT);
                             database.saveAndBroadcast(car);
                             error.printStackTrace();
                         }

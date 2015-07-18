@@ -9,7 +9,7 @@
     <string name="use_miles_description">Usa miglia invece di chilometri</string>
 
     <string name="motion_recognition">Motion detection</string>
-    <string name="motion_recognition_description">Rileva quando entri o scendi dall\'auto, pure quando il Bluetooth è spento</string>
+    <string name="motion_recognition_description">Rileva quando parcheggi l\'auto, pure quando il Bluetooth è spento</string>
 
     <string name="bt_on_vehicle">Auto BlueTooth on</string>
     <string name="bt_on_vehicle_description">Bluetooth si collega automaticamente quando si entra in una macchina</string>

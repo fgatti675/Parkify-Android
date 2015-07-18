@@ -35,6 +35,10 @@ public class Util {
         Util.DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+
+    public static void createUpperToast(Context context, int resId, int length) {
+        createUpperToast(context, context.getString(resId), length);
+    }
     /**
      * Method for printing our fancy custom Toast
      *

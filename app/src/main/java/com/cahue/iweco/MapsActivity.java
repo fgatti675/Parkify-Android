@@ -99,8 +99,8 @@ public class MapsActivity extends AppCompatActivity
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(2000)         // 5 seconds
-            .setFastestInterval(16)    // 16ms = 60fps
+            .setInterval(3000)         // 5 seconds
+            .setFastestInterval(32)    // 32ms = 30fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
     /**
@@ -611,7 +611,7 @@ public class MapsActivity extends AppCompatActivity
         if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmpty())
             return;
 
-        Toast.makeText(this, R.string.long_click_instructions, Toast.LENGTH_LONG).show();
+        Util.createUpperToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
 
         PreferencesUtil.setLongClickToastShown(this, true);
     }
@@ -786,6 +786,7 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
     }
 
     private void setUpMapListeners() {

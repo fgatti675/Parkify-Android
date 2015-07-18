@@ -283,7 +283,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private void onGCMError(String authToken) {
         setLoading(false);
         clearGoogleToken(authToken);
-        Toast.makeText(this, R.string.gcm_error, Toast.LENGTH_SHORT).show();
+        Util.createUpperToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
     private void clearGoogleToken(String authToken) {
@@ -399,7 +399,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     private void onTokenRetrieveError() {
-        Toast.makeText(this, "Error Google auth", Toast.LENGTH_SHORT).show();
+        Util.createUpperToast(this, "Error Google auth", Toast.LENGTH_SHORT);
         setLoading(false);
     }
 
@@ -501,7 +501,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     public void onLoginError(String authToken) {
         setLoading(false);
         clearGoogleToken(authToken);
-        Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+        Util.createUpperToast(this, R.string.login_error, Toast.LENGTH_SHORT);
     }
 
     /**

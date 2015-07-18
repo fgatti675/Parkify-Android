@@ -32,6 +32,7 @@ import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.LoadProfileImage;
+import com.cahue.iweco.util.Util;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -83,6 +84,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
     };
+    private View userDetailsView;
     private ImageView userImage;
     private TextView usernameTextView;
     private TextView emailTextView;
@@ -131,7 +133,7 @@ public class NavigationDrawerFragment extends Fragment {
                 container,
                 false);
 
-        View userDetails = mDrawerListView.findViewById(R.id.user_details);
+        userDetailsView = mDrawerListView.findViewById(R.id.user_details);
 
         userImage = (ImageView) mDrawerListView.findViewById(R.id.profile_image);
         usernameTextView = (TextView) mDrawerListView.findViewById(R.id.username);
@@ -154,11 +156,6 @@ public class NavigationDrawerFragment extends Fragment {
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        if (!skippedLogin)
-            setUpUserDetails();
-
-        userDetails.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
-
         // Create adView.
         adView = (AdView) mDrawerListView.findViewById(R.id.adView);
         adView.setVisibility(View.GONE);
@@ -172,6 +169,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
         adapter.setUpElements();
+        adapter.notifyDataSetChanged();
 
         billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
         if (billingFragment == null)
@@ -201,8 +199,10 @@ public class NavigationDrawerFragment extends Fragment {
 
 
         getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
-
         getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
+
+        setUpUserDetails();
+
     }
 
     @Override
@@ -391,10 +391,26 @@ public class NavigationDrawerFragment extends Fragment {
 //        recyclerView.getAdapter().notifyDataSetChanged();
     }
 
+    private boolean detailsSet = false;
+
     private void setUpUserDetails() {
-        usernameTextView.setText(AuthUtils.getLoggedUsername(getActivity()));
+
+        userDetailsView.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
+
+        if (skippedLogin || detailsSet)
+            return;
+
+        String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
+
+        // in case it is being loaded in the background
+        if(loggedUsername == null)
+            return;
+
+        usernameTextView.setText(loggedUsername);
         emailTextView.setText(AuthUtils.getEmail(getActivity()));
         new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
+
+        detailsSet = true;
     }
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -497,7 +513,7 @@ public class NavigationDrawerFragment extends Fragment {
                                 mDrawerLayout.closeDrawers();
 
                         } else {
-                            Toast.makeText(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT).show();
+                            Util.createUpperToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
                         }
                     }
                 };
