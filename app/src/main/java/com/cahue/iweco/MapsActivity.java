@@ -186,10 +186,6 @@ public class MapsActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
 
-
-        Tracker tracker = ((IwecoApp) getApplication()).getTracker();
-        tracker.setScreenName(TAG);
-
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
         /**

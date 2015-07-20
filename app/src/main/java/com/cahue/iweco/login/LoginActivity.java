@@ -191,11 +191,18 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             @Override
             public void onClick(View v) {
                 AuthUtils.setSkippedLogin(LoginActivity.this, true);
-                tracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("UX")
-                        .setAction("click")
-                        .setLabel("Skip Login")
-                        .build());
+
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        tracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("UX")
+                                .setAction("click")
+                                .setLabel("Skip Login")
+                                .build());
+                        return null;
+                    }
+                }.execute();
                 goToMaps();
             }
         });

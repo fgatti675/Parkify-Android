@@ -2,6 +2,7 @@ package com.cahue.iweco.parkedCar;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -47,13 +48,19 @@ public class ParkedCarService extends LocationPollerService {
         CarsSync.storeCar(carDatabase, context, car);
 
         if (BuildConfig.DEBUG) {
-            Tracker tracker = ((IwecoApp) getApplication()).getTracker();
+            final Tracker tracker = ((IwecoApp) getApplication()).getTracker();
             tracker.setScreenName(TAG);
-            tracker.send(new HitBuilders.EventBuilder()
-                    .setCategory("IO")
-                    .setAction("post")
-                    .setLabel("Car update")
-                    .build());
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    tracker.send(new HitBuilders.EventBuilder()
+                            .setCategory("IO")
+                            .setAction("post")
+                            .setLabel("Car update")
+                            .build());
+                    return null;
+                }
+            }.execute();
         }
 
         /**

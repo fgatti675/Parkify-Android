@@ -302,12 +302,18 @@ public class NavigationDrawerFragment extends Fragment {
                 }
 
                 if (BuildConfig.DEBUG) {
-                    Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-                    tracker.send(new HitBuilders.EventBuilder()
-                            .setCategory("UX")
-                            .setAction("click")
-                            .setLabel("Drawer open")
-                            .build());
+                    final Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            tracker.send(new HitBuilders.EventBuilder()
+                                    .setCategory("UX")
+                                    .setAction("click")
+                                    .setLabel("Drawer open")
+                                    .build());
+                            return null;
+                        }
+                    }.execute();
                 }
 
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()

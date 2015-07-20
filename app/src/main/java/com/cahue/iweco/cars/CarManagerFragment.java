@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -269,12 +270,18 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         CarsSync.storeCar(carDatabase, getActivity(), car);
 
         if(!BuildConfig.DEBUG) {
-            Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-            tracker.send(new HitBuilders.EventBuilder()
-                    .setCategory("UX")
-                    .setAction("edit")
-                    .setLabel("Car edited")
-                    .build());
+            final Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    tracker.send(new HitBuilders.EventBuilder()
+                            .setCategory("UX")
+                            .setAction("edit")
+                            .setLabel("Car edited")
+                            .build());
+                    return null;
+                }
+            }.execute();
         }
     }
 

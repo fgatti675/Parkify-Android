@@ -2,6 +2,7 @@ package com.cahue.iweco;
 
 import android.app.Activity;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -258,12 +259,18 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         queriedBounds.add(extendedViewBounds);
 
         if (BuildConfig.DEBUG) {
-            Tracker tracker = getTracker();
-            tracker.send(new HitBuilders.EventBuilder()
-                    .setCategory("IO")
-                    .setAction("query")
-                    .setLabel("Spots area query")
-                    .build());
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    Tracker tracker = getTracker();
+                    tracker.send(new HitBuilders.EventBuilder()
+                            .setCategory("IO")
+                            .setAction("query")
+                            .setLabel("Spots area query")
+                            .build());
+                    return null;
+                }
+            }.execute();
         }
         ParkingSpotsQuery areaQuery = new AreaSpotsQuery(getActivity(), extendedViewBounds, this);
 
@@ -446,12 +453,18 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             detailsViewManager.setDetailsFragment(SpotDetailsFragment.newInstance(selectedSpot, userLocation));
 
             if (BuildConfig.DEBUG) {
-                Tracker tracker = getTracker();
-                tracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("UX")
-                        .setAction("click")
-                        .setLabel("Spot clicked")
-                        .build());
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        Tracker tracker = getTracker();
+                        tracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("UX")
+                                .setAction("click")
+                                .setLabel("Spot clicked")
+                                .build());
+                        return null;
+                    }
+                }.execute();
             }
 
             return true;

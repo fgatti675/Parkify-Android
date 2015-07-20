@@ -2,6 +2,7 @@ package com.cahue.iweco;
 
 import android.app.Activity;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -350,13 +351,19 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
             onCarClicked();
 
-            if (BuildConfig.DEBUG) {
-                Tracker tracker = getTracker();
-                tracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("UX")
-                        .setAction("click")
-                        .setLabel("Car clicked")
-                        .build());
+            if (!BuildConfig.DEBUG) {
+                final Tracker tracker = getTracker();
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        tracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("UX")
+                                .setAction("click")
+                                .setLabel("Car clicked")
+                                .build());
+                        return null;
+                    }
+                }.execute();
             }
             return true;
         } else {
