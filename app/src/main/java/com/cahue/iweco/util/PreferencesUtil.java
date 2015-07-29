@@ -20,7 +20,9 @@ public class PreferencesUtil {
      * Shared preferences constants
      */
     public static final String PREF_LONG_CLICK_SHOWN = "PREF_LONG_CLICK_SHOWN";
-    public static final String PREF_TUTORIAL_DIALOG_SHOWN = "PREF_DIALOG_SHOWN";
+    public static final String PREF_RATED_DIALOG_ACCEPTED = "PREF_RATED_DIALOG_ACCEPTED";
+    public static final String PREF_RATE_DIALOG_SHOWN = "PREF_RATE_DIALOG_SHOWN";
+    public static final String PREF_TUTORIAL_SHOWN = "PREF_DIALOG_SHOWN";
     public static final String PREF_FACEBOOK_INVITES_DIALOG_SHOWN = "PREF_FACEBOOK_INVITES_DIALOG_SHOWN";
     public static final String PREF_UNINSTALL_WIMC_SHOWN = "PREF_UNINSTALL_WIMC_SHOWN";
     public static final String PREF_IWECO_PROMO_DATE = "PREF_IWECO_PROMO_DATE";
@@ -31,6 +33,8 @@ public class PreferencesUtil {
     public static final String PREF_USE_MILES = "PREF_USE_MILES";
     public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
     public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
+
+
 
     public static boolean isLongClickToastShown(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -44,12 +48,12 @@ public class PreferencesUtil {
 
     public static boolean isTutorialShown(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PREF_TUTORIAL_DIALOG_SHOWN, false);
+        return prefs.getBoolean(PREF_TUTORIAL_SHOWN, false);
     }
 
     public static void setTutorialShown(Context context, boolean shown) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PREF_TUTORIAL_DIALOG_SHOWN, shown).apply();
+        prefs.edit().putBoolean(PREF_TUTORIAL_SHOWN, shown).apply();
     }
 
     public static boolean isFacebookInvitesShown(Context context) {
@@ -105,23 +109,13 @@ public class PreferencesUtil {
                 .remove(PREF_IWECO_PROMO_DATE)
                 .remove(PREF_FACEBOOK_INVITES_DIALOG_SHOWN)
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
-                .remove(PREF_TUTORIAL_DIALOG_SHOWN)
+                .remove(PREF_TUTORIAL_SHOWN)
                 .remove(PREF_LONG_CLICK_SHOWN)
+                .remove(PREF_RATE_DIALOG_SHOWN)
                 .apply();
     }
 
-    public static void setIwecoPromoDialogShown(Context context, Date date) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putLong(PREF_IWECO_PROMO_DATE, date.getTime()).apply();
-    }
 
-    public static Date getIwecoPromoDialogShown(Context context) {
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if(!prefs.contains(PREF_IWECO_PROMO_DATE))
-            return  null;
-        return new Date(prefs.getLong(PREF_IWECO_PROMO_DATE, 0));
-    }
 
     public static boolean isUseMiles(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

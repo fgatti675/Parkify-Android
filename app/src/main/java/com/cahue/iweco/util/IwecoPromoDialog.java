@@ -10,8 +10,10 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
@@ -30,7 +32,7 @@ public class IwecoPromoDialog extends DialogFragment {
         Locale locale = context.getResources().getConfiguration().locale;
         if (!locale.getCountry().equalsIgnoreCase("ES")) return false;
 
-        Date lastDisplayed = PreferencesUtil.getIwecoPromoDialogShown(context);
+        Date lastDisplayed = getIwecoPromoDialogShown(context);
         if (lastDisplayed == null) return true;
 
         return (new Date().getTime() - lastDisplayed.getTime()) > 2 * 24 * 60 * 60;
@@ -54,10 +56,23 @@ public class IwecoPromoDialog extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                     }
                 });
-
-        PreferencesUtil.setIwecoPromoDialogShown(getActivity(), new Date());
+        setIwecoPromoDialogShown(getActivity(), new Date());
 
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+
+    public static void setIwecoPromoDialogShown(Context context, Date date) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, date.getTime()).apply();
+    }
+
+    public static Date getIwecoPromoDialogShown(Context context) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if(!prefs.contains(PreferencesUtil.PREF_IWECO_PROMO_DATE))
+            return  null;
+        return new Date(prefs.getLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, 0));
     }
 }

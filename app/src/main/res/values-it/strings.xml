@@ -69,6 +69,9 @@
     <string name="iweco_promo">Prova adesso IWECO! Ti dirà pure dove trovare parcheggio!</string>
     <string name="new_app" >Nuova app!</string>
 
+    <string name="rating_message">Una buona review su Play Store ci fa molto bene :)</string>
+    <string name="like_question" >Ti piace questa app?</string>
+    <string name="rate">Valutare</string>
 
     <string name="share">Invita i tuoi amici</string>
     <string name="share_promo">Perche non condividere con i tuoi amici di Facebook? :)</string>

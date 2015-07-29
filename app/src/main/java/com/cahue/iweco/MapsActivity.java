@@ -47,6 +47,7 @@ import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.RatingDialog;
 import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
@@ -331,6 +332,7 @@ public class MapsActivity extends AppCompatActivity
         /**
          * Show some dialogs in case the user is bored
          */
+        checkRatingDialogShown();
         checkIweco();
         checkWIMC();
         showFacebookAppInvite();
@@ -371,6 +373,13 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+
+    public void checkRatingDialogShown() {
+        if (RatingDialog.shouldBeShown(this)) {
+            RatingDialog dialog = new RatingDialog();
+            dialog.show(getFragmentManager(), "RatingDialog");
+        }
+    }
 
     public void checkIweco() {
         if ("wimc".equals(BuildConfig.FLAVOR)) {

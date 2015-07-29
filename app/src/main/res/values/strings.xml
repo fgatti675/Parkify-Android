@@ -66,6 +66,11 @@
     <string name="iweco_promo">Check now IWECO! Not only it will tell you where you parked, also where there are available parking spots! ;)</string>
     <string name="new_app" >New app!</string>
 
+
+    <string name="rating_message">You would really help us if you gave us a good rating in Play Store :)</string>
+    <string name="like_question" >Do you like this app?</string>
+    <string name="rate">Rate</string>
+
     <string name="share">Invite your friends</string>
     <string name="share_promo">How about inviting your Facebook friends and telling them their parking needs could be solved by sharing this app? :)</string>
     <string name="ask_just_parked">Did you just park?</string>
