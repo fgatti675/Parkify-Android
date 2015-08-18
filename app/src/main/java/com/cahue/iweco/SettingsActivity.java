@@ -8,6 +8,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.util.PreferencesUtil;
 
 /**
@@ -72,6 +73,12 @@ public class SettingsActivity extends PreferenceActivity {
             if (key.equals(PreferencesUtil.PREF_MOVEMENT_RECOGNITION)) {
                 boolean enableBtPreferences = sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true);
                 updateBtPreferencesState(enableBtPreferences);
+
+                if (enableBtPreferences) {
+                    ActivityRecognitionService.startIfNecessary(getActivity());
+                } else {
+                    ActivityRecognitionService.stop(getActivity());
+                }
             }
         }
 
@@ -86,7 +93,7 @@ public class SettingsActivity extends PreferenceActivity {
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
 
-            updateBtPreferencesState(sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, false));
+            updateBtPreferencesState(sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true));
         }
 
         @Override

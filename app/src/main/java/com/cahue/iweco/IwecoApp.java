@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.os.StrictMode;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -41,9 +42,25 @@ public class IwecoApp extends Application {
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
         if (!BuildConfig.DEBUG) {
-            tracker.enableExceptionReporting(true);
-            tracker.enableAdvertisingIdCollection(true);
+//            tracker.enableExceptionReporting(true);
+//            tracker.enableAdvertisingIdCollection(true);
             tracker.enableAutoActivityTracking(true);
+        }
+
+        // Strict mode
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()   // or .detectAll() for all detectable problems
+                    .penaltyLog()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
         }
     }
 

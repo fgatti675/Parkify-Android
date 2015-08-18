@@ -52,7 +52,6 @@ import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
@@ -73,7 +72,6 @@ import com.google.android.gms.plus.Plus;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -306,6 +304,9 @@ public class MapsActivity extends AppCompatActivity
         cameraUpdateRequesterList = new HashSet<>();
         registerCameraUpdater(this);
 
+
+        handleIntent(getIntent());
+
     }
 
 
@@ -362,7 +363,12 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if (intent.getAction().equals(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST)) {
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST)) {
+            initialCameraSet = true;
             Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
             Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
             String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
@@ -370,6 +376,7 @@ public class MapsActivity extends AppCompatActivity
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
             mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
+            intent.setAction(null);
         }
     }
 
@@ -460,7 +467,7 @@ public class MapsActivity extends AppCompatActivity
         mMap.clear();
 
         for (AbstractMarkerDelegate delegate : delegates) {
-            delegate.onMapReady(mMap);
+            delegate.setMap(mMap);
         }
 
 
@@ -511,12 +518,14 @@ public class MapsActivity extends AppCompatActivity
             setCarLocationDelegate.setRetainInstance(true);
             transaction.add(setCarLocationDelegate, SetCarLocationDelegate.FRAGMENT_TAG);
             transaction.commit();
+            getFragmentManager().executePendingTransactions();
         }
         return setCarLocationDelegate;
     }
 
 
     private void setMapPadding(int bottomPadding) {
+        if(mMap == null) return;
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
     }
 
@@ -1124,7 +1133,9 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
-                Car car = carDatabase.retrieveCars(false).iterator().next();
+                List<Car> cars = carDatabase.retrieveCars(false);
+                if(cars.isEmpty()) return;
+                Car car = cars.iterator().next();
                 intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
                 startService(intent);
             }
@@ -1134,7 +1145,9 @@ public class MapsActivity extends AppCompatActivity
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Car car = carDatabase.retrieveCars(false).iterator().next();
+                List<Car> cars = carDatabase.retrieveCars(false);
+                if(cars.isEmpty()) return;
+                Car car = cars.iterator().next();
                 ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
             }
         });

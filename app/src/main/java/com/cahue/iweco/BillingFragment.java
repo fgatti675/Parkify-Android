@@ -72,7 +72,7 @@ public class BillingFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        packageName = activity.getPackageName();
+        packageName = BuildConfig.APPLICATION_ID;
         bindBillingService();
     }
 

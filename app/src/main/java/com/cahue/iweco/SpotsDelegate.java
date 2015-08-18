@@ -504,8 +504,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     @Override
     public void onMapReady(GoogleMap map) {
-        Log.d(TAG, "onMapReady");
-        super.onMapReady(map);
+        Log.d(TAG, "setMap");
         directionsDelegate.setMap(map);
         directionsDelegate.setColor(getResources().getColor(R.color.theme_accent));
         reset(false);

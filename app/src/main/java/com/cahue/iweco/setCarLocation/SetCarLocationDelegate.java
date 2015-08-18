@@ -42,11 +42,6 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -107,11 +102,6 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
         DetailsFragment detailsFragment = detailsViewManager.getDetailsFragment();
         return detailsFragment != null && detailsFragment instanceof SetCarDetailsFragment;
-    }
-
-    @Override
-    public void onMapReady(GoogleMap map) {
-        super.onMapReady(map);
     }
 
 

@@ -3,6 +3,7 @@ package com.cahue.iweco;
 import android.app.Activity;
 import android.app.Fragment;
 import android.location.Location;
+import android.os.Bundle;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,21 +45,46 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        cameraManager.registerCameraUpdater(this);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        cameraManager.registerCameraUpdater(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        cameraManager.unregisterCameraUpdater(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        cameraManager = null;
+        detailsViewManager = null;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        cameraManager.unregisterCameraUpdater(this);
         mMap = null;
+    }
+
+    /**
+     * @param mMap
+     */
+    public final void setMap(GoogleMap mMap) {
+        this.mMap = mMap;
+        onMapReady(mMap);
     }
 
     /**
@@ -66,8 +92,8 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
      *
      * @param mMap
      */
-    public void onMapReady(GoogleMap mMap) {
-        this.mMap = mMap;
+    protected void onMapReady(GoogleMap mMap) {
+
     }
 
     /**
@@ -125,7 +151,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     protected GoogleMap getMap() {
         if (mMap == null) {
-            onMapReady(((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap());
+            setMap(((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap());
         }
         return mMap;
     }

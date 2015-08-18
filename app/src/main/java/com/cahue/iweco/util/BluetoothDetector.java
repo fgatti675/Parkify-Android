@@ -67,16 +67,13 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Stop activity recognition
          */
-        Intent intent = new Intent(context, ActivityRecognitionService.class);
-        intent.setAction(Constants.ACTION_STOP_ACTIVITY_RECOGNITION);
-        context.startService(intent);
+        ActivityRecognitionService.stop(context);
     }
 
     private void onBtTurnedOff(Context context) {
         /**
          * Start activity recognition
          */
-
         ActivityRecognitionService.startIfNecessary(context);
     }
 

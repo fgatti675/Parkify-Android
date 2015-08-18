@@ -44,6 +44,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         mReceiver = intent.getParcelableExtra(RECEIVER);
 
+        if (mReceiver == null)
+            return;
+
         Bundle bundle = new Bundle();
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);

@@ -122,7 +122,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     @Override
     public void onMapReady(GoogleMap map) {
-        super.onMapReady(map);
         directionsDelegate.setMap(map);
         update(true);
     }

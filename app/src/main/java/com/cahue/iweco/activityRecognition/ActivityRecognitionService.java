@@ -1,5 +1,7 @@
 package com.cahue.iweco.activityRecognition;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -9,7 +11,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.ConnectionResult;
@@ -37,20 +41,37 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
     /**
      * Only fetch updates if BT is off and the user has requested so
+     *
      * @param context
      */
-    public static void startIfNecessary(Context context){
+    public static void startIfNecessary(Context context) {
         if (!BluetoothAdapter.getDefaultAdapter().isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context) && !CarDatabase.getInstance(context).isEmpty()) {
             Intent intent = new Intent(context, ActivityRecognitionService.class);
             intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
             context.startService(intent);
+            if (BuildConfig.DEBUG) {
+                NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+                Notification.Builder mBuilder =
+                        new Notification.Builder(context)
+                                .setSmallIcon(R.drawable.ic_action_action_settings_dark)
+                                .setContentTitle("Recognition Activated");
+                mNotifyMgr.notify(null, 6472837, mBuilder.build());
+            }
         }
     }
 
-    public static void stop(Context context){
-            Intent intent = new Intent(context, ActivityRecognitionService.class);
-            intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
-            context.startService(intent);
+    public static void stop(Context context) {
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        intent.setAction(Constants.ACTION_STOP_ACTIVITY_RECOGNITION);
+        context.startService(intent);
+        if (BuildConfig.DEBUG) {
+            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    new Notification.Builder(context)
+                            .setSmallIcon(R.drawable.ic_navigation_cancel)
+                            .setContentTitle("Recognition Stopped");
+            mNotifyMgr.notify(null, 6472837, mBuilder.build());
+        }
     }
 
     @Override
@@ -69,7 +90,6 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                 .addOnConnectionFailedListener(this)
                 .addApi(ActivityRecognition.API)
                 .build();
-
 
     }
 
@@ -90,6 +110,8 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         if (intent.getAction() != null)
             mGoogleApiClient.connect();
+        else
+            stopSelf(startId);
 
         return Service.START_NOT_STICKY;
     }
@@ -104,7 +126,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         } else if (intent.getAction().equals(Constants.ACTION_STOP_ACTIVITY_RECOGNITION)) {
             stopActivityDetection();
         } else {
-            throw new RuntimeException("ActivityRecognitionService must be started with a valid  action");
+            throw new RuntimeException("ActivityRecognitionService must be started with a valid action");
         }
 
         stopSelf(startId);

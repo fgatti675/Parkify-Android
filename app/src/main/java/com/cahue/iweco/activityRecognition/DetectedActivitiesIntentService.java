@@ -47,6 +47,9 @@ public class DetectedActivitiesIntentService extends IntentService {
     private static DetectedActivity previousActivity;
     private static DetectedActivity previousPreviousActivity;
 
+    // How many times the user has been still in a row
+    private static int stillCounter = 0;
+
     /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
@@ -82,6 +85,19 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         DetectedActivity mostProbableActivity = result.getMostProbableActivity();
 
+        // Check if still
+        if (isStill(mostProbableActivity)) {
+            stillCounter++;
+            if(stillCounter > 5) {
+                // reset if still for too long
+                previousActivity = null;
+                previousPreviousActivity = null;
+            }
+        }else {
+            stillCounter = 0;
+        }
+
+        // If not on foot or in vehicle we are not interested
         if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
             return;
 
@@ -114,7 +130,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
 
     }
-
     private void handleVehicleToFoot() {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent(this, ParkedCarRequestedService.class);
@@ -156,6 +171,12 @@ public class DetectedActivitiesIntentService extends IntentService {
         return (detectedActivity.getType() == DetectedActivity.IN_VEHICLE && detectedActivity.getConfidence() > 95)
                 || (detectedActivity.getType() == DetectedActivity.ON_FOOT && detectedActivity.getConfidence() > 100);
     }
+
+
+    private boolean isStill(DetectedActivity detectedActivity) {
+        return detectedActivity.getType() == DetectedActivity.STILL && detectedActivity.getConfidence() > 90;
+    }
+
 
     private boolean isVehicleRelated(DetectedActivity detectedActivity) {
         if (BuildConfig.DEBUG && detectedActivity.getType() == DetectedActivity.ON_BICYCLE)

@@ -129,7 +129,7 @@ public class PreferencesUtil {
 
     public static boolean isMovementRecognitionEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION, false);
+        return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION, true);
     }
 
     public static boolean isBtOnEnteringVehicleEnabled(Context context) {
