@@ -447,7 +447,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         database.saveAndBroadcast(loginResult.cars);
 
         final Intent resultIntent = new Intent();
-        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email);
+        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email != null ? loginResult.email : loginResult.userId);
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.account_type));
         resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);

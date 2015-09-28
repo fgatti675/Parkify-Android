@@ -168,8 +168,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     private Tracker getTracker() {
-        Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-        return tracker;
+        return ((IwecoApp) getActivity().getApplication()).getTracker();
     }
 
     /**

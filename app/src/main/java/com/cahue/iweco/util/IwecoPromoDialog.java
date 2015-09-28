@@ -30,7 +30,9 @@ public class IwecoPromoDialog extends DialogFragment {
         if (!"wimc".equals(BuildConfig.FLAVOR)) return false;
 
         Locale locale = context.getResources().getConfiguration().locale;
-        if (!locale.getCountry().equalsIgnoreCase("ES")) return false;
+        if (!locale.getCountry().equalsIgnoreCase("ES")
+                | !locale.getCountry().equalsIgnoreCase("DE")
+                | !locale.getCountry().equalsIgnoreCase("AR")) return false;
 
         Date lastDisplayed = getIwecoPromoDialogShown(context);
         if (lastDisplayed == null) return true;
@@ -71,8 +73,8 @@ public class IwecoPromoDialog extends DialogFragment {
     public static Date getIwecoPromoDialogShown(Context context) {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if(!prefs.contains(PreferencesUtil.PREF_IWECO_PROMO_DATE))
-            return  null;
+        if (!prefs.contains(PreferencesUtil.PREF_IWECO_PROMO_DATE))
+            return null;
         return new Date(prefs.getLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, 0));
     }
 }
