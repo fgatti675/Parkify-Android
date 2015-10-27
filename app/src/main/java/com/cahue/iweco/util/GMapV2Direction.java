@@ -1,24 +1,24 @@
 package com.cahue.iweco.util;
 
-import java.io.InputStream;
-import java.util.ArrayList;
+import android.util.Log;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.RequestFuture;
+import com.android.volley.toolbox.StringRequest;
+import com.cahue.iweco.IwecoApp;
+import com.google.android.gms.maps.model.LatLng;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.android.gms.maps.model.LatLng;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
-import android.util.Log;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class GMapV2Direction {
     public final static String MODE_DRIVING = "driving";
@@ -34,14 +34,30 @@ public class GMapV2Direction {
                 + "&sensor=false&units=metric&mode=" + mode;
         Log.d("url", url);
         try {
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpContext localContext = new BasicHttpContext();
-            HttpPost httpPost = new HttpPost(url);
-            HttpResponse response = httpClient.execute(httpPost, localContext);
-            InputStream in = response.getEntity().getContent();
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(in);
-            return doc;
+            RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+            RequestFuture<String> future = RequestFuture.newFuture();
+            StringRequest stringRequest = new StringRequest(
+                    url,
+                    future,
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            error.printStackTrace();
+                        }
+                    }) ;
+
+            // Add the request to the RequestQueue.
+            queue.add(stringRequest);
+
+            try {
+                String res = future.get();
+
+                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                Document doc = builder.parse(res);
+                return doc;
+            } catch (InterruptedException | ExecutionException e) {
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

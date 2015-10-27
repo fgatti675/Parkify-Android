@@ -5,27 +5,22 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.RequestFuture;
+import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.spots.ParkingSpot;
-import com.cahue.iweco.util.Util;
-import com.google.android.gms.maps.model.LatLng;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by francesco on 13.11.2014.
@@ -63,54 +58,30 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
     }
 
     protected JSONObject query(String url) {
-        try {
 
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader("Accept", "application/json");
+        // Instantiate the RequestQueue.
+        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
 
-            Log.i(TAG, "Getting\n" + url);
+        RequestFuture<JSONObject> future = RequestFuture.newFuture();
 
-            final HttpResponse response = httpclient.execute(httpGet);
-            final StatusLine statusLine = response.getStatusLine();
-
-            Log.i(TAG, "Query result: " + statusLine.getStatusCode());
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                String result = EntityUtils.toString(response.getEntity());
-                Log.i(TAG, "Query result: " + result);
-                JSONObject json = new JSONObject(result);
-                return json;
-            } else {
-                if(context instanceof Activity){
-                    response.getEntity().getContent().close();
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //Closes the connection.
-                            listener.onServerError(ParkingSpotsQuery.this, statusLine.getStatusCode(), statusLine.getReasonPhrase());
-                        }
-                    });
-                }
-            }
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-
-            // now this is ugly
-            if (context instanceof Activity) {
-                ((Activity) context).runOnUiThread(new Runnable() {
+        Log.d(TAG, url);
+        JsonRequest stringRequest = new JsonObjectRequest(
+                url,
+                future,
+                new Response.ErrorListener() {
                     @Override
-                    public void run() {
-                        listener.onIOError();
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        listener.onServerError(ParkingSpotsQuery.this, error.networkResponse.statusCode, new String(error.networkResponse.data));
                     }
                 });
-            }
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
         }
 
         return null;
@@ -155,8 +126,6 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
         void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
 
         void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
-
-        void onIOError();
 
     }
 }

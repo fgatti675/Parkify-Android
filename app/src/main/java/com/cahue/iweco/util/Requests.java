@@ -19,7 +19,6 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.login.GCMUtil;
 
-import org.apache.http.client.methods.HttpPost;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +38,28 @@ public class Requests {
 
     public static final String AUTH_HEADER = "Authorization";
     public static final String DEVICE_HEADER = "Device";
+
+    /**
+     * Post a Form
+     */
+    public static class JsonPostFormRequest extends JsonObjectRequest {
+
+        private final Context context;
+
+        public JsonPostFormRequest(Context context, String url, String body, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+            super(Method.POST, url, body, listener, errorListener);
+            this.context = context;
+            setRetryPolicy(new DefaultRetryPolicy(
+                    DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                    RETRIES,
+                    BACKOFF_MULTIPLIER));
+        }
+
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError {
+            return generateHeaders(context);
+        }
+    }
 
     /**
      * Post a JSONObject
@@ -181,17 +202,6 @@ public class Requests {
         return headers;
     }
 
-    @Deprecated
-    public static HttpPost createHttpFormPost(Context context, String url) {
 
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader("Accept", "application/json");
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        for (Map.Entry<String, String> header : generateHeaders(context).entrySet()) {
-            httpPost.addHeader(header.getKey(), header.getValue());
-        }
-
-        return httpPost;
-    }
 
 }

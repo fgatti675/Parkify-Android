@@ -344,11 +344,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         queryCameraView();
     }
 
-    @Override
-    public void onIOError() {
-        Toast.makeText(getActivity(), R.string.check_internet, Toast.LENGTH_SHORT).show();
-    }
-
     public void doDraw() {
 
         Log.d(TAG, "Drawing spots");

@@ -20,3 +20,8 @@
 
 -keep public class pl.droidsonroids.gif.GifIOException{<init>(int);}
 -keep class pl.droidsonroids.gif.GifInfoHandle{<init>(long,int,int,int);}
+
+-dontwarn java.nio.file.Files
+-dontwarn java.nio.file.Path
+-dontwarn java.nio.file.OpenOption
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
