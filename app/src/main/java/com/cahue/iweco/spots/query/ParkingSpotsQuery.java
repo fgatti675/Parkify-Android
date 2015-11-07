@@ -6,8 +6,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cahue.iweco.spots.ParkingSpot;
-import com.cahue.iweco.util.Util;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -52,7 +50,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
 
         Log.d("ParkingSpotsQuery", result.toString());
         super.onPostExecute(result);
-        if(context instanceof Activity){
+        if (context instanceof Activity) {
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -63,9 +61,9 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
     }
 
     protected JSONObject query(String url) {
+        HttpClient httpclient = new DefaultHttpClient();
         try {
 
-            HttpClient httpclient = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(url);
             httpGet.setHeader("Accept", "application/json");
 
@@ -81,7 +79,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
                 JSONObject json = new JSONObject(result);
                 return json;
             } else {
-                if(context instanceof Activity){
+                if (context instanceof Activity) {
                     response.getEntity().getContent().close();
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
@@ -111,6 +109,9 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+
+            httpclient.getConnectionManager().closeExpiredConnections();
         }
 
         return null;
