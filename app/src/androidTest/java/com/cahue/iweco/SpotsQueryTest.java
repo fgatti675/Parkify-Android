@@ -68,11 +68,6 @@ public class SpotsQueryTest extends ActivityTestCase {
                     public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
 
                     }
-
-                    @Override
-                    public void onIOError() {
-
-                    }
                 });
 
         // Execute the async task on the UI thread! THIS IS KEY!

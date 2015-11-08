@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
@@ -547,7 +548,7 @@ public class MapsActivity extends AppCompatActivity
                 TranslateAnimation animation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
                 int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
                 animation.setDuration(mediumAnimTime);
-                animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
+                animation.setInterpolator(new AccelerateDecelerateInterpolator());
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
@@ -594,7 +595,7 @@ public class MapsActivity extends AppCompatActivity
         TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         animation.setDuration(mediumAnimTime);
-        animation.setInterpolator(MapsActivity.this, R.anim.my_decelerate_interpolator);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {

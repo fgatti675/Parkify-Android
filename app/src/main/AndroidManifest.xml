@@ -51,8 +51,7 @@
             android:value="@string/facebook_app_id" />
 
 
-        <activity
-            android:name=".MapsActivity">
+        <activity android:name=".MapsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -77,11 +76,11 @@
             android:name=".login.LoginActivity"
             android:label="@string/common_signin_button_text"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden"></activity>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".tutorial.TutorialActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark"></activity>
+            android:theme="@style/CahueTheme.Dark" />
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"

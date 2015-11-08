@@ -4,14 +4,20 @@ apply plugin: 'com.google.gms.google-services'
 apply from: project.property("cahue.signing") + "/cahue.gradle";
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    compileSdkVersion 21
+    buildToolsVersion '23.0.2'
+//    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.cahue.iweco"
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 21
+        multiDexEnabled true
     }
-    useLibrary 'org.apache.http.legacy'
+
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
+    }
 
     buildTypes {
         release {
@@ -34,32 +40,32 @@ android {
             }
         }
     }
-
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     // Google Maps Android API utility library
-    compile('com.google.maps.android:android-maps-utils:0.3+') {
+    compile('com.google.maps.android:android-maps-utils:0.4') {
         exclude group: "com.google.android.gms"
     }
 
     //    compile 'com.google.code.gson:gson:2.+'
-    compile 'com.android.support:support-v4:23.0.1'
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:support-v13:23.0.1'
-    compile 'com.android.support:cardview-v7:23.0.1'
-    compile 'com.android.support:recyclerview-v7:23.0.1'
-    compile 'com.google.android.gms:play-services-plus:7.5.0'
-    compile 'com.google.android.gms:play-services-maps:7.5.0'
-    compile 'com.google.android.gms:play-services-location:7.5.0'
-    compile 'com.google.android.gms:play-services-wallet:7.5.0'
-    compile 'com.google.android.gms:play-services-gcm:7.5.0'
-    compile 'com.google.android.gms:play-services-ads:7.5.0'
-    compile 'com.google.android.gms:play-services-analytics:7.5.0'
-    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:support-v4:21.0.+'
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:support-v13:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+    compile 'com.android.support:design:21.0.+'
+    compile 'com.google.android.gms:play-services-plus:8.3.0'
+    compile 'com.google.android.gms:play-services-maps:8.3.0'
+    compile 'com.google.android.gms:play-services-location:8.3.0'
+    compile 'com.google.android.gms:play-services-wallet:8.3.0'
+    compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.google.android.gms:play-services-ads:8.3.0'
+    compile 'com.google.android.gms:play-services-analytics:8.3.0'
     compile 'de.hdodenhof:circleimageview:1.2.2'
     compile 'com.mcxiaoke.volley:library:1.0.+@aar'
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
-    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.+'
+    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.10'
+    compile 'com.android.support:multidex:1.0.1'
 }

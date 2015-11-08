@@ -16,10 +16,12 @@
 #   public *;
 #}
 
--dontwarn com.google.common.**
-
+#For the gif library
 -keep public class pl.droidsonroids.gif.GifIOException{<init>(int);}
 -keep class pl.droidsonroids.gif.GifInfoHandle{<init>(long,int,int,int);}
+-keep public class pl.droidsonroids.gif.GifIOException{*;}
+
+-dontwarn com.google.common.**
 
 -dontwarn java.nio.file.Files
 -dontwarn java.nio.file.Path

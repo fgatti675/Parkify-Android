@@ -47,7 +47,7 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
 
         Log.d("ParkingSpotsQuery", result.toString());
         super.onPostExecute(result);
-        if(context instanceof Activity){
+        if (context instanceof Activity) {
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

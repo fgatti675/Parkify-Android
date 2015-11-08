@@ -14,6 +14,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -50,10 +54,10 @@ public class GMapV2Direction {
             queue.add(stringRequest);
 
             try {
-                String res = future.get();
+                InputStream stream = new ByteArrayInputStream(future.get().getBytes());
 
                 DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                Document doc = builder.parse(res);
+                Document doc = builder.parse(stream);
                 return doc;
             } catch (InterruptedException | ExecutionException e) {
             }

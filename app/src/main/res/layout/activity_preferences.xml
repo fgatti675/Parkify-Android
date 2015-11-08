@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/car_manager_fragment"
-        class="com.cahue.iweco.SettingsActivity$PreferencesFragment"
+        class="com.cahue.iweco.PreferencesFragment"
         tools:layout="@layout/fragment_car_manager" />
 
 </RelativeLayout>

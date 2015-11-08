@@ -7,12 +7,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,8 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -308,7 +303,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         String gcmDeviceId = GCMUtil.getRegistrationId(this);
 
         if (gcmDeviceId.isEmpty()) {
-            gcmDeviceId = gcm.register(GCMUtil.SENDER_ID); // TODO: this can crash
+            gcmDeviceId =
+                    gcm.register(GCMUtil.SENDER_ID); // TODO: this can crash
             Log.d(TAG, "Device registered, registration ID: " + gcmDeviceId);
 
             // Persist the regID - no need to register again.

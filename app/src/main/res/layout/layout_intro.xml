@@ -9,7 +9,7 @@
     android:stateListAnimator="@anim/abc_fade_in">
 
     <pl.droidsonroids.gif.GifImageView
-        android:id="@+id/imageView"
+        android:id="@+id/weco_anim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -24,7 +24,6 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/large_padding"
         android:layout_gravity="center_horizontal"
-        android:paddingBottom="@dimen/large_padding">
-    </ImageView>
+        android:paddingBottom="@dimen/large_padding" />
 
 </LinearLayout>
