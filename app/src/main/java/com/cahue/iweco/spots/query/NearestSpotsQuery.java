@@ -23,15 +23,16 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
 
     public NearestSpotsQuery(Context context, LatLng center, Integer limit, ParkingSpotsUpdateListener listener) {
         super(context, listener);
+
+        if (center == null || limit == null)
+            throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");
+
         this.center = center;
         this.limit = limit;
     }
 
     @Override
-    protected QueryResult doInBackground(Void... voids) {
-
-        if (center == null || limit == null)
-            throw new IllegalStateException("There must be a center and a limit in the number of spots set to build the SQL query.");
+    protected Uri getRequestUri() {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -42,10 +43,7 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
                 .appendQueryParameter("long", Double.toString(center.longitude))
                 .appendQueryParameter("count", Integer.toString(limit));
 
-        String url = builder.build().toString();
-        Log.i(TAG, "Query nearest : " + url);
-
-        return parseResult(query(url));
+        return builder.build();
     }
 
 

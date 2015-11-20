@@ -24,11 +24,7 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
     }
 
     @Override
-    protected QueryResult doInBackground(Void... voids) {
-
-        if (latLngBounds == null)
-            throw new IllegalStateException("There must be a latLngBound set as a viewport to build the SQL query.");
-
+    protected Uri getRequestUri() {
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
                 .authority(context.getResources().getString(R.string.baseURL))
@@ -37,12 +33,6 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
                 .appendQueryParameter("swLong", Double.toString(latLngBounds.southwest.longitude))
                 .appendQueryParameter("neLat", Double.toString(latLngBounds.northeast.latitude))
                 .appendQueryParameter("neLong", Double.toString(latLngBounds.northeast.longitude));
-
-        String url = builder.build().toString();
-        Log.i(TAG, "Query area : " +  url);
-
-        return parseResult(query(url));
+        return builder.build();
     }
-
-
 }

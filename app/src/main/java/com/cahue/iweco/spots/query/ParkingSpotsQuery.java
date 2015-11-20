@@ -2,6 +2,7 @@ package com.cahue.iweco.spots.query;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -25,8 +27,19 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by francesco on 13.11.2014.
  */
-public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResult> {
+public abstract class ParkingSpotsQuery {
 
+    /**
+     * Components that use this service must implement a listener using this interface to get the
+     * parking locations
+     */
+    public interface ParkingSpotsUpdateListener {
+
+        void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
+
+        void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
+
+    }
 
     private static final String TAG = ParkingSpotsQuery.class.getSimpleName();
 
@@ -39,52 +52,37 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
         this.listener = listener;
     }
 
-    @Override
-    protected abstract QueryResult doInBackground(Void... voids);
-
-    @Override
-    protected void onPostExecute(final QueryResult result) {
-
-        Log.d("ParkingSpotsQuery", result.toString());
-        super.onPostExecute(result);
-        if (context instanceof Activity) {
-            ((Activity) context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    listener.onSpotsUpdate(ParkingSpotsQuery.this, result);
-                }
-            });
-        }
-    }
-
-    protected JSONObject query(String url) {
+    public void execute() {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
 
-        RequestFuture<JSONObject> future = RequestFuture.newFuture();
+        String url = getRequestUri().toString();
 
-        Log.d(TAG, url);
-        JsonRequest stringRequest = new JsonObjectRequest(
+        Log.d(TAG, "Parking spots query: " + url);
+
+        JsonRequest request = new JsonObjectRequest(
                 url,
-                future,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        QueryResult queryResult = parseResult(response);
+                        listener.onSpotsUpdate(ParkingSpotsQuery.this, queryResult);
+                    }
+                },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        listener.onServerError(ParkingSpotsQuery.this, error.networkResponse.statusCode, new String(error.networkResponse.data));
+                        if (error.networkResponse == null)
+                            listener.onServerError(ParkingSpotsQuery.this, -1, null);
+                        else
+                            listener.onServerError(ParkingSpotsQuery.this, error.networkResponse.statusCode, new String(error.networkResponse.data));
                     }
                 });
 
         // Add the request to the RequestQueue.
-        queue.add(stringRequest);
-
-        try {
-            return future.get();
-        } catch (InterruptedException | ExecutionException e) {
-        }
-
-        return null;
+        queue.add(request);
     }
 
     protected QueryResult parseResult(JSONObject jsonObject) {
@@ -117,15 +115,5 @@ public abstract class ParkingSpotsQuery extends AsyncTask<Void, Void, QueryResul
         return result;
     }
 
-    /**
-     * Components that use this service must implement a listener using this interface to get the
-     * parking locations
-     */
-    public interface ParkingSpotsUpdateListener {
-
-        void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
-
-        void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
-
-    }
+    protected abstract Uri getRequestUri();
 }
