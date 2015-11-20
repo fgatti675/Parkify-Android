@@ -38,14 +38,6 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
         this.type = type;
     }
 
-    private static String createGoogleRegistrationForm(String regId, String authToken) {
-        return String.format("deviceRegId=%s&googleAuthToken=%s", regId, authToken);
-    }
-
-    private static String createFacebookRegistrationForm(String regId, String authToken) {
-        return String.format("deviceRegId=%s&facebookAuthToken=%s", regId, authToken);
-    }
-
     @Override
     protected LoginResultBean doInBackground(Void... voids) {
 
@@ -58,14 +50,15 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                 .authority(context.getResources().getString(R.string.baseURL))
                 .appendPath(context.getResources().getString(R.string.usersPath));
 
-        String body;
 
         if (type == LoginType.Google) {
-            builder.appendPath(context.getResources().getString(R.string.googlePath));
-            body = createGoogleRegistrationForm(registrationId, authToken);
+            builder.appendPath(context.getResources().getString(R.string.googlePath))
+                    .appendQueryParameter("deviceRegId", registrationId)
+                    .appendQueryParameter("googleAuthToken", authToken);
         } else if (type == LoginType.Facebook) {
-            builder.appendPath(context.getResources().getString(R.string.facebookPath));
-            body = createFacebookRegistrationForm(registrationId, authToken);
+            builder.appendPath(context.getResources().getString(R.string.facebookPath))
+                    .appendQueryParameter("deviceRegId", registrationId)
+                    .appendQueryParameter("facebookAuthToken", authToken);
         } else {
             throw new IllegalStateException("What did you do?");
         }
@@ -77,14 +70,14 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
         Log.d(TAG, url);
         JsonRequest stringRequest = new Requests.JsonPostFormRequest(
                 context,
-                body,
                 url,
+                null,
                 future,
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        loginResultListener.onLoginError(authToken);
+                        loginResultListener.onLoginError(authToken, type);
                     }
                 });
 
@@ -115,6 +108,6 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
         void onBackEndLogin(LoginResultBean loginResult, LoginType type);
 
-        void onLoginError(String authToken);
+        void onLoginError(String authToken, LoginType type);
     }
 }

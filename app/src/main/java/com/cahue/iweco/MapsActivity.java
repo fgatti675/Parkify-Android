@@ -1,5 +1,7 @@
 package com.cahue.iweco;
 
+import android.*;
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
@@ -7,12 +9,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -96,6 +101,9 @@ public class MapsActivity extends AppCompatActivity
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
+
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10;
+
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -449,6 +457,14 @@ public class MapsActivity extends AppCompatActivity
 
         mMap = googleMap;
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        } else{
+            setUpMapLocation();
+        }
+
         setUpMap();
         setUpMapListeners();
 
@@ -475,6 +491,36 @@ public class MapsActivity extends AppCompatActivity
         if (detailsDisplayed) showDetails();
         else hideDetails();
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setUpMapLocation();
+                } else {
+                    Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
+    private void setUpMapLocation() {
+
+        if(mMap == null) return;
+
+        if(!mGoogleApiClient.isConnected()) return;
+
+        mMap.setMyLocationEnabled(true);
+        // Connected to Google Play services!
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                REQUEST,
+                this);
     }
 
     private SpotsDelegate getSpotsDelegate() {
@@ -645,11 +691,8 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // Connected to Google Play services!
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                REQUEST,
-                this);
         Log.w(TAG, "onConnected");
+        setUpMapLocation();
     }
 
     @Override
@@ -793,7 +836,6 @@ public class MapsActivity extends AppCompatActivity
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);

@@ -1,5 +1,6 @@
 package com.cahue.iweco.login;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.animation.Animator;
@@ -7,8 +8,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -69,6 +73,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private final static int OUR_REQUEST_CODE = 49404;
+
+    private static final int PERMISSIONS_REQUEST_GET_ACCOUNTS = 234;
 
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     // Profile pic image size in pixels
@@ -288,14 +294,19 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Util.createUpperToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
-    private void clearGoogleToken(String authToken) {
-        try {
-            GoogleAuthUtil.clearToken(this, authToken);
-        } catch (GoogleAuthException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void clearGoogleToken(final String authToken) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    GoogleAuthUtil.clearToken(LoginActivity.this, authToken);
+                } catch (GoogleAuthException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     private String getGCMRegId() throws IOException {
@@ -408,6 +419,34 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     protected void onPlusClientSignIn() {
         Log.d(TAG, "onPlusClientSignIn");
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.GET_ACCOUNTS},
+                    PERMISSIONS_REQUEST_GET_ACCOUNTS);
+        } else{
+            extractPlusDetails();
+        }
+
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_GET_ACCOUNTS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                   extractPlusDetails();
+                } else {
+                    Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
+    private void extractPlusDetails() {
         String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
         requestGoogleOauthToken(email);
     }
@@ -501,10 +540,11 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     @Override
-    public void onLoginError(String authToken) {
+    public void onLoginError(String authToken, LoginType type) {
         setLoading(false);
-        clearGoogleToken(authToken);
-        Util.createUpperToast(this, R.string.login_error, Toast.LENGTH_SHORT);
+        if (type == LoginType.Google)
+            clearGoogleToken(authToken);
+        Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
     }
 
     /**
