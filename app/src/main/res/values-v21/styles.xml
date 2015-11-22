@@ -4,12 +4,12 @@
     <!-- Base application theme. -->
     <style name="CahueTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
-        <item name="windowActionBar">false</item>
+        <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
 
-        <item name="colorPrimary">@color/theme_primary</item>
-        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
-        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:colorPrimary">@color/theme_primary</item>
+        <item name="android:colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="android:colorAccent">@color/theme_accent</item>
 
         <item name="android:textColorPrimary">@color/body_text_1</item>
         <item name="android:textColorSecondary">@color/body_text_2</item>
@@ -24,13 +24,6 @@
         <item name="android:windowSharedElementEnterTransition">@android:transition/move</item>
         <item name="android:windowSharedElementExitTransition">@android:transition/move</item>
 
-    </style>
-
-    <style name="ActionBarThemeOverlay" parent="CahueTheme">
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/white</item>
-        <!--<item name="colorControlNormal">?actionBarIconColor</item>-->
-        <!--<item name="colorControlHighlight">@color/white</item>-->
     </style>
 
     <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
@@ -51,20 +44,19 @@
     </style>
 
     <!-- Base application theme. -->
-    <style name="CahueTheme.Dark" parent="Theme.AppCompat">
-
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-
+    <style name="CahueTheme.Dark">
         <item name="android:colorBackground">@color/theme_primary</item>
 
         <item name="android:textColor">@color/body_text_1_inverse</item>
         <item name="android:textColorPrimary">@color/body_text_1_inverse</item>
         <item name="android:textColorSecondary">@color/body_text_2_inverse</item>
 
-        <item name="colorAccent">@color/theme_accent</item>
-        <!--<item name="cardBackgroundColor">@color/theme_primary_dark</item>-->
+        <item name="android:colorAccent">@color/theme_accent</item>
 
+    </style>
+
+    <style name="CahueTheme.Dark.Tutorial">
+        <item name="android:colorPrimaryDark">@color/black</item>
     </style>
 
     <style name="CardViewStyle" parent="CardView.Light">

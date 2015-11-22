@@ -5,6 +5,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -64,7 +65,7 @@ import java.util.List;
 /**
  * A login screen that offers login via Google+
  */
-public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.LoginListener, GoogleApiClient.ConnectionCallbacks,
+public class LoginActivity extends Activity implements LoginAsyncTask.LoginListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();

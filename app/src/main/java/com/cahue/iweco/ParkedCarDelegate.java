@@ -147,7 +147,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private void setUpColors() {
 
-        lightColor = ColorUtil.getSemiTransparent(getResources().getColor(R.color.car_silver));
+        lightColor = ColorUtil.getSemiTransparent(getResources().getColor(R.color.silver));
 
         if (car.color == null) {
             iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
@@ -162,7 +162,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
                             com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
                             com.google.maps.android.R.style.Bubble_TextAppearance_Light);
 
-            if (car.color != getResources().getColor(R.color.car_white))
+            if (car.color != getResources().getColor(R.color.white))
                 lightColor = brightColor ? car.color : ColorUtil.getSemiTransparent(car.color);
         }
     }

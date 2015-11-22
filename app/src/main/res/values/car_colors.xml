@@ -2,18 +2,18 @@
 <resources>
 
     <array name="rainbow_colors">
-        <item>@color/car_white</item>
-        <item>@color/car_black</item>
-        <item>@color/car_silver</item>
-        <item>@color/car_gray</item>
-        <item>@color/car_red</item>
-        <item>@color/car_blue</item>
-        <item>@color/car_brown</item>
-        <item>@color/car_olive</item>
-        <item>@color/car_yellow</item>
-        <item>@color/car_gold</item>
-        <item>@color/car_orange</item>
-        <item>@color/car_pink</item>
+        <item>@color/white</item>
+        <item>@color/black</item>
+        <item>@color/silver</item>
+        <item>@color/gray</item>
+        <item>@color/red</item>
+        <item>@color/blue</item>
+        <item>@color/brown</item>
+        <item>@color/olive</item>
+        <item>@color/yellow</item>
+        <item>@color/gold</item>
+        <item>@color/orange</item>
+        <item>@color/pink</item>
     </array>
 
     <array name="rainbow_names">

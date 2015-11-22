@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class TutorialActivity extends Activity
+public class TutorialActivity extends AppCompatActivity
         implements CarManagerFragment.Callbacks,
         EditCarDialog.CarEditedListener,
         ViewPager.OnPageChangeListener {

@@ -31,7 +31,7 @@
             android:layout_gravity="center"
             android:clickable="false"
             android:focusable="false"
-            cahue:theme="@style/ActionBar.Details">
+            cahue:theme="@style/CahueTheme">
 
             <TextView
                 android:id="@+id/spot_title"

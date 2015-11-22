@@ -28,7 +28,7 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/car_toolbar"
-            android:theme="@style/ActionBar.Details"
+            android:theme="@style/CahueTheme"
             android:paddingRight="@dimen/default_padding"
             android:clickable="false"
             android:focusable="false"

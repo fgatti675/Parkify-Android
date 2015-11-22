@@ -7,36 +7,14 @@
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
 
-        <!--<item name="actionBarIconColor">#fff</item>-->
-        <!--<item name="actionBarInsetStart">@dimen/keyline_2</item>-->
-        <!--&lt;!&ndash;<item name="homeAsUpIndicator">@drawable/ic_up</item>&ndash;&gt;-->
-        <!--<item name="spinnerBarInsetStart">@dimen/keyline_2_minus_16dp</item>-->
-        <!--<item name="popupItemBackground">?android:selectableItemBackground</item>-->
-        <!--<item name="photoItemForeground">?android:selectableItemBackground</item>-->
-        <!--<item name="photoItemForegroundBorderless">?android:selectableItemBackground</item>-->
-
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
-
-        <!-- used in toolbar up arrow for example -->
-        <!--<item name="colorControlNormal">@color/theme_accent_1</item>-->
-
 
         <item name="android:textColorPrimary">@color/body_text_1</item>
         <item name="android:textColorSecondary">@color/body_text_2</item>
 
         <item name="cardCornerRadius">@dimen/cardCornerRadius</item>
-
-        <!--<item name="android:windowContentOverlay">@null</item>-->
-        <!--<item name="android:windowBackground">@android:color/white</item>-->
-        <!--<item name="android:homeAsUpIndicator">@drawable/ic_up</item>-->
-
-        <!--<item name="android:popupMenuStyle">@style/Widget.IOSched.PopupMenu</item>-->
-        <!--<item name="android:listPopupWindowStyle">@style/Widget.IOSched.PopupMenu</item>-->
-        <!--<item name="android:dropDownListViewStyle">@style/Widget.IOSched.ListView.DropDown</item>-->
-        <!--<item name="android:textAppearanceLargePopupMenu">@style/TextAppearance.LargePopupMenu</item>-->
-
     </style>
 
     <style name="AppTheme.Transparent" parent="CahueTheme">
@@ -57,21 +35,12 @@
         <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="ActionBar.Details" parent="CahueTheme">
-        <!--<item name="android:minWidth">0dp</item>-->
-        <!--<item name="android:paddingLeft">@dimen/default_padding</item>-->
-        <!--<item name="android:scaleType">centerInside</item>-->
-    </style>
-
     <style name="ActionBar.DetailsPopupThemeOverlay" parent="ThemeOverlay.AppCompat">
         <item name="android:padding">0dp</item>
     </style>
 
     <!-- Base application theme. -->
-    <style name="CahueTheme.Dark" parent="Theme.AppCompat">
-
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+    <style name="CahueTheme.Dark">
 
         <item name="android:colorBackground">@color/theme_primary</item>
 
@@ -80,8 +49,11 @@
         <item name="android:textColorSecondary">@color/body_text_2_inverse</item>
 
         <item name="colorAccent">@color/theme_accent</item>
-        <!--<item name="cardBackgroundColor">@color/theme_primary_dark</item>-->
 
+    </style>
+
+    <style name="CahueTheme.Dark.Tutorial">
+        <item name="colorPrimaryDark">@color/black</item>
     </style>
 
     <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
@@ -99,37 +71,28 @@
         <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
-    <!--<style name="CahueTheme.BorderLessButton" parent="Widget.Material.Button.Borderless">-->
-    <!--<item name="background">@drawable/btn_borderless_material</item>-->
-    <!--<item name="stateListAnimator">@null</item>-->
-    <!--</style>-->
-
     <style name="CardViewStyle" parent="CardView.Light">
         <item name="android:textColor">@color/abc_primary_text_material_light</item>
         <item name="android:textColorPrimary">@color/abc_primary_text_material_light</item>
         <item name="android:textColorSecondary">@color/abc_secondary_text_material_light</item>
     </style>
 
-    <style name="SetCarPositionMarkerStyle">
-        <item name="android:textSize">20sp</item>
-        <item name="android:textStyle">bold</item>
+    <style name="Marker">
+        <item name="android:gravity">center</item>
         <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
-    <style name="GreenMarkerStyle">
+    <style name="Marker.Green">
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
-    <style name="OrangeMarkerStyle">
+    <style name="Marker.Orange">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
-    <style name="SelectedMarkerStyle">
+    <style name="Marker.Selected">
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/theme_primary</item>
     </style>
 
 </resources>

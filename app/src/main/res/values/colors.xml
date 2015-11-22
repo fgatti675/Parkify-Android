@@ -23,7 +23,6 @@
     <color name="body_text_1_inverse">#deffffff</color>
     <color name="body_text_2_inverse">#8affffff</color>
 
-    <color name="white">#ffffffff</color>
     <color name="light_grey">#ffebebeb</color>
 
     <color name="theme_primary">#ff12a0d0</color>
@@ -46,18 +45,18 @@
 
     <color name="background_translucent">#88056a80</color>
 
-    <color name="car_white">#ffffffff</color>
-    <color name="car_silver">#a8a9ab</color>
-    <color name="car_gray">#6A747D</color>
-    <color name="car_black">#000000</color>
-    <color name="car_brown">#8a6632</color>
-    <color name="car_olive">#58652d</color>
-    <color name="car_blue">#396e8e</color>
-    <color name="car_green">#63a037</color>
-    <color name="car_gold">#cbb677</color>
-    <color name="car_yellow">#f0f12b</color>
-    <color name="car_orange">#f89021</color>
-    <color name="car_red">#b52026</color>
-    <color name="car_pink">#ff9db3</color>
+    <color name="white">#ffffffff</color>
+    <color name="silver">#a8a9ab</color>
+    <color name="gray">#6A747D</color>
+    <color name="black">#000000</color>
+    <color name="brown">#8a6632</color>
+    <color name="olive">#58652d</color>
+    <color name="blue">#396e8e</color>
+    <color name="green">#63a037</color>
+    <color name="gold">#cbb677</color>
+    <color name="yellow">#f0f12b</color>
+    <color name="orange">#f89021</color>
+    <color name="red">#b52026</color>
+    <color name="pink">#ff9db3</color>
 
 </resources>
