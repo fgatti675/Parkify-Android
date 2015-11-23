@@ -1,4 +1,4 @@
-package com.cahue.iweco.util;
+package com.cahue.iweco.dialogs;
 
 /**
  * Created by Francesco on 07/06/2015.
@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
+import com.cahue.iweco.util.PreferencesUtil;
 
 import java.util.Date;
 import java.util.Locale;

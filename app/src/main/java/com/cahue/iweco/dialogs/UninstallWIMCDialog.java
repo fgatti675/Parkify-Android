@@ -1,4 +1,4 @@
-package com.cahue.iweco.util;
+package com.cahue.iweco.dialogs;
 
 /**
  * Created by Francesco on 07/06/2015.
@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.cahue.iweco.R;
+import com.cahue.iweco.util.PreferencesUtil;
 
 
 public class UninstallWIMCDialog extends DialogFragment {

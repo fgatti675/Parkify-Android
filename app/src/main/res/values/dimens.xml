@@ -9,6 +9,7 @@
     <dimen name="marker_diameter_green">16dp</dimen>
     <dimen name="marker_diameter_selected">22dp</dimen>
 
+
     <dimen name="buttons_margin">20dp</dimen>
     <dimen name="small_padding">4dp</dimen>
     <dimen name="default_padding">8dp</dimen>
@@ -17,8 +18,11 @@
     <dimen name="elevation_small">2dp</dimen>
     <dimen name="cardCornerRadius">2dp</dimen>
 
-    <dimen name="marker_spacing_large">5dp</dimen>
+    <dimen name="marker_padding_big_side">6dp</dimen>
+    <dimen name="marker_padding_big_top">3dp</dimen>
 
+    <dimen name="marker_padding_medium_side">5dp</dimen>
+    <dimen name="marker_padding_medium_top">3dp</dimen>
 
     <dimen name="navigation_drawer_width">320dp</dimen>
 </resources>

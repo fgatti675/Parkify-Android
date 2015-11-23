@@ -1,5 +1,6 @@
 package com.cahue.iweco;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -331,7 +332,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Activity context) {
         super.onAttach(context);
         try {
             mCallbacks = (OnCarClickedListener) context;

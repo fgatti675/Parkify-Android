@@ -45,10 +45,13 @@ public class DetectedActivitiesIntentService extends IntentService {
 
 
     private static DetectedActivity previousActivity;
-    private static DetectedActivity previousPreviousActivity;
 
     // How many times the user has been still in a row
     private static int stillCounter = 0;
+    private static int vehicleCounter = 0;
+
+    // flag to indicate is definitely in a vehicle, not caused by false positives
+    private static boolean definitelyInAVehicle = false;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -88,13 +91,21 @@ public class DetectedActivitiesIntentService extends IntentService {
         // Check if still
         if (isStill(mostProbableActivity)) {
             stillCounter++;
-            if(stillCounter > 5) {
+            if (stillCounter > 5) {
                 // reset if still for too long
                 previousActivity = null;
-                previousPreviousActivity = null;
+                savePreviousActivity(null);
             }
-        }else {
+        } else {
             stillCounter = 0;
+        }
+
+        // check if really in a vehicle
+        if (isVehicleRelated(mostProbableActivity)) {
+            vehicleCounter++;
+            if (vehicleCounter > 3) definitelyInAVehicle = true;
+        } else {
+            vehicleCounter = 0;
         }
 
         // If not on foot or in vehicle we are not interested
@@ -115,21 +126,25 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
 
             if (previousActivity != null) {
+
                 // If switched to on foot, previously in vehicle
-                if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity)) {
+                if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity) && definitelyInAVehicle) {
                     handleVehicleToFoot();
                 } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
                     handleFootToVehicle();
                 }
+
+                // reset this
+                definitelyInAVehicle = false;
             }
 
-            previousPreviousActivity = previousActivity;
             previousActivity = mostProbableActivity;
 
             savePreviousActivity(previousActivity);
         }
 
     }
+
     private void handleVehicleToFoot() {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent(this, ParkedCarRequestedService.class);
@@ -191,14 +206,22 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     private void savePreviousActivity(DetectedActivity previousActivity) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit()
-                .putInt(PREF_PREVIOUS_ACTIVITY_TYPE, previousActivity.getType())
-                .putInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, previousActivity.getConfidence())
-                .apply();
+        if (previousActivity != null) {
+            prefs.edit()
+                    .putInt(PREF_PREVIOUS_ACTIVITY_TYPE, previousActivity.getType())
+                    .putInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, previousActivity.getConfidence())
+                    .apply();
+        } else {
+            prefs.edit()
+                    .remove(PREF_PREVIOUS_ACTIVITY_TYPE)
+                    .remove(PREF_PREVIOUS_ACTIVITY_CONFIDENCE)
+                    .apply();
+        }
     }
 
     private DetectedActivity getStoredDetectedActivity() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!prefs.contains(PREF_PREVIOUS_ACTIVITY_TYPE)) return null;
         int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, DetectedActivity.UNKNOWN);
         int confidence = prefs.getInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, 0);
         return new DetectedActivity(type, confidence);

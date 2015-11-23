@@ -1,6 +1,5 @@
 package com.cahue.iweco;
 
-import android.*;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -40,6 +39,7 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
@@ -51,11 +51,11 @@ import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
-import com.cahue.iweco.util.IwecoPromoDialog;
+import com.cahue.iweco.dialogs.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
-import com.cahue.iweco.util.RatingDialog;
+import com.cahue.iweco.dialogs.RatingDialog;
 import com.cahue.iweco.util.Tracking;
-import com.cahue.iweco.util.UninstallWIMCDialog;
+import com.cahue.iweco.dialogs.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
@@ -104,6 +104,8 @@ public class MapsActivity extends AppCompatActivity
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10;
+
+    private static final int REQUEST_CODE_START_TUTORIAL = 2345;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -306,6 +308,8 @@ public class MapsActivity extends AppCompatActivity
             goToTutorial();
             return;
         }
+
+        checkLocationPermission();
     }
 
     @Override
@@ -457,7 +461,7 @@ public class MapsActivity extends AppCompatActivity
 
         mMap = googleMap;
 
-        setUpMapIfAllowed();
+        setUpMapLocation();
         setUpMap();
         setUpMapListeners();
 
@@ -488,15 +492,15 @@ public class MapsActivity extends AppCompatActivity
 
     private boolean locationPermissionCurrentlyRequested = false;
 
-    private void setUpMapIfAllowed() {
-        if (isLocationPermissionGranted()) {
-            setUpMapLocation();
-        } else {
-            if (!locationPermissionCurrentlyRequested) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                locationPermissionCurrentlyRequested = true;
-            }
+    private void checkLocationPermission() {
+
+        if (isLocationPermissionGranted()) return;
+
+        if (!locationPermissionCurrentlyRequested) {
+            Log.i(TAG, "Requesting location permission");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            locationPermissionCurrentlyRequested = true;
         }
     }
 
@@ -523,7 +527,7 @@ public class MapsActivity extends AppCompatActivity
 
     private void setUpMapLocation() {
 
-        if (mMap == null) return;
+        if (mMap == null || !isLocationPermissionGranted()) return;
 
         if (!mGoogleApiClient.isConnected()) return;
 
@@ -699,7 +703,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.w(TAG, "onConnected");
-        setUpMapIfAllowed();
+        setUpMapLocation();
     }
 
     @Override
@@ -748,8 +752,13 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
-        billingFragment.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_START_TUTORIAL) {
+            checkLocationPermission();
+        } else {
+            BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
+            billingFragment.onActivityResult(requestCode, resultCode, data);
+        }
+
     }
 
     @Override
@@ -822,7 +831,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public void goToTutorial() {
-        startActivity(new Intent(this, TutorialActivity.class));
+        startActivityForResult(new Intent(this, TutorialActivity.class), REQUEST_CODE_START_TUTORIAL);
         // animation
         overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
         PreferencesUtil.setTutorialShown(this, true);
@@ -842,7 +851,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p/>
+     * <p>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {

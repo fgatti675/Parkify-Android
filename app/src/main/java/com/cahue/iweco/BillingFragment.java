@@ -59,7 +59,8 @@ public class BillingFragment extends Fragment {
             /**
              * Tell everyone the billing service is ready
              */
-            getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
+            if(getActivity() != null)
+                getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
         }
     };
 
@@ -139,9 +140,9 @@ public class BillingFragment extends Fragment {
         // element purchase
         if (requestCode == REQUEST_ON_PURCHASE) {
 
-            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+//            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
+//            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+//            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
 
             if (resultCode == getActivity().RESULT_OK) {
 //                try {

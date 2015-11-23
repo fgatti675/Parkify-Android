@@ -45,7 +45,10 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      * @param context
      */
     public static void startIfNecessary(Context context) {
-        if (!BluetoothAdapter.getDefaultAdapter().isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context) && !CarDatabase.getInstance(context).isEmpty()) {
+        if (!BluetoothAdapter.getDefaultAdapter().isEnabled()
+                && PreferencesUtil.isMovementRecognitionEnabled(context)
+                && !CarDatabase.getInstance(context).isEmpty()) {
+
             Intent intent = new Intent(context, ActivityRecognitionService.class);
             intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
             context.startService(intent);
@@ -58,6 +61,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                 mNotifyMgr.notify(null, 6472837, mBuilder.build());
             }
         }
+
     }
 
     public static void stop(Context context) {
