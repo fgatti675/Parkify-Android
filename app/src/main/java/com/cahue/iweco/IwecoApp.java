@@ -25,6 +25,7 @@ public class IwecoApp extends Application {
 
     @Override
     public void onCreate() {
+
         super.onCreate();
 
         iwecoApp = this;
@@ -41,11 +42,8 @@ public class IwecoApp extends Application {
         analytics.setLocalDispatchPeriod(1800);
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
-        if (!BuildConfig.DEBUG) {
-//            tracker.enableExceptionReporting(true);
-//            tracker.enableAdvertisingIdCollection(true);
-            tracker.enableAutoActivityTracking(true);
-        }
+        tracker.enableAdvertisingIdCollection(true);
+        tracker.enableAutoActivityTracking(true);
 
         // Strict mode
         if (BuildConfig.DEBUG) {
@@ -63,7 +61,7 @@ public class IwecoApp extends Application {
         }
     }
 
-    public synchronized Tracker getTracker() {
+    public Tracker getTracker() {
         return tracker;
     }
 

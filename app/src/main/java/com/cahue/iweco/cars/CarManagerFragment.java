@@ -4,7 +4,6 @@ package com.cahue.iweco.cars;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -14,7 +13,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -31,15 +29,11 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.IwecoApp;
-import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.PreferencesUtil;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -269,20 +263,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
          */
         CarsSync.storeCar(carDatabase, getActivity(), car);
 
-        if(!BuildConfig.DEBUG) {
-            final Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    tracker.send(new HitBuilders.EventBuilder()
-                            .setCategory("UX")
-                            .setAction("edit")
-                            .setLabel("Car edited")
-                            .build());
-                    return null;
-                }
-            }.execute();
-        }
+        Tracking.sendEvent(Tracking.CATEGORY_CAR_MANAGER, Tracking.ACTION_CAR_EDIT);
+
     }
 
     public void onCarRemoved(Car car) {

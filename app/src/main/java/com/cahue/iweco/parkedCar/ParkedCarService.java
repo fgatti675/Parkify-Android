@@ -47,22 +47,6 @@ public class ParkedCarService extends LocationPollerService {
         CarDatabase carDatabase = CarDatabase.getInstance(context);
         CarsSync.storeCar(carDatabase, context, car);
 
-        if (BuildConfig.DEBUG) {
-            final Tracker tracker = ((IwecoApp) getApplication()).getTracker();
-            tracker.setScreenName(TAG);
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    tracker.send(new HitBuilders.EventBuilder()
-                            .setCategory("IO")
-                            .setAction("post")
-                            .setLabel("Car update")
-                            .build());
-                    return null;
-                }
-            }.execute();
-        }
-
         /**
          * If the location of the car is good enough we can set a geofence afterwards.
          */

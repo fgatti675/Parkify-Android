@@ -9,6 +9,7 @@
         <item>@color/red</item>
         <item>@color/blue</item>
         <item>@color/brown</item>
+        <item>@color/green</item>
         <item>@color/olive</item>
         <item>@color/yellow</item>
         <item>@color/gold</item>
@@ -25,11 +26,11 @@
         <item>@string/car_blue</item>
         <item>@string/car_brown</item>
         <item>@string/car_green</item>
+        <item>@string/car_olive</item>
         <item>@string/car_yellow</item>
         <item>@string/car_gold</item>
         <item>@string/car_orange</item>
         <item>@string/car_pink</item>
-        <item>@string/car_olive</item>
     </array>
 
     <string name="car_white">White</string>

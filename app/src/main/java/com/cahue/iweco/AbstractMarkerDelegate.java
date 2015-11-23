@@ -151,7 +151,9 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     protected GoogleMap getMap() {
         if (mMap == null) {
-            setMap(((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap());
+            Fragment mapFragment = getFragmentManager().findFragmentById(R.id.map);
+            if (mapFragment != null)
+                setMap(((MapFragment) mapFragment).getMap());
         }
         return mMap;
     }

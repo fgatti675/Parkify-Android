@@ -2,7 +2,6 @@ package com.cahue.iweco;
 
 import android.app.Activity;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -11,8 +10,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -167,9 +165,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         }
     }
 
-    private Tracker getTracker() {
-        return ((IwecoApp) getActivity().getApplication()).getTracker();
-    }
 
     /**
      * Displays the car in the map
@@ -349,20 +344,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
             onCarClicked();
 
-            if (!BuildConfig.DEBUG) {
-                final Tracker tracker = getTracker();
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        tracker.send(new HitBuilders.EventBuilder()
-                                .setCategory("UX")
-                                .setAction("click")
-                                .setLabel("Car clicked")
-                                .build());
-                        return null;
-                    }
-                }.execute();
-            }
+            Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_MARKER);
+
             return true;
         } else {
             setCameraFollowing(false);

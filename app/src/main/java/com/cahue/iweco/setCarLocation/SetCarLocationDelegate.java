@@ -47,7 +47,7 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
         iconGenerator = new IconGenerator(getActivity());
         iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
-        iconGenerator.setTextAppearance(R.style.Marker_Selected);
+        iconGenerator.setTextAppearance(R.style.Marker_SetCar);
         int color = getResources().getColor(R.color.theme_accent);
         iconGenerator.setColor(color);
     }

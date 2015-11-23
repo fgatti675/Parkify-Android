@@ -191,7 +191,6 @@ public class SetCarDetailsFragment extends DetailsFragment {
             addressString = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
 
             updateAddress();
-
         }
     }
 

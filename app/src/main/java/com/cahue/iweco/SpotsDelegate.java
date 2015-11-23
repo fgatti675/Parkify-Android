@@ -15,6 +15,7 @@ import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
 import com.cahue.iweco.util.GMapV2Direction;
+import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -258,20 +259,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        if (BuildConfig.DEBUG) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    Tracker tracker = getTracker();
-                    tracker.send(new HitBuilders.EventBuilder()
-                            .setCategory("IO")
-                            .setAction("query")
-                            .setLabel("Spots area query")
-                            .build());
-                    return null;
-                }
-            }.execute();
-        }
         ParkingSpotsQuery areaQuery = new AreaSpotsQuery(getActivity(), extendedViewBounds, this);
 
         Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
@@ -447,30 +434,12 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
             detailsViewManager.setDetailsFragment(SpotDetailsFragment.newInstance(selectedSpot, userLocation));
 
-            if (BuildConfig.DEBUG) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        Tracker tracker = getTracker();
-                        tracker.send(new HitBuilders.EventBuilder()
-                                .setCategory("UX")
-                                .setAction("click")
-                                .setLabel("Spot clicked")
-                                .build());
-                        return null;
-                    }
-                }.execute();
-            }
-
+            Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_FREE_SPOT_SELECTED);
             return true;
         }
         return false;
     }
 
-    private Tracker getTracker() {
-        Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-        return tracker;
-    }
 
     @Override
     protected void onUserLocationChanged(Location userLocation) {

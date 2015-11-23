@@ -77,5 +77,6 @@
     <string name="ask_just_parked">¿Acabas de aparcar?</string>
     <string name="free_spot">Hueco libre</string>
     <string name="long_click_instructions">Click largo para establecer la posición del coche. ¡La próxima vez se hará automáticamente!</string>
+    <string name="permission_error">Permiso necesario!</string>
 
 </resources>

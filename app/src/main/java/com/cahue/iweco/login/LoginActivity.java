@@ -31,6 +31,7 @@ import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -104,7 +105,7 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
     // attempt has been made, this is non-null.
     // If this IS null, then the connect method is still running.
     private ConnectionResult mConnectionResult;
-    private Tracker tracker;
+
     private CallbackManager mFacebookCallbackManager;
 
     private AccessToken facebookAccessToken;
@@ -114,8 +115,7 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
 
         super.onCreate(savedInstanceState);
 
-        tracker = ((IwecoApp) getApplication()).getTracker();
-        tracker.setScreenName("Login");
+        Tracking.sendView(Tracking.CATEGORY_LOGIN);
 
         gcm = GoogleCloudMessaging.getInstance(this);
 
@@ -193,18 +193,7 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
             @Override
             public void onClick(View v) {
                 AuthUtils.setSkippedLogin(LoginActivity.this, true);
-
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        tracker.send(new HitBuilders.EventBuilder()
-                                .setCategory("UX")
-                                .setAction("click")
-                                .setLabel("Skip Login")
-                                .build());
-                        return null;
-                    }
-                }.execute();
+                Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
                 goToMaps();
             }
         });
@@ -254,14 +243,6 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
         mGoogleApiClient.connect();
 
         onConnectingStatusChange(true);
-
-        if (BuildConfig.DEBUG) {
-            tracker.send(new HitBuilders.EventBuilder()
-                    .setCategory("UX")
-                    .setAction("click")
-                    .setLabel("Google Login")
-                    .build());
-        }
     }
 
     protected void onAuthTokenSet(final String authToken, final LoginType type) {
@@ -291,6 +272,7 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
 
     private void onGCMError(String authToken) {
         setLoading(false);
+        mGoogleApiClient.disconnect();
         clearGoogleToken(authToken);
         Util.createUpperToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
@@ -416,6 +398,7 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
     private void onTokenRetrieveError() {
         Util.createUpperToast(this, "Error Google auth", Toast.LENGTH_SHORT);
         setLoading(false);
+        mGoogleApiClient.disconnect();
     }
 
     protected void onPlusClientSignIn() {
@@ -440,7 +423,7 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                    extractPlusDetails();
                 } else {
-                    Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -489,6 +472,8 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
         finishLogin(resultIntent, loginResult, type);
+
+        Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
 
         goToMaps();
     }
@@ -543,8 +528,10 @@ public class LoginActivity extends Activity implements LoginAsyncTask.LoginListe
     @Override
     public void onLoginError(String authToken, LoginType type) {
         setLoading(false);
-        if (type == LoginType.Google)
+        if (type == LoginType.Google) {
             clearGoogleToken(authToken);
+            mGoogleApiClient.disconnect();
+        }
         Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
     }
 

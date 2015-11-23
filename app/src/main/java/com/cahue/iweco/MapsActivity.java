@@ -54,6 +54,7 @@ import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.RatingDialog;
+import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
@@ -167,7 +168,8 @@ public class MapsActivity extends AppCompatActivity
     /**
      *
      */
-    private Set<CameraUpdateRequester> cameraUpdateRequesterList;
+    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
+    private MapFragment mapFragment;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -221,7 +223,7 @@ public class MapsActivity extends AppCompatActivity
             mAccount = availableAccounts[0];
 
             String userId = mAccountManager.getUserData(mAccount, Authenticator.USER_ID);
-            ((IwecoApp) getApplication()).setTrackerUserId(userId);
+            Tracking.setTrackerUserId(userId);
 
             String typeString = mAccountManager.getUserData(mAccount, Authenticator.LOGIN_TYPE);
             if (typeString != null)
@@ -230,24 +232,19 @@ public class MapsActivity extends AppCompatActivity
 
         // Create a GoogleApiClient instance
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addApi(ActivityRecognition.API)
+                .addApiIfAvailable(LocationServices.API)
+                .addApiIfAvailable(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this);
 
         if (!mSkippedLogin && loginType == LoginType.Google) {
-            builder.addApi(Plus.API)
+            builder.addApiIfAvailable(Plus.API)
                     .addScope(Plus.SCOPE_PLUS_LOGIN)
                     .addScope(Plus.SCOPE_PLUS_PROFILE)
                     .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
         }
 
         mGoogleApiClient = builder.build();
-
-        // show help dialog only on first run of the app
-        if (!PreferencesUtil.isTutorialShown(this)) {
-            goToTutorial();
-        }
 
         setContentView(R.layout.activity_main);
 
@@ -261,7 +258,6 @@ public class MapsActivity extends AppCompatActivity
             mToolbar.removeView(findViewById(R.id.logo));
             mToolbar.setTitle(getString(R.string.app_name));
         }
-
 
         setUpNavigationDrawer();
 
@@ -278,29 +274,23 @@ public class MapsActivity extends AppCompatActivity
         /**
          * Try to reuse map
          */
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
         /**
          * There is no saved instance so we create a few things
          */
         if (savedInstanceState == null) {
-
             // First incarnation of this activity.
             mapFragment.setRetainInstance(true);
-
         }
-
         /**
          *
          */
         else {
-
             initialCameraSet = savedInstanceState.getBoolean("initialCameraSet");
             mapInitialised = savedInstanceState.getBoolean("mapInitialised");
             detailsDisplayed = savedInstanceState.getBoolean("detailsDisplayed");
             cameraFollowing = savedInstanceState.getBoolean("cameraFollowing");
-
         }
 
         /**
@@ -310,14 +300,24 @@ public class MapsActivity extends AppCompatActivity
         detailsContainer = (CardView) findViewById(R.id.marker_details_container);
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-        cameraUpdateRequesterList = new HashSet<>();
-        registerCameraUpdater(this);
 
-
-        handleIntent(getIntent());
-
+        // show help dialog only on first run of the app
+        if (!PreferencesUtil.isTutorialShown(this)) {
+            goToTutorial();
+            return;
+        }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        registerCameraUpdater(this);
+
+        handleIntent(getIntent());
+        mapFragment.getMapAsync(this);
+        mGoogleApiClient.connect();
+    }
 
     @Override
     protected void onResume() {
@@ -457,14 +457,7 @@ public class MapsActivity extends AppCompatActivity
 
         mMap = googleMap;
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        } else{
-            setUpMapLocation();
-        }
-
+        setUpMapIfAllowed();
         setUpMap();
         setUpMapListeners();
 
@@ -493,9 +486,26 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
+    private boolean locationPermissionCurrentlyRequested = false;
+
+    private void setUpMapIfAllowed() {
+        if (isLocationPermissionGranted()) {
+            setUpMapLocation();
+        } else {
+            if (!locationPermissionCurrentlyRequested) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                locationPermissionCurrentlyRequested = true;
+            }
+        }
+    }
+
+    private boolean isLocationPermissionGranted() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -505,6 +515,7 @@ public class MapsActivity extends AppCompatActivity
                 } else {
                     Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
                 }
+                locationPermissionCurrentlyRequested = false;
                 return;
             }
         }
@@ -512,9 +523,9 @@ public class MapsActivity extends AppCompatActivity
 
     private void setUpMapLocation() {
 
-        if(mMap == null) return;
+        if (mMap == null) return;
 
-        if(!mGoogleApiClient.isConnected()) return;
+        if (!mGoogleApiClient.isConnected()) return;
 
         mMap.setMyLocationEnabled(true);
         // Connected to Google Play services!
@@ -572,7 +583,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     private void setMapPadding(int bottomPadding) {
-        if(mMap == null) return;
+        if (mMap == null) return;
         mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
     }
 
@@ -677,14 +688,10 @@ public class MapsActivity extends AppCompatActivity
         PreferencesUtil.setLongClickToastShown(this, true);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
 
     @Override
     protected void onStop() {
+        unregisterCameraUpdater(this);
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -692,7 +699,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.w(TAG, "onConnected");
-        setUpMapLocation();
+        setUpMapIfAllowed();
     }
 
     @Override
@@ -799,7 +806,7 @@ public class MapsActivity extends AppCompatActivity
         final LoginManager loginManager = LoginManager.getInstance();
         loginManager.logOut();
 
-        ((IwecoApp) getApplication()).setTrackerUserId(null);
+        Tracking.setTrackerUserId(null);
 
         PreferencesUtil.clear(this);
         AuthUtils.clearLoggedUserDetails(this);
@@ -816,6 +823,8 @@ public class MapsActivity extends AppCompatActivity
 
     public void goToTutorial() {
         startActivity(new Intent(this, TutorialActivity.class));
+        // animation
+        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
         PreferencesUtil.setTutorialShown(this, true);
     }
 
@@ -823,7 +832,8 @@ public class MapsActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            if (isLocationPermissionGranted())
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
         unregisterReceiver(carUpdateReceiver);
 
@@ -1099,7 +1109,7 @@ public class MapsActivity extends AppCompatActivity
         Log.d(TAG, "zoomToMyLocation");
 
         LatLng userPosition = getUserLatLng();
-        if (userPosition == null) return;
+        if (userPosition == null || mMap == null) return;
 
         float zoom = Math.max(mMap.getCameraPosition().zoom, 15);
 
@@ -1174,7 +1184,7 @@ public class MapsActivity extends AppCompatActivity
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
                 List<Car> cars = carDatabase.retrieveCars(false);
-                if(cars.isEmpty()) return;
+                if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
                 startService(intent);
@@ -1186,7 +1196,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 List<Car> cars = carDatabase.retrieveCars(false);
-                if(cars.isEmpty()) return;
+                if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
             }

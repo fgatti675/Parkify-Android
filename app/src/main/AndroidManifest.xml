@@ -51,7 +51,8 @@
             android:value="@string/facebook_app_id" />
 
 
-        <activity android:name=".MapsActivity">
+        <activity android:name=".MapsActivity"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -81,7 +82,7 @@
         <activity
             android:name=".tutorial.TutorialActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark" />
+            android:theme="@style/CahueTheme.Dark.Tutorial" />
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"

@@ -6,7 +6,7 @@
     <dimen name="marker_diameter_red">9dp</dimen>
     <dimen name="marker_diameter_orange">9dp</dimen>
     <dimen name="marker_diameter_yellow">12dp</dimen>
-    <dimen name="marker_diameter_green">16dp</dimen>0
+    <dimen name="marker_diameter_green">16dp</dimen>
     <dimen name="marker_diameter_selected">22dp</dimen>
 
     <dimen name="buttons_margin">20dp</dimen>
@@ -16,6 +16,9 @@
     <dimen name="elevation">4dp</dimen>
     <dimen name="elevation_small">2dp</dimen>
     <dimen name="cardCornerRadius">2dp</dimen>
+
+    <dimen name="marker_spacing_large">5dp</dimen>
+
 
     <dimen name="navigation_drawer_width">320dp</dimen>
 </resources>

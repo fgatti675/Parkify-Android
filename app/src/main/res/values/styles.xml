@@ -5,11 +5,13 @@
 
         <!-- Both of these are needed -->
         <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
 
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
+
+        <item name="android:colorBackground">@color/light_grey</item>
 
         <item name="android:textColorPrimary">@color/body_text_1</item>
         <item name="android:textColorSecondary">@color/body_text_2</item>
@@ -52,8 +54,21 @@
 
     </style>
 
-    <style name="CahueTheme.Dark.Tutorial">
-        <item name="colorPrimaryDark">@color/black</item>
+    <!-- Base application theme. -->
+    <style name="CahueTheme.Dark.Tutorial" parent="Theme.AppCompat">
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="android:colorBackground">@color/theme_primary</item>
+
+        <item name="android:textColor">@color/body_text_1_inverse</item>
+        <item name="android:textColorPrimary">@color/body_text_1_inverse</item>
+        <item name="android:textColorSecondary">@color/body_text_2_inverse</item>
+
+        <item name="colorAccent">@color/theme_accent</item>
+        <!--<item name="cardBackgroundColor">@color/theme_primary_dark</item>-->
+
     </style>
 
     <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
@@ -90,9 +105,15 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <style name="Marker.SetCar">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="Marker.Selected">
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/theme_primary</item>
     </style>
 
 </resources>

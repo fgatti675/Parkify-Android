@@ -3,6 +3,7 @@ package com.cahue.iweco.tutorial;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.cahue.iweco.BuildConfig;
+import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.R;
@@ -125,9 +127,6 @@ public class TutorialActivity extends AppCompatActivity
         });
         mViewPager.setOffscreenPageLimit(TOTAL_NUMBER_PAGES - 1);
         mViewPager.setOnPageChangeListener(this);
-
-        // animation
-        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
 
     }
 

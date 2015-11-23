@@ -1,6 +1,5 @@
 package com.cahue.iweco;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -32,12 +31,11 @@ import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.util.LoadProfileImage;
+import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -301,21 +299,6 @@ public class NavigationDrawerFragment extends Fragment {
                     return;
                 }
 
-                if (BuildConfig.DEBUG) {
-                    final Tracker tracker = ((IwecoApp) getActivity().getApplication()).getTracker();
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            tracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory("UX")
-                                    .setAction("click")
-                                    .setLabel("Drawer open")
-                                    .build());
-                            return null;
-                        }
-                    }.execute();
-                }
-
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -348,16 +331,16 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mCallbacks = (OnCarClickedListener) activity;
+            mCallbacks = (OnCarClickedListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement OnCarClickedListener.");
         }
 
         try {
-            navigation = (Navigation) activity;
+            navigation = (Navigation) context;
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement Navigation.");
         }
@@ -511,6 +494,7 @@ public class NavigationDrawerFragment extends Fragment {
                     public void onClick(View v) {
                         if (car.location != null) {
 
+                            Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_DRAWER);
                             ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id)).onCarClicked();
 
                             mCallbacks.onCarClicked(car.id);
@@ -562,6 +546,7 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.goToCarManager();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_MANAGER_CLICK);
                 }
             });
         }
@@ -573,6 +558,7 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.openShareDialog();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_FACEBOOK_INVITE_CLICK);
                 }
             });
         }
@@ -584,6 +570,7 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.goToPreferences();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SETTINGS_CLICK);
                 }
             });
         }
@@ -595,6 +582,7 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.openDonationDialog();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_DONATION_CLICK);
                 }
             });
         }
@@ -606,6 +594,7 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.signOut();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SIGN_OUT);
                 }
             });
         }
@@ -617,6 +606,7 @@ public class NavigationDrawerFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     navigation.goToTutorial();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_HELP_CLICK);
                 }
             });
         }
