@@ -200,8 +200,6 @@ public class NavigationDrawerFragment extends Fragment {
         getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
         getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
 
-        setUpUserDetails();
-
     }
 
     @Override
@@ -322,6 +320,8 @@ public class NavigationDrawerFragment extends Fragment {
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
         adView.resume();
+
+        setUpUserDetails();
     }
 
     @Override
@@ -381,13 +381,12 @@ public class NavigationDrawerFragment extends Fragment {
 //        recyclerView.getAdapter().notifyDataSetChanged();
     }
 
-    private boolean detailsSet = false;
 
     private void setUpUserDetails() {
 
         userDetailsView.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
 
-        if (skippedLogin || detailsSet)
+        if (skippedLogin)
             return;
 
         String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
@@ -400,7 +399,6 @@ public class NavigationDrawerFragment extends Fragment {
         emailTextView.setText(AuthUtils.getEmail(getActivity()));
         new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
 
-        detailsSet = true;
     }
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

@@ -59,9 +59,13 @@ import com.cahue.iweco.dialogs.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -240,10 +244,10 @@ public class MapsActivity extends AppCompatActivity
                 .addOnConnectionFailedListener(this);
 
         if (!mSkippedLogin && loginType == LoginType.Google) {
-            builder.addApiIfAvailable(Plus.API)
-                    .addScope(Plus.SCOPE_PLUS_LOGIN)
-                    .addScope(Plus.SCOPE_PLUS_PROFILE)
-                    .addScope(new Scope("https://www.googleapis.com/auth/userinfo.email"));
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .build();
+            builder.addApi(Auth.GOOGLE_SIGN_IN_API, gso);
         }
 
         mGoogleApiClient = builder.build();
@@ -803,12 +807,12 @@ public class MapsActivity extends AppCompatActivity
 
         // We only want to sign out if we're connected.
         if (mGoogleApiClient.isConnected()) {
-
-            // Clear the default account in order to allow the user to potentially choose a
-            // different account from the account chooser.
-            if (!mSkippedLogin && loginType == LoginType.Google) {
-                Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
-            }
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+                    Log.d(TAG, "Google Signed out!");
+                }
+            });
         }
 
         // Facebook disconnect
