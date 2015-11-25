@@ -18,8 +18,8 @@
     <dimen name="elevation_small">2dp</dimen>
     <dimen name="cardCornerRadius">2dp</dimen>
 
-    <dimen name="marker_padding_big_side">6dp</dimen>
-    <dimen name="marker_padding_big_top">3dp</dimen>
+    <dimen name="marker_padding_big_side">7dp</dimen>
+    <dimen name="marker_padding_big_top">4dp</dimen>
 
     <dimen name="marker_padding_medium_side">5dp</dimen>
     <dimen name="marker_padding_medium_top">3dp</dimen>

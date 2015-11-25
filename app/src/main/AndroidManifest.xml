@@ -105,7 +105,8 @@
 
         <activity
             android:name=".cars.CarManagerActivity"
-            android:parentActivityName=".MapsActivity">
+            android:parentActivityName=".MapsActivity"
+            android:theme="@style/CahueTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MapsActivity" />
@@ -113,7 +114,8 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:parentActivityName=".MapsActivity">
+            android:parentActivityName=".MapsActivity"
+            android:theme="@style/CahueTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MapsActivity" />

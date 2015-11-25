@@ -43,6 +43,7 @@
                 android:layout_marginLeft="@dimen/default_padding"
                 android:layout_marginRight="@dimen/default_padding"
                 android:foreground="?android:attr/selectableItemBackground"
+                cahue:cardBackgroundColor="@color/white"
                 cahue:cardCornerRadius="@dimen/cardCornerRadius" />
 
             <include

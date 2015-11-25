@@ -21,6 +21,7 @@
         android:layout_height="50dp"
         android:id="@+id/logo"
         android:src="@drawable/iweco_logo_white"
+        android:background="@android:color/transparent"
         android:visibility="invisible"
         android:layout_gravity="center"
         android:layout_alignParentBottom="true"

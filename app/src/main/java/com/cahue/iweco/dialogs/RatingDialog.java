@@ -1,7 +1,7 @@
 package com.cahue.iweco.dialogs;
 
 /**
- * Created by Francesco on 07/06/2015.
+ * Get some nice ratings
  */
 
 import android.app.AlertDialog;
@@ -18,25 +18,24 @@ import android.preference.PreferenceManager;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.Tracking;
 
 import java.util.Date;
 
-
 public class RatingDialog extends DialogFragment {
-
 
     public static boolean shouldBeShown(Context context) {
 
-        if(isDialogShown(context))
+        if (isDialogShown(context))
             return false;
 
-        Date lastDisplayed = getRateDialogDate(context);
+        Date lastDisplayed = getRateDialogLastDisplayed(context);
         if (lastDisplayed == null) {
             setRateDialogDate(context, new Date());
             return false;
         }
 
-        return (new Date().getTime() - lastDisplayed.getTime()) > 4 * 24 * 60 * 60;
+        return (System.currentTimeMillis() - lastDisplayed.getTime()) > 3 * 24 * 60 * 60 * 1000;
     }
 
     @Override
@@ -52,11 +51,13 @@ public class RatingDialog extends DialogFragment {
                         intent.setData(Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID));
                         startActivity(intent);
                         setRatedDialogShown(getActivity(), true);
+                        Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_ACCEPT);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         setRatedDialogShown(getActivity(), true);
+                        Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_DISMISS);
                     }
                 });
 
@@ -68,25 +69,24 @@ public class RatingDialog extends DialogFragment {
 
     public static boolean isDialogShown(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, true);
+        return prefs.getBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, false);
     }
 
     public static void setRatedDialogShown(Context context, boolean shown) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PreferencesUtil.PREF_RATE_DIALOG_SHOWN, shown).apply();
+        prefs.edit().putBoolean(PreferencesUtil.PREF_RATED_DIALOG_SHOWN, shown).apply();
     }
 
 
-
-    public static Date getRateDialogDate(Context context) {
+    public static Date getRateDialogLastDisplayed(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if(!prefs.contains(PreferencesUtil.PREF_RATE_DIALOG_SHOWN))
-            return  null;
-        return new Date(prefs.getLong(PreferencesUtil.PREF_RATE_DIALOG_SHOWN, 0));
+        if (!prefs.contains(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE))
+            return null;
+        return new Date(prefs.getLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, 0));
     }
 
     public static void setRateDialogDate(Context context, Date date) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putLong(PreferencesUtil.PREF_RATE_DIALOG_SHOWN, date.getTime()).apply();
+        prefs.edit().putLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, date.getTime()).apply();
     }
 }

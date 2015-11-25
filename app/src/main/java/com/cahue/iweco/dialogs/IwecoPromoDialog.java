@@ -51,7 +51,7 @@ public class IwecoPromoDialog extends DialogFragment {
                 .setPositiveButton(R.string.install, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse("market://details?id=com.cahue.iweco"));
+                        intent.setData(Uri.parse("market://details?id=com.cahue.iweco&referrer=utm_source%3Dwhereismycar"));
                         startActivity(intent);
                     }
                 })

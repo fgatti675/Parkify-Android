@@ -11,7 +11,7 @@
     <item >
         <bitmap
             android:id="@+id/Idofbg2"
-            android:gravity="center"
+            android:gravity="fill_vertical"
             android:src="@drawable/bg_parking" />
     </item>
 

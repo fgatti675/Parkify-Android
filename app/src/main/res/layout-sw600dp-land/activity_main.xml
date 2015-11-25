@@ -53,7 +53,8 @@
             android:layout_marginLeft="@dimen/default_padding"
             android:layout_marginRight="@dimen/default_padding"
             android:foreground="?android:attr/selectableItemBackground"
-            cahue:cardCornerRadius="@dimen/cardCornerRadius" />
+            cahue:cardCornerRadius="@dimen/cardCornerRadius"
+            cahue:cardBackgroundColor="@color/white" />
 
         <include
             layout="@layout/button_my_location"

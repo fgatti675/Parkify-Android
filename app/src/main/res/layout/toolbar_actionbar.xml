@@ -19,7 +19,6 @@
     android:theme="@style/ActionBarThemeOverlay"
     android:id="@+id/toolbar_actionbar"
     android:background="@color/theme_primary"
-    cahue:titleTextAppearance="@style/ActionBar.TitleText"
     android:layout_gravity="right"
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize">

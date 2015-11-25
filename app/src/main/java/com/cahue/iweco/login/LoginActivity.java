@@ -71,7 +71,7 @@ import java.util.List;
 /**
  * A login screen that offers login via Google+
  */
-public class LoginActivity extends FragmentActivity implements LoginAsyncTask.LoginListener, GoogleApiClient.OnConnectionFailedListener {
+public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.LoginListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -265,7 +265,8 @@ public class LoginActivity extends FragmentActivity implements LoginAsyncTask.Lo
         }
 
         // FB
-        mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+        if (mFacebookCallbackManager != null)
+            mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private void onGCMRegIdSet(String gcmRegId, String authToken, LoginType type) {

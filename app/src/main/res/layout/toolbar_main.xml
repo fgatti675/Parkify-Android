@@ -18,7 +18,6 @@
     xmlns:cahue="http://schemas.android.com/apk/res-auto"
     android:theme="@style/ActionBarThemeOverlay"
     android:background="@color/theme_primary"
-    cahue:titleTextAppearance="@style/ActionBar.TitleText"
     android:layout_width="match_parent"
     android:layout_height="?actionBarSize"
     android:elevation="@dimen/elevation"

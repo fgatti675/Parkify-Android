@@ -9,8 +9,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.Date;
-
 /**
  * Created by Francesco on 04/06/2015.
  */
@@ -21,7 +19,8 @@ public class PreferencesUtil {
      */
     public static final String PREF_LONG_CLICK_SHOWN = "PREF_LONG_CLICK_SHOWN";
     public static final String PREF_RATED_DIALOG_ACCEPTED = "PREF_RATED_DIALOG_ACCEPTED";
-    public static final String PREF_RATE_DIALOG_SHOWN = "PREF_RATE_DIALOG_SHOWN";
+    public static final String PREF_RATED_DIALOG_SHOWN = "PREF_RATED_DIALOG_SHOWN";
+    public static final String PREF_RATED_DIALOG_SHOWN_DATE = "PREF_RATED_DIALOG_SHOWN_DATE";
     public static final String PREF_TUTORIAL_SHOWN = "PREF_DIALOG_SHOWN";
     public static final String PREF_FACEBOOK_INVITES_DIALOG_SHOWN = "PREF_FACEBOOK_INVITES_DIALOG_SHOWN";
     public static final String PREF_UNINSTALL_WIMC_SHOWN = "PREF_UNINSTALL_WIMC_SHOWN";
@@ -111,7 +110,7 @@ public class PreferencesUtil {
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
                 .remove(PREF_TUTORIAL_SHOWN)
                 .remove(PREF_LONG_CLICK_SHOWN)
-                .remove(PREF_RATE_DIALOG_SHOWN)
+                .remove(PREF_RATED_DIALOG_SHOWN)
                 .apply();
     }
 

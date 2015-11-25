@@ -286,18 +286,18 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     public class RecyclerViewCarsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        public static final int CAR_TYPE = 0;
-        public static final int INFO_TYPE = 1;
+        public static final int INFO_TYPE = 0;
+        public static final int CAR_TYPE = 1;
         public static final int BT_DEVICE_TYPE = 2;
         public static final int ADD_BUTTON_TYPE = 3;
 
         @Override
         public int getItemViewType(int position) {
 
-            if (position < cars.size())
-                return CAR_TYPE;
-            else if (position == cars.size())
+            if (position == 0)
                 return INFO_TYPE;
+            else if (position < cars.size() + 1)
+                return CAR_TYPE;
             else if (position > cars.size() && position < cars.size() + 1 + devices.size())
                 return BT_DEVICE_TYPE;
             else if (position == (cars.size() + devices.size() + 1))
@@ -311,31 +311,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
             /**
-             * Car
-             */
-            if (viewType == CAR_TYPE) {
-                View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.layout_car_details,
-                                viewGroup,
-                                false);
-
-                CardView cardView = new CardView(viewGroup.getContext());
-                cardView.addView(itemView);
-                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-                int margin = (int) viewGroup.getContext().getResources().getDimension(R.dimen.default_padding);
-                params.setMargins(margin, 0, margin, margin);
-                cardView.setLayoutParams(params);
-
-
-                return new CarViewHolder(cardView);
-            }
-
-            /**
              * Information
              */
-            else if (viewType == INFO_TYPE) {
+            if (viewType == INFO_TYPE) {
 
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
                         inflate(R.layout.card_manager_instructions,
@@ -354,6 +332,30 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
                 return new SimpleViewHolder(itemView);
             }
+
+            /**
+             * Car
+             */
+            else if (viewType == CAR_TYPE) {
+                View itemView = LayoutInflater.from(viewGroup.getContext()).
+                        inflate(R.layout.layout_car_details,
+                                viewGroup,
+                                false);
+
+                CardView cardView = new CardView(viewGroup.getContext());
+                cardView.addView(itemView);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                int margin = (int) viewGroup.getContext().getResources().getDimension(R.dimen.default_padding);
+                params.setMargins(margin, 0, margin, margin);
+                cardView.setLayoutParams(params);
+                cardView.setCardBackgroundColor(getResources().getColor(R.color.white));
+
+
+                return new CarViewHolder(cardView);
+            }
+
 
             /**
              * Device selection
@@ -402,7 +404,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
-                final Car car = cars.get(position);
+                final Car car = cars.get(position - 1);
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, mBtAdapter);
 
 
@@ -448,7 +450,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         @Override
         public int getItemCount() {
-            return cars.size() + 1 + devices.size() + 1;
+            return 1 + cars.size() + devices.size() + 1;
         }
     }
 
@@ -584,8 +586,10 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     private void addDevice(BluetoothDevice device) {
         if (!devices.contains(device) && !selectedDeviceAddresses.contains(device.getAddress())) {
-            devices.add(device);
-            adapter.notifyItemInserted(cars.size() + devices.size());
+            if (device.getName() != null && !device.getName().isEmpty()) {
+                devices.add(device);
+                adapter.notifyItemInserted(cars.size() + devices.size());
+            }
         }
     }
 

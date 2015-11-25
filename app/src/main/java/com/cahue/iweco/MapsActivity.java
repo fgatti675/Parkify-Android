@@ -223,7 +223,7 @@ public class MapsActivity extends AppCompatActivity
             Log.w(TAG, "Multiple accounts found");
         }
 
-        loginType = LoginType.Google;
+        loginType = null;
 
         if (availableAccounts.length > 0) {
             mAccount = availableAccounts[0];
@@ -806,7 +806,7 @@ public class MapsActivity extends AppCompatActivity
     public void signOut() {
 
         // We only want to sign out if we're connected.
-        if (mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient.isConnected() && loginType == LoginType.Google) {
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {

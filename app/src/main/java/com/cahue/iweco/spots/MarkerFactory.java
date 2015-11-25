@@ -29,21 +29,21 @@ public class MarkerFactory {
             int bigSide = (int) context.getResources().getDimension(R.dimen.marker_padding_big_side);
             int bigTop = (int) context.getResources().getDimension(R.dimen.marker_padding_big_top);
 
-            int mediumSide = (int) context.getResources().getDimension(R.dimen.marker_padding_big_side);
-            int mediumTop = (int) context.getResources().getDimension(R.dimen.marker_padding_big_top);
+            int mediumSide = (int) context.getResources().getDimension(R.dimen.marker_padding_medium_side);
+            int mediumTop = (int) context.getResources().getDimension(R.dimen.marker_padding_medium_top);
 
             greenIconGenerator = new IconGenerator(context.getApplicationContext());
-            greenIconGenerator.setContentPadding(bigSide, bigTop, bigSide, 0);
+            greenIconGenerator.setContentPadding(bigSide, bigTop, 0, 0);
             greenIconGenerator.setTextAppearance(R.style.Marker_Green);
             greenIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_green));
 
             yellowIconGenerator = new IconGenerator(context.getApplicationContext());
-            yellowIconGenerator.setContentPadding(mediumSide, mediumTop, mediumSide, 0);
+            yellowIconGenerator.setContentPadding(mediumSide, mediumTop, 0, 0);
             yellowIconGenerator.setTextAppearance(R.style.Marker_Orange);
             yellowIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_orange));
 
             selectedIconGenerator = new IconGenerator(context.getApplicationContext());
-            selectedIconGenerator.setContentPadding(bigSide, bigTop, bigSide, 0);
+            selectedIconGenerator.setContentPadding(bigSide, bigTop, 0, 0);
             selectedIconGenerator.setTextAppearance(R.style.Marker_Selected);
             selectedIconGenerator.setBackground(context.getResources().getDrawable(R.drawable.map_marker_selected));
         }

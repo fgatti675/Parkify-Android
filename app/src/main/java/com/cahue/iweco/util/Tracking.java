@@ -17,6 +17,8 @@ public class Tracking {
 
     public static final String CATEGORY_NAVIGATION_DRAWER = "Navigation drawer";
 
+    public static final String CATEGORY_RATING_DIALOG = "Rating Dialog";
+
     public static final String ACTION_DO_LOGIN = "Do login";
 
     public static final String ACTION_SKIP_LOGIN = "Skip login";
@@ -41,6 +43,9 @@ public class Tracking {
     public static final String ACTION_DONATION_CLICK = "Donation click";
     public static final String ACTION_SIGN_OUT = "Sign out";
     public static final String ACTION_HELP_CLICK = "Help click";
+
+    public static final String ACTION_ACCEPT = "Accepted";
+    public static final String ACTION_DISMISS = "Dismissed";
 
 
     public static void sendView( String screenName) {
