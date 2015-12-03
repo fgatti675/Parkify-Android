@@ -162,7 +162,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         StringBuilder stringBuilder = new StringBuilder(previousText);
         for (DetectedActivity detectedActivity : result.getProbableActivities()) {
-            stringBuilder.append(detectedActivity.toString() + "\n");
+            stringBuilder.append(detectedActivity.toString()).append("\n");
         }
 
         long[] pattern = {0, 100, 1000};

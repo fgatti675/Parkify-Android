@@ -345,9 +345,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 } catch (UserRecoverableAuthException userRecoverableException) {
                     // GooglePlayServices.apk is either old, disabled, or not present
                     // so we need to show the user some UI in the activity to recover.
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (GoogleAuthException e) {
+                } catch (IOException | GoogleAuthException e) {
                     e.printStackTrace();
                 }
                 Log.d(TAG, "Google oAuth token: " + mGoogleAuthToken);
