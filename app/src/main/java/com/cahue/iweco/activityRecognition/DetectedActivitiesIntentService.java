@@ -62,13 +62,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         super(TAG);
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        if (previousActivity == null)
-            previousActivity = getStoredDetectedActivity();
-    }
-
     /**
      * Handles incoming intents.
      *
@@ -85,6 +78,9 @@ public class DetectedActivitiesIntentService extends IntentService {
 
 
     private void handleDetectedActivities(ActivityRecognitionResult result) {
+
+        if (previousActivity == null)
+            previousActivity = getStoredDetectedActivity();
 
         DetectedActivity mostProbableActivity = result.getMostProbableActivity();
 

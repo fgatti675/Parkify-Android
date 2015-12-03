@@ -1,20 +1,13 @@
 package com.cahue.iweco.login;
 
-import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -22,9 +15,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.auth.Authenticator;
@@ -42,8 +33,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -54,11 +43,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -253,10 +238,11 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
                 requestGoogleOauthToken(acct.getEmail());
 
-                AuthUtils.setLoggedUserDetails(this, acct.getDisplayName(), acct.getEmail(), acct.getPhotoUrl().toString());
+                String pictureURL = acct.getPhotoUrl() != null ? acct.getPhotoUrl().toString() : null;
+                AuthUtils.setLoggedUserDetails(this, acct.getDisplayName(), acct.getEmail(), pictureURL);
 
                 Log.w(TAG, "Name: " + acct.getDisplayName() + ", email: " + acct.getEmail()
-                        + ", Image: " + acct.getPhotoUrl().toString());
+                        + ", Image: " + pictureURL);
 
             } else {
                 // Signed out, show unauthenticated UI.

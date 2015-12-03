@@ -392,12 +392,14 @@ public class NavigationDrawerFragment extends Fragment {
         String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
 
         // in case it is being loaded in the background
-        if(loggedUsername == null)
+        if (loggedUsername == null)
             return;
 
         usernameTextView.setText(loggedUsername);
         emailTextView.setText(AuthUtils.getEmail(getActivity()));
-        new LoadProfileImage(userImage).execute(AuthUtils.getProfilePicURL(getActivity()));
+        String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
+        if (profilePicURL != null)
+            new LoadProfileImage(userImage).execute(profilePicURL);
 
     }
 
