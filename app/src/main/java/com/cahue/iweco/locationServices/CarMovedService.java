@@ -2,17 +2,16 @@ package com.cahue.iweco.locationServices;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.cars.Car;
-import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
+import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.spots.ParkingSpotSender;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.cahue.iweco.spots.ParkingSpotSender;
 
 import java.util.Arrays;
 import java.util.Calendar;

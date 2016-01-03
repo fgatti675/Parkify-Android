@@ -50,7 +50,7 @@ public class CarsProvider extends ContentProvider {
         return null;
     }
     /*
-     * delete() always returns "no rows affected" (0)
+     * deleteCar() always returns "no rows affected" (0)
      */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {

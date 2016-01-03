@@ -6,15 +6,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.json.JSONException;
@@ -38,11 +37,10 @@ public class GcmIntentService extends IntentService {
      */
     public static final String UPDATED_CAR = "UPDATED_CAR";
     public static final String DELETED_CAR = "DELETED_CAR";
-
+    public static final int NOTIFICATION_ID = 1;
     private static final String TAG = GcmIntentService.class.getSimpleName();
-
-    private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
+    private NotificationManager mNotificationManager;
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -98,15 +96,13 @@ public class GcmIntentService extends IntentService {
         Car car = Car.fromJSON(new JSONObject(carJson));
         if (BuildConfig.DEBUG)
             sendNotification(car.toString());
-        CarDatabase.getInstance(this).saveAndBroadcast(car);
+        CarDatabase.getInstance(this).saveCarAndBroadcast(car);
     }
 
     private void deleteCar(String carId) throws JSONException {
         CarDatabase database = CarDatabase.getInstance(this);
-        database.delete(carId);
+        database.deleteCar(carId);
     }
-
-    public static final int NOTIFICATION_ID = 1;
 
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with

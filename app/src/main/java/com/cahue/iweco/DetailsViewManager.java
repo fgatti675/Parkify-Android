@@ -1,7 +1,7 @@
 package com.cahue.iweco;
 
 /**
- * Created by f.gatti.gomez on 02/07/15.
+ * Interface for controlling when details fragment are displayed
  */
 public interface DetailsViewManager {
 

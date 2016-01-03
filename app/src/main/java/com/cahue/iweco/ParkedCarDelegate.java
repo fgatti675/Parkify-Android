@@ -5,8 +5,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
@@ -28,29 +28,27 @@ import com.google.maps.android.ui.IconGenerator;
  */
 public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraUpdateRequester {
 
+    public static final String FRAGMENT_TAG = "PARKED_CAR_DELEGATE";
     private static final String TAG = ParkedCarDelegate.class.getSimpleName();
-
     private static final int MAX_DIRECTIONS_DISTANCE = 2000;
 
     private static final String ARG_CAR_ID = "car";
-
     private String carId;
     private Car car;
-
     private boolean following = false;
-
     private IconGenerator iconGenerator;
-
     private OnCarClickedListener carSelectedListener;
-
     private int lightColor;
-
     /**
      * Map components
      */
     private Marker carMarker;
     private Circle accuracyCircle;
     private DirectionsDelegate directionsDelegate;
+
+    public static String getFragmentTag(String carId) {
+        return FRAGMENT_TAG + "." + carId;
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -100,7 +98,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     public void update(boolean resetDirections) {
 
-        this.car = CarDatabase.getInstance(getActivity()).find(carId);
+        this.car = CarDatabase.getInstance(getActivity()).findCar(carId);
 
         if (getMap() == null || !isResumed()) return;
 
@@ -112,7 +110,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         setUpColors();
 
         directionsDelegate.setColor(lightColor);
-        if(resetDirections)
+        if (resetDirections)
             directionsDelegate.hide(true);
 
         doDraw();
@@ -208,10 +206,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     }
 
-
-    public Car getCar() {
-        return car;
-    }
 
     public void removeCar() {
         clear();

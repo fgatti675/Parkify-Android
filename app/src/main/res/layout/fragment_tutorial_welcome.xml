@@ -6,24 +6,24 @@
     tools:context="com.cahue.iweco.tutorial.TutorialWelcomeFragment">
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:textSize="40dp"
-        android:text="@string/welcome"
-        android:id="@+id/textView"
-        android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:text="@string/welcome"
+        android:textSize="40dp" />
 
     <ImageView
+        android:id="@+id/logo"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:id="@+id/logo"
-        android:src="@drawable/iweco_logo_white"
-        android:background="@android:color/transparent"
-        android:visibility="invisible"
-        android:layout_gravity="center"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:src="@drawable/parkify_logo"
+        android:visibility="invisible" />
 </RelativeLayout>

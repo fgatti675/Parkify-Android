@@ -1,8 +1,7 @@
 package com.cahue.iweco.spots.query;
 
-import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.model.ParkingSpot;
 
-import java.util.List;
 import java.util.Set;
 
 /**

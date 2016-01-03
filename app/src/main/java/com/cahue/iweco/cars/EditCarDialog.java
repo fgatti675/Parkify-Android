@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.cahue.iweco.R;
+import com.cahue.iweco.model.Car;
 
 
 /**
@@ -20,19 +21,12 @@ import com.cahue.iweco.R;
  */
 public class EditCarDialog extends DialogFragment {
 
-    public interface CarEditedListener {
-        void onCarEdited(Car car, boolean newCar);
-    }
-
     private final static String TAG = EditCarDialog.class.getSimpleName();
     private static final String ARG_CAR = "arg_car";
     private static final String ARG_NEW_CAR = "arg_new_car";
-
     Car car;
     boolean newCar;
-
     private CarEditedListener mListener;
-
 
     /**
      * Use this factory method to create a new instance of
@@ -64,7 +58,6 @@ public class EditCarDialog extends DialogFragment {
         }
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +66,6 @@ public class EditCarDialog extends DialogFragment {
             newCar = getArguments().getBoolean(ARG_NEW_CAR);
         }
     }
-
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -112,6 +104,11 @@ public class EditCarDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+
+    public interface CarEditedListener {
+        void onCarEdited(Car car, boolean newCar);
     }
 
 }

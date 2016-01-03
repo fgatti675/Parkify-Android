@@ -1,4 +1,4 @@
-package com.cahue.iweco.cars;
+package com.cahue.iweco.model;
 
 import android.location.Location;
 import android.os.Parcel;
@@ -20,35 +20,6 @@ import java.util.Set;
  */
 public class Car implements Parcelable {
 
-    public static final String TABLE_NAME = "cars";
-
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_NAME = "name";
-    public static final String COLUMN_BT_ADDRESS = "bt_address";
-    public static final String COLUMN_SPOT_ID = "spot_id";
-    public static final String COLUMN_LATITUDE = "latitude";
-    public static final String COLUMN_LONGITUDE = "longitude";
-    public static final String COLUMN_ACCURACY = "accuracy";
-    public static final String COLUMN_ADDRESS = "address";
-    public static final String COLUMN_TIME = "time";
-    public static final String COLUMN_COLOR = "color";
-
-    public String id;
-
-    public String name;
-
-    public String btAddress;
-
-    public Long spotId;
-
-    public Location location;
-
-    public Date time;
-
-    public Integer color;
-
-    public String address;
-
     public static final Parcelable.Creator<Car> CREATOR =
             new Parcelable.Creator<Car>() {
                 @Override
@@ -61,6 +32,14 @@ public class Car implements Parcelable {
                     return new Car[size];
                 }
             };
+    public String id;
+    public String name;
+    public String btAddress;
+    public Long spotId;
+    public Location location;
+    public Date time;
+    public Integer color;
+    public String address;
 
     public Car(Parcel parcel) {
         id = parcel.readString();
@@ -75,52 +54,6 @@ public class Car implements Parcelable {
 
     public Car() {
 
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(name);
-        parcel.writeString(btAddress);
-        parcel.writeValue(spotId);
-        parcel.writeParcelable(location, i);
-        parcel.writeSerializable(time);
-        parcel.writeValue(color);
-        parcel.writeString(address);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Car car = (Car) o;
-
-        if (!id.equals(car.id)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Car{" +
-                "id='" + id + '\'' +
-                ", btAddress='" + btAddress + '\'' +
-                ", name='" + name + '\'' +
-                ", spotId=" + spotId +
-                ", location=" + location +
-                ", time=" + time +
-                '}';
     }
 
     public static Set<Car> fromJSONArray(JSONArray carsArray) {
@@ -176,6 +109,51 @@ public class Car implements Parcelable {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(name);
+        parcel.writeString(btAddress);
+        parcel.writeValue(spotId);
+        parcel.writeParcelable(location, i);
+        parcel.writeSerializable(time);
+        parcel.writeValue(color);
+        parcel.writeString(address);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Car car = (Car) o;
+
+        return id.equals(car.id);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "id='" + id + '\'' +
+                ", btAddress='" + btAddress + '\'' +
+                ", name='" + name + '\'' +
+                ", spotId=" + spotId +
+                ", location=" + location +
+                ", time=" + time +
+                '}';
     }
 
     public JSONObject toJSON() {

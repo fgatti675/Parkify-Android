@@ -2,24 +2,23 @@ package com.cahue.iweco;
 
 import android.app.Activity;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.spots.MarkerFactory;
-import com.cahue.iweco.spots.ParkingSpot;
 import com.cahue.iweco.spots.SpotDetailsFragment;
 import com.cahue.iweco.spots.query.AreaSpotsQuery;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
 import com.cahue.iweco.util.GMapV2Direction;
 import com.cahue.iweco.util.Tracking;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -50,49 +49,51 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     // distance we are adding to the bounds query on each one of the 4 sides to get also results outside the screen
     public static final int OFFSET_METERS = 2000;
     public static final String FRAGMENT_TAG = "SPOTS_DELEGATE";
-    
+
     /**
      * If zoom is more far than this, we don't display the markers
      */
     public final static float MAX_ZOOM = 5F;
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-    
+
     private static final String TAG = "SpotsDelegate";
     private static final String QUERY_TAG = "SpotsDelegateQuery";
-    
+
     // Earth’s radius, sphere
     private final static double EARTH_RADIUS = 6378137;
-    
+
     // time after we consider the query is outdated and need to repeat
     private final static long TIMEOUT_MS = 60000;
-    
+
     // number of spots being retrieved on nearby spots query
     private final static int CLOSEST_LOCATIONS = 100;
-    
+
     // max number of spots displayed at once.
     private static final int MARKERS_LIMIT = 100;
-    
+
     private static final float MAX_DIRECTIONS_DISTANCE = 40000; // 40 km
-    
+
     private final Handler handler = new Handler();
     int displayedMarkers;
     private Set<ParkingSpot> spots;
+
     private Map<ParkingSpot, Marker> spotMarkersMap;
     private Map<Marker, ParkingSpot> markerSpotsMap;
+    private Marker selectedMarker;
 
-    
+
     private SpotSelectedListener spotSelectedListener;
 
     // In the next spots update, clear the previous state
     private boolean shouldBeReset = false;
     private List<LatLngBounds> queriedBounds;
-    
+
     private LatLngBounds viewBounds;
     private LatLngBounds extendedViewBounds;
-    
+
     private Date lastResetTaskRequestTime;
     private ScheduledFuture scheduledResetTask;
-    
+
     private boolean following = false;
 
     // location used as a center fos nearby spots query
@@ -104,11 +105,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * If markers shouldn't be displayed (like zoom is too far)
      */
     private boolean markersDisplayed = false;
-    
+
     private ParkingSpot selectedSpot;
-    
+
     private float maxZoom;
-    
+
     /**
      * Directions delegate
      */
@@ -304,7 +305,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         if (!parkingSpots.isEmpty()) {
             LatLngBounds.Builder builder = LatLngBounds.builder();
             for (ParkingSpot spot : parkingSpots) {
-                builder.include(spot.position);
+                builder.include(spot.getLatLng());
             }
             queriedBounds.add(builder.build());
         }
@@ -354,23 +355,22 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 return;
             }
 
-            LatLng spotPosition = parkingSpot.position;
+            LatLng spotPosition = parkingSpot.getLatLng();
 
             Marker marker = spotMarkersMap.get(parkingSpot);
 
             // if there is no marker we create it
             if (marker == null) {
-                marker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity(), parkingSpot.equals(selectedSpot)));
+                marker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);
             }
 
             // else we may need to update it
-            else if (true) { // TODO
-                updateMarker(parkingSpot, marker, parkingSpot.equals(selectedSpot));
+            else {
+                updateMarker(parkingSpot, marker);
             }
-
 
             if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
                 makeMarkerVisible(marker, parkingSpot);
@@ -381,6 +381,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         if (selectedSpot != null) {
             drawDirections();
+            drawSelectedMarker();
         }
     }
 
@@ -388,18 +389,18 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         if (selectedSpot != null) {
 
             LatLng userLatLng = getUserLatLng();
-            updateTooFar(getSpotLatLng(), userLatLng);
+            updateTooFar(selectedSpot.getLatLng(), userLatLng);
 
             // don't set if they are too far
             if (isTooFar()) return;
 
             if (userLatLng != null)
-                directionsDelegate.drawDirections(userLatLng, selectedSpot.position, GMapV2Direction.MODE_DRIVING);
+                directionsDelegate.drawDirections(userLatLng, selectedSpot.getLatLng(), GMapV2Direction.MODE_DRIVING);
         }
     }
 
-    private void updateMarker(ParkingSpot parkingSpot, Marker marker, boolean selected) {
-        MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity(), selected);
+    private void updateMarker(ParkingSpot parkingSpot, Marker marker) {
+        MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity());
         marker.setIcon(markerOptions.getIcon());
     }
 
@@ -427,7 +428,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         if (selectedSpot != null) {
             Marker selectedMarker = spotMarkersMap.get(selectedSpot);
 
-            updateMarker(selectedSpot, selectedMarker, true);
+            updateMarker(selectedSpot, selectedMarker);
+            drawSelectedMarker();
             drawDirections();
 
             spotSelectedListener.onSpotClicked(selectedSpot);
@@ -438,6 +440,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             return true;
         }
         return false;
+    }
+
+    private void drawSelectedMarker() {
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.marker_selected);
+        selectedMarker = getMap().addMarker(new MarkerOptions()
+                .flat(true)
+                .position(selectedSpot.getLatLng())
+                .icon(icon)
+                .anchor(0.5F, 0.5F));
     }
 
 
@@ -454,13 +465,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         Log.d(TAG, "Clearing selected spot");
 
         // clear previous selection
-        if (selectedSpot != null) {
-            Marker previousMarker = spotMarkersMap.get(selectedSpot);
-
-            // we may have restored the selected spot but it may not have been drawn (like on device rotation)
-            if (previousMarker != null) {
-                updateMarker(selectedSpot, previousMarker, false);
-            }
+        if (selectedSpot != null && selectedMarker != null) {
+            selectedMarker.remove();
+            selectedMarker = null;
         }
         directionsDelegate.hide(true);
         selectedSpot = null;
@@ -592,13 +599,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         Log.v(TAG, "zoomToSeeBoth");
 
-        LatLng carPosition = getSpotLatLng();
+        LatLng spotPosition = selectedSpot.getLatLng();
         LatLng userPosition = getUserLatLng();
 
-        if (carPosition == null || userPosition == null) return false;
+        if (spotPosition == null || userPosition == null) return false;
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder()
-                .include(carPosition)
+                .include(spotPosition)
                 .include(userPosition);
 
         for (LatLng latLng : directionsDelegate.getDirectionPoints())
@@ -612,11 +619,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     @Override
     public float getDirectionsMaxDistance() {
         return MAX_DIRECTIONS_DISTANCE;
-    }
-
-    private LatLng getSpotLatLng() {
-        if (selectedSpot == null) return null;
-        return selectedSpot.position;
     }
 
     public boolean isFollowing() {

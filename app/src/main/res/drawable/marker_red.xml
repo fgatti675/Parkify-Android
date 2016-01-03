@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-
-    <solid
-        android:color="@color/marker_red"/>
-
-    <size
-        android:width="@dimen/marker_diameter_red"
-        android:height="@dimen/marker_diameter_red"/>
-
-</shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="22dp"
+    android:viewportHeight="22.9"
+    android:viewportWidth="16.0">
+    <path
+        android:fillColor="#F57C00"
+        android:pathData="M8,0c-4.8,0 -8,4 -8,7.9c0,5.3 4.4,10.6 8,15c3.7,-4.4 8,-9.9 8,-15C16,4 12.8,0 8,0z" />
+</vector>

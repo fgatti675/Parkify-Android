@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -35,27 +34,28 @@ import android.widget.Toast;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityRecognition.ParkedCarRequestedService;
 import com.cahue.iweco.auth.Authenticator;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
+import com.cahue.iweco.dialogs.IwecoPromoDialog;
+import com.cahue.iweco.dialogs.RatingDialog;
+import com.cahue.iweco.dialogs.UninstallWIMCDialog;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarService;
-import com.cahue.iweco.setCarLocation.SetCarLocationDelegate;
-import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.setCarLocation.LongTapLocationDelegate;
+import com.cahue.iweco.setCarLocation.PossibleParkedCarDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
-import com.cahue.iweco.dialogs.IwecoPromoDialog;
 import com.cahue.iweco.util.PreferencesUtil;
-import com.cahue.iweco.dialogs.RatingDialog;
 import com.cahue.iweco.util.Tracking;
-import com.cahue.iweco.dialogs.UninstallWIMCDialog;
 import com.cahue.iweco.util.Util;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
@@ -64,7 +64,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
@@ -78,7 +77,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.plus.Plus;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -124,13 +122,11 @@ public class MapsActivity extends AppCompatActivity
     private final BroadcastReceiver carUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId != null) {
                 Log.i(TAG, "Car update received: " + carId);
                 getParkedCarDelegate(carId).update(true);
             }
-
         }
     };
     List<AbstractMarkerDelegate> delegates;
@@ -144,6 +140,7 @@ public class MapsActivity extends AppCompatActivity
     private CarDatabase carDatabase;
 
     private Toolbar mToolbar;
+
     private FloatingActionButton myLocationButton;
     private CardView detailsContainer;
     private DetailsFragment detailsFragment;
@@ -176,6 +173,7 @@ public class MapsActivity extends AppCompatActivity
      */
     private Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
     private MapFragment mapFragment;
+    private boolean locationPermissionCurrentlyRequested = false;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -340,7 +338,8 @@ public class MapsActivity extends AppCompatActivity
         if (!"wimc".equals(BuildConfig.FLAVOR))
             delegates.add(getSpotsDelegate());
 
-        delegates.add(getSetCarLocationDelegate());
+        for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots())
+            delegates.add(getSetCarLocationDelegate(spot));
 
         List<String> carIds = carDatabase.getCarIds();
         for (String id : carIds) {
@@ -363,7 +362,7 @@ public class MapsActivity extends AppCompatActivity
         /**
          * Set no cars details if database is empty
          */
-        if (carDatabase.isEmpty()) {
+        if (carDatabase.isEmptyOfCars()) {
             setNoCars();
         } else {
             if (detailsFragment instanceof NoCarsFragment) hideDetails();
@@ -377,7 +376,6 @@ public class MapsActivity extends AppCompatActivity
         showOnLongClickToast();
     }
 
-
     @Override
     protected void onNewIntent(Intent intent) {
         handleIntent(intent);
@@ -386,17 +384,15 @@ public class MapsActivity extends AppCompatActivity
     private void handleIntent(Intent intent) {
         if (intent != null && intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST)) {
             initialCameraSet = true;
-            Location location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
-            Date time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis()));
-            String address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
-            getSetCarLocationDelegate().setRequestLocation(location, time, address);
+
+            ParkingSpot spot = intent.getParcelableExtra(Constants.INTENT_SPOT_EXTRA);
+            getPossibleParkedCarDelegate(spot);
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
             mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
             intent.setAction(null);
         }
     }
-
 
     public void checkRatingDialogShown() {
         if (RatingDialog.shouldBeShown(this)) {
@@ -494,8 +490,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private boolean locationPermissionCurrentlyRequested = false;
-
     private void checkLocationPermission() {
 
         if (isLocationPermissionGranted()) return;
@@ -509,7 +503,8 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private boolean isLocationPermissionGranted() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -560,13 +555,14 @@ public class MapsActivity extends AppCompatActivity
      * @return
      */
     private ParkedCarDelegate getParkedCarDelegate(String carId) {
-        ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(carId);
+        String fragmentId = ParkedCarDelegate.getFragmentTag(carId);
+        ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(fragmentId);
         if (parkedCarDelegate == null) {
             Log.d(TAG, "Creating new ParkedCarDelegate");
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
             parkedCarDelegate.setRetainInstance(true);
-            transaction.add(parkedCarDelegate, carId);
+            transaction.add(parkedCarDelegate, fragmentId);
             transaction.commit();
         }
         return parkedCarDelegate;
@@ -575,20 +571,52 @@ public class MapsActivity extends AppCompatActivity
     /**
      * @return
      */
-    private SetCarLocationDelegate getSetCarLocationDelegate() {
-        SetCarLocationDelegate setCarLocationDelegate = (SetCarLocationDelegate) getFragmentManager().findFragmentByTag(SetCarLocationDelegate.FRAGMENT_TAG);
-        if (setCarLocationDelegate == null) {
-            Log.d(TAG, "Creating new SetCarLocationDelegate");
+    private PossibleParkedCarDelegate getSetCarLocationDelegate(ParkingSpot spot) {
+        String fragmentId = PossibleParkedCarDelegate.getFragmentTag(spot);
+        PossibleParkedCarDelegate possibleParkedCarDelegate = (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(fragmentId);
+        if (possibleParkedCarDelegate == null) {
+            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            setCarLocationDelegate = SetCarLocationDelegate.newInstance();
-            setCarLocationDelegate.setRetainInstance(true);
-            transaction.add(setCarLocationDelegate, SetCarLocationDelegate.FRAGMENT_TAG);
+            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
+            possibleParkedCarDelegate.setRetainInstance(true);
+            transaction.add(possibleParkedCarDelegate, fragmentId);
             transaction.commit();
             getFragmentManager().executePendingTransactions();
         }
-        return setCarLocationDelegate;
+        return possibleParkedCarDelegate;
     }
 
+    /**
+     * @return
+     */
+    private LongTapLocationDelegate getLongTapLocationDelegate(ParkingSpot spot) {
+        String fragmentId = LongTapLocationDelegate.getFragmentTag(spot);
+        LongTapLocationDelegate longTapLocationDelegate = (LongTapLocationDelegate) getFragmentManager().findFragmentByTag(fragmentId);
+        if (longTapLocationDelegate == null) {
+            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            longTapLocationDelegate = LongTapLocationDelegate.newInstance(spot);
+            longTapLocationDelegate.setRetainInstance(true);
+            transaction.add(longTapLocationDelegate, fragmentId);
+            transaction.commit();
+            getFragmentManager().executePendingTransactions();
+        }
+        return longTapLocationDelegate;
+    }
+
+    private PossibleParkedCarDelegate getPossibleParkedCarDelegate(ParkingSpot spot) {
+        PossibleParkedCarDelegate possibleParkedCarDelegate = (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.FRAGMENT_TAG);
+        if (possibleParkedCarDelegate == null) {
+            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
+            possibleParkedCarDelegate.setRetainInstance(true);
+            transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.FRAGMENT_TAG);
+            transaction.commit();
+            getFragmentManager().executePendingTransactions();
+        }
+        return possibleParkedCarDelegate;
+    }
 
     private void setMapPadding(int bottomPadding) {
         if (mMap == null) return;
@@ -648,7 +676,7 @@ public class MapsActivity extends AppCompatActivity
 
         if (!detailsDisplayed) return;
 
-        if (carDatabase.isEmpty()) {
+        if (carDatabase.isEmptyOfCars()) {
             setNoCars();
             return;
         }
@@ -688,7 +716,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void showOnLongClickToast() {
-        if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmpty())
+        if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmptyOfCars())
             return;
 
         Util.createUpperToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
@@ -855,7 +883,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p>
+     * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
@@ -955,7 +983,7 @@ public class MapsActivity extends AppCompatActivity
     public void onMapLongClick(LatLng latLng) {
         Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
 
-        if (carDatabase.isEmpty())
+        if (carDatabase.isEmptyOfCars())
             return;
 
         Location location = new Location(Util.TAPPED_PROVIDER);
@@ -963,7 +991,9 @@ public class MapsActivity extends AppCompatActivity
         location.setLongitude(latLng.longitude);
         location.setAccuracy(10);
 
-        getSetCarLocationDelegate().setRequestLocation(location, new Date(), null);
+        ParkingSpot spot = new ParkingSpot(null, location, null, new Date(), false);
+
+        getLongTapLocationDelegate(spot).setRequestLocation();
 
     }
 
@@ -1008,12 +1038,11 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        boolean consumeEvent = false;
         for (AbstractMarkerDelegate delegate : delegates) {
             if (delegate.onMarkerClick(marker))
-                consumeEvent = true;
+                return true;
         }
-        return consumeEvent;
+        return false;
     }
 
     @Override

@@ -27,10 +27,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.LoadProfileImage;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
@@ -496,7 +496,7 @@ public class NavigationDrawerFragment extends Fragment {
                         if (car.location != null) {
 
                             Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_DRAWER);
-                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(car.id)).onCarClicked();
+                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(car.id))).onCarClicked();
 
                             mCallbacks.onCarClicked(car.id);
 

@@ -1,9 +1,7 @@
 package com.cahue.iweco.spots.query;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -11,42 +9,24 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.RequestFuture;
 import com.cahue.iweco.IwecoApp;
-import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.model.ParkingSpot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by francesco on 13.11.2014.
  */
 public abstract class ParkingSpotsQuery {
 
-    /**
-     * Components that use this service must implement a listener using this interface to get the
-     * parking locations
-     */
-    public interface ParkingSpotsUpdateListener {
-
-        void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
-
-        void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
-
-    }
-
     private static final String TAG = ParkingSpotsQuery.class.getSimpleName();
-
     protected Context context;
     protected ParkingSpotsUpdateListener listener;
-
-
     public ParkingSpotsQuery(Context context, ParkingSpotsUpdateListener listener) {
         this.context = context;
         this.listener = listener;
@@ -116,4 +96,16 @@ public abstract class ParkingSpotsQuery {
     }
 
     protected abstract Uri getRequestUri();
+
+    /**
+     * Components that use this service must implement a listener using this interface to get the
+     * parking locations
+     */
+    public interface ParkingSpotsUpdateListener {
+
+        void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
+
+        void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
+
+    }
 }

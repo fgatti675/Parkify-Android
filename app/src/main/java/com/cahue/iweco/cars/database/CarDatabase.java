@@ -9,7 +9,8 @@ import android.location.Location;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.model.ParkingSpot;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,8 +24,46 @@ import java.util.Set;
  */
 public class CarDatabase {
 
+    public static final String TABLE_CARS = "cars";
+    public static final String TABLE_POSSIBLE_SPOTS = "possible_spots";
+
+    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_BT_ADDRESS = "bt_address";
+    public static final String COLUMN_SPOT_ID = "spot_id";
+    public static final String COLUMN_LATITUDE = "latitude";
+    public static final String COLUMN_LONGITUDE = "longitude";
+    public static final String COLUMN_ACCURACY = "accuracy";
+    public static final String COLUMN_ADDRESS = "address";
+    public static final String COLUMN_TIME = "time";
+    public static final String COLUMN_COLOR = "color";
+    public static final String[] CAR_PROJECTION = new String[]{
+            COLUMN_ID,
+            COLUMN_NAME,
+            COLUMN_BT_ADDRESS,
+            COLUMN_COLOR,
+            COLUMN_LATITUDE,
+            COLUMN_LONGITUDE,
+            COLUMN_ACCURACY,
+            COLUMN_TIME,
+            COLUMN_ADDRESS,
+            COLUMN_SPOT_ID
+    };
+    public static final String[] SPOT_PROJECTION = new String[]{
+            COLUMN_LATITUDE,
+            COLUMN_LONGITUDE,
+            COLUMN_ACCURACY,
+            COLUMN_TIME,
+            COLUMN_ADDRESS
+    };
+    private static final int MAX_POSSIBLE_SPOTS = 5;
+    private static final String TAG = CarDatabase.class.getSimpleName();
     private static CarDatabase mInstance;
     private Context context;
+
+    private CarDatabase(Context context) {
+        this.context = context;
+    }
 
     public static CarDatabase getInstance(Context ctx) {
         /**
@@ -39,45 +78,26 @@ public class CarDatabase {
         return mInstance;
     }
 
-    public static final String[] PROJECTION = new String[]{
-            Car.COLUMN_ID,
-            Car.COLUMN_NAME,
-            Car.COLUMN_BT_ADDRESS,
-            Car.COLUMN_COLOR,
-            Car.COLUMN_LATITUDE,
-            Car.COLUMN_LONGITUDE,
-            Car.COLUMN_ACCURACY,
-            Car.COLUMN_TIME,
-            Car.COLUMN_ADDRESS,
-            Car.COLUMN_SPOT_ID
-    };
-
-    private static final String TAG = CarDatabase.class.getSimpleName();
-
-    private CarDatabase(Context context) {
-        this.context = context;
-    }
-
     /**
      * Persist the location of the car in the shared preferences
      *
      * @param cars
      */
-    public void saveAndBroadcast(Collection<Car> cars) {
+    public void clearSaveAndBroadcast(Collection<Car> cars) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
 
-            database.delete(Car.TABLE_NAME, null, null);
+            database.delete(TABLE_CARS, null, null);
 
             for (Car car : cars) {
 
                 if (car.id == null)
                     throw new NullPointerException("Car without an ID");
 
-                ContentValues values = getCarContentValues(car);
-                database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+                ContentValues values = createCarContentValues(car);
+                database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
 
                 broadCastCarUpdate(car);
             }
@@ -104,8 +124,8 @@ public class CarDatabase {
                 throw new NullPointerException("Car without an ID");
 
             ContentValues values = new ContentValues();
-            values.put(Car.COLUMN_SPOT_ID, car.spotId);
-            database.update(Car.TABLE_NAME, values, "id = '" + car.id + "'", null);
+            values.put(COLUMN_SPOT_ID, car.spotId);
+            database.update(TABLE_CARS, values, "id = '" + car.id + "'", null);
 
         } finally {
             database.close();
@@ -131,8 +151,8 @@ public class CarDatabase {
                 throw new NullPointerException("Car without an ID");
 
             ContentValues values = new ContentValues();
-            values.put(Car.COLUMN_ADDRESS, car.address);
-            database.update(Car.TABLE_NAME, values, "id = '" + car.id + "'", null);
+            values.put(COLUMN_ADDRESS, car.address);
+            database.update(TABLE_CARS, values, "id = '" + car.id + "'", null);
 
         } finally {
             database.close();
@@ -146,7 +166,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void saveAndBroadcast(Car car) {
+    public void saveCarAndBroadcast(Car car) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -155,9 +175,35 @@ public class CarDatabase {
             if (car.id == null)
                 throw new NullPointerException("Car without an ID");
 
-            ContentValues values = getCarContentValues(car);
-            database.insertWithOnConflict(Car.TABLE_NAME, Car.COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+            ContentValues values = createCarContentValues(car);
+            database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
 
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+
+        broadCastCarUpdate(car);
+
+    }
+
+    /**
+     * Persist date about a car, location included
+     *
+     * @param car
+     */
+    public void updateCarRemoveSpotAndBroadcast(Car car, ParkingSpot spot) {
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+
+        try {
+            if (car.id == null)
+                throw new NullPointerException("Car without an ID");
+
+            ContentValues values = createCarContentValues(car);
+            database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+            database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + spot.time.toString() + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();
@@ -179,20 +225,26 @@ public class CarDatabase {
         context.sendBroadcast(intent);
     }
 
-    private ContentValues getCarContentValues(Car car) {
+    /**
+     * Create ContentValues from Car
+     *
+     * @param car
+     * @return
+     */
+    private ContentValues createCarContentValues(Car car) {
         ContentValues values = new ContentValues();
-        values.put(Car.COLUMN_ID, car.id);
-        values.put(Car.COLUMN_NAME, car.name);
-        values.put(Car.COLUMN_BT_ADDRESS, car.btAddress);
-        values.put(Car.COLUMN_COLOR, car.color);
+        values.put(COLUMN_ID, car.id);
+        values.put(COLUMN_NAME, car.name);
+        values.put(COLUMN_BT_ADDRESS, car.btAddress);
+        values.put(COLUMN_COLOR, car.color);
 
         if (car.location != null) {
-            values.put(Car.COLUMN_SPOT_ID, car.spotId);
-            values.put(Car.COLUMN_LATITUDE, car.location.getLatitude());
-            values.put(Car.COLUMN_LONGITUDE, car.location.getLongitude());
-            values.put(Car.COLUMN_ACCURACY, car.location.getAccuracy());
-            values.put(Car.COLUMN_TIME, car.time != null ? car.time.getTime() : null);
-            values.put(Car.COLUMN_ADDRESS, car.address);
+            values.put(COLUMN_SPOT_ID, car.spotId);
+            values.put(COLUMN_LATITUDE, car.location.getLatitude());
+            values.put(COLUMN_LONGITUDE, car.location.getLongitude());
+            values.put(COLUMN_ACCURACY, car.location.getAccuracy());
+            values.put(COLUMN_TIME, car.time != null ? car.time.getTime() : null);
+            values.put(COLUMN_ADDRESS, car.address);
         }
 
         return values;
@@ -206,9 +258,9 @@ public class CarDatabase {
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
             Cursor cursor = database.query(true,
-                    Car.TABLE_NAME,
-                    new String[]{Car.COLUMN_BT_ADDRESS},
-                    Car.COLUMN_BT_ADDRESS + " IS NOT NULL",
+                    TABLE_CARS,
+                    new String[]{COLUMN_BT_ADDRESS},
+                    COLUMN_BT_ADDRESS + " IS NOT NULL",
                     null, null, null, null, null);
 
             Log.d(TAG, "Paired BT addresses: ");
@@ -238,10 +290,10 @@ public class CarDatabase {
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
 
-            Cursor cursor = database.query(Car.TABLE_NAME,
-                    new String[]{Car.COLUMN_ID},
+            Cursor cursor = database.query(TABLE_CARS,
+                    new String[]{COLUMN_ID},
                     null, null, null, null,
-                    Car.COLUMN_TIME + " DESC");
+                    COLUMN_TIME + " DESC");
 
             while (cursor.moveToNext()) {
                 ids.add(cursor.getString(0));
@@ -270,11 +322,11 @@ public class CarDatabase {
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
 
-            Cursor cursor = database.query(Car.TABLE_NAME,
-                    PROJECTION,
-                    onlyParked ? Car.COLUMN_LATITUDE + " > 0" : null,
+            Cursor cursor = database.query(TABLE_CARS,
+                    CAR_PROJECTION,
+                    onlyParked ? COLUMN_LATITUDE + " > 0" : null,
                     null, null, null,
-                    Car.COLUMN_TIME + " DESC");
+                    COLUMN_TIME + " DESC");
 
             while (cursor.moveToNext()) {
                 cars.add(cursorToCar(cursor));
@@ -283,6 +335,7 @@ public class CarDatabase {
 
         } finally {
             database.close();
+            carDatabaseHelper.close();
         }
 
         Log.d(TAG, "Retrieved cars from DB: " + cars);
@@ -290,14 +343,14 @@ public class CarDatabase {
         return cars;
     }
 
-    public Car find(String id) {
+    public Car findCar(String id) {
         Car car;
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
-            Cursor cursor = database.query(Car.TABLE_NAME,
-                    PROJECTION,
-                    Car.COLUMN_ID + " = '" + id + "'",
+            Cursor cursor = database.query(TABLE_CARS,
+                    CAR_PROJECTION,
+                    COLUMN_ID + " = '" + id + "'",
                     null, null, null, null);
 
             if (cursor.getCount() == 0) return null;
@@ -317,14 +370,14 @@ public class CarDatabase {
 
     }
 
-    public Car findByBTAddress(String btAddress) {
+    public Car findCarByBTAddress(String btAddress) {
         Car car;
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
-            Cursor cursor = database.query(Car.TABLE_NAME,
-                    PROJECTION,
-                    Car.COLUMN_BT_ADDRESS + " = '" + btAddress + "'",
+            Cursor cursor = database.query(TABLE_CARS,
+                    CAR_PROJECTION,
+                    COLUMN_BT_ADDRESS + " = '" + btAddress + "'",
                     null, null, null, null);
 
             if (cursor.getCount() == 0) return null;
@@ -379,29 +432,29 @@ public class CarDatabase {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
-            database.execSQL("delete from " + Car.TABLE_NAME);
+            database.execSQL("delete from " + TABLE_CARS);
         } finally {
             database.close();
             carDatabaseHelper.close();
         }
     }
 
-    public void delete(Car car) {
+    public void deleteCar(Car car) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
-            database.delete(Car.TABLE_NAME, "id = '" + car.id + "'", null);
+            database.delete(TABLE_CARS, "id = '" + car.id + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();
         }
     }
 
-    public void delete(String carId) {
+    public void deleteCar(String carId) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
-            database.delete(Car.TABLE_NAME, "id = '" + carId + "'", null);
+            database.delete(TABLE_CARS, "id = '" + carId + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();
@@ -413,12 +466,12 @@ public class CarDatabase {
      *
      * @return
      */
-    public boolean isEmpty() {
+    public boolean isEmptyOfCars() {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
-            Cursor cursor = database.query(Car.TABLE_NAME,
-                    new String[]{Car.COLUMN_ID},
+            Cursor cursor = database.query(TABLE_CARS,
+                    new String[]{COLUMN_ID},
                     null, null, null, null, null);
 
             boolean res = cursor.getCount() == 0;
@@ -427,5 +480,103 @@ public class CarDatabase {
         } finally {
             database.close();
         }
+    }
+
+    public void addPossibleParkingSpot(ParkingSpot spot) {
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+
+        try {
+            ContentValues values = createSpotContentValues(spot);
+
+            database.insertWithOnConflict(TABLE_POSSIBLE_SPOTS, COLUMN_TIME, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+            Cursor cursor = database.query(TABLE_POSSIBLE_SPOTS,
+                    new String[]{COLUMN_TIME},
+                    null,
+                    null, null, null,
+                    COLUMN_TIME + " DESC");
+
+            List<Long> parkingTimes = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                parkingTimes.add(cursor.getLong(0));
+            }
+            cursor.close();
+
+            if (parkingTimes.size() > MAX_POSSIBLE_SPOTS) {
+                for (Long time : parkingTimes.subList(MAX_POSSIBLE_SPOTS, parkingTimes.size())) {
+                    database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + time.toString() + "'", null);
+                }
+            }
+
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+    }
+
+    /**
+     * Create ContentValues from Car
+     *
+     * @param spot
+     * @return
+     */
+    private ContentValues createSpotContentValues(ParkingSpot spot) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_LATITUDE, spot.location.getLatitude());
+        values.put(COLUMN_LONGITUDE, spot.location.getLongitude());
+        values.put(COLUMN_ACCURACY, spot.location.getAccuracy());
+        values.put(COLUMN_TIME, spot.time != null ? spot.time.getTime() : null);
+        values.put(COLUMN_ADDRESS, spot.address);
+
+        return values;
+    }
+
+    /**
+     * Get a Collection of possible parking spots
+     *
+     * @return
+     */
+    public List<ParkingSpot> retrievePossibleParkingSpots() {
+        List<ParkingSpot> spots = new ArrayList<>();
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
+        try {
+
+            Cursor cursor = database.query(TABLE_POSSIBLE_SPOTS,
+                    SPOT_PROJECTION,
+                    null,
+                    null, null, null,
+                    COLUMN_TIME + " DESC");
+
+            while (cursor.moveToNext()) {
+                spots.add(cursorToSpot(cursor));
+            }
+            cursor.close();
+
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+
+        Log.d(TAG, "Retrieved cars from DB: " + spots);
+
+        return spots;
+    }
+
+    private ParkingSpot cursorToSpot(Cursor cursor) {
+
+        double latitude = cursor.getDouble(0);
+        double longitude = cursor.getDouble(1);
+        float accuracy = cursor.getFloat(2);
+        Location location = new Location("db");
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        location.setAccuracy(accuracy);
+        Date time = new Date(cursor.getLong(3));
+        String address = cursor.isNull(4) ? null : cursor.getString(4);
+
+        return new ParkingSpot(null, location, address, time, false);
     }
 }

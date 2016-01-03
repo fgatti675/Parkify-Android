@@ -1,42 +1,49 @@
 package com.cahue.iweco.setCarLocation;
 
-import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
+import com.cahue.iweco.model.ParkingSpot;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 
-import java.util.Date;
-
 /**
- * Created by Francesco on 06/07/2015.
+ * Delegate to show a marker where a car might be parked, based on activity recognition
  */
-public class SetCarLocationDelegate extends AbstractMarkerDelegate implements SetCarDetailsFragment.CarSelectedListener {
+public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements SetCarDetailsFragment.CarSelectedListener {
 
-    public static final String FRAGMENT_TAG = "SET_CAR_LOCATION_DELEGATE";
+    public static final String FRAGMENT_TAG = "POSSIBLE_PARKED_CAR_DELEGATE";
 
-    Location requestLocation;
+    private static final String ARG_SPOT = "spot";
+
+    ParkingSpot spot;
 
     Marker marker;
 
     private IconGenerator iconGenerator;
+    private boolean following;
 
+    public static String getFragmentTag(ParkingSpot spot) {
+        return FRAGMENT_TAG + "." + spot.time.getTime();
+    }
 
-    public static SetCarLocationDelegate newInstance() {
-        SetCarLocationDelegate fragment = new SetCarLocationDelegate();
+    public static PossibleParkedCarDelegate newInstance(ParkingSpot spot) {
+        PossibleParkedCarDelegate fragment = new PossibleParkedCarDelegate();
         Bundle args = new Bundle();
+        args.putParcelable(ARG_SPOT, spot);
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,36 +51,43 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        this.spot = getArguments().getParcelable(ARG_SPOT);
         iconGenerator = new IconGenerator(getActivity());
-        iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
-        iconGenerator.setTextAppearance(R.style.Marker_SetCar);
-        int color = getResources().getColor(R.color.theme_accent);
-        iconGenerator.setColor(color);
+        LayoutInflater myInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View contentView = myInflater.inflate(R.layout.marker_possible_view, null, false);
+        iconGenerator.setBackground(null);
+        iconGenerator.setContentView(contentView);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        doDraw();
+    }
+
+    @Override
+    protected void onMapReady(GoogleMap mMap) {
+        super.onMapReady(mMap);
+        doDraw();
     }
 
     @Override
     public void doDraw() {
         clearMarker();
 
-        LatLng latLng = new LatLng(requestLocation.getLatitude(), requestLocation.getLongitude());
-
         marker = getMap().addMarker(new MarkerOptions()
-                .position(latLng)
+                .position(spot.getLatLng())
                 .snippet("")
                 .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("?")))
                 .anchor(iconGenerator.getAnchorU(), iconGenerator.getAnchorV()));
 
-        centerCameraOnMarker();
     }
 
     private void centerCameraOnMarker() {
 
-        LatLng latLng = new LatLng(requestLocation.getLatitude(), requestLocation.getLongitude());
-
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                 .zoom(15)
-                .target(latLng)
+                .target(spot.getLatLng())
                 .build());
 
         cameraManager.onCameraUpdateRequest(cameraUpdate, this);
@@ -81,6 +95,11 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        if (marker == this.marker) {
+            detailsViewManager.setDetailsFragment(SetCarDetailsFragment.newInstance(spot));
+            setCameraFollowing(true);
+            return true;
+        }
         return false;
     }
 
@@ -91,11 +110,6 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
-        if (requester != this) {
-            clearMarker();
-            if (isDisplayed())
-                detailsViewManager.hideDetails();
-        }
     }
 
     private boolean isDisplayed() {
@@ -108,30 +122,22 @@ public class SetCarLocationDelegate extends AbstractMarkerDelegate implements Se
     private void clearMarker() {
         if (marker != null) {
             marker.remove();
+            marker = null;
         }
     }
 
     @Override
     public void setCameraFollowing(boolean following) {
-
+        this.following = following;
+        if (following) centerCameraOnMarker();
     }
 
     @Override
     public void onMapResized() {
-        if (isDisplayed())
+        if (isDisplayed() && following)
             centerCameraOnMarker();
     }
 
-    @Override
-    public void onDetailsClosed() {
-        clearMarker();
-    }
-
-    public void setRequestLocation(Location requestLocation, Date time, String address) {
-        this.requestLocation = requestLocation;
-        detailsViewManager.setDetailsFragment(SetCarDetailsFragment.newInstance(requestLocation, time, address));
-        doDraw();
-    }
 
     @Override
     public void onCarButtonClicked(String carId) {

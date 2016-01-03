@@ -1,9 +1,7 @@
 package com.cahue.iweco.tutorial;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
@@ -16,14 +14,10 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.MapsActivity;
-import com.cahue.iweco.cars.Car;
-import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.R;
+import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.cars.EditCarDialog;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.cahue.iweco.model.Car;
 
 
 public class TutorialActivity extends AppCompatActivity
@@ -178,6 +172,10 @@ public class TutorialActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onCarEdited(Car car, boolean newCar) {
+        ((CarManagerFragment) mSectionsPagerAdapter.getItem("wimc".equals(BuildConfig.FLAVOR) ? 2 : 3)).onCarEdited(car, newCar);
+    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -232,11 +230,6 @@ public class TutorialActivity extends AppCompatActivity
             }
             return super.isViewFromObject(view, object);
         }
-    }
-
-    @Override
-    public void onCarEdited(Car car, boolean newCar) {
-        ((CarManagerFragment) mSectionsPagerAdapter.getItem("wimc".equals(BuildConfig.FLAVOR) ? 2 : 3)).onCarEdited(car, newCar);
     }
 
 }

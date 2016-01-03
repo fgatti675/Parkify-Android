@@ -1,17 +1,20 @@
 package com.cahue.iweco.locationServices;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -86,10 +89,10 @@ public abstract class LocationPollerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
 
-            if(intent.getExtras() != null) {
+            if (intent.getExtras() != null) {
                 String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
                 if (carId != null) {
-                    car = CarDatabase.getInstance(this).find(carId);
+                    car = CarDatabase.getInstance(this).findCar(carId);
                     if (car == null) {
                         Log.e(TAG, "Car not found");
                     }
@@ -140,6 +143,10 @@ public abstract class LocationPollerService extends Service implements
         /**
          * Start location updates request
          */
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
     }

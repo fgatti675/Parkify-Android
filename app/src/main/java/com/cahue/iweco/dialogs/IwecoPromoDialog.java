@@ -41,12 +41,25 @@ public class IwecoPromoDialog extends DialogFragment {
         return (new Date().getTime() - lastDisplayed.getTime()) > 2 * 24 * 60 * 60;
     }
 
+    public static void setIwecoPromoDialogShown(Context context, Date date) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, date.getTime()).apply();
+    }
+
+    public static Date getIwecoPromoDialogShown(Context context) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.contains(PreferencesUtil.PREF_IWECO_PROMO_DATE))
+            return null;
+        return new Date(prefs.getLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, 0));
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.iweco_promo)
-                .setIcon(R.drawable.iweco_logo_small)
+                .setIcon(R.drawable.weco_logo_small)
                 .setTitle(R.string.new_app)
                 .setPositiveButton(R.string.install, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -63,19 +76,5 @@ public class IwecoPromoDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
-    }
-
-
-    public static void setIwecoPromoDialogShown(Context context, Date date) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, date.getTime()).apply();
-    }
-
-    public static Date getIwecoPromoDialogShown(Context context) {
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!prefs.contains(PreferencesUtil.PREF_IWECO_PROMO_DATE))
-            return null;
-        return new Date(prefs.getLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, 0));
     }
 }

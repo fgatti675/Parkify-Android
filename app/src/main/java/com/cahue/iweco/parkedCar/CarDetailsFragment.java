@@ -20,10 +20,10 @@ import com.cahue.iweco.Constants;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 
 
 /**
@@ -51,7 +51,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId.equals(CarDetailsFragment.this.carId)) {
                 Log.d(TAG, "Received car update request" + carId);
-                car = carDatabase.find(carId);
+                car = carDatabase.findCar(carId);
                 updateLayout();
             }
         }
@@ -86,9 +86,9 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         if (getArguments() != null) {
             carId = getArguments().getString(ARG_CAR_ID);
         }
-        parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(carId);
+        parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(carId));
 
-        car = carDatabase.find(carId);
+        car = carDatabase.findCar(carId);
     }
 
     @Override

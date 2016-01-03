@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.cahue.iweco.R;
+import com.cahue.iweco.model.Car;
 
 /**
  * This activity is in charge of wrapping a {@link com.cahue.iweco.cars.CarManagerFragment}

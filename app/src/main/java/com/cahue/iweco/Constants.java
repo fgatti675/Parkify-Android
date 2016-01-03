@@ -46,6 +46,8 @@ public class Constants {
     public static final String INTENT_CAR_EXTRA_TIME = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_TIME";
 
 
+    public static final String INTENT_SPOT_EXTRA = BuildConfig.APPLICATION_ID + ".INTENT_SPOT_EXTRA";
+
     public static final String EXTRA_START_TIME = BuildConfig.APPLICATION_ID + "EXTRA_START_TIME";
 
     // billing

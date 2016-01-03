@@ -10,8 +10,8 @@ import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.FetchAddressIntentService;
 
 /**
@@ -36,7 +36,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
         database = CarDatabase.getInstance(context);
 
         String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
-        car = database.find(carId);
+        car = database.findCar(carId);
 
         // this should happen only if the user was logged out at that particular moment...
         if (car == null)

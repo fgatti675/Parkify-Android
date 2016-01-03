@@ -1,7 +1,5 @@
 package com.cahue.iweco.setCarLocation;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,19 +14,17 @@ import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.FetchAddressIntentService;
 import com.cahue.iweco.util.PreferencesUtil;
-import com.cahue.iweco.util.Util;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,19 +32,15 @@ import java.util.List;
  */
 public class SetCarDetailsFragment extends DetailsFragment {
 
-    private static final String ARG_LOCATION = "arg_location";
-    private static final String ARG_TIME = "arg_time";
-    private static final String ARG_ADDRESS = "arg_address";
+    private static final String ARG_SPOT = "arg_spot";
 
-    private Date time;
-    private Location location;
-    private String addressString;
+    private ParkingSpot spot;
 
     private CarDatabase carDatabase;
 
-    private TextView distance;
-    private TextView timeAgo;
-    private TextView address;
+    private TextView distanceView;
+    private TextView timeAgoView;
+    private TextView addressView;
 
     private Location userLocation;
 
@@ -60,27 +52,12 @@ public class SetCarDetailsFragment extends DetailsFragment {
      *
      * @return A new instance of fragment SetCarDetailsFragment.
      */
-    public static DetailsFragment newInstance(Location location, Date time, String address) {
+    public static DetailsFragment newInstance(ParkingSpot spot) {
         DetailsFragment fragment = new SetCarDetailsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_LOCATION, location);
-        args.putSerializable(ARG_TIME, time);
-        if (address != null)
-            args.putString(ARG_ADDRESS, address);
+        args.putParcelable(ARG_SPOT, spot);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            this.carSelectedListener = (CarSelectedListener) getFragmentManager().findFragmentByTag(SetCarLocationDelegate.FRAGMENT_TAG);
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement " + CarSelectedListener.class.getName());
-        }
     }
 
     @Override
@@ -90,40 +67,42 @@ public class SetCarDetailsFragment extends DetailsFragment {
 
         carDatabase = CarDatabase.getInstance(getActivity());
 
-        if (getArguments() != null) {
-            location = getArguments().getParcelable(ARG_LOCATION);
-            time = (Date) getArguments().getSerializable(ARG_TIME);
-            if (getArguments().containsKey(ARG_ADDRESS))
-                addressString = getArguments().getString(ARG_ADDRESS);
+        spot = getArguments().getParcelable(ARG_SPOT);
+        if (spot.address == null)
+            fetchAddress();
+
+        try {
+            this.carSelectedListener = (CarSelectedListener) getFragmentManager().findFragmentByTag(LongTapLocationDelegate.getFragmentTag(spot));
+        } catch (ClassCastException e) {
+            throw new ClassCastException(getActivity().toString()
+                    + " must implement " + CarSelectedListener.class.getName());
         }
 
-        if (addressString == null)
-            fetchAddress();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_set_car_details, container, false);
-        if (location != null) {
+        if (spot != null) {
 
             // Set time ago
-            timeAgo = (TextView) view.findViewById(R.id.time);
+            timeAgoView = (TextView) view.findViewById(R.id.time);
             updateTimeAgo();
 
             // Update distance
-            distance = (TextView) view.findViewById(R.id.distance);
+            distanceView = (TextView) view.findViewById(R.id.distance);
             updateDistance();
 
-            // Update address
-            address = (TextView) view.findViewById(R.id.address);
+            // Update addressView
+            addressView = (TextView) view.findViewById(R.id.address);
             updateAddress();
 
             GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
             List<Car> cars = carDatabase.retrieveCars(false);
 
-            if(!cars.isEmpty())
-                buttonsLayout.setAdapter(new ButtonAdapter(cars));
+            if (!cars.isEmpty())
+                buttonsLayout.setAdapter(new CarButtonAdapter(cars));
 
             Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
             view.startAnimation(fadeInAnimation);
@@ -143,33 +122,33 @@ public class SetCarDetailsFragment extends DetailsFragment {
 
     private void updateDistance() {
         if (userLocation != null) {
-            float distanceM = location.distanceTo(userLocation);
+            float distanceM = spot.location.distanceTo(userLocation);
 
             if (PreferencesUtil.isUseMiles(getActivity())) {
-                distance.setText(String.format("%.1f miles", distanceM / 1609.34));
+                distanceView.setText(String.format("%.1f miles", distanceM / 1609.34));
             } else {
-                distance.setText(String.format("%.1f km", distanceM / 1000));
+                distanceView.setText(String.format("%.1f km", distanceM / 1000));
             }
         }
     }
 
     private void updateTimeAgo() {
-        timeAgo.setText(DateUtils.getRelativeTimeSpanString(time.getTime()));
+        timeAgoView.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
     }
 
     private void updateAddress() {
-        if (addressString != null && address != null) {
-            address.setText(addressString);
+        if (spot.address != null && addressView != null) {
+            addressView.setText(spot.address);
         }
     }
 
+    /**
+     * Fetch address for the spot
+     */
     private void fetchAddress() {
-        /**
-         * Fetch address
-         */
         Intent fetchAddressIntent = new Intent(getActivity(), FetchAddressIntentService.class);
         fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
-        fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location);
+        fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, spot.location);
         getActivity().startService(fetchAddressIntent);
     }
 
@@ -188,17 +167,17 @@ public class SetCarDetailsFragment extends DetailsFragment {
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;
 
-            addressString = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
+            spot.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
 
             updateAddress();
         }
     }
 
-    public class ButtonAdapter extends BaseAdapter {
+    public class CarButtonAdapter extends BaseAdapter {
 
         private List<Car> cars;
 
-        public ButtonAdapter(List<Car> cars) {
+        public CarButtonAdapter(List<Car> cars) {
             this.cars = cars;
         }
 
@@ -231,11 +210,7 @@ public class SetCarDetailsFragment extends DetailsFragment {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    car.location = location;
-                    car.spotId = null;
-                    car.address = addressString;
-                    car.time = time;
-                    CarsSync.storeCar(carDatabase, getActivity(), car);
+                    CarsSync.updateCarFromPossibleSpot(carDatabase, getActivity(), car, spot);
                     carSelectedListener.onCarButtonClicked(car.id);
                 }
             });

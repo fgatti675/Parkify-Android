@@ -19,9 +19,9 @@ import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.auth.Authenticator;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
@@ -384,7 +384,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         for (Car car : cars)
             CarsSync.postCar(car, this, CarDatabase.getInstance(this));
 
-        database.saveAndBroadcast(loginResult.cars);
+        database.clearSaveAndBroadcast(loginResult.cars);
 
         final Intent resultIntent = new Intent();
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email != null ? loginResult.email : loginResult.userId);

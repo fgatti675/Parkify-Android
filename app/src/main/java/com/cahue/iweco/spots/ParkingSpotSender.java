@@ -11,9 +11,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.Requests;
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONObject;
 
@@ -27,9 +27,7 @@ public class ParkingSpotSender {
     private static final String TAG = ParkingSpotSender.class.getSimpleName();
 
     public static void doPostSpotLocation(Context context, Location spotLocation, boolean future, Car car) {
-
-        LatLng latLng = new LatLng(spotLocation.getLatitude(), spotLocation.getLongitude());
-        ParkingSpot spot = new ParkingSpot(car.spotId, latLng, spotLocation.getAccuracy(), new Date(), future);
+        ParkingSpot spot = new ParkingSpot(car.spotId, spotLocation, null, new Date(), future);
         postSpot(context, spot, car);
     }
 

@@ -1,6 +1,6 @@
 package com.cahue.iweco.login;
 
-import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.model.Car;
 
 import org.json.JSONArray;
 import org.json.JSONException;

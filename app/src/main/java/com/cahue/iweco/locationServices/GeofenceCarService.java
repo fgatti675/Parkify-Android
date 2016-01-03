@@ -16,7 +16,7 @@ import android.util.Log;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.Car;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.DetectedActivity;
@@ -38,21 +38,6 @@ public class GeofenceCarService extends LocationPollerService {
     private PendingIntent mGeofencePendingIntent;
 
     private GoogleApiClient mGeofenceApiClient;
-
-    /**
-     * Start the GeoFence service after 2 minutes
-     * @param context
-     * @param carId
-     */
-    public static void startDelayedGeofenceService(Context context, String carId){
-        Intent intent = new Intent(context, GeofenceCarService.class);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carId);
-        PendingIntent pIntent = PendingIntent.getService(context, 0, intent, 0);
-        AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Log.i(TAG, "Starting delayed geofence service");
-        alarm.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 60 * 1000, pIntent);
-    }
-
     /**
      * Result receiver that will send a notification when we are approaching a parked car.
      */
@@ -102,6 +87,21 @@ public class GeofenceCarService extends LocationPollerService {
             mGeofenceApiClient.connect();
         }
     };
+
+    /**
+     * Start the GeoFence service after 2 minutes
+     *
+     * @param context
+     * @param carId
+     */
+    public static void startDelayedGeofenceService(Context context, String carId) {
+        Intent intent = new Intent(context, GeofenceCarService.class);
+        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carId);
+        PendingIntent pIntent = PendingIntent.getService(context, 0, intent, 0);
+        AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Log.i(TAG, "Starting delayed geofence service");
+        alarm.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2 * 60 * 1000, pIntent);
+    }
 
     @Override
     protected boolean checkPreconditions(Car car) {

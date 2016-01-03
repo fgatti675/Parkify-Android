@@ -17,13 +17,25 @@ import com.facebook.share.widget.AppInviteDialog;
 
 
 public class FacebookAppInvitesDialog extends DialogFragment {
+    public static AppInviteContent getFacebookAppInvites(Context context) {
+        String appLinkUrl, previewImageUrl;
+
+        appLinkUrl = context.getString(R.string.facebook_app_link);
+        previewImageUrl = context.getString(R.string.facebook_app_image_url);
+
+        return new AppInviteContent.Builder()
+                .setApplinkUrl(appLinkUrl)
+                .setPreviewImageUrl(previewImageUrl)
+                .build();
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.share_promo)
                 .setTitle(R.string.share)
-                .setIcon(R.drawable.iweco_logo_small)
+                .setIcon(R.drawable.weco_logo_small)
                 .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         AppInviteDialog.show(getActivity(), getFacebookAppInvites(getActivity()));
@@ -38,15 +50,24 @@ public class FacebookAppInvitesDialog extends DialogFragment {
         return builder.create();
     }
 
-    public static AppInviteContent getFacebookAppInvites(Context context) {
-        String appLinkUrl, previewImageUrl;
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.share_promo)
+                .setTitle(R.string.share)
+                .setIcon(R.drawable.weco_logo_small)
+                .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        AppInviteDialog.show(getActivity(), getFacebookAppInvites(getActivity()));
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
 
-        appLinkUrl = context.getString(R.string.facebook_app_link);
-        previewImageUrl = context.getString(R.string.facebook_app_image_url);
-
-        return new AppInviteContent.Builder()
-                .setApplinkUrl(appLinkUrl)
-                .setPreviewImageUrl(previewImageUrl)
-                .build();
+        // Create the AlertDialog object and return it
+        return builder.create();
     }
 }

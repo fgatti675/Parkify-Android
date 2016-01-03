@@ -1,9 +1,9 @@
 package com.cahue.iweco.spots;
 
+import android.app.Fragment;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.R;
 import com.cahue.iweco.SpotsDelegate;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 
@@ -44,6 +45,10 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     private SpotsDelegate spotsDelegate;
     private Toolbar toolbar;
 
+    public SpotDetailsFragment() {
+        // Required empty public constructor
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -58,10 +63,6 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
         args.putParcelable(ARG_LOCATION, userLocation);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public SpotDetailsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -141,7 +142,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
 
     private void updateImage() {
         if (spot.future) {
-            rectangleImage.setImageResource(R.drawable.map_marker_future);
+            rectangleImage.setImageResource(R.drawable.marker_future);
         } else {
             GradientDrawable gradientDrawable = (GradientDrawable) rectangleImage.getDrawable();
             gradientDrawable.setStroke((int) Util.dpToPx(getActivity(), 8), getResources().getColor(spot.getMarkerType().colorId));
@@ -150,10 +151,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
 
     private void updateDistance() {
         if (userLocation != null) {
-            Location spotLocation = new Location("spot");
-            spotLocation.setLatitude(spot.position.latitude);
-            spotLocation.setLongitude(spot.position.longitude);
-            float distanceM = spotLocation.distanceTo(userLocation);
+            float distanceM = spot.location.distanceTo(userLocation);
 
             if (PreferencesUtil.isUseMiles(getActivity())) {
                 distance.setText(String.format("%.1f miles", distanceM / 1609.34));

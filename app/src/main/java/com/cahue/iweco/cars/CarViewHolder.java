@@ -12,9 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cahue.iweco.R;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.PreferencesUtil;
-import com.cahue.iweco.util.Util;
 
 /**
  * Created by Francesco on 08/03/2015.

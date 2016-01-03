@@ -9,10 +9,10 @@ import android.util.Log;
 
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
-import com.cahue.iweco.locationServices.CarMovedService;
-import com.cahue.iweco.parkedCar.ParkedCarService;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.locationServices.CarMovedService;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.parkedCar.ParkedCarService;
 
 import java.util.Set;
 
@@ -52,7 +52,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
                 Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
-                Car car = carDatabase.findByBTAddress(address);
+                Car car = carDatabase.findCarByBTAddress(address);
 
                 if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                     onBtDisconnected(context, car);

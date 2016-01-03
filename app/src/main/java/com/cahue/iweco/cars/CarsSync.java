@@ -18,6 +18,8 @@ import com.cahue.iweco.IwecoApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.Requests;
 import com.cahue.iweco.util.Util;
 
@@ -30,13 +32,31 @@ public class CarsSync {
 
     private static final String TAG = CarsSync.class.getSimpleName();
 
+    public static void updateCarFromPossibleSpot(CarDatabase carDatabase, Context context, Car car, ParkingSpot spot) {
+
+        Log.i(TAG, "Updating car " + car + " " + spot);
+
+        car.location = spot.location;
+        car.address = spot.address;
+        car.spotId = null;
+        car.time = spot.time;
+
+        if (BuildConfig.DEBUG)
+            Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
+
+        carDatabase.updateCarRemoveSpotAndBroadcast(car, spot);
+
+        if (!AuthUtils.isSkippedLogin(context))
+            postCar(car, context, carDatabase);
+    }
+
     public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
         Log.i(TAG, "Storing car " + car);
 
         if(BuildConfig.DEBUG)
             Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
 
-        carDatabase.saveAndBroadcast(car);
+        carDatabase.saveCarAndBroadcast(car);
 
         if (!AuthUtils.isSkippedLogin(context))
             postCar(car, context, carDatabase);
@@ -94,7 +114,7 @@ public class CarsSync {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Util.createUpperToast(context, R.string.delete_error, Toast.LENGTH_SHORT);
-                            database.saveAndBroadcast(car);
+                            database.saveCarAndBroadcast(car);
                             error.printStackTrace();
                         }
                     });
@@ -103,7 +123,7 @@ public class CarsSync {
             queue.add(removeRequest);
         }
 
-        database.delete(car);
+        database.deleteCar(car);
 
     }
 

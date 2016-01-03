@@ -6,15 +6,30 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar_actionbar"
-        android:id="@+id/toolbar_actionbar"/>
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="end"
+        android:theme="@style/ActionBarThemeOverlay">
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </android.support.v7.widget.Toolbar>
 
     <fragment
-        android:layout_below="@id/toolbar_actionbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/car_manager_fragment"
         class="com.cahue.iweco.cars.CarManagerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_actionbar"
         tools:layout="@layout/fragment_car_manager" />
 
 </RelativeLayout>

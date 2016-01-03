@@ -1,5 +1,6 @@
 package com.cahue.iweco.activityRecognition;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -14,9 +15,10 @@ import android.util.Log;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.Car;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationServices.LocationPollerService;
+import com.cahue.iweco.model.Car;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.FetchAddressIntentService;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -79,12 +81,12 @@ public class ParkedCarRequestedService extends LocationPollerService {
 
         long[] pattern = {0, 100, 1000};
 
+        ParkingSpot possibleParkingSpot = new ParkingSpot((long) Math.random(), location, address, time, false);
+
         // Intent to start the activity and show a just parked dialog
         Intent intent = new Intent(this, MapsActivity.class);
         intent.setAction(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_LOCATION, location);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, address);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, time.getTime());
+        intent.putExtra(Constants.INTENT_SPOT_EXTRA, possibleParkingSpot);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -103,27 +105,28 @@ public class ParkedCarRequestedService extends LocationPollerService {
         int numberActions = Math.min(cars.size(), 3);
         for (int i = 0; i < numberActions; i++) {
             Car car = cars.get(i);
-            NotificationCompat.Action saveAction = createCarSaveAction(car, address, i);
+            NotificationCompat.Action saveAction = createCarSaveAction(car, possibleParkingSpot, i);
             mBuilder.addAction(saveAction);
         }
 
         mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
+
+        carDatabase.addPossibleParkingSpot(possibleParkingSpot);
     }
 
 
-    private NotificationCompat.Action createCarSaveAction(Car car, String address, int index) {
+    private NotificationCompat.Action createCarSaveAction(Car car, ParkingSpot possibleSpot, int index) {
 
         Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_LOCATION, location);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, address);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_TIME, System.currentTimeMillis());
+        intent.putExtra(Constants.INTENT_SPOT_EXTRA, possibleSpot);
 
         PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, car.name, pIntent);
     }
 
 
+    @SuppressLint("ParcelCreator")
     class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver() {
             super(new Handler());

@@ -31,8 +31,8 @@
     <color name="theme_accent">#02edaf</color>
     <color name="theme_accent_light">#8a07ffc3</color>
 
-    <color name="marker_red">#ff1293c3</color>
-    <color name="marker_yellow">#fa7d0a</color>
+    <color name="marker_red">#e65100</color>
+    <color name="marker_yellow">#f57c00</color>
     <color name="marker_green">#02edaf</color>
 
     <color name="google_red">#dd4b39</color>

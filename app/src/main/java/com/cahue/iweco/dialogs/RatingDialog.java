@@ -38,12 +38,34 @@ public class RatingDialog extends DialogFragment {
         return (System.currentTimeMillis() - lastDisplayed.getTime()) > 3 * 24 * 60 * 60 * 1000;
     }
 
+    public static boolean isDialogShown(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, false);
+    }
+
+    public static void setRatedDialogShown(Context context, boolean shown) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PreferencesUtil.PREF_RATED_DIALOG_SHOWN, shown).apply();
+    }
+
+    public static Date getRateDialogLastDisplayed(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.contains(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE))
+            return null;
+        return new Date(prefs.getLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, 0));
+    }
+
+    public static void setRateDialogDate(Context context, Date date) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, date.getTime()).apply();
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.rating_message)
-                .setIcon(R.drawable.iweco_logo_small)
+                .setIcon(R.drawable.weco_logo_small)
                 .setTitle(R.string.like_question)
                 .setPositiveButton(R.string.rate, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -65,28 +87,5 @@ public class RatingDialog extends DialogFragment {
 
         // Create the AlertDialog object and return it
         return builder.create();
-    }
-
-    public static boolean isDialogShown(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, false);
-    }
-
-    public static void setRatedDialogShown(Context context, boolean shown) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PreferencesUtil.PREF_RATED_DIALOG_SHOWN, shown).apply();
-    }
-
-
-    public static Date getRateDialogLastDisplayed(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!prefs.contains(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE))
-            return null;
-        return new Date(prefs.getLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, 0));
-    }
-
-    public static void setRateDialogDate(Context context, Date date) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, date.getTime()).apply();
     }
 }

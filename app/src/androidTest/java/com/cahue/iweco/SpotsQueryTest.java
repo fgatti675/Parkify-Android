@@ -1,9 +1,10 @@
 package com.cahue.iweco;
 
+import android.location.Location;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
-import com.cahue.iweco.spots.ParkingSpot;
+import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
 import com.cahue.iweco.spots.query.QueryResult;
 import com.google.android.gms.maps.model.LatLng;
@@ -12,7 +13,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -37,10 +37,14 @@ public class SpotsQueryTest extends ActivityTestCase {
 
         List<ParkingSpot> expectedResult = new ArrayList<ParkingSpot>() {
             {
+                Location location = new Location("");
+                location.setLatitude(48.129830);
+                location.setLongitude(11.559060);
+                location.setAccuracy(10);
                 add(new ParkingSpot(
                         6245697686863872L,
-                        new LatLng(48.129830, 11.559060),
-                        10,
+                        location,
+                        null,
                         new Date(1413928884000L),
                         false));
             }

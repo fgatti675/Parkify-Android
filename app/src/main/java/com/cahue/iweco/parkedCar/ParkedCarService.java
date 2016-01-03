@@ -2,19 +2,14 @@ package com.cahue.iweco.parkedCar;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.util.Log;
 
-import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.IwecoApp;
-import com.cahue.iweco.cars.Car;
-import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.cars.CarsSync;
+import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationServices.GeofenceCarService;
 import com.cahue.iweco.locationServices.LocationPollerService;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
+import com.cahue.iweco.model.Car;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;

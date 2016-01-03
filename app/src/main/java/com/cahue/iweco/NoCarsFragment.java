@@ -2,24 +2,13 @@ package com.cahue.iweco;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.cahue.iweco.cars.CarManagerActivity;
-import com.cahue.iweco.spots.ParkingSpot;
-import com.cahue.iweco.util.PreferencesUtil;
-import com.cahue.iweco.util.Util;
 
 
 /**
@@ -29,6 +18,10 @@ import com.cahue.iweco.util.Util;
  */
 public class NoCarsFragment extends DetailsFragment {
 
+
+    public NoCarsFragment() {
+        // Required empty public constructor
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -42,11 +35,6 @@ public class NoCarsFragment extends DetailsFragment {
         fragment.setArguments(args);
         return fragment;
     }
-
-    public NoCarsFragment() {
-        // Required empty public constructor
-    }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
