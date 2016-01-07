@@ -13,6 +13,7 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityRecognition.ParkedCarRequestedService;
+import com.cahue.iweco.activityRecognition.PossibleParkedCarDelegate;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
@@ -50,7 +52,6 @@ import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.parkedCar.CarDetailsFragment;
 import com.cahue.iweco.parkedCar.ParkedCarService;
 import com.cahue.iweco.setCarLocation.LongTapLocationDelegate;
-import com.cahue.iweco.setCarLocation.PossibleParkedCarDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
@@ -91,13 +92,12 @@ public class MapsActivity extends AppCompatActivity
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
-        SpotsDelegate.SpotSelectedListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
-        CameraManager,
-        OnMapReadyCallback,
         CameraUpdateRequester,
-        OnCarClickedListener,
+        DelegateManager,
         Navigation,
+        OnMapReadyCallback,
+        OnCarClickedListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, DetailsViewManager {
 
@@ -129,7 +129,8 @@ public class MapsActivity extends AppCompatActivity
             }
         }
     };
-    List<AbstractMarkerDelegate> delegates;
+
+    private Set<AbstractMarkerDelegate> delegates = new HashSet<>();
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -318,9 +319,10 @@ public class MapsActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
 
-        registerCameraUpdater(this);
+        registerCameraUpdateRequester(this);
 
         handleIntent(getIntent());
+
         mapFragment.getMapAsync(this);
         mGoogleApiClient.connect();
     }
@@ -330,21 +332,20 @@ public class MapsActivity extends AppCompatActivity
 
         super.onResume();
 
-        delegates = new ArrayList();
+        delegates.clear();
 
         /**
          * Add delegates
          */
         if (!"wimc".equals(BuildConfig.FLAVOR))
-            delegates.add(getSpotsDelegate());
+            initSpotsDelegate();
 
         for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots())
-            delegates.add(getSetCarLocationDelegate(spot));
+            initPossibleParkedCarDelegate(spot);
 
-        List<String> carIds = carDatabase.getCarIds();
-        for (String id : carIds) {
-            delegates.add(getParkedCarDelegate(id));
-        }
+        for (String id : carDatabase.getCarIds(true))
+            initParkedCarDelegate(id);
+
 
         /**
          * Show some dialogs in case the user is bored
@@ -386,7 +387,7 @@ public class MapsActivity extends AppCompatActivity
             initialCameraSet = true;
 
             ParkingSpot spot = intent.getParcelableExtra(Constants.INTENT_SPOT_EXTRA);
-            getPossibleParkedCarDelegate(spot);
+            getPossibleParkedCarDelegate(spot).activate();
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
             mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
@@ -540,13 +541,20 @@ public class MapsActivity extends AppCompatActivity
     private SpotsDelegate getSpotsDelegate() {
         SpotsDelegate spotsDelegate = (SpotsDelegate) getFragmentManager().findFragmentByTag(SpotsDelegate.FRAGMENT_TAG);
         if (spotsDelegate == null) {
-            Log.d(TAG, "Creating new ParkedCarDelegate");
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            spotsDelegate = SpotsDelegate.newInstance();
-            spotsDelegate.setRetainInstance(true);
-            transaction.add(spotsDelegate, SpotsDelegate.FRAGMENT_TAG);
-            transaction.commit();
+            spotsDelegate = initSpotsDelegate();
         }
+        return spotsDelegate;
+    }
+
+    @NonNull
+    private SpotsDelegate initSpotsDelegate() {
+        SpotsDelegate spotsDelegate;
+        Log.d(TAG, "Creating new ParkedCarDelegate");
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        spotsDelegate = SpotsDelegate.newInstance();
+        spotsDelegate.setRetainInstance(true);
+        transaction.add(spotsDelegate, SpotsDelegate.FRAGMENT_TAG);
+        transaction.commit();
         return spotsDelegate;
     }
 
@@ -555,67 +563,72 @@ public class MapsActivity extends AppCompatActivity
      * @return
      */
     private ParkedCarDelegate getParkedCarDelegate(String carId) {
-        String fragmentId = ParkedCarDelegate.getFragmentTag(carId);
-        ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(fragmentId);
+        ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(carId));
         if (parkedCarDelegate == null) {
-            Log.d(TAG, "Creating new ParkedCarDelegate");
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
-            parkedCarDelegate.setRetainInstance(true);
-            transaction.add(parkedCarDelegate, fragmentId);
-            transaction.commit();
+            parkedCarDelegate = initParkedCarDelegate(carId);
         }
+        return parkedCarDelegate;
+    }
+
+    @NonNull
+    private ParkedCarDelegate initParkedCarDelegate(String carId) {
+        ParkedCarDelegate parkedCarDelegate;
+        Log.d(TAG, "Creating new ParkedCarDelegate");
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
+        parkedCarDelegate.setRetainInstance(true);
+        transaction.add(parkedCarDelegate, ParkedCarDelegate.getFragmentTag(carId));
+        transaction.commit();
         return parkedCarDelegate;
     }
 
     /**
      * @return
      */
-    private PossibleParkedCarDelegate getSetCarLocationDelegate(ParkingSpot spot) {
-        String fragmentId = PossibleParkedCarDelegate.getFragmentTag(spot);
-        PossibleParkedCarDelegate possibleParkedCarDelegate = (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(fragmentId);
+    private PossibleParkedCarDelegate getPossibleParkedCarDelegate(ParkingSpot spot) {
+        PossibleParkedCarDelegate possibleParkedCarDelegate =
+                (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(spot));
         if (possibleParkedCarDelegate == null) {
-            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
-            possibleParkedCarDelegate.setRetainInstance(true);
-            transaction.add(possibleParkedCarDelegate, fragmentId);
-            transaction.commit();
-            getFragmentManager().executePendingTransactions();
+            possibleParkedCarDelegate = initPossibleParkedCarDelegate(spot);
         }
+        return possibleParkedCarDelegate;
+    }
+
+    @NonNull
+    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(ParkingSpot spot) {
+        PossibleParkedCarDelegate possibleParkedCarDelegate;
+        Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
+        possibleParkedCarDelegate.setRetainInstance(true);
+        transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
+        transaction.commit();
+        getFragmentManager().executePendingTransactions();
         return possibleParkedCarDelegate;
     }
 
     /**
      * @return
      */
-    private LongTapLocationDelegate getLongTapLocationDelegate(ParkingSpot spot) {
-        String fragmentId = LongTapLocationDelegate.getFragmentTag(spot);
-        LongTapLocationDelegate longTapLocationDelegate = (LongTapLocationDelegate) getFragmentManager().findFragmentByTag(fragmentId);
+    private LongTapLocationDelegate getLongTapLocationDelegate() {
+        LongTapLocationDelegate longTapLocationDelegate = (LongTapLocationDelegate) getFragmentManager().findFragmentByTag(LongTapLocationDelegate.FRAGMENT_TAG);
         if (longTapLocationDelegate == null) {
-            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            longTapLocationDelegate = LongTapLocationDelegate.newInstance(spot);
-            longTapLocationDelegate.setRetainInstance(true);
-            transaction.add(longTapLocationDelegate, fragmentId);
-            transaction.commit();
-            getFragmentManager().executePendingTransactions();
+            longTapLocationDelegate = initLongTapLocationDelegate();
         }
         return longTapLocationDelegate;
     }
 
-    private PossibleParkedCarDelegate getPossibleParkedCarDelegate(ParkingSpot spot) {
-        PossibleParkedCarDelegate possibleParkedCarDelegate = (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.FRAGMENT_TAG);
-        if (possibleParkedCarDelegate == null) {
-            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
-            possibleParkedCarDelegate.setRetainInstance(true);
-            transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.FRAGMENT_TAG);
-            transaction.commit();
-            getFragmentManager().executePendingTransactions();
-        }
-        return possibleParkedCarDelegate;
+    @NonNull
+    private LongTapLocationDelegate initLongTapLocationDelegate() {
+        LongTapLocationDelegate longTapLocationDelegate;
+        Log.d(TAG, "Creating new PossibleParkedCarDelegate: ");
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        longTapLocationDelegate = LongTapLocationDelegate.newInstance();
+        longTapLocationDelegate.setRetainInstance(true);
+        transaction.add(longTapLocationDelegate, LongTapLocationDelegate.FRAGMENT_TAG);
+        transaction.commit();
+        getFragmentManager().executePendingTransactions();
+        return longTapLocationDelegate;
     }
 
     private void setMapPadding(int bottomPadding) {
@@ -727,7 +740,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        unregisterCameraUpdater(this);
+        unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -953,7 +966,7 @@ public class MapsActivity extends AppCompatActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {
 
-            final List<Car> parkedCars = carDatabase.retrieveCars(true);
+            final List<Car> parkedCars = carDatabase.retrieveParkedCars();
 
             List<Car> closeCars = new ArrayList<>();
             for (Car car : parkedCars) {
@@ -967,7 +980,7 @@ public class MapsActivity extends AppCompatActivity
             // One parked car
             if (closeCars.size() == 1) {
                 Car car = closeCars.get(0);
-                getParkedCarDelegate(car.id).onCarClicked();
+                getParkedCarDelegate(car.id).activate();
             }
             // zoom to user otherwise
             else {
@@ -993,7 +1006,7 @@ public class MapsActivity extends AppCompatActivity
 
         ParkingSpot spot = new ParkingSpot(null, location, null, new Date(), false);
 
-        getLongTapLocationDelegate(spot).setRequestLocation();
+        getLongTapLocationDelegate().activate(spot);
 
     }
 
@@ -1020,10 +1033,10 @@ public class MapsActivity extends AppCompatActivity
         if (lastCameraUpdateRequester != this)
             setCameraFollowing(false);
 
-        for (AbstractMarkerDelegate delegate : delegates) {
-            if (lastCameraUpdateRequester != delegate) {
-                delegate.setCameraFollowing(false);
-                delegate.onCameraChange(cameraPosition, lastCameraUpdateRequester);
+        for (CameraUpdateRequester requester : cameraUpdateRequesterList) {
+            if (lastCameraUpdateRequester != requester) {
+                requester.setCameraFollowing(false);
+                requester.onCameraChange(cameraPosition, lastCameraUpdateRequester);
             }
         }
 
@@ -1047,13 +1060,8 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onMapClick(LatLng point) {
-
     }
 
-
-    @Override
-    public void onSpotClicked(ParkingSpot spot) {
-    }
 
     @Override
     public DetailsFragment getDetailsFragment() {
@@ -1091,21 +1099,27 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCarClicked(String carId) {
+    public void registerDelegate(AbstractMarkerDelegate delegate) {
+        delegates.add(delegate);
     }
 
     @Override
-    public void registerCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
+    public void unregisterDelegate(AbstractMarkerDelegate delegate) {
+        delegates.remove(delegate);
+    }
+
+    @Override
+    public void registerCameraUpdateRequester(CameraUpdateRequester cameraUpdateRequester) {
         cameraUpdateRequesterList.add(cameraUpdateRequester);
     }
 
     @Override
-    public void unregisterCameraUpdater(CameraUpdateRequester cameraUpdateRequester) {
+    public void unregisterCameraUpdateRequester(CameraUpdateRequester cameraUpdateRequester) {
         cameraUpdateRequesterList.remove(cameraUpdateRequester);
     }
 
     @Override
-    public void onCameraUpdateRequest(CameraUpdate cameraUpdate, final CameraUpdateRequester cameraUpdateRequester) {
+    public void doCameraUpdate(CameraUpdate cameraUpdate, final CameraUpdateRequester cameraUpdateRequester) {
 
         if (mMap == null) return;
 
@@ -1160,7 +1174,7 @@ public class MapsActivity extends AppCompatActivity
                 .target(userPosition)
                 .build());
 
-        onCameraUpdateRequest(cameraUpdate, this);
+        doCameraUpdate(cameraUpdate, this);
     }
 
     @Override
@@ -1215,7 +1229,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carDatabase.retrieveCars(false).iterator().next().id);
+                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carDatabase.retrieveCars(true).iterator().next().id);
                 startService(intent);
             }
         });
@@ -1225,7 +1239,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
-                List<Car> cars = carDatabase.retrieveCars(false);
+                List<Car> cars = carDatabase.retrieveCars(true);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
@@ -1237,7 +1251,7 @@ public class MapsActivity extends AppCompatActivity
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Car> cars = carDatabase.retrieveCars(false);
+                List<Car> cars = carDatabase.retrieveCars(true);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
@@ -1245,4 +1259,8 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
+    @Override
+    public void onCarSelected(Car car) {
+
+    }
 }

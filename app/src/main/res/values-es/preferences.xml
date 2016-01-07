@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
     <string name="preferences">Preferencias</string>
 
     <string name="units">Unidades</string>
@@ -9,7 +8,10 @@
     <string name="use_miles_description">Utilizar millas en lugar de kilómetros</string>
 
     <string name="motion_recognition">Detección de movimiento</string>
-    <string name="motion_recognition_description">Detectar cuando aparcas coche aunque el Bluetooth esté desactivado</string>
+    <string name="motion_recognition_description">Detectar cuando aparcas coche aunque el Bluetooth esté desactivado, basado en el movimiento del teléfono. ¡No consume bateria adicional!</string>
+
+    <string name="motion_recognition_notification">Mostrar notificación</string>
+    <string name="motion_recognition_notification_description">Mostrar una notificacion al bajar del vehiculo para confirmar. No se muestra cuando te bajas de un coche vinculado por BT.</string>
 
     <string name="bt_on_vehicle">Auto BlueTooth encendido</string>
     <string name="bt_on_vehicle_description">Conectar el Bluetooth automaticamente al entrar en un coche</string>

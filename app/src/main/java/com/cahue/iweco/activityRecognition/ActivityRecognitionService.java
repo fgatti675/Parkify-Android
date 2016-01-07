@@ -49,6 +49,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                 && PreferencesUtil.isMovementRecognitionEnabled(context)
                 && !CarDatabase.getInstance(context).isEmptyOfCars()) {
 
+
             Intent intent = new Intent(context, ActivityRecognitionService.class);
             intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
             context.startService(intent);

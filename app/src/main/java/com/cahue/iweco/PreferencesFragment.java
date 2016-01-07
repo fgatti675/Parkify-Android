@@ -42,6 +42,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     }
 
     private void updateBtPreferencesState(boolean enableBtPreferences) {
+        getPreferenceManager().findPreference(PreferencesUtil.PREF_MOVEMENT_RECOGNITION_NOTIFICATION).setEnabled(enableBtPreferences);
         getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableBtPreferences);
     }
 

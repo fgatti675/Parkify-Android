@@ -20,6 +20,12 @@
             android:title="@string/motion_recognition" />
 
         <SwitchPreference
+            android:defaultValue="true"
+            android:key="PREF_MOVEMENT_RECOGNITION_NOTIFICATION"
+            android:summary="@string/motion_recognition_notification_description"
+            android:title="@string/motion_recognition_notification" />
+
+        <SwitchPreference
             android:id="@+id/bt_on"
             android:defaultValue="false"
             android:key="PREF_BT_ON_ENTER_VEHICLE"

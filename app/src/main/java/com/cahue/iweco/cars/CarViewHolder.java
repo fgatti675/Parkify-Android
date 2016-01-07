@@ -47,13 +47,19 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(Context context, final Car car, Location userLastLocation, BluetoothAdapter btAdapter) {
 
-        name.setText(car.name);
+        if (car.isOther()) {
+            name.setText(context.getResources().getText(R.string.other));
+        } else {
+            name.setText(car.name);
+        }
 
         updateTime(car);
 
-        int color = car.color != null ?
-                car.color :
-                context.getResources().getColor(R.color.theme_accent);
+        int color = car.isOther() ?
+                context.getResources().getColor(R.color.silver) :
+                (car.color != null ?
+                        car.color :
+                        context.getResources().getColor(R.color.theme_accent));
 
         carImage.setBackgroundColor(color);
 

@@ -20,6 +20,7 @@ import com.cahue.iweco.locationServices.LocationPollerService;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.FetchAddressIntentService;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;
@@ -29,7 +30,7 @@ import java.util.List;
  * This service fetches the current location and ask the user if the car was set there.
  * It is started from the activity recognition service, when it detects that the user steps out of
  * a vehicle.
- *
+ * <p/>
  * When the location is retrieved the user gets a notification asking him whan car he has parked.
  *
  * @author Francesco
@@ -79,9 +80,13 @@ public class ParkedCarRequestedService extends LocationPollerService {
      */
     private void onAddressFetched(String address) {
 
-        long[] pattern = {0, 100, 1000};
+        ParkingSpot possibleParkingSpot = new ParkingSpot(null, location, address, time, false);
+        carDatabase.addPossibleParkingSpot(possibleParkingSpot);
 
-        ParkingSpot possibleParkingSpot = new ParkingSpot((long) Math.random(), location, address, time, false);
+        if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(this))
+            return;
+
+        long[] pattern = {0, 100, 1000};
 
         // Intent to start the activity and show a just parked dialog
         Intent intent = new Intent(this, MapsActivity.class);
@@ -101,7 +106,7 @@ public class ParkedCarRequestedService extends LocationPollerService {
                         .setContentTitle(getString(R.string.ask_just_parked))
                         .setContentText(address);
 
-        List<Car> cars = carDatabase.retrieveCars(false);
+        List<Car> cars = carDatabase.retrieveCars(true);
         int numberActions = Math.min(cars.size(), 3);
         for (int i = 0; i < numberActions; i++) {
             Car car = cars.get(i);
@@ -110,8 +115,6 @@ public class ParkedCarRequestedService extends LocationPollerService {
         }
 
         mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
-
-        carDatabase.addPossibleParkingSpot(possibleParkingSpot);
     }
 
 
@@ -122,7 +125,8 @@ public class ParkedCarRequestedService extends LocationPollerService {
         intent.putExtra(Constants.INTENT_SPOT_EXTRA, possibleSpot);
 
         PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, car.name, pIntent);
+        String name = car.isOther() ? getResources().getString(R.string.other) : car.name;
+        return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, name, pIntent);
     }
 
 

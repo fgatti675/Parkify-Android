@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cahue="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,11 +11,11 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:adjustViewBounds="false"
-        android:background="@color/theme_accent"
+        android:background="@color/theme_primary"
         android:cropToPadding="false"
         android:padding="@dimen/large_padding"
         android:scaleType="fitStart"
-        android:src="@drawable/ic_help_circle_white_24dp" />
+        android:src="@drawable/car_interrogation_24" />
 
 
     <LinearLayout
@@ -32,14 +31,21 @@
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/what_car_is_parked"
+            android:text="@string/did_you_park"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/body_text_1" />
 
-        <RelativeLayout
-            android:paddingTop="@dimen/default_padding"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/default_padding"
+            android:text="@string/based_on_activity_recognition"
+            android:textColor="@color/body_text_1" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/default_padding">
 
             <TextView
                 android:id="@+id/time"
@@ -75,12 +81,14 @@
             android:id="@+id/car_buttons"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:numColumns="auto_fit"
-            android:verticalSpacing="10dp"
+            android:gravity="center"
             android:horizontalSpacing="10dp"
-            android:stretchMode="columnWidth"
             android:paddingTop="@dimen/default_padding"
-            android:gravity="center"            />
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp"
+            tools:listitem="@layout/button_car"
+            tools:numColumns="3"
+            tools:rowCount="2" />
 
 
     </LinearLayout>

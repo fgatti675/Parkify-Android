@@ -26,7 +26,7 @@ public class RatingDialog extends DialogFragment {
 
     public static boolean shouldBeShown(Context context) {
 
-        if (isDialogShown(context))
+        if (isDialogAccepted(context))
             return false;
 
         Date lastDisplayed = getRateDialogLastDisplayed(context);
@@ -35,10 +35,10 @@ public class RatingDialog extends DialogFragment {
             return false;
         }
 
-        return (System.currentTimeMillis() - lastDisplayed.getTime()) > 3 * 24 * 60 * 60 * 1000;
+        return (System.currentTimeMillis() - lastDisplayed.getTime()) > 6 * 24 * 60 * 60 * 1000;
     }
 
-    public static boolean isDialogShown(Context context) {
+    public static boolean isDialogAccepted(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, false);
     }

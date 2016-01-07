@@ -24,6 +24,8 @@
     <string name="bt_linked_to">Car location will be stored on disconnection from %1$s</string>
     <string name="car_was_here">Car was here %s</string>
     <string name="what_car_is_parked">What car is parked here?</string>
+    <string name="did_you_park">Did you park here?</string>
+    <string name="based_on_activity_recognition">It seems you stepped out of a vehicle here, based on motion recognition</string>
     <string name="car">Car</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

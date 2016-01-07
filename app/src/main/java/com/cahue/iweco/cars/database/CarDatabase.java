@@ -203,7 +203,7 @@ public class CarDatabase {
 
             ContentValues values = createCarContentValues(car);
             database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
-            database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + spot.time.toString() + "'", null);
+            database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + spot.time.getTime() + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();
@@ -281,28 +281,39 @@ public class CarDatabase {
     /**
      * Get a Collection of available car ids
      *
+     * @param includeOther Should the "Other" car be included
      * @return
      */
-    public List<String> getCarIds() {
+    public List<String> getCarIds(boolean includeOther) {
         List<String> ids = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
+
+        // was the 'Other' car already in the database
+        boolean otherAlreadyInDB = false;
         try {
 
             Cursor cursor = database.query(TABLE_CARS,
                     new String[]{COLUMN_ID},
-                    null, null, null, null,
+                    includeOther ? null : COLUMN_ID + " != '" + Car.OTHER_ID + "'",
+                    null, null, null,
                     COLUMN_TIME + " DESC");
 
             while (cursor.moveToNext()) {
-                ids.add(cursor.getString(0));
+                String id = cursor.getString(0);
+                if (id.equals(Car.OTHER_ID)) otherAlreadyInDB = true;
+                ids.add(id);
             }
             cursor.close();
 
         } finally {
             database.close();
         }
+
+//        if(includeOther && !otherAlreadyInDB) {
+//            ids.add(Car.OTHER_ID);
+//        }
 
         Log.d(TAG, "Retrieved car ids from DB: " + ids);
 
@@ -312,10 +323,57 @@ public class CarDatabase {
     /**
      * Get a Collection of available cars, can have the location set to null
      *
-     * @param onlyParked
+     * @param includeOther Should the "Other" car be included
      * @return
      */
-    public List<Car> retrieveCars(boolean onlyParked) {
+    public List<Car> retrieveCars(boolean includeOther) {
+        List<Car> cars = new ArrayList<>();
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
+
+        // was the 'Other' car already in the database
+        boolean otherAlreadyInDB = false;
+        try {
+
+            Cursor cursor = database.query(TABLE_CARS,
+                    CAR_PROJECTION,
+                    includeOther ? null : COLUMN_ID + " != '" + Car.OTHER_ID + "'",
+                    null, null, null,
+                    COLUMN_TIME + " DESC");
+
+            while (cursor.moveToNext()) {
+                Car car = cursorToCar(cursor);
+                if (car.id.equals(Car.OTHER_ID)) otherAlreadyInDB = true;
+                cars.add(car);
+            }
+            cursor.close();
+
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+
+        Log.d(TAG, "Retrieved cars from DB: " + cars);
+
+        if (includeOther && !otherAlreadyInDB) {
+            cars.add(generateOtherCar());
+        }
+        return cars;
+    }
+
+    private Car generateOtherCar() {
+        Car car = new Car();
+        car.id = Car.OTHER_ID;
+        return car;
+    }
+
+    /**
+     * Get a Collection of available cars, location will be not null
+     *
+     * @return
+     */
+    public List<Car> retrieveParkedCars() {
         List<Car> cars = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -324,7 +382,7 @@ public class CarDatabase {
 
             Cursor cursor = database.query(TABLE_CARS,
                     CAR_PROJECTION,
-                    onlyParked ? COLUMN_LATITUDE + " > 0" : null,
+                    COLUMN_LATITUDE + " > 0",
                     null, null, null,
                     COLUMN_TIME + " DESC");
 
@@ -343,7 +401,10 @@ public class CarDatabase {
         return cars;
     }
 
+
     public Car findCar(String id) {
+
+        Log.d(TAG, "Querying car by ID: " + id);
         Car car;
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
@@ -479,6 +540,7 @@ public class CarDatabase {
             return res;
         } finally {
             database.close();
+            carDatabaseHelper.close();
         }
     }
 

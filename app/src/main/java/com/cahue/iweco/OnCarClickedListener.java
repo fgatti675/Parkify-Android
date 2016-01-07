@@ -1,11 +1,13 @@
 package com.cahue.iweco;
 
+import com.cahue.iweco.model.Car;
+
 /**
  * Callbacks interface that all activities using this fragment must implement.
  */
 public interface OnCarClickedListener {
     /**
-     * Called when an item in the navigation drawer is selected.
+     * Called when a car is selected in an UI component
      */
-    void onCarClicked(String carId);
+    void onCarSelected(Car car);
 }

@@ -18,7 +18,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     protected Location userLocation;
     protected DetailsViewManager detailsViewManager;
-    protected CameraManager cameraManager;
+    protected DelegateManager delegateManager;
     // too far from the car to calculate directions
     private boolean tooFar = false;
     private GoogleMap mMap;
@@ -30,10 +30,10 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         super.onAttach(activity);
 
         try {
-            this.cameraManager = (CameraManager) activity;
+            this.delegateManager = (DelegateManager) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement " + CameraManager.class.getName());
+                    + " must implement " + DelegateManager.class.getName());
         }
 
         try {
@@ -47,7 +47,8 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        cameraManager.registerCameraUpdater(this);
+        delegateManager.registerCameraUpdateRequester(this);
+        delegateManager.registerDelegate(this);
     }
 
     @Override
@@ -68,23 +69,16 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     @Override
     public void onDetach() {
         super.onDetach();
-        cameraManager = null;
+        delegateManager = null;
         detailsViewManager = null;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        cameraManager.unregisterCameraUpdater(this);
+        delegateManager.unregisterCameraUpdateRequester(this);
+        delegateManager.unregisterDelegate(this);
         mMap = null;
-    }
-
-    /**
-     * @param mMap
-     */
-    public final void setMap(GoogleMap mMap) {
-        this.mMap = mMap;
-        onMapReady(mMap);
     }
 
     /**
@@ -156,5 +150,13 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
                 setMap(((MapFragment) mapFragment).getMap());
         }
         return mMap;
+    }
+
+    /**
+     * @param mMap
+     */
+    public final void setMap(GoogleMap mMap) {
+        this.mMap = mMap;
+        onMapReady(mMap);
     }
 }

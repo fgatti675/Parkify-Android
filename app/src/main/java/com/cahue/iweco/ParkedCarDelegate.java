@@ -38,6 +38,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private boolean following = false;
     private IconGenerator iconGenerator;
     private OnCarClickedListener carSelectedListener;
+
+    private Integer markerColor;
     private int lightColor;
     /**
      * Map components
@@ -93,7 +95,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public void onResume() {
         super.onResume();
         update(true);
-        Log.i(TAG, "c " + carId);
     }
 
     public void update(boolean resetDirections) {
@@ -143,23 +144,25 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private void setUpColors() {
 
+
+        markerColor = car.isOther() ? getActivity().getResources().getColor(R.color.silver) : car.color;
         lightColor = ColorUtil.getSemiTransparent(getResources().getColor(R.color.silver));
 
-        if (car.color == null) {
+        if (markerColor == null) {
             iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
-            int color = getResources().getColor(R.color.theme_accent);
-            iconGenerator.setColor(color);
-            lightColor = ColorUtil.getSemiTransparent(color);
+            markerColor = getResources().getColor(R.color.theme_accent);
+            iconGenerator.setColor(markerColor);
+            lightColor = ColorUtil.getSemiTransparent(markerColor);
         } else {
-            iconGenerator.setColor(car.color);
-            boolean brightColor = ColorUtil.isBrightColor(car.color);
+            iconGenerator.setColor(markerColor);
+            boolean brightColor = ColorUtil.isBrightColor(markerColor);
             iconGenerator.setTextAppearance(getActivity(),
                     brightColor ?
                             com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
                             com.google.maps.android.R.style.Bubble_TextAppearance_Light);
 
-            if (car.color != getResources().getColor(R.color.white))
-                lightColor = brightColor ? car.color : ColorUtil.getSemiTransparent(car.color);
+            if (markerColor != getResources().getColor(R.color.white))
+                lightColor = brightColor ? markerColor : ColorUtil.getSemiTransparent(markerColor);
         }
     }
 
@@ -185,9 +188,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         // Uses a colored icon.
         LatLng carLatLng = getCarLatLng();
 
-        String name = car.name;
-        if (name == null)
-            name = getActivity().getResources().getText(R.string.car).toString();
+        String name = car.isOther() ?
+                getActivity().getResources().getText(R.string.other).toString() :
+                (car.name != null ? car.name : getActivity().getResources().getText(R.string.car).toString());
 
         carMarker = getMap().addMarker(new MarkerOptions()
                 .position(carLatLng)
@@ -279,7 +282,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
      */
     protected boolean zoomToSeeBoth() {
 
-        if (cameraManager == null)
+        if (delegateManager == null)
             return false;
 
         if (!isAdded()) return false;
@@ -298,7 +301,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         for (LatLng latLng : directionsDelegate.getDirectionPoints())
             builder.include(latLng);
 
-        cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
+        delegateManager.doCameraUpdate(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
 
         return true;
     }
@@ -315,7 +318,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         LatLng loc = getCarLatLng();
 
         if (loc != null) {
-            cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+            delegateManager.doCameraUpdate(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                             .target(loc)
                             .zoom(15.5f)
                             .build()),
@@ -334,9 +337,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(carMarker)) {
 
-            carSelectedListener.onCarClicked(carId);
+            carSelectedListener.onCarSelected(car);
 
-            onCarClicked();
+            activate();
 
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_MARKER);
 
@@ -347,7 +350,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         return false;
     }
 
-    public void onCarClicked() {
+    public void activate() {
         setCameraFollowing(true);
         detailsViewManager.setDetailsFragment(CarDetailsFragment.newInstance(carId));
     }

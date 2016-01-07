@@ -39,6 +39,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -78,7 +79,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
+            retrieveCarsFromDB();
             adapter.notifyDataSetChanged();
         }
 
@@ -146,7 +147,6 @@ public class NavigationDrawerFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-//        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
 
         adapter = new RecyclerViewDrawerAdapter();
@@ -166,9 +166,8 @@ public class NavigationDrawerFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        cars = CarDatabase.getInstance(getActivity()).retrieveCars(false);
-        adapter.setUpElements();
-        adapter.notifyDataSetChanged();
+        retrieveCarsFromDB();
+
 
         billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
         if (billingFragment == null)
@@ -200,6 +199,20 @@ public class NavigationDrawerFragment extends Fragment {
         getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
         getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
 
+    }
+
+    private void retrieveCarsFromDB() {
+        cars = CarDatabase.getInstance(getActivity()).retrieveCars(true);
+
+        // hide 'Other' car if not parked
+        Iterator<Car> iterator = cars.iterator();
+        while (iterator.hasNext()) {
+            Car car = iterator.next();
+            if (car.isOther() && car.location == null) iterator.remove();
+        }
+
+        adapter.setUpElements();
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -416,6 +429,7 @@ public class NavigationDrawerFragment extends Fragment {
         // each entry represents an item in the drawer
         private int[] itemTypes;
 
+
         public void setUpElements() {
 
             int totalElements = cars.size() + (AppInviteDialog.canShow() ? 6 : 5);
@@ -496,9 +510,9 @@ public class NavigationDrawerFragment extends Fragment {
                         if (car.location != null) {
 
                             Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_DRAWER);
-                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(car.id))).onCarClicked();
+                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(car.id))).activate();
 
-                            mCallbacks.onCarClicked(car.id);
+                            mCallbacks.onCarSelected(car);
 
                             if (mDrawerLayout != null)
                                 mDrawerLayout.closeDrawers();

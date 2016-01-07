@@ -1,12 +1,10 @@
 package com.cahue.iweco;
 
-import android.location.Location;
-
 import com.google.android.gms.maps.model.CameraPosition;
 
 /**
  * Implemented by components that can make camera update requests.
- * Requests are made calling {@link com.cahue.iweco.CameraManager#onCameraUpdateRequest(com.google.android.gms.maps.CameraUpdate, CameraUpdateRequester)}
+ * Requests are made calling {@link DelegateManager#doCameraUpdate(com.google.android.gms.maps.CameraUpdate, CameraUpdateRequester)}
  */
 public interface CameraUpdateRequester {
 

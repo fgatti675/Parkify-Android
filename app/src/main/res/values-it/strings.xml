@@ -79,5 +79,7 @@
     <string name="free_spot">Posto libero</string>
     <string name="long_click_instructions">Click lungo per impostare la posizione della macchina!</string>
     <string name="permission_error">Permesso necessario!</string>
+    <string name="based_on_activity_recognition">Sembra che sei sceso da un veicolo qui, basato sul motion recognition</string>
+    <string name="did_you_park">Hai parcheggiato qui?</string>
 
 </resources>

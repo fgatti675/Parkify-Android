@@ -11,8 +11,7 @@ import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
-
-import java.util.Date;
+import com.cahue.iweco.model.ParkingSpot;
 
 /**
  * Broadcast receiver in charge of saving a car, after if is requested by a action taken from a
@@ -34,12 +33,9 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
             return;
         }
 
-        car.spotId = null;
-        car.location = intent.getParcelableExtra(Constants.INTENT_CAR_EXTRA_LOCATION);
-        car.address = intent.getStringExtra(Constants.INTENT_CAR_EXTRA_ADDRESS);
-        car.time = new Date(intent.getLongExtra(Constants.INTENT_CAR_EXTRA_TIME, 0));
+        ParkingSpot possibleSpot = intent.getExtras().getParcelable(Constants.INTENT_SPOT_EXTRA);
 
-        CarsSync.storeCar(database, context, car);
+        CarsSync.updateCarFromPossibleSpot(database, context, car, possibleSpot);
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
         mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);

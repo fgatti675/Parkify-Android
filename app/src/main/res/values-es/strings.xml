@@ -78,5 +78,7 @@
     <string name="free_spot">Hueco libre</string>
     <string name="long_click_instructions">Click largo para establecer la posición del coche. ¡La próxima vez se hará automáticamente!</string>
     <string name="permission_error">Permiso necesario!</string>
+    <string name="based_on_activity_recognition">Parece que has bajado de un vehículo aquí, basado en la detección de movimiento</string>
+    <string name="did_you_park">¿Has aparcado aquí?</string>
 
 </resources>

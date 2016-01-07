@@ -50,24 +50,4 @@ public class FacebookAppInvitesDialog extends DialogFragment {
         return builder.create();
     }
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.share_promo)
-                .setTitle(R.string.share)
-                .setIcon(R.drawable.weco_logo_small)
-                .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        AppInviteDialog.show(getActivity(), getFacebookAppInvites(getActivity()));
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-
-        // Create the AlertDialog object and return it
-        return builder.create();
-    }
 }

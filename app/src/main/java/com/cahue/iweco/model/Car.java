@@ -20,6 +20,8 @@ import java.util.Set;
  */
 public class Car implements Parcelable {
 
+    public final static String OTHER_ID = "OTHER";
+
     public static final Parcelable.Creator<Car> CREATOR =
             new Parcelable.Creator<Car>() {
                 @Override
@@ -175,5 +177,9 @@ public class Car implements Parcelable {
             e.printStackTrace();
         }
         return jsonObject;
+    }
+
+    public boolean isOther() {
+        return id.equals(OTHER_ID);
     }
 }

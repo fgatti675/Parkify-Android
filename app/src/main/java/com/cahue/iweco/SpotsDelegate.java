@@ -1,6 +1,5 @@
 package com.cahue.iweco;
 
-import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,8 +16,6 @@ import com.cahue.iweco.util.GMapV2Direction;
 import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -78,11 +75,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private Set<ParkingSpot> spots;
 
     private Map<ParkingSpot, Marker> spotMarkersMap;
-    private Map<Marker, ParkingSpot> markerSpotsMap;
+    private Map<String, ParkingSpot> markerSpotsMap;
+    private List<Marker> markers;
+
     private Marker selectedMarker;
-
-
-    private SpotSelectedListener spotSelectedListener;
 
     // In the next spots update, clear the previous state
     private boolean shouldBeReset = false;
@@ -126,39 +122,32 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
+        setRetainInstance(true);
 
-            setRetainInstance(true);
+        queriedBounds = new ArrayList<>();
+        spots = new HashSet<>();
+        lastResetTaskRequestTime = new Date();
 
-            queriedBounds = new ArrayList<>();
-            spots = new HashSet<>();
-            lastResetTaskRequestTime = new Date();
+        spotMarkersMap = new HashMap<>();
+        markerSpotsMap = new HashMap<>();
+        markers = new ArrayList<>();
 
-            spotMarkersMap = new HashMap<>();
-            markerSpotsMap = new HashMap<>();
+        maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
 
-            maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
-
-            directionsDelegate = new DirectionsDelegate();
-        }
+        directionsDelegate = new DirectionsDelegate();
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            this.spotSelectedListener = (SpotSelectedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement SpotSelectedListener");
-        }
+    public void onStart() {
+        super.onStart();
+        reset(false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        Log.d(TAG, "onResume");
         setUpResetTask();
         if (getMap() != null)
             doDraw();
@@ -213,19 +202,20 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 //    }
 
     private void reset(boolean clearSpots) {
-        Log.d(TAG, "Spots reset");
-        for (Marker marker : markerSpotsMap.keySet()) {
+        Log.d(TAG, "Reset: " + clearSpots);
+        for (Marker marker : markers) {
             marker.remove();
         }
         queriedBounds.clear();
         if (clearSpots) spots.clear();
         markerSpotsMap.clear();
         spotMarkersMap.clear();
+        markers.clear();
     }
 
     /**
      * Set the bounds where the camera is currently looking.
-     * A query is done
+     * Retrieve parking spots from the current viewport
      *
      * @return
      */
@@ -312,11 +302,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         spots.addAll(parkingSpots);
 
-        if (selectedSpot != null && !parkingSpots.contains(selectedSpot)) {
-            directionsDelegate.hide(true);
-            selectedSpot = null;
-        }
-
         doDraw();
     }
 
@@ -334,7 +319,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     public void doDraw() {
 
-        Log.d(TAG, "Drawing spots");
+        Log.v(TAG, "doDraw");
 
         setUpViewBounds();
 
@@ -342,9 +327,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         hideMarkers();
 
         if (!markersDisplayed) {
-            Log.d(TAG, "Abort drawing spots. Markers are hidden");
+            Log.v(TAG, "Abort drawing spots. Markers are hidden");
             return;
         }
+
+        markers = new ArrayList<>(spots.size());
 
         for (final ParkingSpot parkingSpot : spots) {
 
@@ -364,7 +351,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 marker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
-                markerSpotsMap.put(marker, parkingSpot);
+                markerSpotsMap.put(marker.getId(), parkingSpot);
+                markers.add(marker);
             }
 
             // else we may need to update it
@@ -385,6 +373,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         }
     }
 
+    private void updateMarker(ParkingSpot parkingSpot, Marker marker) {
+        MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity());
+        marker.setIcon(markerOptions.getIcon());
+    }
+
     private void drawDirections() {
         if (selectedSpot != null) {
 
@@ -399,10 +392,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         }
     }
 
-    private void updateMarker(ParkingSpot parkingSpot, Marker marker) {
-        MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity());
-        marker.setIcon(markerOptions.getIcon());
-    }
 
     /**
      * Hide non visible markers (outside of viewport)
@@ -411,9 +400,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         displayedMarkers = 0;
 
-        for (final Marker marker : markerSpotsMap.keySet()) {
-            if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
-                marker.setVisible(false);
+        for (final Marker marker : markers) {
+//            if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
+            marker.setVisible(false);
         }
     }
 
@@ -423,16 +412,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         clearSelectedSpot();
 
         // apply new style and tell listener
-        selectedSpot = markerSpotsMap.get(marker);
+        selectedSpot = markerSpotsMap.get(marker.getId());
 
         if (selectedSpot != null) {
-            Marker selectedMarker = spotMarkersMap.get(selectedSpot);
-
-            updateMarker(selectedSpot, selectedMarker);
             drawSelectedMarker();
             drawDirections();
-
-            spotSelectedListener.onSpotClicked(selectedSpot);
 
             detailsViewManager.setDetailsFragment(SpotDetailsFragment.newInstance(selectedSpot, userLocation));
 
@@ -443,12 +427,21 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     private void drawSelectedMarker() {
-        BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.marker_selected);
-        selectedMarker = getMap().addMarker(new MarkerOptions()
-                .flat(true)
-                .position(selectedSpot.getLatLng())
-                .icon(icon)
-                .anchor(0.5F, 0.5F));
+
+        if (selectedMarker != null) {
+            selectedMarker.remove();
+        }
+
+        if (selectedSpot != null) {
+            Marker spotMarker = spotMarkersMap.get(selectedSpot);
+
+            if (spotMarker == null) {
+                selectedSpot = null;
+            } else {
+                selectedMarker = getMap().addMarker(MarkerFactory.getSelectedMarker(getActivity(), selectedSpot.getLatLng()));
+                updateMarker(selectedSpot, spotMarker);
+            }
+        }
     }
 
 
@@ -465,17 +458,19 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         Log.d(TAG, "Clearing selected spot");
 
         // clear previous selection
-        if (selectedSpot != null && selectedMarker != null) {
+        if (selectedMarker != null) {
             selectedMarker.remove();
             selectedMarker = null;
         }
+
         directionsDelegate.hide(true);
         selectedSpot = null;
     }
 
+
     @Override
     public void onMapReady(GoogleMap map) {
-        Log.d(TAG, "setMap");
+        Log.d(TAG, "onMapReady");
         directionsDelegate.setMap(map);
         directionsDelegate.setColor(getResources().getColor(R.color.theme_accent));
         reset(false);
@@ -509,7 +504,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 if (alpha < 1) {
                     // Post again 12ms later.
                     marker.setAlpha(alpha);
-                    handler.postDelayed(this, 12);
+                    handler.postDelayed(this, 16);
                 } else {
                     marker.setAlpha(1);
                     // animation ended
@@ -592,7 +587,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     protected boolean zoomToSeeBoth() {
 
-        if (cameraManager == null)
+        if (delegateManager == null)
             return false;
 
         if (!isAdded()) return false;
@@ -611,7 +606,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         for (LatLng latLng : directionsDelegate.getDirectionPoints())
             builder.include(latLng);
 
-        cameraManager.onCameraUpdateRequest(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
+        delegateManager.doCameraUpdate(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
 
         return true;
     }
@@ -623,10 +618,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     public boolean isFollowing() {
         return following;
-    }
-
-    public interface SpotSelectedListener {
-        void onSpotClicked(ParkingSpot spot);
     }
 
 

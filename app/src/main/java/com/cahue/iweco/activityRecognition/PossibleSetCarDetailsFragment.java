@@ -1,5 +1,7 @@
-package com.cahue.iweco.setCarLocation;
+package com.cahue.iweco.activityRecognition;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -11,17 +13,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
 import com.cahue.iweco.DetailsFragment;
+import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.util.CarButtonAdapter;
 import com.cahue.iweco.util.FetchAddressIntentService;
 import com.cahue.iweco.util.PreferencesUtil;
 
@@ -30,9 +31,12 @@ import java.util.List;
 /**
  * Created by Francesco on 06/07/2015.
  */
-public class SetCarDetailsFragment extends DetailsFragment {
+public class PossibleSetCarDetailsFragment extends DetailsFragment {
 
     private static final String ARG_SPOT = "arg_spot";
+
+    // id of the fragment contructing this one
+    private static final String ARG_DELEGATE_FRAGMENT_ID = "arg_delegate_fragment_id";
 
     private ParkingSpot spot;
 
@@ -44,20 +48,36 @@ public class SetCarDetailsFragment extends DetailsFragment {
 
     private Location userLocation;
 
-    private CarSelectedListener carSelectedListener;
+    private OnCarClickedListener carSelectedListener;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment SetCarDetailsFragment.
+     * @return A new instance of fragment LongTapSetCarDetailsFragment.
      */
-    public static DetailsFragment newInstance(ParkingSpot spot) {
-        DetailsFragment fragment = new SetCarDetailsFragment();
+    public static DetailsFragment newInstance(ParkingSpot spot, String parentFragmentTag) {
+        DetailsFragment fragment = new PossibleSetCarDetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_SPOT, spot);
+        args.putString(ARG_DELEGATE_FRAGMENT_ID, parentFragmentTag);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        String parentFragmentId = getArguments().getString(ARG_DELEGATE_FRAGMENT_ID);
+        Fragment fragment = getFragmentManager().findFragmentByTag(parentFragmentId);
+
+        try {
+            this.carSelectedListener = (OnCarClickedListener) fragment;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.getClass().getName()
+                    + " must implement " + OnCarClickedListener.class.getName());
+        }
     }
 
     @Override
@@ -71,19 +91,12 @@ public class SetCarDetailsFragment extends DetailsFragment {
         if (spot.address == null)
             fetchAddress();
 
-        try {
-            this.carSelectedListener = (CarSelectedListener) getFragmentManager().findFragmentByTag(LongTapLocationDelegate.getFragmentTag(spot));
-        } catch (ClassCastException e) {
-            throw new ClassCastException(getActivity().toString()
-                    + " must implement " + CarSelectedListener.class.getName());
-        }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.layout_set_car_details, container, false);
+        View view = inflater.inflate(R.layout.layout_possible_set_car_details, container, false);
         if (spot != null) {
 
             // Set time ago
@@ -99,10 +112,11 @@ public class SetCarDetailsFragment extends DetailsFragment {
             updateAddress();
 
             GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
-            List<Car> cars = carDatabase.retrieveCars(false);
+            List<Car> cars = carDatabase.retrieveCars(true);
+            buttonsLayout.setNumColumns(Math.max(cars.size(), 3));
 
             if (!cars.isEmpty())
-                buttonsLayout.setAdapter(new CarButtonAdapter(cars));
+                buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
 
             Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
             view.startAnimation(fadeInAnimation);
@@ -152,10 +166,6 @@ public class SetCarDetailsFragment extends DetailsFragment {
         getActivity().startService(fetchAddressIntent);
     }
 
-    public interface CarSelectedListener {
-        void onCarButtonClicked(String carId);
-    }
-
     class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver() {
             super(new Handler());
@@ -173,48 +183,4 @@ public class SetCarDetailsFragment extends DetailsFragment {
         }
     }
 
-    public class CarButtonAdapter extends BaseAdapter {
-
-        private List<Car> cars;
-
-        public CarButtonAdapter(List<Car> cars) {
-            this.cars = cars;
-        }
-
-        public int getCount() {
-            return cars.size();
-        }
-
-        public Object getItem(int position) {
-            return cars.get(position);
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        // create a new Button for each item referenced by the Adapter
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Button button;
-            final Car car = cars.get(position);
-            if (convertView == null) {
-                button = (Button) LayoutInflater.from(parent.getContext()).
-                        inflate(R.layout.button_borderless,
-                                parent,
-                                false);
-//                button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_car_grey600_24dp, 0, 0, 0);
-            } else {
-                button = (Button) convertView;
-            }
-            button.setText(car.name);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CarsSync.updateCarFromPossibleSpot(carDatabase, getActivity(), car, spot);
-                    carSelectedListener.onCarButtonClicked(car.id);
-                }
-            });
-            return button;
-        }
-    }
 }

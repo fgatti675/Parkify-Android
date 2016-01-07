@@ -2,9 +2,9 @@
 
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/text"
-    android:layout_width="16dp"
-    android:layout_height="16dp"
-    android:background="@drawable/circle_primary"
+    android:layout_width="24dp"
+    android:layout_height="24dp"
+    android:background="@drawable/circle_accent"
     android:gravity="center"
     android:padding="1dp"
-    android:src="@drawable/car_interrogation_16" />
+    android:src="@drawable/car_interrogation_24" />

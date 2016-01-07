@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 
 import com.cahue.iweco.R;
@@ -108,6 +109,27 @@ public class MarkerFactory {
                 .position(position)
                 .icon(futureBitmap)
                 .anchor(0.5F, 1F);
+    }
+
+    public static MarkerOptions getSelectedMarker(Context context, LatLng latLng) {
+        return new MarkerOptions()
+                .flat(true)
+                .position(latLng)
+                .icon(createSelectedBitmap(context))
+                .anchor(0.5F, 0.5F);
+    }
+
+    private static BitmapDescriptor createSelectedBitmap(Context context) {
+        int diameter = context.getResources().getDimensionPixelSize(R.dimen.marker_diameter_selected);
+        Bitmap mDotMarkerBitmap = Bitmap.createBitmap(diameter, diameter, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(mDotMarkerBitmap);
+
+        GradientDrawable drawable = (GradientDrawable) context.getResources().getDrawable(R.drawable.marker_selected);
+        drawable.setBounds(0, 0, mDotMarkerBitmap.getWidth(), mDotMarkerBitmap.getHeight());
+        drawable.draw(canvas);
+
+        return BitmapDescriptorFactory.fromBitmap(mDotMarkerBitmap);
     }
 
 

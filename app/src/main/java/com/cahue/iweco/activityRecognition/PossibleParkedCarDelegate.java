@@ -1,4 +1,4 @@
-package com.cahue.iweco.setCarLocation;
+package com.cahue.iweco.activityRecognition;
 
 import android.content.Context;
 import android.location.Location;
@@ -9,7 +9,11 @@ import android.view.View;
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DetailsFragment;
+import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
+import com.cahue.iweco.cars.CarsSync;
+import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,7 +27,7 @@ import com.google.maps.android.ui.IconGenerator;
 /**
  * Delegate to show a marker where a car might be parked, based on activity recognition
  */
-public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements SetCarDetailsFragment.CarSelectedListener {
+public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements OnCarClickedListener {
 
     public static final String FRAGMENT_TAG = "POSSIBLE_PARKED_CAR_DELEGATE";
 
@@ -60,12 +64,6 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-//        doDraw();
-    }
-
-    @Override
     protected void onMapReady(GoogleMap mMap) {
         super.onMapReady(mMap);
         doDraw();
@@ -77,27 +75,24 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
         marker = getMap().addMarker(new MarkerOptions()
                 .position(spot.getLatLng())
-                .snippet("")
-                .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("?")))
-                .anchor(iconGenerator.getAnchorU(), iconGenerator.getAnchorV()));
+                .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon())));
 
     }
 
     private void centerCameraOnMarker() {
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .zoom(15)
+                .zoom(16)
                 .target(spot.getLatLng())
                 .build());
 
-        cameraManager.onCameraUpdateRequest(cameraUpdate, this);
+        delegateManager.doCameraUpdate(cameraUpdate, this);
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker == this.marker) {
-            detailsViewManager.setDetailsFragment(SetCarDetailsFragment.newInstance(spot));
-            setCameraFollowing(true);
+        if (marker.equals(this.marker)) {
+            activate();
             return true;
         }
         return false;
@@ -105,7 +100,6 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
     @Override
     protected void onUserLocationChanged(Location userLocation) {
-
     }
 
     @Override
@@ -113,9 +107,8 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     private boolean isDisplayed() {
-
         DetailsFragment detailsFragment = detailsViewManager.getDetailsFragment();
-        return detailsFragment != null && detailsFragment instanceof SetCarDetailsFragment;
+        return detailsFragment != null && detailsFragment instanceof PossibleSetCarDetailsFragment;
     }
 
 
@@ -138,10 +131,16 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
             centerCameraOnMarker();
     }
 
-
     @Override
-    public void onCarButtonClicked(String carId) {
+    public void onCarSelected(Car car) {
         clearMarker();
+        CarsSync.updateCarFromPossibleSpot(CarDatabase.getInstance(getActivity()), getActivity(), car, spot);
         detailsViewManager.hideDetails();
+    }
+
+    public void activate() {
+        centerCameraOnMarker();
+        detailsViewManager.setDetailsFragment(PossibleSetCarDetailsFragment.newInstance(spot, getTag()));
+        setCameraFollowing(true);
     }
 }

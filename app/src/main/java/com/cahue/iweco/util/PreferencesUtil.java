@@ -31,6 +31,7 @@ public class PreferencesUtil {
 
     public static final String PREF_USE_MILES = "PREF_USE_MILES";
     public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
+    public static final String PREF_MOVEMENT_RECOGNITION_NOTIFICATION = "PREF_MOVEMENT_RECOGNITION_NOTIFICATION";
     public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
 
 
@@ -129,6 +130,11 @@ public class PreferencesUtil {
     public static boolean isMovementRecognitionEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION, true);
+    }
+
+    public static boolean isMovementRecognitionNotificationEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION_NOTIFICATION, true);
     }
 
     public static boolean isBtOnEnteringVehicleEnabled(Context context) {
