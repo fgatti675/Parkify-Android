@@ -27,7 +27,7 @@ import com.google.maps.android.ui.IconGenerator;
 /**
  * Delegate to show a marker where a car might be parked, based on activity recognition
  */
-public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements OnCarClickedListener {
+public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements OnCarClickedListener, PossibleSetCarDetailsFragment.OnPossibleSpotDeletedListener {
 
     public static final String FRAGMENT_TAG = "POSSIBLE_PARKED_CAR_DELEGATE";
 
@@ -39,6 +39,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
     private IconGenerator iconGenerator;
     private boolean following;
+    private CarDatabase database;
 
     public static String getFragmentTag(ParkingSpot spot) {
         return FRAGMENT_TAG + "." + spot.time.getTime();
@@ -55,6 +56,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        database = CarDatabase.getInstance(getActivity());
         this.spot = getArguments().getParcelable(ARG_SPOT);
         iconGenerator = new IconGenerator(getActivity());
         LayoutInflater myInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -137,7 +139,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     @Override
     public void onCarSelected(Car car) {
         clearMarker();
-        CarsSync.updateCarFromPossibleSpot(CarDatabase.getInstance(getActivity()), getActivity(), car, spot);
+        CarsSync.updateCarFromPossibleSpot(database, getActivity(), car, spot);
         detailsViewManager.hideDetails();
     }
 
@@ -145,5 +147,12 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
         centerCameraOnMarker();
         detailsViewManager.setDetailsFragment(PossibleSetCarDetailsFragment.newInstance(spot, getTag()));
         setCameraFollowing(true);
+    }
+
+    @Override
+    public void onPossibleSpotDeleted(ParkingSpot spot) {
+        database.removeParkingSpot(spot);
+        marker.remove();
+        detailsViewManager.hideDetails();
     }
 }

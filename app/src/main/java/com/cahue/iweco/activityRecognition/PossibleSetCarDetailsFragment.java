@@ -7,8 +7,11 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -42,6 +45,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
 
     private CarDatabase carDatabase;
 
+    private Toolbar toolbar;
     private TextView distanceView;
     private TextView timeAgoView;
     private TextView addressView;
@@ -49,6 +53,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
     private Location userLocation;
 
     private OnCarClickedListener carSelectedListener;
+    private OnPossibleSpotDeletedListener possibleSpotDeletedListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -78,6 +83,13 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
             throw new ClassCastException(fragment.getClass().getName()
                     + " must implement " + OnCarClickedListener.class.getName());
         }
+
+        try {
+            this.possibleSpotDeletedListener = (OnPossibleSpotDeletedListener) fragment;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.getClass().getName()
+                    + " must implement " + OnCarClickedListener.class.getName());
+        }
     }
 
     @Override
@@ -99,6 +111,19 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
         View view = inflater.inflate(R.layout.layout_possible_set_car_details, container, false);
         if (spot != null) {
 
+            toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            toolbar.inflateMenu(R.menu.possible_spot_menu);
+            toolbar.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_delete:
+                            possibleSpotDeletedListener.onPossibleSpotDeleted(spot);
+                            return true;
+                    }
+                    return false;
+                }
+            });
             // Set time ago
             timeAgoView = (TextView) view.findViewById(R.id.time);
             updateTimeAgo();
@@ -170,6 +195,15 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
         fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
         fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, spot.location);
         getActivity().startService(fetchAddressIntent);
+    }
+
+    /**
+     * Interface for telling the containing activity that the car position has been deleted
+     */
+    public interface OnPossibleSpotDeletedListener {
+
+        void onPossibleSpotDeleted(ParkingSpot spot);
+
     }
 
     class AddressResultReceiver extends ResultReceiver {

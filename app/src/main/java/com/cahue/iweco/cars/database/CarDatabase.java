@@ -619,6 +619,25 @@ public class CarDatabase {
         return spots;
     }
 
+    /**
+     * Persist date about a car, location included
+     *
+     * @param spot
+     */
+    public void removeParkingSpot(ParkingSpot spot) {
+
+        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
+        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+
+        try {
+            database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + spot.time.getTime() + "'", null);
+        } finally {
+            database.close();
+            carDatabaseHelper.close();
+        }
+
+    }
+
     private ParkingSpot cursorToSpot(Cursor cursor) {
 
         double latitude = cursor.getDouble(0);
