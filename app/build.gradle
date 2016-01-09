@@ -29,14 +29,14 @@ android {
             productFlavors {
                 iweco {
                     applicationId "com.cahue.iweco"
-                    versionCode 25
-                    versionName "1.3.1"
+                    versionCode 26
+                    versionName "1.4.0"
                     signingConfig signingConfigs.iweco
                 }
                 wimc {
                     applicationId "com.whereismycar"
-                    versionCode 50
-                    versionName "2.9.1"
+                    versionCode 51
+                    versionName "2.10.0"
                     signingConfig signingConfigs.wimc
                 }
             }

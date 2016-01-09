@@ -14,7 +14,6 @@ import android.util.Log;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,25 +43,30 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      *
      * @param context
      */
-    public static void startIfNecessary(Context context) {
-        if (!BluetoothAdapter.getDefaultAdapter().isEnabled()
-                && PreferencesUtil.isMovementRecognitionEnabled(context)
-                && !CarDatabase.getInstance(context).isEmptyOfCars()) {
-
-
-            Intent intent = new Intent(context, ActivityRecognitionService.class);
-            intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
-            context.startService(intent);
-            if (BuildConfig.DEBUG) {
-                NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-                Notification.Builder mBuilder =
-                        new Notification.Builder(context)
-                                .setSmallIcon(R.drawable.ic_action_action_settings_dark)
-                                .setContentTitle("Recognition Activated");
-                mNotifyMgr.notify(null, 6472837, mBuilder.build());
-            }
+    public static void startIfNoBT(Context context) {
+        if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+            startIfEnabled(context);
         }
 
+    }
+
+    public static void startIfEnabled(Context context) {
+
+        if (!PreferencesUtil.isMovementRecognitionEnabled(context)) {
+            return;
+        }
+
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
+        context.startService(intent);
+        if (BuildConfig.DEBUG) {
+            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    new Notification.Builder(context)
+                            .setSmallIcon(R.drawable.ic_action_action_settings_dark)
+                            .setContentTitle("Recognition Activated");
+            mNotifyMgr.notify(null, 6472837, mBuilder.build());
+        }
     }
 
     public static void stop(Context context) {

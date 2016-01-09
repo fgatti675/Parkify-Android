@@ -101,7 +101,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         this.car = CarDatabase.getInstance(getActivity()).findCar(carId);
 
-        if (getMap() == null || !isResumed()) return;
+        if (!isMapReady() || !isResumed()) return;
 
         if (car == null || car.location == null) {
             clear();
@@ -268,7 +268,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     public boolean updateCameraIfFollowing() {
 
-        if (getMap() == null || !isResumed()) return false;
+        if (!isMapReady() || !isResumed()) return false;
 
         if (following) {
             return zoomToSeeBoth();

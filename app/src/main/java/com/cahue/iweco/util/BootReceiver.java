@@ -13,7 +13,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        ActivityRecognitionService.startIfNecessary(context);
+        ActivityRecognitionService.startIfNoBT(context);
     }
 
 }

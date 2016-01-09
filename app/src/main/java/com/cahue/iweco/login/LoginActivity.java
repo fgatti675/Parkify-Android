@@ -172,12 +172,17 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         noSingIn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                AuthUtils.setSkippedLogin(LoginActivity.this, true);
-                Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
-                goToMaps();
+                onLoginSkipped();
             }
         });
 
+    }
+
+    public void onLoginSkipped() {
+        database.saveCarAndBroadcast(database.generateOtherCar());
+        AuthUtils.setSkippedLogin(LoginActivity.this, true);
+        Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
+        goToMaps();
     }
 
     private void goToMaps() {

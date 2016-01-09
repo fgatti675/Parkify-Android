@@ -71,6 +71,9 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
     @Override
     public void doDraw() {
+
+        if (!isMapReady() || !isResumed()) return;
+
         clearMarker();
 
         marker = getMap().addMarker(new MarkerOptions()

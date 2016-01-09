@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -143,12 +142,11 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         return tooFar;
     }
 
+    protected boolean isMapReady() {
+        return mMap != null;
+    }
+
     protected GoogleMap getMap() {
-        if (mMap == null) {
-            Fragment mapFragment = getFragmentManager().findFragmentById(R.id.map);
-            if (mapFragment != null)
-                setMap(((MapFragment) mapFragment).getMap());
-        }
         return mMap;
     }
 

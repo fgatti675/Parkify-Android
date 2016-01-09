@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -125,7 +126,7 @@ public class MapsActivity extends AppCompatActivity
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId != null) {
                 Log.i(TAG, "Car update received: " + carId);
-                getParkedCarDelegate(carId).update(true);
+                initParkedCarDelegate(carId).update(true);
             }
         }
     };
@@ -323,7 +324,6 @@ public class MapsActivity extends AppCompatActivity
 
         handleIntent(getIntent());
 
-        mapFragment.getMapAsync(this);
         mGoogleApiClient.connect();
     }
 
@@ -338,14 +338,13 @@ public class MapsActivity extends AppCompatActivity
          * Add delegates
          */
         if (!"wimc".equals(BuildConfig.FLAVOR))
-            initSpotsDelegate();
+            delegates.add(initSpotsDelegate());
 
         for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots())
-            initPossibleParkedCarDelegate(spot);
+            delegates.add(initPossibleParkedCarDelegate(spot));
 
         for (String id : carDatabase.getCarIds(true))
-            initParkedCarDelegate(id);
-
+            delegates.add(initParkedCarDelegate(id));
 
         /**
          * Show some dialogs in case the user is bored
@@ -356,9 +355,9 @@ public class MapsActivity extends AppCompatActivity
         showFacebookAppInvite();
 
         /**
-         * If BT is not enabled, start activity recognition service (if enabled)
+         * If BT is not enabled, startIfEnabled activity recognition service (if enabled)
          */
-        ActivityRecognitionService.startIfNecessary(this);
+        ActivityRecognitionService.startIfNoBT(this);
 
         /**
          * Set no cars details if database is empty
@@ -375,6 +374,8 @@ public class MapsActivity extends AppCompatActivity
         setInitialCamera();
 
         showOnLongClickToast();
+
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -387,7 +388,7 @@ public class MapsActivity extends AppCompatActivity
             initialCameraSet = true;
 
             ParkingSpot spot = intent.getParcelableExtra(Constants.INTENT_SPOT_EXTRA);
-            getPossibleParkedCarDelegate(spot).activate();
+            initPossibleParkedCarDelegate(spot).activate();
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
             mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
@@ -538,23 +539,17 @@ public class MapsActivity extends AppCompatActivity
                 this);
     }
 
-    private SpotsDelegate getSpotsDelegate() {
-        SpotsDelegate spotsDelegate = (SpotsDelegate) getFragmentManager().findFragmentByTag(SpotsDelegate.FRAGMENT_TAG);
-        if (spotsDelegate == null) {
-            spotsDelegate = initSpotsDelegate();
-        }
-        return spotsDelegate;
-    }
-
     @NonNull
     private SpotsDelegate initSpotsDelegate() {
-        SpotsDelegate spotsDelegate;
-        Log.d(TAG, "Creating new ParkedCarDelegate");
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        spotsDelegate = SpotsDelegate.newInstance();
-        spotsDelegate.setRetainInstance(true);
-        transaction.add(spotsDelegate, SpotsDelegate.FRAGMENT_TAG);
-        transaction.commit();
+        SpotsDelegate spotsDelegate = (SpotsDelegate) getFragmentManager().findFragmentByTag(SpotsDelegate.FRAGMENT_TAG);
+        if (spotsDelegate == null) {
+            Log.d(TAG, "Creating new ParkedCarDelegate");
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            spotsDelegate = SpotsDelegate.newInstance();
+            spotsDelegate.setRetainInstance(true);
+            transaction.add(spotsDelegate, SpotsDelegate.FRAGMENT_TAG);
+            transaction.commit();
+        }
         return spotsDelegate;
     }
 
@@ -562,72 +557,55 @@ public class MapsActivity extends AppCompatActivity
      * @param carId
      * @return
      */
-    private ParkedCarDelegate getParkedCarDelegate(String carId) {
+    @NonNull
+    private ParkedCarDelegate initParkedCarDelegate(String carId) {
         ParkedCarDelegate parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(carId));
         if (parkedCarDelegate == null) {
-            parkedCarDelegate = initParkedCarDelegate(carId);
+            Log.d(TAG, "Creating new ParkedCarDelegate");
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
+            parkedCarDelegate.setRetainInstance(true);
+            transaction.add(parkedCarDelegate, ParkedCarDelegate.getFragmentTag(carId));
+            transaction.commit();
         }
         return parkedCarDelegate;
     }
 
-    @NonNull
-    private ParkedCarDelegate initParkedCarDelegate(String carId) {
-        ParkedCarDelegate parkedCarDelegate;
-        Log.d(TAG, "Creating new ParkedCarDelegate");
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
-        parkedCarDelegate.setRetainInstance(true);
-        transaction.add(parkedCarDelegate, ParkedCarDelegate.getFragmentTag(carId));
-        transaction.commit();
-        return parkedCarDelegate;
-    }
 
     /**
      * @return
      */
-    private PossibleParkedCarDelegate getPossibleParkedCarDelegate(ParkingSpot spot) {
+    @NonNull
+    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(ParkingSpot spot) {
         PossibleParkedCarDelegate possibleParkedCarDelegate =
                 (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(spot));
         if (possibleParkedCarDelegate == null) {
-            possibleParkedCarDelegate = initPossibleParkedCarDelegate(spot);
+            Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
+            possibleParkedCarDelegate.setRetainInstance(true);
+            transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
+            transaction.commit();
+            getFragmentManager().executePendingTransactions();
         }
-        return possibleParkedCarDelegate;
-    }
-
-    @NonNull
-    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(ParkingSpot spot) {
-        PossibleParkedCarDelegate possibleParkedCarDelegate;
-        Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
-        possibleParkedCarDelegate.setRetainInstance(true);
-        transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
-        transaction.commit();
-        getFragmentManager().executePendingTransactions();
         return possibleParkedCarDelegate;
     }
 
     /**
      * @return
      */
+    @NonNull
     private LongTapLocationDelegate getLongTapLocationDelegate() {
         LongTapLocationDelegate longTapLocationDelegate = (LongTapLocationDelegate) getFragmentManager().findFragmentByTag(LongTapLocationDelegate.FRAGMENT_TAG);
         if (longTapLocationDelegate == null) {
-            longTapLocationDelegate = initLongTapLocationDelegate();
+            Log.d(TAG, "Creating new PossibleParkedCarDelegate: ");
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            longTapLocationDelegate = LongTapLocationDelegate.newInstance();
+            longTapLocationDelegate.setRetainInstance(true);
+            transaction.add(longTapLocationDelegate, LongTapLocationDelegate.FRAGMENT_TAG);
+            transaction.commit();
+            getFragmentManager().executePendingTransactions();
         }
-        return longTapLocationDelegate;
-    }
-
-    @NonNull
-    private LongTapLocationDelegate initLongTapLocationDelegate() {
-        LongTapLocationDelegate longTapLocationDelegate;
-        Log.d(TAG, "Creating new PossibleParkedCarDelegate: ");
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        longTapLocationDelegate = LongTapLocationDelegate.newInstance();
-        longTapLocationDelegate.setRetainInstance(true);
-        transaction.add(longTapLocationDelegate, LongTapLocationDelegate.FRAGMENT_TAG);
-        transaction.commit();
-        getFragmentManager().executePendingTransactions();
         return longTapLocationDelegate;
     }
 
@@ -645,6 +623,8 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onGlobalLayout() {
 
+                final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
+
                 final int height = detailsContainer.getMeasuredHeight();
 
                 setMapPadding(height);
@@ -658,9 +638,11 @@ public class MapsActivity extends AppCompatActivity
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
-                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
-                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
-                        myLocationButton.setLayoutParams(params); //causes layout update
+                        if (moveLocationButton) {
+                            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
+                            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                            myLocationButton.setLayoutParams(params); //causes layout update
+                        }
                     }
 
                     @Override
@@ -673,7 +655,8 @@ public class MapsActivity extends AppCompatActivity
                     }
                 });
                 detailsContainer.startAnimation(animation);
-                myLocationButton.startAnimation(animation);
+                if (moveLocationButton) myLocationButton.startAnimation(animation);
+
                 detailsDisplayed = true;
 
                 detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -694,6 +677,8 @@ public class MapsActivity extends AppCompatActivity
             return;
         }
 
+        final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
+
         detailsDisplayed = false;
 
         setMapPadding(0);
@@ -713,10 +698,11 @@ public class MapsActivity extends AppCompatActivity
                 detailsContainer.setVisibility(View.INVISIBLE);
                 detailsContainer.removeAllViews();
 
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
-                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                myLocationButton.setLayoutParams(params); //causes layout update
-
+                if (moveLocationButton) {
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
+                    params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    myLocationButton.setLayoutParams(params); //causes layout update
+                }
             }
 
             @Override
@@ -725,7 +711,7 @@ public class MapsActivity extends AppCompatActivity
         });
 
         detailsContainer.startAnimation(animation);
-        myLocationButton.startAnimation(animation);
+        if (moveLocationButton) myLocationButton.startAnimation(animation);
     }
 
     private void showOnLongClickToast() {
@@ -924,7 +910,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     /**
-     * Method used to start the pairing activity
+     * Method used to startIfEnabled the pairing activity
      */
     @Override
     public void goToCarManager() {
@@ -970,7 +956,7 @@ public class MapsActivity extends AppCompatActivity
 
             List<Car> closeCars = new ArrayList<>();
             for (Car car : parkedCars) {
-                ParkedCarDelegate parkedCarDelegate = getParkedCarDelegate(car.id);
+                ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
                 parkedCarDelegate.onLocationChanged(getUserLocation());
                 if (!parkedCarDelegate.isTooFar()) {
                     closeCars.add(car);
@@ -980,7 +966,7 @@ public class MapsActivity extends AppCompatActivity
             // One parked car
             if (closeCars.size() == 1) {
                 Car car = closeCars.get(0);
-                getParkedCarDelegate(car.id).activate();
+                initParkedCarDelegate(car.id).activate();
             }
             // zoom to user otherwise
             else {
@@ -995,9 +981,6 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapLongClick(LatLng latLng) {
         Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
-
-        if (carDatabase.isEmptyOfCars())
-            return;
 
         Location location = new Location(Util.TAPPED_PROVIDER);
         location.setLatitude(latLng.latitude);
@@ -1207,7 +1190,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (!"wimc".equals(BuildConfig.FLAVOR))
-                    getSpotsDelegate().queryCameraView();
+                    initSpotsDelegate().queryCameraView();
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
                 else

@@ -99,7 +99,13 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
 
             GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
             List<Car> cars = carDatabase.retrieveCars(true);
-            buttonsLayout.setNumColumns(Math.max(cars.size(), 3));
+            int numCars = cars.size();
+            int numColumns;
+            if (numCars < 4) numColumns = numCars;
+            else if (numCars % 3 == 0) numColumns = 3;
+            else if (numCars % 2 == 0) numColumns = 2;
+            else numColumns = 3;
+            buttonsLayout.setNumColumns(numColumns);
 
             if (!cars.isEmpty())
                 buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));

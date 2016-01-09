@@ -21,6 +21,7 @@
     </style>
 
     <style name="ActionBarThemeOverlay" parent="CahueTheme">
+        <item name="android:background">@color/theme_primary</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
         <!--<item name="colorControlNormal">?actionBarIconColor</item>-->

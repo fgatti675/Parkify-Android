@@ -221,13 +221,14 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             /**
              * Car's carPosition is simple
              */
-            carPosition = cars.size() - 1;
+            carPosition = cars.size() + 1;
             adapter.notifyItemInserted(carPosition);
 
             PreferencesUtil.setLongClickToastShown(getActivity(), false);
-            ActivityRecognitionService.startIfNecessary(getActivity());
+            ActivityRecognitionService.startIfNoBT(getActivity());
 
         } else {
+            carPosition = 1;
             for (Car existingCar : cars) {
                 if (car == existingCar) break;
                 carPosition++;

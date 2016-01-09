@@ -50,7 +50,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    public final static float MAX_ZOOM = 5F;
+    public final static float MAX_ZOOM = 4F;
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     private static final String TAG = "SpotsDelegate";
@@ -66,7 +66,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private final static int CLOSEST_LOCATIONS = 100;
 
     // max number of spots displayed at once.
-    private static final int MARKERS_LIMIT = 100;
+    private static final int MARKERS_LIMIT = 50;
 
     private static final float MAX_DIRECTIONS_DISTANCE = 40000; // 40 km
 
@@ -75,13 +75,12 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private Set<ParkingSpot> spots;
 
     private Map<ParkingSpot, Marker> spotMarkersMap;
-    private Map<String, ParkingSpot> markerSpotsMap;
-    private List<Marker> markers;
+    private Map<Marker, ParkingSpot> markerSpotsMap;
 
     private Marker selectedMarker;
 
     // In the next spots update, clear the previous state
-    private boolean shouldBeReset = false;
+    private boolean resetOnNextUpdate = false;
     private List<LatLngBounds> queriedBounds;
 
     private LatLngBounds viewBounds;
@@ -122,25 +121,20 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.d(TAG, "onCreate");
+
         setRetainInstance(true);
 
         queriedBounds = new ArrayList<>();
         spots = new HashSet<>();
         lastResetTaskRequestTime = new Date();
 
-        spotMarkersMap = new HashMap<>();
-        markerSpotsMap = new HashMap<>();
-        markers = new ArrayList<>();
+        spotMarkersMap = new HashMap<>(MARKERS_LIMIT);
+        markerSpotsMap = new HashMap<>(MARKERS_LIMIT);
 
         maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
 
         directionsDelegate = new DirectionsDelegate();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        reset(false);
     }
 
     @Override
@@ -149,7 +143,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         Log.d(TAG, "onResume");
         setUpResetTask();
-        if (getMap() != null)
+        if (isMapReady())
             doDraw();
     }
 
@@ -172,7 +166,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                             public void run() {
                                 Log.d(TAG, "scheduledResetTask run");
                                 lastResetTaskRequestTime = new Date();
-                                shouldBeReset = true;
+                                resetOnNextUpdate = true;
                                 queryCameraView();
                             }
                         });
@@ -203,14 +197,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     private void reset(boolean clearSpots) {
         Log.d(TAG, "Reset: " + clearSpots);
-        for (Marker marker : markers) {
+        for (Marker marker : markerSpotsMap.keySet()) {
             marker.remove();
         }
         queriedBounds.clear();
         if (clearSpots) spots.clear();
         markerSpotsMap.clear();
         spotMarkersMap.clear();
-        markers.clear();
     }
 
     /**
@@ -238,7 +231,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         /**
          * Check if this query is already contained in another one
          */
-        if (!shouldBeReset) {
+        if (!resetOnNextUpdate) {
             for (LatLngBounds latLngBounds : queriedBounds) {
                 if (latLngBounds.contains(viewBounds.northeast) && latLngBounds.contains(viewBounds.southwest)) {
                     Log.v(QUERY_TAG, "No need to query again camera");
@@ -252,7 +245,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         ParkingSpotsQuery areaQuery = new AreaSpotsQuery(getActivity(), extendedViewBounds, this);
 
-        Log.v(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
+        Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.execute();
 
         return true;
@@ -271,12 +264,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     @Override
     public void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
 
-        if (result.moreResults) {
+        Log.v(TAG, "onSpotsUpdate");
+
+        if (isMapReady() && isResumed() && result.moreResults) {
+            maxZoom = getMap().getCameraPosition().zoom;
             Log.d(TAG, "maxZoom set to " + maxZoom);
             if (BuildConfig.DEBUG)
                 Toast.makeText(getActivity(), "maxZoom set to " + maxZoom, Toast.LENGTH_SHORT).show();
-
-            maxZoom = getMap().getCameraPosition().zoom;
         }
 
         Set<ParkingSpot> parkingSpots = result.spots;
@@ -284,15 +278,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 //        if (query == nearbyQuery)
 //            lastNearbyQuery = new Date();
 
-        if (shouldBeReset) {
+        if (resetOnNextUpdate) {
             reset(true);
-            shouldBeReset = false;
+            resetOnNextUpdate = false;
         }
 
         /**
          * We can consider that after an update, all
          */
-        if (!parkingSpots.isEmpty()) {
+        if (!parkingSpots.isEmpty() && !result.moreResults) {
             LatLngBounds.Builder builder = LatLngBounds.builder();
             for (ParkingSpot spot : parkingSpots) {
                 builder.include(spot.getLatLng());
@@ -319,19 +313,23 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     public void doDraw() {
 
+        if (!isMapReady() || !isResumed()) return;
+
         Log.v(TAG, "doDraw");
 
         setUpViewBounds();
-
-        // hideMarkers first
-        hideMarkers();
 
         if (!markersDisplayed) {
             Log.v(TAG, "Abort drawing spots. Markers are hidden");
             return;
         }
 
-        markers = new ArrayList<>(spots.size());
+        if (selectedSpot != null) {
+            drawDirections();
+            drawSelectedMarker();
+        }
+
+        displayedMarkers = 0;
 
         for (final ParkingSpot parkingSpot : spots) {
 
@@ -339,7 +337,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
             if (displayedMarkers > MARKERS_LIMIT) {
                 Log.v(TAG, "Marker display limit reached");
-                return;
+                break;
             }
 
             LatLng spotPosition = parkingSpot.getLatLng();
@@ -351,25 +349,25 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 marker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
-                markerSpotsMap.put(marker.getId(), parkingSpot);
-                markers.add(marker);
+                markerSpotsMap.put(marker, parkingSpot);
+                if (viewBounds.contains(spotPosition)) {
+                    revealMarker(marker);
+                    displayedMarkers++;
+                }
             }
 
             // else we may need to update it
             else {
                 updateMarker(parkingSpot, marker);
+                if (viewBounds.contains(spotPosition)) {
+                    marker.setVisible(true);
+                    displayedMarkers++;
+                } else {
+                    marker.setVisible(false);
+                }
             }
 
-            if (!marker.isVisible() && viewBounds.contains(spotPosition)) {
-                makeMarkerVisible(marker, parkingSpot);
-                displayedMarkers++;
-            }
 
-        }
-
-        if (selectedSpot != null) {
-            drawDirections();
-            drawSelectedMarker();
         }
     }
 
@@ -393,26 +391,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
 
-    /**
-     * Hide non visible markers (outside of viewport)
-     */
-    private void hideMarkers() {
-
-        displayedMarkers = 0;
-
-        for (final Marker marker : markers) {
-//            if (!markersDisplayed || !viewBounds.contains(marker.getPosition()))
-            marker.setVisible(false);
-        }
-    }
-
     @Override
     public boolean onMarkerClick(Marker marker) {
 
         clearSelectedSpot();
 
         // apply new style and tell listener
-        selectedSpot = markerSpotsMap.get(marker.getId());
+        selectedSpot = markerSpotsMap.get(marker);
 
         if (selectedSpot != null) {
             drawSelectedMarker();
@@ -423,10 +408,13 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_FREE_SPOT_SELECTED);
             return true;
         }
+
         return false;
     }
 
     private void drawSelectedMarker() {
+
+        if (!isMapReady() || !isResumed()) return;
 
         if (selectedMarker != null) {
             selectedMarker.remove();
@@ -435,10 +423,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         if (selectedSpot != null) {
             Marker spotMarker = spotMarkersMap.get(selectedSpot);
 
-            if (spotMarker == null) {
-                selectedSpot = null;
-            } else {
-                selectedMarker = getMap().addMarker(MarkerFactory.getSelectedMarker(getActivity(), selectedSpot.getLatLng()));
+            selectedMarker = getMap().addMarker(MarkerFactory.getSelectedMarker(getActivity(), selectedSpot.getLatLng()));
+
+            if (spotMarker != null) {
                 updateMarker(selectedSpot, spotMarker);
             }
         }
@@ -448,23 +435,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     @Override
     protected void onUserLocationChanged(Location userLocation) {
         drawDirections();
-    }
-
-    /**
-     * Clear previously selected spot
-     */
-    private void clearSelectedSpot() {
-
-        Log.d(TAG, "Clearing selected spot");
-
-        // clear previous selection
-        if (selectedMarker != null) {
-            selectedMarker.remove();
-            selectedMarker = null;
-        }
-
-        directionsDelegate.hide(true);
-        selectedSpot = null;
     }
 
 
@@ -481,7 +451,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "scheduledResetTask canceled");
+        Log.d(TAG, "onPause");
+        Log.v(TAG, "scheduledResetTask canceled");
         scheduledResetTask.cancel(true);
     }
 
@@ -490,7 +461,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         clearSelectedSpot();
     }
 
-    private void makeMarkerVisible(final Marker marker, ParkingSpot spot) {
+    private void revealMarker(final Marker marker) {
 
         marker.setVisible(true);
         final float dAlpha = 0.03F;
@@ -517,6 +488,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+
+        if (!isMapReady() || !isResumed()) return;
+
         float zoom = getMap().getCameraPosition().zoom;
         Log.v(TAG, "zoom: " + zoom);
 
@@ -527,7 +501,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
          * Query for current camera position
          */
         if (zoom >= maxZoom) {
-            Log.d(TAG, "Querying because we are close enough");
+            Log.v(TAG, "Querying because we are close enough");
 
             queryCameraView();
 
@@ -550,9 +524,26 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         updateCameraIfFollowing();
     }
 
+    /**
+     * Clear previously selected spot
+     */
+    private void clearSelectedSpot() {
+
+        Log.d(TAG, "Clearing selected spot");
+
+        // clear previous selection
+        if (selectedMarker != null) {
+            selectedMarker.remove();
+            selectedMarker = null;
+        }
+
+        directionsDelegate.hide(true);
+        selectedSpot = null;
+    }
+
     public boolean updateCameraIfFollowing() {
 
-        if (getMap() == null || !isResumed()) return false;
+        if (!isMapReady() || !isResumed()) return false;
 
         if (following) {
             return zoomToSeeBoth();

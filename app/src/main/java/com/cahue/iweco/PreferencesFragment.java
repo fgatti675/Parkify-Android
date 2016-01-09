@@ -34,7 +34,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
             updateBtPreferencesState(enableBtPreferences);
 
             if (enableBtPreferences) {
-                ActivityRecognitionService.startIfNecessary(getActivity());
+                ActivityRecognitionService.startIfNoBT(getActivity());
             } else {
                 ActivityRecognitionService.stop(getActivity());
             }

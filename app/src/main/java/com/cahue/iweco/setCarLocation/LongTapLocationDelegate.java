@@ -55,6 +55,9 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
 
     @Override
     public void doDraw() {
+
+        if (!isMapReady() || !isResumed()) return;
+
         clearMarker();
 
         marker = getMap().addMarker(new MarkerOptions()

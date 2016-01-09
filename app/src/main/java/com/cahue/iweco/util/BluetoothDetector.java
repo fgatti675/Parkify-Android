@@ -55,33 +55,34 @@ public class BluetoothDetector extends BroadcastReceiver {
                 Car car = carDatabase.findCarByBTAddress(address);
 
                 if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                    onBtDisconnected(context, car);
+                    onBtDisconnectedFromCar(context, car);
                 } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-                    onBtConnected(context, car);
+                    onBtConnectedToCar(context, car);
                 }
             }
         }
     }
 
     private void onBtTurnedOn(Context context) {
-        /**
-         * Stop activity recognition
-         */
-        ActivityRecognitionService.stop(context);
     }
 
     private void onBtTurnedOff(Context context) {
         /**
          * Start activity recognition
          */
-        ActivityRecognitionService.startIfNecessary(context);
+        ActivityRecognitionService.startIfEnabled(context);
     }
 
-    public void onBtConnected(Context context, Car car) {
+    public void onBtConnectedToCar(Context context, Car car) {
 
-        Log.d("Bluetooth", "onBtConnected");
+        /**
+         * Stop activity recognition
+         */
+        ActivityRecognitionService.stop(context);
 
-        // we create an intent to start the location poller service, as declared in manifest
+        Log.d("Bluetooth", "onBtConnectedToCar");
+
+        // we create an intent to startIfEnabled the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, CarMovedService.class);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
@@ -89,11 +90,11 @@ public class BluetoothDetector extends BroadcastReceiver {
 
     }
 
-    public void onBtDisconnected(Context context, Car car) {
+    public void onBtDisconnectedFromCar(Context context, Car car) {
 
-        Log.d("Bluetooth", "onBtDisconnected");
+        Log.d("Bluetooth", "onBtDisconnectedFromCar");
 
-        // we create an intent to start the location poller service, as declared in manifest
+        // we create an intent to startIfEnabled the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, ParkedCarService.class);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);

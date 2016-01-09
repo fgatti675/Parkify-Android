@@ -79,11 +79,22 @@ public class CarDatabase {
     }
 
     /**
+     * Create the 'Other' car
+     */
+    public Car generateOtherCar() {
+        Car car = new Car();
+        car.id = Car.OTHER_ID;
+        return car;
+    }
+
+    /**
      * Persist the location of the car in the shared preferences
      *
      * @param cars
      */
     public void clearSaveAndBroadcast(Collection<Car> cars) {
+
+        cars.add(generateOtherCar());
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -291,7 +302,6 @@ public class CarDatabase {
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
 
         // was the 'Other' car already in the database
-        boolean otherAlreadyInDB = false;
         try {
 
             Cursor cursor = database.query(TABLE_CARS,
@@ -302,7 +312,6 @@ public class CarDatabase {
 
             while (cursor.moveToNext()) {
                 String id = cursor.getString(0);
-                if (id.equals(Car.OTHER_ID)) otherAlreadyInDB = true;
                 ids.add(id);
             }
             cursor.close();
@@ -310,10 +319,6 @@ public class CarDatabase {
         } finally {
             database.close();
         }
-
-//        if(includeOther && !otherAlreadyInDB) {
-//            ids.add(Car.OTHER_ID);
-//        }
 
         Log.d(TAG, "Retrieved car ids from DB: " + ids);
 
@@ -332,10 +337,7 @@ public class CarDatabase {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
 
-        // was the 'Other' car already in the database
-        boolean otherAlreadyInDB = false;
         try {
-
             Cursor cursor = database.query(TABLE_CARS,
                     CAR_PROJECTION,
                     includeOther ? null : COLUMN_ID + " != '" + Car.OTHER_ID + "'",
@@ -344,7 +346,6 @@ public class CarDatabase {
 
             while (cursor.moveToNext()) {
                 Car car = cursorToCar(cursor);
-                if (car.id.equals(Car.OTHER_ID)) otherAlreadyInDB = true;
                 cars.add(car);
             }
             cursor.close();
@@ -355,17 +356,7 @@ public class CarDatabase {
         }
 
         Log.d(TAG, "Retrieved cars from DB: " + cars);
-
-        if (includeOther && !otherAlreadyInDB) {
-            cars.add(generateOtherCar());
-        }
         return cars;
-    }
-
-    private Car generateOtherCar() {
-        Car car = new Car();
-        car.id = Car.OTHER_ID;
-        return car;
     }
 
     /**
@@ -533,7 +524,8 @@ public class CarDatabase {
         try {
             Cursor cursor = database.query(TABLE_CARS,
                     new String[]{COLUMN_ID},
-                    null, null, null, null, null);
+                    COLUMN_ID + " != '" + Car.OTHER_ID + "'",
+                    null, null, null, null);
 
             boolean res = cursor.getCount() == 0;
             cursor.close();

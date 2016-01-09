@@ -11,14 +11,14 @@
     <item >
         <bitmap
             android:id="@+id/Idofbg2"
-            android:gravity="center|fill_horizontal"
+            android:gravity="center|fill_vertical"
             android:src="@drawable/bg_parking" />
     </item>
 
     <item >
         <bitmap
             android:id="@+id/Idofbg1"
-            android:gravity="center|fill_horizontal"
+            android:gravity="center|fill_vertical"
             android:src="@drawable/bg_spots" />
     </item>
 

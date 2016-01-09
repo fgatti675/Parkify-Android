@@ -53,7 +53,7 @@ public class CarsSync {
     public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
         Log.i(TAG, "Storing car " + car);
 
-        if(BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG)
             Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
 
         carDatabase.saveCarAndBroadcast(car);
@@ -133,6 +133,8 @@ public class CarsSync {
      * @param context
      */
     public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
+
+        if (car.isOther()) return;
 
         // Instantiate the RequestQueue.
         RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
