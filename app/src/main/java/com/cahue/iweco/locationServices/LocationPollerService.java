@@ -31,13 +31,19 @@ public abstract class LocationPollerService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    /**
+     * Do nothing before this time has passed. Useful to avoid stale locations
+     */
+    private final static int MINIMUM_TIME_MS = 3000;
 
     /**
      * Timeout after we consider the location may have changed too much for the initial fix
      */
     private final static int PRECISE_FIX_TIMEOUT_MS = 18500;
 
-
+    /**
+     * Time after which the service dies
+     */
     private final static int SERVICE_TIMEOUT_MS = 60000;
 
     /**
@@ -137,8 +143,8 @@ public abstract class LocationPollerService extends Service implements
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(1500);
-        mLocationRequest.setFastestInterval(500);
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(100);
 
         /**
          * Start location updates request
@@ -166,6 +172,11 @@ public abstract class LocationPollerService extends Service implements
     public void onLocationChanged(Location location) {
 
         Date now = new Date();
+
+        // do nothing before a few seconds
+        if (now.getTime() - startTime.getTime() < MINIMUM_TIME_MS) {
+            return;
+        }
 
         Log.v(TAG, location.toString());
 
@@ -206,9 +217,9 @@ public abstract class LocationPollerService extends Service implements
      * is reached.
      *
      * @param context
-     * @param location The location fetched as a result
-     * @param car The car associated with this request (can be null)
-     * @param startTime The time this request startes
+     * @param location        The location fetched as a result
+     * @param car             The car associated with this request (can be null)
+     * @param startTime       The time this request startes
      * @param googleApiClient A connected GoogleApiClient
      */
     public abstract void onPreciseFixPolled(Context context,
@@ -216,7 +227,6 @@ public abstract class LocationPollerService extends Service implements
                                             Car car,
                                             Date startTime,
                                             GoogleApiClient googleApiClient);
-
 
     @Override
     public void onConnectionSuspended(int i) {

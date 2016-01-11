@@ -355,7 +355,7 @@ public class MapsActivity extends AppCompatActivity
         showFacebookAppInvite();
 
         /**
-         * If BT is not enabled, startIfEnabled activity recognition service (if enabled)
+         * If BT is not enabled, start activity recognition service (if enabled)
          */
         ActivityRecognitionService.startIfNoBT(this);
 
@@ -910,7 +910,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     /**
-     * Method used to startIfEnabled the pairing activity
+     * Method used to start the pairing activity
      */
     @Override
     public void goToCarManager() {

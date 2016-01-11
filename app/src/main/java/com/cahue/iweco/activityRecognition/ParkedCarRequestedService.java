@@ -88,7 +88,7 @@ public class ParkedCarRequestedService extends LocationPollerService {
 
         long[] pattern = {0, 100, 1000};
 
-        // Intent to startIfEnabled the activity and show a just parked dialog
+        // Intent to start the activity and show a just parked dialog
         Intent intent = new Intent(this, MapsActivity.class);
         intent.setAction(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST);
         intent.putExtra(Constants.INTENT_SPOT_EXTRA, possibleParkingSpot);

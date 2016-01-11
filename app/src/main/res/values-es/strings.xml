@@ -80,5 +80,6 @@
     <string name="permission_error">Permiso necesario!</string>
     <string name="based_on_activity_recognition">Parece que has bajado de un vehículo aquí, basado en la detección de movimiento</string>
     <string name="did_you_park">¿Has aparcado aquí?</string>
+    <string name="clear">Borrar</string>
 
 </resources>
