@@ -25,7 +25,7 @@
 
     <color name="background">#ffffffff</color>
 
-    <color name="theme_primary">#fff24536</color>
+    <color name="theme_primary">#f24536</color>
     <color name="theme_primary_dark">#ffc93d34</color>
     <color name="theme_primary_light">#87f24536</color>
 
