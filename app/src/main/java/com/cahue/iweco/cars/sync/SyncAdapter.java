@@ -14,7 +14,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
@@ -49,7 +49,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "Sync in progress");
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+        RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")

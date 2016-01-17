@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class NavigationDrawerFragment extends Fragment {
 
-    private static final boolean ADS_ENABLED = true;
+    private static final boolean ADS_ENABLED = false;
 
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
     /**

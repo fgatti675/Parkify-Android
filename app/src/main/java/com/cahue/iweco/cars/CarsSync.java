@@ -14,7 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
@@ -80,7 +80,7 @@ public class CarsSync {
 
     public static void remove(final Context context, final Car car, final CarDatabase database) {
         // Instantiate the RequestQueue.
-        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+        RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
         Log.i(TAG, "Removing car " + car);
 
@@ -137,7 +137,7 @@ public class CarsSync {
         if (car.isOther()) return;
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+        RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
         Log.i(TAG, "Posting car");
 

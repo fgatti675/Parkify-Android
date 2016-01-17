@@ -34,14 +34,14 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
-import com.cahue.iweco.activityRecognition.ParkedCarRequestedService;
 import com.cahue.iweco.activityRecognition.PossibleParkedCarDelegate;
+import com.cahue.iweco.activityRecognition.PossibleParkedCarService;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
-import com.cahue.iweco.dialogs.IwecoPromoDialog;
+import com.cahue.iweco.dialogs.ParkifyPromoDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
 import com.cahue.iweco.dialogs.UninstallWIMCDialog;
 import com.cahue.iweco.locationServices.CarMovedService;
@@ -391,7 +391,7 @@ public class MapsActivity extends AppCompatActivity
             initPossibleParkedCarDelegate(spot).activate();
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-            mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
+            mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
             intent.setAction(null);
         }
     }
@@ -412,9 +412,9 @@ public class MapsActivity extends AppCompatActivity
                     dialog.show(getFragmentManager(), "UninstallWIMCDialog");
                 }
             } else {
-                if (IwecoPromoDialog.shouldBeShown(this)) {
-                    IwecoPromoDialog dialog = new IwecoPromoDialog();
-                    dialog.show(getFragmentManager(), "IwecoPromoDialog");
+                if (ParkifyPromoDialog.shouldBeShown(this)) {
+                    ParkifyPromoDialog dialog = new ParkifyPromoDialog();
+                    dialog.show(getFragmentManager(), "ParkifyPromoDialog");
                 }
             }
 
@@ -1202,7 +1202,7 @@ public class MapsActivity extends AppCompatActivity
         actRecog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, ParkedCarRequestedService.class);
+                Intent intent = new Intent(MapsActivity.this, PossibleParkedCarService.class);
                 startService(intent);
             }
         });

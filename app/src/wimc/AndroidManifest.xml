@@ -62,7 +62,7 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service android:name="com.cahue.iweco.auth.IwecoAccountService">
+        <service android:name="com.cahue.iweco.auth.ParkifyAccountService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

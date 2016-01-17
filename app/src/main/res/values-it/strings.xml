@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">iweco</string>
+    <string name="app_name">Parkify</string>
 
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>
@@ -64,9 +64,9 @@
     <string name="add">Aggiungi</string>
 
     <string name="install">Installare</string>
-    <string name="uninstall_WIMC">Se iweco è installato non è più necessaria Where is my car?. Disinstallare?</string>
+    <string name="uninstall_WIMC">Se Parkify è installato non è più necessaria Where is my car?. Disinstallare?</string>
     <string name="uninstall">Disinstallare</string>
-    <string name="iweco_promo">Prova adesso IWECO! Ti dirà pure dove trovare parcheggio!</string>
+    <string name="parkify_promo">Prova adesso Parkify! Ti dirà pure dove trovare parcheggio!</string>
     <string name="new_app" >Nuova app!</string>
 
     <string name="rating_message">Una buona review su Play Store ci fa molto bene :)</string>

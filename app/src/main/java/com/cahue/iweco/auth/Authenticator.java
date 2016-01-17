@@ -13,7 +13,7 @@ import android.text.TextUtils;
 
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.login.LoginActivity;
 
@@ -33,12 +33,12 @@ public class Authenticator extends AbstractAccountAuthenticator {
     public static final String LOGIN_TYPE = "login_type";
     public static final String LOGIN_DATE = "login_time";
 
-    private IwecoAccountService iwecoAccountService;
+    private ParkifyAccountService parkifyAccountService;
     private Context mContext;
 
-    public Authenticator(IwecoAccountService iwecoAccountService, Context context) {
+    public Authenticator(ParkifyAccountService parkifyAccountService, Context context) {
         super(context);
-        this.iwecoAccountService = iwecoAccountService;
+        this.parkifyAccountService = parkifyAccountService;
         this.mContext = context;
     }
 
@@ -130,7 +130,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         RequestFuture<String> future = RequestFuture.newFuture();
         StringRequest request = new StringRequest(builder.build().toString(), future, future);
-        IwecoApp.getIwecoApp().getRequestQueue().add(request);
+        ParkifyApp.getParkifyApp().getRequestQueue().add(request);
 
         try {
             return future.get(); // this will block

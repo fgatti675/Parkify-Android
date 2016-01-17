@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Locale;
 
 
-public class IwecoPromoDialog extends DialogFragment {
+public class ParkifyPromoDialog extends DialogFragment {
 
 
     public static boolean shouldBeShown(Context context) {
@@ -58,7 +58,7 @@ public class IwecoPromoDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.iweco_promo)
+        builder.setMessage(R.string.parkify_promo)
                 .setIcon(R.drawable.weco_logo_small)
                 .setTitle(R.string.new_app)
                 .setPositiveButton(R.string.install, new DialogInterface.OnClickListener() {

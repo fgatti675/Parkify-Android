@@ -9,7 +9,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.model.ParkingSpot;
 
 import org.json.JSONArray;
@@ -35,7 +35,7 @@ public abstract class ParkingSpotsQuery {
     public void execute() {
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+        RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
         String url = getRequestUri().toString();
 

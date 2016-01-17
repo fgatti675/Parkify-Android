@@ -21,11 +21,10 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-public class IwecoAccountService extends Service {
+public class ParkifyAccountService extends Service {
 
-    private static final String TAG = "GenericAccountService";
     public static final String ACCOUNT_NAME = "iweco";
-
+    private static final String TAG = "GenericAccountService";
     private Authenticator mAuthenticator;
 
 

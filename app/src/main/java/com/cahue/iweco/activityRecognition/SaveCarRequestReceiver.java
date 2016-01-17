@@ -38,6 +38,6 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
         CarsSync.updateCarFromPossibleSpot(database, context, car, possibleSpot);
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
-        mNotifyMgr.cancel(ParkedCarRequestedService.NOTIFICATION_ID);
+        mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
     }
 }

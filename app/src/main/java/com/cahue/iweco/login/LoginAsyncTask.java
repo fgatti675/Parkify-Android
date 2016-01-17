@@ -10,7 +10,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.RequestFuture;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.Requests;
 
@@ -63,7 +63,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
             throw new IllegalStateException("What did you do?");
         }
 
-        RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+        RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
         RequestFuture<JSONObject> future = RequestFuture.newFuture();
         String url = builder.build().toString();

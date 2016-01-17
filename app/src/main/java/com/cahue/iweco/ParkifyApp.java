@@ -12,15 +12,15 @@ import com.google.android.gms.analytics.Tracker;
 /**
  * Created by Francesco on 14/06/2015.
  */
-public class IwecoApp extends Application {
+public class ParkifyApp extends Application {
 
     public static GoogleAnalytics analytics;
     public static Tracker tracker;
-    private static IwecoApp iwecoApp;
+    private static ParkifyApp parkifyApp;
     private RequestQueue mRequestQueue;
 
-    public static IwecoApp getIwecoApp() {
-        return iwecoApp;
+    public static ParkifyApp getParkifyApp() {
+        return parkifyApp;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class IwecoApp extends Application {
 
         super.onCreate();
 
-        iwecoApp = this;
+        parkifyApp = this;
 
         /**
          * Start Facebook SDK

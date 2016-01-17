@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -30,16 +31,16 @@ import java.util.List;
  * This service fetches the current location and ask the user if the car was set there.
  * It is started from the activity recognition service, when it detects that the user steps out of
  * a vehicle.
- * <p/>
+ * <p>
  * When the location is retrieved the user gets a notification asking him whan car he has parked.
  *
  * @author Francesco
  */
-public class ParkedCarRequestedService extends LocationPollerService {
+public class PossibleParkedCarService extends LocationPollerService {
 
     public static final int NOTIFICATION_ID = 875644;
 
-    private final static String TAG = ParkedCarRequestedService.class.getSimpleName();
+    private final static String TAG = PossibleParkedCarService.class.getSimpleName();
 
     private CarDatabase carDatabase;
 
@@ -54,6 +55,9 @@ public class ParkedCarRequestedService extends LocationPollerService {
 
     @Override
     public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
+
+        if (location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) return;
+
         this.location = location;
         this.time = startTime;
 
@@ -118,6 +122,7 @@ public class ParkedCarRequestedService extends LocationPollerService {
     }
 
 
+    @NonNull
     private NotificationCompat.Action createCarSaveAction(Car car, ParkingSpot possibleSpot, int index) {
 
         Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);

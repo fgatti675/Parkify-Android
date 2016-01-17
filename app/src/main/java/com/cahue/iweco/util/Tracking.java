@@ -3,7 +3,7 @@ package com.cahue.iweco.util;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -81,10 +81,10 @@ public class Tracking {
     }
 
     public static void setTrackerUserId(String trackerUserId) {
-        IwecoApp.getIwecoApp().setTrackerUserId(trackerUserId);
+        ParkifyApp.getParkifyApp().setTrackerUserId(trackerUserId);
     }
 
     private static Tracker getTracker(){
-        return IwecoApp.getIwecoApp().getTracker();
+        return ParkifyApp.getParkifyApp().getTracker();
     }
 }

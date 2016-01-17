@@ -7,7 +7,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
-import com.cahue.iweco.IwecoApp;
+import com.cahue.iweco.ParkifyApp;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.w3c.dom.Document;
@@ -16,8 +16,6 @@ import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -38,7 +36,7 @@ public class GMapV2Direction {
                 + "&sensor=false&units=metric&mode=" + mode;
         Log.d("url", url);
         try {
-            RequestQueue queue = IwecoApp.getIwecoApp().getRequestQueue();
+            RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
             RequestFuture<String> future = RequestFuture.newFuture();
             StringRequest stringRequest = new StringRequest(
                     url,

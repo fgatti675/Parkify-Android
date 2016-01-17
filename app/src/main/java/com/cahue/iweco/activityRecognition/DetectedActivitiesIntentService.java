@@ -143,7 +143,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     private void handleVehicleToFoot() {
         // we create an intent to start the location poller service, as declared in manifest
-        Intent intent = new Intent(this, ParkedCarRequestedService.class);
+        Intent intent = new Intent(this, PossibleParkedCarService.class);
         this.startService(intent);
     }
 

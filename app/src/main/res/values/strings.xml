@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">iweco</string>
+    <string name="app_name">Parkify</string>
     <string name="scanning">Scanning for devices…</string>
     <string name="cars">Cars</string>
     <string name="select_device_long">All you have to do is select which is the Bluetooth device installed in your car and forget about where you parked.\nYou will need to keep your Bluetooth activated and at least one of GPS or WIFI.</string>
@@ -65,9 +65,9 @@
     <string name="add">Add</string>
 
     <string name="install">Install</string>
-    <string name="uninstall_WIMC">After installing iweco you don\'t need Where is my Car? anymore. Would you like to uninstall?</string>
+    <string name="uninstall_WIMC">After installing Parkify you don\'t need Where is my Car? anymore. Would you like to uninstall?</string>
     <string name="uninstall">Uninstall</string>
-    <string name="iweco_promo">Check now IWECO! Not only it will tell you where you parked, also where there are available parking spots! ;)</string>
+    <string name="parkify_promo">Check now Parkify! Not only it will tell you where you parked, also where there are available parking spots! ;)</string>
     <string name="new_app" >New app!</string>
 
 

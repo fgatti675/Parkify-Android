@@ -29,6 +29,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
@@ -135,6 +136,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         // Callback registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
+
+        FacebookSdk.sdkInitialize(this);
 
         final LoginManager loginManager = LoginManager.getInstance();
         mFacebookLoginButton.setOnClickListener(new OnClickListener() {
