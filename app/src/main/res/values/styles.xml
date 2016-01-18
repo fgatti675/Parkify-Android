@@ -52,6 +52,8 @@
 
     </style>
 
+    <style name="CahueTheme.Dark.TranslucentBars"></style>
+
     <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
         <item name="colorButtonNormal">@color/theme_accent</item>
         <item name="android:textColor">@color/body_text_1_inverse</item>
