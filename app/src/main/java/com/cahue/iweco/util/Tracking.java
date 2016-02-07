@@ -9,6 +9,8 @@ import com.google.android.gms.analytics.Tracker;
 
 public class Tracking {
 
+    public static final String CATEGORY_TUTORIAL = "Tutorial";
+
     public static final String CATEGORY_LOGIN = "Login";
 
     public static final String CATEGORY_MAP = "Map";

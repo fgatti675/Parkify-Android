@@ -48,15 +48,18 @@
                 tools:layout_height="120dp"
                 tools:visibility="visible" />
 
-            <include
+            <android.support.design.widget.FloatingActionButton
                 android:id="@+id/my_location"
-                layout="@layout/button_my_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_above="@+id/marker_details_container"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:layout_margin="@dimen/large_padding" />
+                android:layout_margin="@dimen/large_padding"
+                android:elevation="@dimen/elevation"
+                android:src="@drawable/crosshairs_gps"
+                cahue:borderWidth="0dp" />
 
             <include layout="@layout/debug_layout" />
 

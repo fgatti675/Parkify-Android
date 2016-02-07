@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.TypedArray;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -19,7 +18,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -357,18 +355,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         // Unregister broadcast listeners
         getActivity().unregisterReceiver(mReceiver);
-    }
-
-    /**
-     * Parse attributes during inflation from a view hierarchy into the
-     * arguments we handle.
-     */
-    @Override
-    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
-        super.onInflate(activity, attrs, savedInstanceState);
-        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.CarManagerFragment);
-//        clickableCars = a.getBoolean(R.styleable.CarManagerFragment_clickableCars, false);
-        a.recycle();
     }
 
     private void showClearDialog(final Car car) {

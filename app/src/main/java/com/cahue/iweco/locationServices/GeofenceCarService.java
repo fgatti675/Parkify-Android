@@ -229,7 +229,7 @@ public class GeofenceCarService extends LocationPollerService {
         Notification.Builder mBuilder =
                 new Notification.Builder(this)
                         .setVibrate(pattern)
-                        .setSmallIcon(R.drawable.ic_car_white_36dp)
+                        .setSmallIcon(R.drawable.ic_car_white_48dp)
                         .setContentTitle("Approaching " + car.name);
 
         if (location != null)

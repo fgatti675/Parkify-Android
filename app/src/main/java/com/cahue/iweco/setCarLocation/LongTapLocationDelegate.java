@@ -17,6 +17,7 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Marker;
@@ -33,7 +34,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     ParkingSpot spot;
 
     Marker marker;
-
+    boolean activated = false;
     private IconGenerator iconGenerator;
 
     public static LongTapLocationDelegate newInstance() {
@@ -54,9 +55,21 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        doDraw();
+    }
+
+    @Override
+    protected void onMapReady(GoogleMap mMap) {
+        super.onMapReady(mMap);
+        doDraw();
+    }
+
+    @Override
     public void doDraw() {
 
-        if (!isMapReady() || !isResumed()) return;
+        if (!isMapReady() || !isResumed() || !activated) return;
 
         clearMarker();
 
@@ -91,9 +104,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
         if (requester != this) {
-            clearMarker();
-            if (isDisplayed())
-                detailsViewManager.hideDetails();
+            deactivate();
         }
     }
 
@@ -122,10 +133,18 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
 
     @Override
     public void onDetailsClosed() {
+        deactivate();
+    }
+
+    private void deactivate() {
+        activated = false;
         clearMarker();
+        if (isDisplayed())
+            detailsViewManager.hideDetails();
     }
 
     public void activate(ParkingSpot spot) {
+        activated = true;
         this.spot = spot;
         detailsViewManager.setDetailsFragment(LongTapSetCarDetailsFragment.newInstance(spot));
         doDraw();
@@ -133,7 +152,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
 
     @Override
     public void onCarSelected(Car car) {
-        clearMarker();
+        deactivate();
 
         CarsSync.updateCarFromPossibleSpot(CarDatabase.getInstance(getActivity()), getActivity(), car, spot);
 

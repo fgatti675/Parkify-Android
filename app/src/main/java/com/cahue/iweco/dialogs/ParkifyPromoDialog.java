@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.PreferencesUtil;
 
@@ -27,8 +26,6 @@ public class ParkifyPromoDialog extends DialogFragment {
 
 
     public static boolean shouldBeShown(Context context) {
-
-        if (!"wimc".equals(BuildConfig.FLAVOR)) return false;
 
         Locale locale = context.getResources().getConfiguration().locale;
         if (!locale.getCountry().equalsIgnoreCase("ES")

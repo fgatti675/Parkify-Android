@@ -34,6 +34,8 @@ public class PreferencesUtil {
     public static final String PREF_MOVEMENT_RECOGNITION_NOTIFICATION = "PREF_MOVEMENT_RECOGNITION_NOTIFICATION";
     public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
 
+    public static final String PREF_REMOVE_ADS = "PREF_REMOVE_ADS";
+
 
 
     public static boolean isLongClickToastShown(Context context) {
@@ -101,6 +103,16 @@ public class PreferencesUtil {
     public static void setWIMCUninstallDialogShown(Context context, boolean shown) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putBoolean(PREF_UNINSTALL_WIMC_SHOWN, shown).apply();
+    }
+
+    public static boolean isAdsRemoved(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_REMOVE_ADS, false);
+    }
+
+    public static void setAdsRemoved(Context context, boolean removed) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_REMOVE_ADS, removed).apply();
     }
 
     public static void clear(Context context) {

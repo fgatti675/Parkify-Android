@@ -42,69 +42,73 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_weight="1"
             android:orientation="vertical"
             android:paddingBottom="@dimen/default_padding"
             android:paddingLeft="@dimen/large_padding"
             android:paddingRight="@dimen/large_padding">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/based_on_activity_recognition"
-            android:textColor="@color/body_text_1" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/based_on_activity_recognition"
+                android:textColor="@color/body_text_1" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/default_padding">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/default_padding">
+
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_access_time_black_18px"
+                    android:drawablePadding="@dimen/default_padding"
+                    android:drawableStart="@drawable/ic_access_time_black_18px"
+                    android:singleLine="false"
+                    android:textColor="@color/body_text_2"
+                    tools:text="Hace 2 horas" />
+
+                <TextView
+                    android:id="@+id/distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:paddingLeft="@dimen/default_padding"
+                    android:singleLine="true"
+                    android:textColor="@color/body_text_2"
+                    tools:text="1477.3 km" />
+
+            </RelativeLayout>
 
             <TextView
-                android:id="@+id/time"
-                android:layout_width="wrap_content"
+                android:id="@+id/address"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="right"
-                android:singleLine="false"
+                android:layout_marginTop="@dimen/small_padding"
+                android:drawableLeft="@drawable/ic_location_city_black_18px"
+                android:drawablePadding="@dimen/default_padding"
+                android:drawableStart="@drawable/ic_location_city_black_18px"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/body_text_2"
-                tools:text="Hace 2 horas" />
+                tools:text="Lindwurmstr. 143" />
 
-            <TextView
-                android:id="@+id/distance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:paddingLeft="@dimen/default_padding"
-                android:singleLine="true"
-                android:textColor="@color/body_text_2"
-                tools:text="1477.3 km" />
-
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/body_text_3"
-            tools:text="Lindwurmstr. 143" />
-
-        <GridView
-            android:id="@+id/car_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:horizontalSpacing="10dp"
-            android:paddingTop="@dimen/default_padding"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="10dp"
-            tools:listitem="@layout/button_car"
-            tools:numColumns="3"
-            tools:rowCount="2" />
+            <GridView
+                android:id="@+id/car_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:horizontalSpacing="10dp"
+                android:paddingTop="@dimen/default_padding"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp"
+                tools:listitem="@layout/button_car"
+                tools:numColumns="3"
+                tools:rowCount="2" />
 
 
-    </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

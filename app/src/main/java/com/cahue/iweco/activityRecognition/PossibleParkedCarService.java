@@ -42,6 +42,8 @@ public class PossibleParkedCarService extends LocationPollerService {
 
     private final static String TAG = PossibleParkedCarService.class.getSimpleName();
 
+    private static final int ACCURACY_THRESHOLD_M = 40;
+
     private CarDatabase carDatabase;
 
     private Location location;
@@ -56,7 +58,7 @@ public class PossibleParkedCarService extends LocationPollerService {
     @Override
     public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
 
-        if (location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) return;
+//        if (location.getAccuracy() > ACCURACY_THRESHOLD_M) return;
 
         this.location = location;
         this.time = startTime;

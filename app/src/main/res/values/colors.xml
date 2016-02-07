@@ -20,10 +20,13 @@
     <color name="body_text_3">#60000000</color>
     <color name="body_text_disabled">#44000000</color>
 
+    <color name="divider">#1e000000</color>
+
     <color name="body_text_1_inverse">#deffffff</color>
     <color name="body_text_2_inverse">#8affffff</color>
 
-    <color name="light_grey">#ffebebeb</color>
+    <color name="light_grey">#f0f1f2</color>
+    <color name="medium_grey">#d8d8d8</color>
 
     <color name="theme_primary">#12a0d0</color>
     <color name="theme_primary_dark">#ff1293c3</color>

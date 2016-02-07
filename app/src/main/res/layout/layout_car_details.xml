@@ -1,39 +1,38 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cahue="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:layout_centerVertical="true"
     android:background="?android:attr/selectableItemBackground"
-    android:layout_centerVertical="true">
+    android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/car_image"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:padding="@dimen/large_padding"
-        android:src="@drawable/ic_car_white_24dp"
-        android:background="@color/theme_accent"
         android:adjustViewBounds="false"
+        android:background="@color/theme_accent"
         android:cropToPadding="false"
-        android:scaleType="fitStart" />
+        android:padding="@dimen/large_padding"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_car_white_24dp" />
 
     <LinearLayout
         android:id="@+id/info_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_centerVertical="true"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/car_toolbar"
-            android:theme="@style/CahueTheme"
-            android:paddingRight="@dimen/default_padding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:clickable="false"
             android:focusable="false"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:paddingRight="@dimen/default_padding"
+            android:theme="@style/CahueTheme">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -42,19 +41,19 @@
                 <TextView
                     android:id="@+id/name"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    tools:text="Alfa Romeo Mito"
-                    android:textColor="@color/body_text_1" />
+                    android:textColor="@color/body_text_1"
+                    tools:text="Alfa Romeo Mito" />
 
                 <TextView
-                    android:paddingLeft="@dimen/small_padding"
                     android:id="@+id/linked_device"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:text="Blue&amp;Me"
-                    android:textColor="@color/body_text_3" />
+                    android:paddingLeft="@dimen/default_padding"
+                    android:textColor="@color/body_text_2"
+                    tools:text="Blue&amp;Me" />
 
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
@@ -62,12 +61,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:paddingLeft="@dimen/large_padding"
-            android:paddingBottom="@dimen/large_padding"
-            android:paddingRight="@dimen/large_padding"
-            android:layout_weight="1"
             android:layout_centerVertical="true"
-            android:orientation="vertical">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/large_padding"
+            android:paddingLeft="@dimen/large_padding"
+            android:paddingRight="@dimen/large_padding">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -77,21 +76,25 @@
                     android:id="@+id/time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="Hace 2 horas"
-                    android:textColor="@color/body_text_2"
+                    android:drawableLeft="@drawable/ic_access_time_black_18px"
+                    android:drawablePadding="@dimen/default_padding"
+                    android:drawableStart="@drawable/ic_access_time_black_18px"
+                    android:foregroundGravity="center"
                     android:gravity="right"
-                    android:singleLine="false" />
+                    android:singleLine="false"
+                    android:textColor="@color/body_text_2"
+                    tools:text="Hace 2 horas" />
 
                 <TextView
                     android:id="@+id/distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/default_padding"
-                    tools:text="1477.3 km"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
+                    android:paddingLeft="@dimen/default_padding"
+                    android:singleLine="true"
                     android:textColor="@color/body_text_2"
-                    android:singleLine="true" />
+                    tools:text="1477.3 km" />
 
             </RelativeLayout>
 
@@ -99,9 +102,13 @@
                 android:id="@+id/address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="Lindwurmstr. 143"
+                android:layout_marginTop="@dimen/small_padding"
+                android:drawableLeft="@drawable/ic_location_city_black_18px"
+                android:drawablePadding="@dimen/default_padding"
+                android:drawableStart="@drawable/ic_location_city_black_18px"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/body_text_3" />
+                android:textColor="@color/body_text_2"
+                tools:text="Lindwurmstr. 143" />
         </LinearLayout>
 
     </LinearLayout>

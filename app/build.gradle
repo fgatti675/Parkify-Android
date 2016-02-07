@@ -29,14 +29,14 @@ android {
             productFlavors {
                 iweco {
                     applicationId "com.cahue.iweco"
-                    versionCode 55
-                    versionName "1.5.2"
+                    versionCode 56
+                    versionName "1.5.3"
                     signingConfig signingConfigs.iweco
                 }
                 wimc {
                     applicationId "com.whereismycar"
-                    versionCode 55
-                    versionName "2.10.4"
+                    versionCode 56
+                    versionName "3.0.0"
                     signingConfig signingConfigs.wimc
                 }
             }
@@ -68,7 +68,9 @@ dependencies {
     compile 'com.google.android.gms:play-services-analytics:8.4.0'
     compile 'de.hdodenhof:circleimageview:1.2.2'
     compile 'com.mcxiaoke.volley:library:1.0.+@aar'
-    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.+'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.10'
     compile 'com.android.support:multidex:1.0.1'
+
+    compile 'com.myappfree.sdk:appvalidator:1.0.5'
 }

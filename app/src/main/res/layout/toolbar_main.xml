@@ -4,13 +4,13 @@
     android:layout_height="?actionBarSize"
     android:background="@color/theme_primary"
     android:elevation="@dimen/elevation"
-    android:gravity="left"
+    android:gravity="start"
     android:theme="@style/ActionBarThemeOverlay">
 
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:paddingBottom="@dimen/default_padding"
         android:paddingTop="@dimen/default_padding"
         android:scaleType="fitStart"

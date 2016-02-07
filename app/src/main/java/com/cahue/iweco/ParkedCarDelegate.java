@@ -91,12 +91,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         Log.i(TAG, "onCreate " + carId);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        update(true);
-    }
-
     public void update(boolean resetDirections) {
 
         this.car = CarDatabase.getInstance(getActivity()).findCar(carId);

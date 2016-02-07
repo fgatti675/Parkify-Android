@@ -52,7 +52,7 @@ public class Constants {
 
     // billing
     public static final String INTENT_BILLING_READY = BuildConfig.APPLICATION_ID + ".INTENT_BILLING_READY";
-    public static final String INTENT_NEW_PURCHASE = BuildConfig.APPLICATION_ID + ".INTENT_NEW_PURCHASE";
+    public static final String INTENT_ADS_REMOVED = BuildConfig.APPLICATION_ID + ".INTENT_ADS_REMOVED";
 
     // Activity detection
     public static final String ACTION_START_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".ACTION_START_ACTIVITY_RECOGNITION";

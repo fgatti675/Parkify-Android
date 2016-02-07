@@ -36,17 +36,7 @@ public class BillingFragment extends Fragment {
     private static String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
 
     private String packageName;
-
-    public static BillingFragment newInstance() {
-        BillingFragment fragment = new BillingFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-
     private IInAppBillingService iInAppBillingService;
-
     private ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -63,6 +53,13 @@ public class BillingFragment extends Fragment {
                 getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
         }
     };
+
+    public static BillingFragment newInstance() {
+        BillingFragment fragment = new BillingFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -154,7 +151,7 @@ public class BillingFragment extends Fragment {
 //                    e.printStackTrace();
 //                }
 
-                getActivity().sendBroadcast(new Intent(Constants.INTENT_NEW_PURCHASE));
+                getActivity().sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

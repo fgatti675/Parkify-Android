@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:cahue="http://schemas.android.com/apk/res-auto"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:cahue="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -11,41 +11,42 @@
     <LinearLayout
         android:id="@+id/user_details"
         android:layout_width="match_parent"
-        android:padding="@dimen/default_padding"
-        android:background="@color/light_grey"
-        android:layout_alignParentTop="true"
         android:layout_height="wrap_content"
-        android:elevation="@dimen/elevation_small">
+        android:layout_alignParentTop="true"
+        android:background="@color/light_grey"
+        android:elevation="@dimen/elevation_small"
+        android:padding="@dimen/default_padding">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_gravity="center"
             android:src="@drawable/ic_action_help"
-            cahue:border_width="1dp"
             cahue:border_color="@color/white"
-            android:layout_gravity="center" />
+            cahue:border_width="1dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:padding="@dimen/large_padding"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="@dimen/large_padding">
 
             <TextView
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="Pedrito"
+                android:layout_gravity="center_vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_gravity="center_vertical" />
+                android:textColor="@color/body_text_1"
+                tools:text="Pedrito" />
 
             <TextView
                 android:id="@+id/email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="email@email.com"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                tools:text="email@email.com" />
 
         </LinearLayout>
     </LinearLayout>
@@ -60,10 +61,10 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
-        android:layout_above="@id/adView"
-        android:layout_below="@id/user_details"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@id/adView"
+        android:layout_below="@id/user_details" />
 
 
 </RelativeLayout>

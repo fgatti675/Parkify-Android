@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.model.Car;
+import com.cahue.iweco.util.Tracking;
 
 /**
  * This activity is in charge of wrapping a {@link com.cahue.iweco.cars.CarManagerFragment}
@@ -28,6 +29,8 @@ public class CarManagerActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Tracking.sendView(Tracking.CATEGORY_CAR_MANAGER);
 
         setContentView(R.layout.activity_car_manager);
 

@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 
-import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 
 /**
@@ -18,6 +17,10 @@ import com.cahue.iweco.R;
  * create an instance of this fragment.
  */
 public class TutorialWelcomeFragment extends Fragment {
+
+    public TutorialWelcomeFragment() {
+        // Required empty public constructor
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -32,34 +35,27 @@ public class TutorialWelcomeFragment extends Fragment {
         return fragment;
     }
 
-    public TutorialWelcomeFragment() {
-        // Required empty public constructor
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_tutorial_welcome, container, false);
         AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
-        alpha.setDuration(1600);
+        alpha.setDuration(400);
         alpha.setFillAfter(true);
         view.findViewById(R.id.textView).startAnimation(alpha);
-        if (!"wimc".equals(BuildConfig.FLAVOR)) {
-            final View logo = view.findViewById(R.id.logo);
-            logo.setVisibility(View.INVISIBLE);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
-                    alpha.setDuration(2400);
-                    alpha.setFillAfter(true);
-                    logo.setVisibility(View.VISIBLE);
-                    logo.startAnimation(alpha);
-                }
-            }, 800/* 0.8sec delay */);
-        }
+        final View logo = view.findViewById(R.id.logo);
+        logo.setVisibility(View.INVISIBLE);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
+                alpha.setDuration(800);
+                alpha.setFillAfter(true);
+                logo.setVisibility(View.VISIBLE);
+                logo.startAnimation(alpha);
+            }
+        }, 400);
         return view;
     }
 

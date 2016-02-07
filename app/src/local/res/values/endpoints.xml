@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="baseURL" translatable="false">192.168.1.146:8080</string>
-
-</resources>

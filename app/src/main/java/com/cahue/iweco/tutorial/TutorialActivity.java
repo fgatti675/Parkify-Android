@@ -13,11 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
-import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.model.Car;
+import com.cahue.iweco.util.Tracking;
 
 
 public class TutorialActivity extends AppCompatActivity
@@ -25,7 +25,7 @@ public class TutorialActivity extends AppCompatActivity
         EditCarDialog.CarEditedListener,
         ViewPager.OnPageChangeListener {
 
-    private static final int TOTAL_NUMBER_PAGES = "wimc".equals(BuildConfig.FLAVOR) ? 3 : 4;
+    private static final int TOTAL_NUMBER_PAGES = 4;
     private static final String TAG = TutorialActivity.class.getSimpleName();
 
     /**
@@ -53,6 +53,8 @@ public class TutorialActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        Tracking.sendView(Tracking.CATEGORY_TUTORIAL);
 
         setContentView(R.layout.activity_tutorial);
 
@@ -94,12 +96,8 @@ public class TutorialActivity extends AppCompatActivity
 
         background.getDrawable(0).setAlpha(0); // this is the lowest drawable
         background.getDrawable(1).setAlpha(0);
-        if("wimc".equals(BuildConfig.FLAVOR)){
-            background.getDrawable(2).setAlpha(255); // this is the upper one
-        }else {
-            background.getDrawable(2).setAlpha(0);
-            background.getDrawable(3).setAlpha(255); // this is the upper one
-        }
+        background.getDrawable(2).setAlpha(0);
+        background.getDrawable(3).setAlpha(255); // this is the upper one
 
         mViewPager.setPageTransformer(true, new ViewPager.PageTransformer() {
             @Override
@@ -174,7 +172,7 @@ public class TutorialActivity extends AppCompatActivity
 
     @Override
     public void onCarEdited(Car car, boolean newCar) {
-        ((CarManagerFragment) mSectionsPagerAdapter.getItem("wimc".equals(BuildConfig.FLAVOR) ? 2 : 3)).onCarEdited(car, newCar);
+        ((CarManagerFragment) mSectionsPagerAdapter.getItem(3)).onCarEdited(car, newCar);
     }
 
     /**
@@ -197,8 +195,7 @@ public class TutorialActivity extends AppCompatActivity
                 case 1:
                     return TutorialInstructionsFragment.newInstance(R.string.info_parking_text_header, R.string.info_parking_text, TutorialInstructionsFragment.TYPE_PARKING);
                 case 2:
-                    if(!"wimc".equals(BuildConfig.FLAVOR))
-                        return TutorialInstructionsFragment.newInstance(R.string.info_spots_text_header, R.string.info_spots_text, TutorialInstructionsFragment.TYPE_SPOTS);
+                    return TutorialInstructionsFragment.newInstance(R.string.info_spots_text_header, R.string.info_spots_text, TutorialInstructionsFragment.TYPE_SPOTS);
                 case 3:
                     if (carManagerFragment == null)
                         carManagerFragment = CarManagerFragment.newInstance();
@@ -217,16 +214,13 @@ public class TutorialActivity extends AppCompatActivity
             if (object instanceof TutorialWelcomeFragment) {
                 view.setTag(0);
             } else if (object instanceof TutorialInstructionsFragment) {
-                if (((TutorialInstructionsFragment) object).getType().equals(TutorialInstructionsFragment.TYPE_PARKING))
+                String type = ((TutorialInstructionsFragment) object).getType();
+                if (type.equals(TutorialInstructionsFragment.TYPE_PARKING))
                     view.setTag(1);
-                else if (((TutorialInstructionsFragment) object).getType().equals(TutorialInstructionsFragment.TYPE_SPOTS))
+                else if (type.equals(TutorialInstructionsFragment.TYPE_SPOTS))
                     view.setTag(2);
             } else if (object instanceof CarManagerFragment) {
-                if("wimc".equals(BuildConfig.FLAVOR)) {
-                    view.setTag(2);
-                } else{
-                    view.setTag(3);
-                }
+                view.setTag(3);
             }
             return super.isViewFromObject(view, object);
         }

@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         mFacebookLoginButton = (Button) findViewById(R.id.facebook_login_button);
 
-        // Callback registration
+        // Facebook callback registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
 
         FacebookSdk.sdkInitialize(this);

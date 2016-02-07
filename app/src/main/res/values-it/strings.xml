@@ -74,7 +74,7 @@
     <string name="rate">Valutare</string>
 
     <string name="share">Invita i tuoi amici</string>
-    <string name="share_promo">Perche non condividere con i tuoi amici di Facebook? :)</string>
+    <string name="share_promo">Invita al meno 5 amici e toggli via la pubblicità</string>
     <string name="ask_just_parked">Hai appena parcheggiato?</string>
     <string name="free_spot">Posto libero</string>
     <string name="long_click_instructions">Click lungo per impostare la posizione della macchina!</string>
@@ -82,5 +82,8 @@
     <string name="based_on_activity_recognition">Sembra che sei sceso da un veicolo qui, basato sul motion recognition</string>
     <string name="did_you_park">Hai parcheggiato qui?</string>
     <string name="clear">Elimina</string>
+    <string name="deprecated">Hey! This app is moving and this version will not be maintained. Get the new one clicking on this text!</string>
+    <string name="myAppFree">Parkify senza pubblicita grazie a myAppFree</string>
+    <string name="and_remove_ads">E toggli la pubblicitá!</string>
 
 </resources>

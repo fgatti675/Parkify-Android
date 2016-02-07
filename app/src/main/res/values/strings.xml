@@ -64,6 +64,8 @@
     <string name="add_car_instructions">Add a new car to get automatic parking updates</string>
     <string name="add">Add</string>
 
+    <string name="and_remove_ads">And remove ads!</string>
+
     <string name="install">Install</string>
     <string name="uninstall_WIMC">After installing Parkify you don\'t need Where is my Car? anymore. Would you like to uninstall?</string>
     <string name="uninstall">Uninstall</string>
@@ -76,9 +78,13 @@
     <string name="rate">Rate</string>
 
     <string name="share">Invite your friends</string>
-    <string name="share_promo">How about inviting your Facebook friends and telling them their parking needs could be solved by sharing this app? :)</string>
+    <string name="share_promo">Invite at least 5 Facebook friends and get rid of the ads! :)</string>
+
     <string name="ask_just_parked">Did you just park?</string>
     <string name="free_spot">Available parking spot</string>
     <string name="long_click_instructions">Long click to set your car\'s position. Next time it will be automatic!</string>
 
+
+    <string name="deprecated">Hey! This app is moving and this version will not be maintained. Get the new one clicking on this text!</string>
+    <string name="myAppFree">You have unlocked a special content for free by using myAppFree</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cahue="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -41,22 +41,35 @@
                 android:layout_marginRight="@dimen/default_padding"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:visibility="invisible"
-                cahue:cardBackgroundColor="@color/white"
-                cahue:cardCornerRadius="@dimen/cardCornerRadius"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="@dimen/cardCornerRadius"
                 tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
-            <include
+            <android.support.design.widget.FloatingActionButton
                 android:id="@+id/my_location"
-                layout="@layout/button_my_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/marker_details_container"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:layout_margin="@dimen/large_padding" />
+                android:layout_margin="@dimen/large_padding"
+                android:elevation="@dimen/elevation"
+                android:src="@drawable/crosshairs_gps"
+                app:borderWidth="0dp" />
 
             <include layout="@layout/debug_layout" />
+
+            <TextView
+                android:id="@+id/deprecated_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@android:color/background_light"
+                android:elevation="8dp"
+                android:padding="@dimen/default_padding"
+                android:text="@string/deprecated"
+                android:visibility="gone" />
 
         </RelativeLayout>
 
@@ -76,4 +89,5 @@
             tools:layout="@layout/fragment_navigation_drawer" />
 
     </android.support.v4.widget.DrawerLayout>
+
 </LinearLayout>

@@ -73,7 +73,7 @@
     <string name="rate">Puntua ahora</string>
 
     <string name="share">Invita a tus amigos</string>
-    <string name="share_promo">¿Por qué no les dices a tus amigos de Facebook que ya no tienes problemas de aparcamiento? :)</string>
+    <string name="share_promo">Invita al menos a 5 amigos y librate de los anuncios ;)</string>
     <string name="ask_just_parked">¿Acabas de aparcar?</string>
     <string name="free_spot">Hueco libre</string>
     <string name="long_click_instructions">Click largo para establecer la posición del coche. ¡La próxima vez se hará automáticamente!</string>
@@ -81,5 +81,8 @@
     <string name="based_on_activity_recognition">Parece que has bajado de un vehículo aquí, basado en la detección de movimiento</string>
     <string name="did_you_park">¿Has aparcado aquí?</string>
     <string name="clear">Borrar</string>
+    <string name="deprecated">Hola! Esta aplicacion se translada y no se va a mantener mas esta version! Haz click aqui para obtener la original, que se seguirá desarrollando. Tranquilo, todas las funciones y los coches seguiran ahi!</string>
+    <string name="myAppFree">Parkify sin anuncios gracias a myAppFree</string>
+    <string name="and_remove_ads">⁄¡Y elimina los anuncios!</string>
 
 </resources>

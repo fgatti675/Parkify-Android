@@ -32,6 +32,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.LoadProfileImage;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.share.widget.AppInviteDialog;
@@ -196,7 +197,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
 
-        getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_NEW_PURCHASE));
+        getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
         getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
 
     }
@@ -229,6 +230,8 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (!ADS_ENABLED) return;
 
+        if (PreferencesUtil.isAdsRemoved(getActivity())) return;
+
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -256,7 +259,7 @@ public class NavigationDrawerFragment extends Fragment {
                 if (displayAd) {
                     adView.setVisibility(View.VISIBLE);
                     // Ad request
-                    AdRequest adRequest = new AdRequest.Builder().build();
+                    AdRequest adRequest = new AdRequest.Builder().setLocation(mLastUserLocation).build();
                     adView.loadAd(adRequest);
                 } else {
                     adView.setVisibility(View.GONE);
@@ -480,6 +483,8 @@ public class NavigationDrawerFragment extends Fragment {
                         inflate(R.layout.layout_item_drawer_navigation,
                                 viewGroup,
                                 false);
+
+
                 return new MenuViewHolder(itemView);
             }
 
@@ -556,7 +561,9 @@ public class NavigationDrawerFragment extends Fragment {
 
         private void bindCarManager(MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.edit_cars);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_border_color_grey600_24dp);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_edit_primary_blue_24dp);
+            menuViewHolder.divider.setVisibility(View.VISIBLE);
+
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -568,7 +575,9 @@ public class NavigationDrawerFragment extends Fragment {
 
         private void bindShare(MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.share);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_facebook_box_grey600_24dp);
+            menuViewHolder.subtitle.setText(R.string.and_remove_ads);
+            menuViewHolder.subtitle.setVisibility(View.VISIBLE);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_facebook);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -578,9 +587,24 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
+        private void bindDonate(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.donate);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_favorite_24dp);
+            menuViewHolder.subtitle.setText(R.string.and_remove_ads);
+            menuViewHolder.subtitle.setVisibility(View.VISIBLE);
+            menuViewHolder.divider.setVisibility(View.VISIBLE);
+            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    navigation.openDonationDialog();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_DONATION_CLICK);
+                }
+            });
+        }
+
         private void bindPreferences(MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.preferences);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_settings_grey600_24dp);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_settings_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -590,14 +614,14 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindDonate(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(R.string.donate);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_heart_grey600_24dp);
+        private void bindHelp(MenuViewHolder menuViewHolder) {
+            menuViewHolder.title.setText(R.string.help);
+            menuViewHolder.icon.setImageResource(R.drawable.ic_help_circle);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigation.openDonationDialog();
-                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_DONATION_CLICK);
+                    navigation.goToTutorial();
+                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_HELP_CLICK);
                 }
             });
         }
@@ -614,18 +638,6 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindHelp(MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(R.string.help);
-            menuViewHolder.icon.setImageResource(R.drawable.ic_help_circle_grey600_24dp);
-            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    navigation.goToTutorial();
-                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_HELP_CLICK);
-                }
-            });
-        }
-
         @Override
         public int getItemCount() {
             return itemTypes.length;
@@ -635,6 +647,8 @@ public class NavigationDrawerFragment extends Fragment {
 
             public ImageView icon;
             public TextView title;
+            public TextView subtitle;
+            public View divider;
             public View itemView;
 
             public MenuViewHolder(View itemView) {
@@ -642,6 +656,8 @@ public class NavigationDrawerFragment extends Fragment {
                 this.itemView = itemView;
                 icon = (ImageView) itemView.findViewById(R.id.icon);
                 title = (TextView) itemView.findViewById(R.id.title);
+                subtitle = (TextView) itemView.findViewById(R.id.subtitle);
+                divider = itemView.findViewById(R.id.divider);
             }
         }
     }

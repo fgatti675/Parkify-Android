@@ -13,6 +13,7 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -41,9 +42,7 @@ import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
-import com.cahue.iweco.dialogs.ParkifyPromoDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
-import com.cahue.iweco.dialogs.UninstallWIMCDialog;
 import com.cahue.iweco.locationServices.CarMovedService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
@@ -59,6 +58,7 @@ import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.facebook.CallbackManager;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.auth.api.Auth;
@@ -79,12 +79,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.myappfree.appvalidator.AppValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import bolts.AppLinks;
 
 public class MapsActivity extends AppCompatActivity
         implements
@@ -156,6 +159,9 @@ public class MapsActivity extends AppCompatActivity
     private boolean mSkippedLogin;
 
     private LoginType loginType;
+
+
+    private CallbackManager mFacebookCallbackManager;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -201,6 +207,8 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        Tracking.sendView(Tracking.CATEGORY_MAP);
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
@@ -260,10 +268,6 @@ public class MapsActivity extends AppCompatActivity
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
-        if ("wimc".equals(BuildConfig.FLAVOR)) {
-            mToolbar.removeView(findViewById(R.id.logo));
-            mToolbar.setTitle(getString(R.string.app_name));
-        }
 
         setUpNavigationDrawer();
 
@@ -314,6 +318,20 @@ public class MapsActivity extends AppCompatActivity
         }
 
         checkLocationPermission();
+
+        // TODO remove
+        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
+            @Override
+            public void validated() {
+                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+                PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
+                AppValidator.showDialog(MapsActivity.this, getString(R.string.myAppFree));
+            }
+        });
+
+
+        // Facebook callback registration
+        mFacebookCallbackManager = CallbackManager.Factory.create();
     }
 
     @Override
@@ -337,8 +355,7 @@ public class MapsActivity extends AppCompatActivity
         /**
          * Add delegates
          */
-        if (!"wimc".equals(BuildConfig.FLAVOR))
-            delegates.add(initSpotsDelegate());
+        delegates.add(initSpotsDelegate());
 
         for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots())
             delegates.add(initPossibleParkedCarDelegate(spot));
@@ -350,8 +367,6 @@ public class MapsActivity extends AppCompatActivity
          * Show some dialogs in case the user is bored
          */
         checkRatingDialogShown();
-        checkIweco();
-        checkWIMC();
         showFacebookAppInvite();
 
         /**
@@ -376,6 +391,11 @@ public class MapsActivity extends AppCompatActivity
         showOnLongClickToast();
 
         mapFragment.getMapAsync(this);
+
+        Uri targetUrl = AppLinks.getTargetUrlFromInboundIntent(this, getIntent());
+        if (targetUrl != null) {
+            Log.i("Activity", "App Link Target URL: " + targetUrl.toString());
+        }
     }
 
     @Override
@@ -403,33 +423,6 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    public void checkIweco() {
-        if ("wimc".equals(BuildConfig.FLAVOR)) {
-
-            if (Util.isPackageInstalled("com.cahue.iweco", this)) {
-                if (!PreferencesUtil.isWIMCUninstallDialogShown(this)) {
-                    UninstallWIMCDialog dialog = new UninstallWIMCDialog();
-                    dialog.show(getFragmentManager(), "UninstallWIMCDialog");
-                }
-            } else {
-                if (ParkifyPromoDialog.shouldBeShown(this)) {
-                    ParkifyPromoDialog dialog = new ParkifyPromoDialog();
-                    dialog.show(getFragmentManager(), "ParkifyPromoDialog");
-                }
-            }
-
-        }
-    }
-
-    private void checkWIMC() {
-        if ("iweco".equals(BuildConfig.FLAVOR)
-                && Util.isPackageInstalled("com.whereismycar", this)
-                && !PreferencesUtil.isWIMCUninstallDialogShown(this)) {
-            UninstallWIMCDialog dialog = new UninstallWIMCDialog();
-            dialog.show(getFragmentManager(), "UninstallWIMCDialog");
-        }
-    }
-
     private void setUpBillingFragment() {
         Log.d(TAG, "Creating new BillingFragment");
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -443,7 +436,7 @@ public class MapsActivity extends AppCompatActivity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
-//        mNavigationDrawerFragment.setRetainInstance(true);
+        mNavigationDrawerFragment.setUserLocation(getUserLocation());
 
         // Set up the drawer.
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -783,13 +776,22 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == REQUEST_CODE_START_TUTORIAL) {
             checkLocationPermission();
-        } else {
+        } else if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
             BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
             billingFragment.onActivityResult(requestCode, resultCode, data);
         }
 
+        // FB
+        if (mFacebookCallbackManager != null)
+            mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+
+    }
+
+    public CallbackManager getFacebookCallbackManager() {
+        return mFacebookCallbackManager;
     }
 
     @Override
@@ -901,7 +903,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public void openShareDialog() {
-        AppInviteDialog.show(this, FacebookAppInvitesDialog.getFacebookAppInvites(this));
+        FacebookAppInvitesDialog.showAppInviteDialog(this);
     }
 
     public void openDonationDialog() {
@@ -989,7 +991,9 @@ public class MapsActivity extends AppCompatActivity
 
         ParkingSpot spot = new ParkingSpot(null, location, null, new Date(), false);
 
-        getLongTapLocationDelegate().activate(spot);
+        LongTapLocationDelegate longTapLocationDelegate = getLongTapLocationDelegate();
+        longTapLocationDelegate.setMap(mMap);
+        longTapLocationDelegate.activate(spot);
 
     }
 
@@ -1189,8 +1193,7 @@ public class MapsActivity extends AppCompatActivity
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!"wimc".equals(BuildConfig.FLAVOR))
-                    initSpotsDelegate().queryCameraView();
+                initSpotsDelegate().queryCameraView();
                 if (mAccount != null)
                     CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
                 else
