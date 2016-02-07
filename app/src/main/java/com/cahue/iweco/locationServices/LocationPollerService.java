@@ -34,7 +34,7 @@ public abstract class LocationPollerService extends Service implements
     /**
      * Do nothing before this time has passed. Useful to avoid stale locations
      */
-    private final static int MINIMUM_TIME_MS = 3000;
+    private final static int MINIMUM_TIME_MS = 4000;
 
     /**
      * Timeout after we consider the location may have changed too much for the initial fix
