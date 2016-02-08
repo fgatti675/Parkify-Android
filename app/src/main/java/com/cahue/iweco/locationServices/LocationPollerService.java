@@ -143,8 +143,8 @@ public abstract class LocationPollerService extends Service implements
 
         LocationRequest mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(1000);
-        mLocationRequest.setFastestInterval(100);
+        mLocationRequest.setInterval(1500);
+        mLocationRequest.setFastestInterval(500);
 
         /**
          * Start location updates request
