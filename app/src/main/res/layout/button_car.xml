@@ -7,5 +7,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:drawableLeft="@drawable/ic_car_grey600_24dp"
+    android:drawablePadding="@dimen/default_padding"
     android:singleLine="true"
     tools:text="Mito" />

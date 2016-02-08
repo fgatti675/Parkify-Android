@@ -51,12 +51,9 @@
             android:paddingRight="@dimen/large_padding">
         <TextView
             android:id="@+id/time"
+            style="@style/TextTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_access_time_black_18px"
-            android:drawablePadding="@dimen/small_padding"
-            android:drawableStart="@drawable/ic_access_time_black_18px"
-            android:textColor="@color/body_text_2"
             tools:text="12 minutes ago" />
 
         <TextView

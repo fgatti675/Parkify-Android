@@ -54,10 +54,10 @@
 
             <Button
                 android:id="@+id/no_sign_in"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/no_sign_in"
-                android:theme="@style/Widget.AppCompat.Button.Borderless" />
+                android:text="@string/no_sign_in" />
         </LinearLayout>
 
     </RelativeLayout>

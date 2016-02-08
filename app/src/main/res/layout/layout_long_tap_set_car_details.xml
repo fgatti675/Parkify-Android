@@ -41,14 +41,10 @@
 
             <TextView
                 android:id="@+id/time"
+                style="@style/TextTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_access_time_black_18px"
-                android:drawablePadding="@dimen/default_padding"
-                android:drawableStart="@drawable/ic_access_time_black_18px"
-                android:gravity="right"
                 android:singleLine="false"
-                android:textColor="@color/body_text_2"
                 tools:text="Hace 2 horas" />
 
             <TextView
@@ -57,7 +53,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:paddingLeft="@dimen/default_padding"
                 android:singleLine="true"
                 android:textColor="@color/body_text_2"
                 tools:text="1477.3 km" />
@@ -66,14 +61,10 @@
 
         <TextView
             android:id="@+id/address"
+            style="@style/TextAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/small_padding"
-            android:drawableLeft="@drawable/ic_location_city_black_18px"
-            android:drawablePadding="@dimen/default_padding"
-            android:drawableStart="@drawable/ic_location_city_black_18px"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/body_text_2"
             tools:text="Lindwurmstr. 143" />
 
         <GridView
