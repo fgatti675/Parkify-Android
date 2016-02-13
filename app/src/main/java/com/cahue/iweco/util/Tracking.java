@@ -50,8 +50,8 @@ public class Tracking {
     public static final String ACTION_DISMISS = "Dismissed";
 
 
-    public static void sendView( String screenName) {
-        if(BuildConfig.DEBUG) return;
+    public static void sendView(String screenName) {
+        if (BuildConfig.DEBUG) return;
 
         getTracker().setScreenName(screenName);
         Log.i("Tracking", "View: " + screenName);
@@ -68,17 +68,30 @@ public class Tracking {
         sendEvent(category, action, label, null);
     }
 
-    public static void sendEvent( String category, String action, String label, Long value) {
-        if(BuildConfig.DEBUG) return;
+    public static void sendEvent(String category, String action, String label, Long value) {
+        if (BuildConfig.DEBUG) return;
 
         Log.i("Tracking", "Event: " + action + " " + category + " " + label + " " + value);
         HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
         builder.setAction(action);
         builder.setCategory(category);
-        if(label != null) builder.setLabel(label);
-        if(value != null) builder.setValue(value == null ? -1 : value);
+        if (label != null) builder.setLabel(label);
+        if (value != null) builder.setValue(value == null ? -1 : value);
 
         getTracker().send(builder.build());
+
+    }
+
+    public static void sendException(String location, String message, boolean fatal) {
+        if (BuildConfig.DEBUG) return;
+
+        Log.i("Tracking", "Event: " + location + " " + message);
+
+        // Build and send exception.
+        getTracker().send(new HitBuilders.ExceptionBuilder()
+                .setDescription(location + " : " + message)
+                .setFatal(fatal)
+                .build());
 
     }
 
@@ -86,7 +99,7 @@ public class Tracking {
         ParkifyApp.getParkifyApp().setTrackerUserId(trackerUserId);
     }
 
-    private static Tracker getTracker(){
+    private static Tracker getTracker() {
         return ParkifyApp.getParkifyApp().getTracker();
     }
 }
