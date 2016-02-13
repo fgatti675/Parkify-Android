@@ -45,6 +45,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.myappfree.appvalidator.AppValidator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +53,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
 
 /**
  * A login screen that offers login via Google+
@@ -176,6 +176,17 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             @Override
             public void onClick(View v) {
                 onLoginSkipped();
+            }
+        });
+
+
+        // TODO remove
+        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
+            @Override
+            public void validated() {
+                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+                PreferencesUtil.setAdsRemoved(LoginActivity.this, true);
+                AppValidator.showDialog(LoginActivity.this, getString(R.string.myAppFree));
             }
         });
 

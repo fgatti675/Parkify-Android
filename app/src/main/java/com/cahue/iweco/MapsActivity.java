@@ -79,7 +79,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.myappfree.appvalidator.AppValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -318,17 +317,6 @@ public class MapsActivity extends AppCompatActivity
         }
 
         checkLocationPermission();
-
-        // TODO remove
-        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
-            @Override
-            public void validated() {
-                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-                PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
-                AppValidator.showDialog(MapsActivity.this, getString(R.string.myAppFree));
-            }
-        });
-
 
         // Facebook callback registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
