@@ -3,6 +3,8 @@ package com.cahue.iweco;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -33,7 +35,9 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private static final int MAX_DIRECTIONS_DISTANCE = 2000;
 
     private static final String ARG_CAR_ID = "car";
+    @Nullable
     private String carId;
+    @Nullable
     private Car car;
     private boolean following = false;
     private IconGenerator iconGenerator;
@@ -48,6 +52,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private Circle accuracyCircle;
     private DirectionsDelegate directionsDelegate;
 
+    @NonNull
     public static String getFragmentTag(String carId) {
         return FRAGMENT_TAG + "." + carId;
     }
@@ -59,6 +64,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
      * @param carId
      * @return A new instance of fragment CarDetailsFragment.
      */
+    @NonNull
     public static ParkedCarDelegate newInstance(String carId) {
         ParkedCarDelegate fragment = new ParkedCarDelegate();
         Bundle args = new Bundle();
@@ -69,7 +75,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
 
         try {
@@ -328,7 +334,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
+    public boolean onMarkerClick(@NonNull Marker marker) {
         if (marker.equals(carMarker)) {
 
             carSelectedListener.onCarSelected(car);

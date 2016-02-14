@@ -7,11 +7,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class FetchAddressIntentService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(@NonNull Intent intent) {
 
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 

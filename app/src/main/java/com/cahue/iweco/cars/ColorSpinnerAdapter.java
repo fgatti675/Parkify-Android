@@ -2,6 +2,8 @@ package com.cahue.iweco.cars;
 
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +20,11 @@ import com.cahue.iweco.R;
 public class ColorSpinnerAdapter extends BaseAdapter {
 
 
-    private Context context;
     private final int[] colorsValues;
     private final String[] colorNames;
+    private Context context;
 
-    public ColorSpinnerAdapter(Context context) {
+    public ColorSpinnerAdapter(@NonNull Context context) {
         this.context = context;
 
         colorsValues = context.getResources().getIntArray(R.array.rainbow_colors);
@@ -30,7 +32,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
 
         View row = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.spinner_color_item, parent, false);
@@ -57,6 +59,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
         return colorsValues.length + 1;
     }
 
+    @Nullable
     @Override
     public Integer getItem(int position) {
 
@@ -70,7 +73,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         return getDropDownView(position, convertView, parent);
     }
 
@@ -79,7 +82,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
      *
      * @param color
      */
-    public int getPositionOf(Integer color) {
+    public int getPositionOf(@Nullable Integer color) {
 
         if (color == null) return 0;
 

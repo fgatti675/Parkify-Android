@@ -3,6 +3,7 @@ package com.cahue.iweco.setCarLocation;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -37,6 +38,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     boolean activated = false;
     private IconGenerator iconGenerator;
 
+    @NonNull
     public static LongTapLocationDelegate newInstance() {
         LongTapLocationDelegate fragment = new LongTapLocationDelegate();
         Bundle args = new Bundle();
@@ -151,7 +153,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     }
 
     @Override
-    public void onCarSelected(Car car) {
+    public void onCarSelected(@NonNull Car car) {
         deactivate();
 
         CarsSync.updateCarFromPossibleSpot(CarDatabase.getInstance(getActivity()), getActivity(), car, spot);

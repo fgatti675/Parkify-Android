@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ public class NoCarsFragment extends DetailsFragment {
      *
      * @return A new instance of fragment MarkerDetailsFragment.
      */
+    @NonNull
     public static NoCarsFragment newInstance() {
         NoCarsFragment fragment = new NoCarsFragment();
         Bundle args = new Bundle();
@@ -42,7 +44,7 @@ public class NoCarsFragment extends DetailsFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_no_cars, container, false);
         view.findViewById(R.id.add_car).setOnClickListener(new View.OnClickListener() {

@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.PreferencesUtil;
@@ -25,7 +26,7 @@ import java.util.Locale;
 public class ParkifyPromoDialog extends DialogFragment {
 
 
-    public static boolean shouldBeShown(Context context) {
+    public static boolean shouldBeShown(@NonNull Context context) {
 
         Locale locale = context.getResources().getConfiguration().locale;
         if (!locale.getCountry().equalsIgnoreCase("ES")
@@ -38,7 +39,7 @@ public class ParkifyPromoDialog extends DialogFragment {
         return (new Date().getTime() - lastDisplayed.getTime()) > 2 * 24 * 60 * 60;
     }
 
-    public static void setIwecoPromoDialogShown(Context context, Date date) {
+    public static void setIwecoPromoDialogShown(Context context, @NonNull Date date) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putLong(PreferencesUtil.PREF_IWECO_PROMO_DATE, date.getTime()).apply();
     }

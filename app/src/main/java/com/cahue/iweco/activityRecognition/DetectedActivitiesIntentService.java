@@ -23,6 +23,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -44,6 +46,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private static final String PREF_PREVIOUS_ACTIVITY_CONFIDENCE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
 
 
+    @Nullable
     private static DetectedActivity previousActivity;
 
     // How many times the user has been still in a row
@@ -77,7 +80,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
 
-    private void handleDetectedActivities(ActivityRecognitionResult result) {
+    private void handleDetectedActivities(@NonNull ActivityRecognitionResult result) {
 
         if (previousActivity == null)
             previousActivity = getStoredDetectedActivity();
@@ -155,7 +158,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
 
-    private void showDebugNotification(ActivityRecognitionResult result, DetectedActivity mostProbableActivity) {
+    private void showDebugNotification(@NonNull ActivityRecognitionResult result, @NonNull DetectedActivity mostProbableActivity) {
         String previousText = previousActivity != null ?
                 "Previous: " + previousActivity.toString() + "\n" :
                 "Previous unknown\n";
@@ -178,29 +181,29 @@ public class DetectedActivitiesIntentService extends IntentService {
         mNotifyMgr.notify(null, 7908772, mBuilder.build());
     }
 
-    private boolean isInteresting(DetectedActivity detectedActivity) {
+    private boolean isInteresting(@NonNull DetectedActivity detectedActivity) {
         return (detectedActivity.getType() == DetectedActivity.IN_VEHICLE && detectedActivity.getConfidence() > 95)
                 || (detectedActivity.getType() == DetectedActivity.ON_FOOT && detectedActivity.getConfidence() > 100);
     }
 
 
-    private boolean isStill(DetectedActivity detectedActivity) {
+    private boolean isStill(@NonNull DetectedActivity detectedActivity) {
         return detectedActivity.getType() == DetectedActivity.STILL && detectedActivity.getConfidence() > 90;
     }
 
 
-    private boolean isVehicleRelated(DetectedActivity detectedActivity) {
+    private boolean isVehicleRelated(@NonNull DetectedActivity detectedActivity) {
         if (BuildConfig.DEBUG && detectedActivity.getType() == DetectedActivity.ON_BICYCLE)
             return true;
         return detectedActivity.getType() == DetectedActivity.IN_VEHICLE;
     }
 
-    private boolean isOnFoot(DetectedActivity detectedActivity) {
+    private boolean isOnFoot(@NonNull DetectedActivity detectedActivity) {
         return detectedActivity.getType() == DetectedActivity.ON_FOOT;
     }
 
 
-    private void savePreviousActivity(DetectedActivity previousActivity) {
+    private void savePreviousActivity(@Nullable DetectedActivity previousActivity) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (previousActivity != null) {
             prefs.edit()

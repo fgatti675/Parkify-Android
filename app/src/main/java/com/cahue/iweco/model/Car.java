@@ -3,6 +3,8 @@ package com.cahue.iweco.model;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.cahue.iweco.util.Util;
 
@@ -24,11 +26,13 @@ public class Car implements Parcelable {
 
     public static final Parcelable.Creator<Car> CREATOR =
             new Parcelable.Creator<Car>() {
+                @NonNull
                 @Override
-                public Car createFromParcel(Parcel parcel) {
+                public Car createFromParcel(@NonNull Parcel parcel) {
                     return new Car(parcel);
                 }
 
+                @NonNull
                 @Override
                 public Car[] newArray(int size) {
                     return new Car[size];
@@ -37,13 +41,18 @@ public class Car implements Parcelable {
     public String id;
     public String name;
     public String btAddress;
+    @Nullable
     public Long spotId;
+    @Nullable
     public Location location;
+    @Nullable
     public Date time;
+    @Nullable
     public Integer color;
+    @Nullable
     public String address;
 
-    public Car(Parcel parcel) {
+    public Car(@NonNull Parcel parcel) {
         id = parcel.readString();
         name = parcel.readString();
         btAddress = parcel.readString();
@@ -58,7 +67,8 @@ public class Car implements Parcelable {
 
     }
 
-    public static Set<Car> fromJSONArray(JSONArray carsArray) {
+    @NonNull
+    public static Set<Car> fromJSONArray(@NonNull JSONArray carsArray) {
         try {
             Set<Car> cars = new HashSet<>();
             for (int i = 0; i < carsArray.length(); i++) {
@@ -75,7 +85,8 @@ public class Car implements Parcelable {
         }
     }
 
-    public static Car fromJSON(JSONObject carJSON) {
+    @NonNull
+    public static Car fromJSON(@NonNull JSONObject carJSON) {
         try {
             Car car = new Car();
             car.id = carJSON.getString("id");
@@ -107,7 +118,7 @@ public class Car implements Parcelable {
                 }
             }
             return car;
-        } catch (JSONException | ParseException e) {
+        } catch (@NonNull JSONException | ParseException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -119,7 +130,7 @@ public class Car implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeString(id);
         parcel.writeString(name);
         parcel.writeString(btAddress);
@@ -131,7 +142,7 @@ public class Car implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -146,6 +157,7 @@ public class Car implements Parcelable {
         return id.hashCode();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Car{" +
@@ -158,6 +170,7 @@ public class Car implements Parcelable {
                 '}';
     }
 
+    @NonNull
     public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
         try {

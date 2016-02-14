@@ -2,11 +2,9 @@ package com.cahue.iweco.util;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -15,10 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cahue.iweco.R;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -36,7 +30,7 @@ public class Util {
     }
 
 
-    public static void createUpperToast(Context context, int resId, int length) {
+    public static void createUpperToast(@NonNull Context context, int resId, int length) {
         createUpperToast(context, context.getString(resId), length);
     }
     /**
@@ -46,7 +40,7 @@ public class Util {
      * @param string  Content of the toast
      * @param length  One from Toast.LENGTH_LONG or Toast.LENGTH_SHORT
      */
-    public static void createUpperToast(Context context, String string, int length) {
+    public static void createUpperToast(@NonNull Context context, String string, int length) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.toast_custom, null);
         TextView text = (TextView) layout.findViewById(R.id.error_text);
@@ -60,7 +54,7 @@ public class Util {
         toast.show();
     }
 
-    public static int getActionBarSize(Context context) {
+    public static int getActionBarSize(@NonNull Context context) {
         final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
                 new int[]{android.R.attr.actionBarSize});
         int actionBarSize = (int) styledAttributes.getDimension(0, 0);
@@ -69,16 +63,16 @@ public class Util {
     }
 
 
-    public static float dpToPx(Context context, int dp) {
+    public static float dpToPx(@NonNull Context context, int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 
-    public static boolean isImperialMetricsLocale(Context context){
+    public static boolean isImperialMetricsLocale(@NonNull Context context) {
         Locale locale = context.getResources().getConfiguration().locale;
         return locale.getCountry().equals("US");
     }
 
-    public static boolean isPackageInstalled(String packageName, Context context) {
+    public static boolean isPackageInstalled(String packageName, @NonNull Context context) {
         PackageManager pm = context.getPackageManager();
         try {
             pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);

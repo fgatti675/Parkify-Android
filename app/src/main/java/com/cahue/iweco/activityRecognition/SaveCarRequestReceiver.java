@@ -3,6 +3,7 @@ package com.cahue.iweco.activityRecognition;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
 import android.widget.Toast;
 
@@ -19,7 +20,7 @@ import com.cahue.iweco.model.ParkingSpot;
  */
 public class SaveCarRequestReceiver extends BroadcastReceiver {
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 
         CarDatabase database = CarDatabase.getInstance(context);
 

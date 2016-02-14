@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 
 import com.cahue.iweco.R;
@@ -25,7 +26,8 @@ public class MarkerFactory {
     private static BitmapDescriptor redBitmap;
     private static BitmapDescriptor futureBitmap;
 
-    public static MarkerOptions getMarker(ParkingSpot spot, Context context) {
+    @NonNull
+    public static MarkerOptions getMarker(@NonNull ParkingSpot spot, @NonNull Context context) {
 
         if (greenIconGenerator == null) {
 
@@ -75,7 +77,7 @@ public class MarkerFactory {
         return String.format("%d'", ms / 60000);
     }
 
-    private static MarkerOptions getRedMarker(Context context, LatLng position) {
+    private static MarkerOptions getRedMarker(@NonNull Context context, LatLng position) {
 
         if (redBitmap == null) {
 
@@ -111,7 +113,7 @@ public class MarkerFactory {
                 .anchor(0.5F, 1F);
     }
 
-    public static MarkerOptions getSelectedMarker(Context context, LatLng latLng) {
+    public static MarkerOptions getSelectedMarker(@NonNull Context context, LatLng latLng) {
         return new MarkerOptions()
                 .flat(true)
                 .position(latLng)
@@ -119,7 +121,7 @@ public class MarkerFactory {
                 .anchor(0.5F, 0.5F);
     }
 
-    private static BitmapDescriptor createSelectedBitmap(Context context) {
+    private static BitmapDescriptor createSelectedBitmap(@NonNull Context context) {
         int diameter = context.getResources().getDimensionPixelSize(R.dimen.marker_diameter_selected);
         Bitmap mDotMarkerBitmap = Bitmap.createBitmap(diameter, diameter, Bitmap.Config.ARGB_8888);
 

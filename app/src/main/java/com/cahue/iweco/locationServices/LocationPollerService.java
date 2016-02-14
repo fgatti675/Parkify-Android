@@ -9,6 +9,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -59,6 +61,7 @@ public abstract class LocationPollerService extends Service implements
     private Date startTime;
 
     // Car related to this service
+    @Nullable
     private Car car;
 
     private Handler handler;
@@ -69,6 +72,7 @@ public abstract class LocationPollerService extends Service implements
     private Location bestAccuracyLocation;
 
 
+    @Nullable
     private Runnable finishTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -93,7 +97,7 @@ public abstract class LocationPollerService extends Service implements
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         if (intent != null) {
 
             if (intent.getExtras() != null) {
@@ -172,7 +176,7 @@ public abstract class LocationPollerService extends Service implements
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(@NonNull Location location) {
 
         Date now = new Date();
 
@@ -204,7 +208,7 @@ public abstract class LocationPollerService extends Service implements
      *
      * @param location
      */
-    private void notifyFixLocation(Location location) {
+    private void notifyFixLocation(@NonNull Location location) {
         Bundle extras = new Bundle();
         extras.putSerializable(Constants.EXTRA_START_TIME, startTime);
         location.setExtras(extras);
@@ -242,6 +246,7 @@ public abstract class LocationPollerService extends Service implements
         stopSelf();
     }
 
+    @Nullable
     public Car getCar() {
         return car;
     }

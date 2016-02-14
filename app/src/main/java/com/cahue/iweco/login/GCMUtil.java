@@ -2,28 +2,27 @@ package com.cahue.iweco.login;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.util.Util;
 
 /**
  * Created by francesco on 19.01.2015.
  */
 public class GCMUtil {
 
-    private static final String TAG = GCMUtil.class.getSimpleName();
-
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
-
+    public static final String GCM_PREFS = "GCM_PREFS";
     /**
      * Substitute you own sender ID here. This is the project number you got
      * from the API Console, as described in "Getting Started."
      */
     static final String SENDER_ID = "582791978228";
-    public static final String GCM_PREFS = "GCM_PREFS";
+    private static final String TAG = GCMUtil.class.getSimpleName();
+    private static final String PROPERTY_APP_VERSION = "appVersion";
 
     /**
      * Gets the current registration ID for application on GCM service.
@@ -33,7 +32,8 @@ public class GCMUtil {
      * @return registration ID, or empty string if there is no existing
      * registration ID.
      */
-    public static String getRegistrationId(Context context) {
+    @Nullable
+    public static String getRegistrationId(@NonNull Context context) {
         final SharedPreferences prefs = getGCMPreferences(context);
         String registrationId = prefs.getString(PROPERTY_REG_ID, "");
         if (registrationId.isEmpty()) {
@@ -59,7 +59,7 @@ public class GCMUtil {
      * @param context application's context.
      * @param regId   registration ID
      */
-    public static void storeRegistrationId(Context context, String regId) {
+    public static void storeRegistrationId(@NonNull Context context, String regId) {
         final SharedPreferences prefs = getGCMPreferences(context);
         int appVersion = BuildConfig.VERSION_CODE;
         Log.i(TAG, "Saving regId on app version " + appVersion);
@@ -73,7 +73,7 @@ public class GCMUtil {
     /**
      * @return Application's {@code SharedPreferences}.
      */
-    public static SharedPreferences getGCMPreferences(Context context) {
+    public static SharedPreferences getGCMPreferences(@NonNull Context context) {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the regID in your app is up to you.
         return context.getSharedPreferences(GCM_PREFS, Context.MODE_PRIVATE);

@@ -2,6 +2,8 @@ package com.cahue.iweco.spots.query;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -52,7 +54,7 @@ public abstract class ParkingSpotsQuery {
                 },
                 new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error) {
+                    public void onErrorResponse(@NonNull VolleyError error) {
                         error.printStackTrace();
                         if (error.networkResponse == null)
                             listener.onServerError(ParkingSpotsQuery.this, -1, null);
@@ -65,7 +67,8 @@ public abstract class ParkingSpotsQuery {
         queue.add(request);
     }
 
-    protected QueryResult parseResult(JSONObject jsonObject) {
+    @NonNull
+    protected QueryResult parseResult(@Nullable JSONObject jsonObject) {
 
         QueryResult result = new QueryResult();
 

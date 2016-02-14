@@ -56,7 +56,7 @@ public class PossibleParkedCarService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(@NonNull Context context, @NonNull Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         if (location.getAccuracy() > ACCURACY_THRESHOLD_M) return;
 
@@ -125,7 +125,7 @@ public class PossibleParkedCarService extends LocationPollerService {
 
 
     @NonNull
-    private NotificationCompat.Action createCarSaveAction(Car car, ParkingSpot possibleSpot, int index) {
+    private NotificationCompat.Action createCarSaveAction(@NonNull Car car, ParkingSpot possibleSpot, int index) {
 
         Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
@@ -144,7 +144,7 @@ public class PossibleParkedCarService extends LocationPollerService {
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
+        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
 
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;

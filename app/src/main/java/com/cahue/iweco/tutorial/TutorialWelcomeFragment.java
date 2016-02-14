@@ -4,6 +4,7 @@ package com.cahue.iweco.tutorial;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ public class TutorialWelcomeFragment extends Fragment {
      *
      * @return A new instance of fragment TutorialWelcome.
      */
+    @NonNull
     public static TutorialWelcomeFragment newInstance() {
         TutorialWelcomeFragment fragment = new TutorialWelcomeFragment();
         Bundle args = new Bundle();
@@ -36,7 +38,7 @@ public class TutorialWelcomeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_tutorial_welcome, container, false);

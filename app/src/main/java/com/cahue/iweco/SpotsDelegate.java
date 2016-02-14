@@ -3,6 +3,8 @@ package com.cahue.iweco;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -77,6 +79,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private Map<ParkingSpot, Marker> spotMarkersMap;
     private Map<Marker, ParkingSpot> markerSpotsMap;
 
+    @Nullable
     private Marker selectedMarker;
 
     // In the next spots update, clear the previous state
@@ -101,6 +104,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     private boolean markersDisplayed = false;
 
+    @Nullable
     private ParkingSpot selectedSpot;
 
     private float maxZoom;
@@ -110,6 +114,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     private DirectionsDelegate directionsDelegate;
 
+    @NonNull
     public static SpotsDelegate newInstance() {
         SpotsDelegate fragment = new SpotsDelegate();
         Bundle args = new Bundle();
@@ -262,7 +267,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * @param result
      */
     @Override
-    public void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
+    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull QueryResult result) {
 
         Log.v(TAG, "onSpotsUpdate");
 
@@ -371,7 +376,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         }
     }
 
-    private void updateMarker(ParkingSpot parkingSpot, Marker marker) {
+    private void updateMarker(@NonNull ParkingSpot parkingSpot, @NonNull Marker marker) {
         MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity());
         marker.setIcon(markerOptions.getIcon());
     }
@@ -461,7 +466,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         clearSelectedSpot();
     }
 
-    private void revealMarker(final Marker marker) {
+    private void revealMarker(@NonNull final Marker marker) {
 
         marker.setVisible(true);
         final float dAlpha = 0.03F;
@@ -552,7 +557,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         return false;
     }
 
-    public LatLng getOffsetLatLng(LatLng original, double offsetNorth, double offsetEast) {
+    @NonNull
+    public LatLng getOffsetLatLng(@NonNull LatLng original, double offsetNorth, double offsetEast) {
 
         // Coordinate offsets in radians
         double dLat = offsetNorth / EARTH_RADIUS;

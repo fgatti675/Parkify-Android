@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -41,9 +43,10 @@ public class GeofenceCarService extends LocationPollerService {
     /**
      * Result receiver that will send a notification when we are approaching a parked car.
      */
+    @NonNull
     private ResultReceiver geofenceResultReceiver = new ResultReceiver(new Handler()) {
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
+        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
 
             Log.d(TAG, "Geofence result received");
 
@@ -94,7 +97,7 @@ public class GeofenceCarService extends LocationPollerService {
      * @param context
      * @param carId
      */
-    public static void startDelayedGeofenceService(Context context, String carId) {
+    public static void startDelayedGeofenceService(@NonNull Context context, String carId) {
         Intent intent = new Intent(context, GeofenceCarService.class);
         intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carId);
         PendingIntent pIntent = PendingIntent.getService(context, 0, intent, 0);
@@ -104,12 +107,12 @@ public class GeofenceCarService extends LocationPollerService {
     }
 
     @Override
-    protected boolean checkPreconditions(Car car) {
+    protected boolean checkPreconditions(@Nullable Car car) {
         return car != null && car.location != null;
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(Context context, @NonNull Location location, @NonNull Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         if (car.location == null) return;
 
@@ -163,7 +166,7 @@ public class GeofenceCarService extends LocationPollerService {
         addGeofence(car, googleApiClient);
     }
 
-    private void addGeofence(final Car car, GoogleApiClient googleApiClient) {
+    private void addGeofence(@NonNull final Car car, GoogleApiClient googleApiClient) {
 
         LocationServices.GeofencingApi.removeGeofences(
                 googleApiClient,
@@ -205,7 +208,7 @@ public class GeofenceCarService extends LocationPollerService {
         Log.i(TAG, "Geofence added");
     }
 
-    private PendingIntent getGeofencePendingIntent(Car car) {
+    private PendingIntent getGeofencePendingIntent(@NonNull Car car) {
 
         // Reuse the PendingIntent if we already have it.
         if (mGeofencePendingIntent != null) {
@@ -222,7 +225,7 @@ public class GeofenceCarService extends LocationPollerService {
         return mGeofencePendingIntent;
     }
 
-    private void notifyApproachingCar(Location location, Car car) {
+    private void notifyApproachingCar(@Nullable Location location, @NonNull Car car) {
 
         long[] pattern = {0, 1000, 200, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -239,7 +242,7 @@ public class GeofenceCarService extends LocationPollerService {
         mNotifyMgr.notify("" + id, id, mBuilder.build());
     }
 
-    private void notifyGeofenceError(Car car, String error) {
+    private void notifyGeofenceError(@NonNull Car car, String error) {
 
         long[] pattern = {0, 110, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -254,7 +257,7 @@ public class GeofenceCarService extends LocationPollerService {
         mNotifyMgr.notify("" + id, id, mBuilder.build());
     }
 
-    private void notifyGeofenceAdded(Car car) {
+    private void notifyGeofenceAdded(@NonNull Car car) {
 
         long[] pattern = {0, 1000, 200, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -34,7 +36,9 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     private static final String ARG_SPOT = "arg_spot";
     private static final String ARG_LOCATION = "arg_location";
 
+    @Nullable
     private Location userLocation;
+    @Nullable
     private ParkingSpot spot;
 
     private TextView title;
@@ -56,6 +60,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
      * @param spot Parameter 1.
      * @return A new instance of fragment MarkerDetailsFragment.
      */
+    @NonNull
     public static DetailsFragment newInstance(ParkingSpot spot, Location userLocation) {
         DetailsFragment fragment = new SpotDetailsFragment();
         Bundle args = new Bundle();
@@ -82,7 +87,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_spot_details, container, false);
         if (spot != null) {
@@ -128,7 +133,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem menuItem) {
+    public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
         // Handle presses on the action bar items
         switch (menuItem.getItemId()) {
             case R.id.action_follow:

@@ -5,6 +5,8 @@ import android.app.FragmentManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -101,7 +103,7 @@ public class TutorialActivity extends AppCompatActivity
 
         mViewPager.setPageTransformer(true, new ViewPager.PageTransformer() {
             @Override
-            public void transformPage(View view, float position) {
+            public void transformPage(@NonNull View view, float position) {
 
                 int index = (Integer) view.getTag();
                 Drawable currentDrawableInLayerDrawable;
@@ -171,7 +173,7 @@ public class TutorialActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCarEdited(Car car, boolean newCar) {
+    public void onCarEdited(@NonNull Car car, boolean newCar) {
         ((CarManagerFragment) mSectionsPagerAdapter.getItem(3)).onCarEdited(car, newCar);
     }
 
@@ -187,6 +189,7 @@ public class TutorialActivity extends AppCompatActivity
             super(fm);
         }
 
+        @Nullable
         @Override
         public Fragment getItem(int position) {
             switch (position) {
@@ -210,7 +213,7 @@ public class TutorialActivity extends AppCompatActivity
         }
 
         @Override
-        public boolean isViewFromObject(View view, Object object) {
+        public boolean isViewFromObject(@NonNull View view, Object object) {
             if (object instanceof TutorialWelcomeFragment) {
                 view.setTag(0);
             } else if (object instanceof TutorialInstructionsFragment) {

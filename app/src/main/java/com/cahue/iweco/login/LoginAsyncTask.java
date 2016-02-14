@@ -3,6 +3,8 @@ package com.cahue.iweco.login;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -38,6 +40,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
         this.type = type;
     }
 
+    @Nullable
     @Override
     protected LoginResultBean doInBackground(Void... voids) {
 
@@ -75,7 +78,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
                 future,
                 new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error) {
+                    public void onErrorResponse(@NonNull VolleyError error) {
                         error.printStackTrace();
                         loginResultListener.onLoginError(authToken, type);
                     }

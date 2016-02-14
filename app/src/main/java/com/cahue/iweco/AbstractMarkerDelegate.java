@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,16 +18,19 @@ import com.google.android.gms.maps.model.Marker;
 public abstract class AbstractMarkerDelegate extends Fragment implements CameraUpdateRequester, LocationListener {
 
     protected Location userLocation;
+    @Nullable
     protected DetailsViewManager detailsViewManager;
+    @Nullable
     protected DelegateManager delegateManager;
     // too far from the car to calculate directions
     private boolean tooFar = false;
+    @Nullable
     private GoogleMap mMap;
 
     public abstract void doDraw();
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
 
         try {
@@ -112,12 +117,13 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     protected abstract void onUserLocationChanged(Location userLocation);
 
+    @Nullable
     protected LatLng getUserLatLng() {
         if (userLocation == null) return null;
         return new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
     }
 
-    protected final void updateTooFar(LatLng firstLocation, LatLng secondLocation) {
+    protected final void updateTooFar(@Nullable LatLng firstLocation, @Nullable LatLng secondLocation) {
 
         if (firstLocation == null || secondLocation == null) {
             return;
@@ -146,6 +152,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         return mMap != null;
     }
 
+    @Nullable
     protected GoogleMap getMap() {
         return mMap;
     }

@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -71,6 +73,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     private Button enableBTButton;
 
+    @Nullable
     private Callbacks callbacks;
 
     private RecyclerView recyclerView;
@@ -79,7 +82,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     // changes the title when discovery is finished
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, @NonNull Intent intent) {
             String action = intent.getAction();
 
             // When discovery finds a linkedDevice
@@ -119,6 +122,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
+    @NonNull
     public static CarManagerFragment newInstance() {
         CarManagerFragment fragment = new CarManagerFragment();
         Bundle args = new Bundle();
@@ -133,7 +137,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_car_manager, container, false);
 
@@ -209,7 +213,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     @Override
-    public void onCarEdited(Car car, boolean newCar) {
+    public void onCarEdited(@NonNull Car car, boolean newCar) {
 
         int carPosition = 0;
         if (newCar) {
@@ -264,7 +268,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     }
 
-    public void onCarRemoved(Car car) {
+    public void onCarRemoved(@NonNull Car car) {
 
         CarsSync.remove(getActivity(), car, CarDatabase.getInstance(getActivity()));
 
@@ -318,7 +322,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         try {
             callbacks = (Callbacks) activity;
@@ -357,7 +361,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         getActivity().unregisterReceiver(mReceiver);
     }
 
-    private void showClearDialog(final Car car) {
+    private void showClearDialog(@NonNull final Car car) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.delete_car_confirmation)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -374,7 +378,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         builder.create().show();
     }
 
-    private void onDeviceSelected(BluetoothDevice device) {
+    private void onDeviceSelected(@NonNull BluetoothDevice device) {
 
         /**
          * Create a car
@@ -386,6 +390,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         editCar(car, true);
     }
 
+    @NonNull
     private Car createCar() {
         Car car = new Car();
         car.id = UUID.randomUUID().toString();
@@ -396,7 +401,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         EditCarDialog.newInstance(car, newCar).show(getFragmentManager(), "EditCarDialog");
     }
 
-    private void addDevice(BluetoothDevice device) {
+    private void addDevice(@NonNull BluetoothDevice device) {
         if (!devices.contains(device) && !selectedDeviceAddresses.contains(device.getAddress())) {
             if (device.getName() != null && !device.getName().isEmpty()) {
                 devices.add(device);
@@ -430,7 +435,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         private View layout;
         private TextView title;
 
-        public DeviceViewHolder(View view) {
+        public DeviceViewHolder(@NonNull View view) {
             super(view);
             layout = view.findViewById(R.id.device_item);
             title = (TextView) view.findViewById(R.id.device);
@@ -438,7 +443,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     public final static class SimpleViewHolder extends RecyclerView.ViewHolder {
-        public SimpleViewHolder(View view) {
+        public SimpleViewHolder(@NonNull View view) {
             super(view);
         }
     }
@@ -466,8 +471,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         }
 
+        @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
             /**
              * Information
@@ -574,7 +580,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 carViewHolder.toolbar.inflateMenu(R.menu.edit_car_menu);
                 carViewHolder.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                     @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
+                    public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
                         switch (menuItem.getItemId()) {
                             case R.id.action_edit:
                                 editCar(car, false);
@@ -617,13 +623,13 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         private final int initialMargin;
 
-        public FirstItemDecoration(Context context) {
+        public FirstItemDecoration(@NonNull Context context) {
             float dimension = context.getResources().getDimension(R.dimen.default_padding);
             initialMargin = (int) context.getResources().getDimension(R.dimen.default_padding);
         }
 
         @Override
-        public void getItemOffsets(android.graphics.Rect outRect, android.view.View view, android.support.v7.widget.RecyclerView parent, android.support.v7.widget.RecyclerView.State state) {
+        public void getItemOffsets(@NonNull android.graphics.Rect outRect, android.view.View view, @NonNull android.support.v7.widget.RecyclerView parent, android.support.v7.widget.RecyclerView.State state) {
             if (parent.getChildPosition(view) == 0)
                 outRect.set(0, initialMargin, 0, 0);
         }

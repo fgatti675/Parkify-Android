@@ -3,6 +3,8 @@ package com.cahue.iweco.model;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.Util;
@@ -21,11 +23,13 @@ public class ParkingSpot implements Parcelable {
 
     public static final Parcelable.Creator<ParkingSpot> CREATOR =
             new Parcelable.Creator<ParkingSpot>() {
+                @NonNull
                 @Override
-                public ParkingSpot createFromParcel(Parcel parcel) {
+                public ParkingSpot createFromParcel(@NonNull Parcel parcel) {
                     return new ParkingSpot(parcel);
                 }
 
+                @NonNull
                 @Override
                 public ParkingSpot[] newArray(int size) {
                     return new ParkingSpot[size];
@@ -33,15 +37,17 @@ public class ParkingSpot implements Parcelable {
             };
     private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
     private static long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
+    @Nullable
     public final Long id;
     public final Location location;
     public final Date time;
 
     public final boolean future;
+    @Nullable
     public String address;
     private LatLng latLng;
 
-    public ParkingSpot(Parcel parcel) {
+    public ParkingSpot(@NonNull Parcel parcel) {
 
         Long parcelid = parcel.readLong();
         if (parcelid == -1) parcelid = null;
@@ -61,7 +67,8 @@ public class ParkingSpot implements Parcelable {
         this.future = future;
     }
 
-    public static ParkingSpot fromJSON(JSONObject jsonObject) throws JSONException {
+    @NonNull
+    public static ParkingSpot fromJSON(@NonNull JSONObject jsonObject) throws JSONException {
         try {
             Location location = new Location("Json");
             location.setLatitude(jsonObject.getDouble("latitude"));
@@ -85,7 +92,7 @@ public class ParkingSpot implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeLong(id == null ? -1 : id);
         parcel.writeParcelable(location, i);
         parcel.writeString(address);
@@ -93,7 +100,8 @@ public class ParkingSpot implements Parcelable {
         parcel.writeByte((byte) (future ? 1 : 0));
     }
 
-    public JSONObject toJSON(Car car) {
+    @Nullable
+    public JSONObject toJSON(@NonNull Car car) {
         try {
             JSONObject obj = new JSONObject();
             obj.put("car", car.id);
@@ -110,6 +118,7 @@ public class ParkingSpot implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ParkingSpot{" +
@@ -121,7 +130,7 @@ public class ParkingSpot implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -146,6 +155,7 @@ public class ParkingSpot implements Parcelable {
      *
      * @return
      */
+    @NonNull
     public Type getMarkerType() {
         long timeSinceSpotWasFree_ms = System.currentTimeMillis() - time.getTime();
         if (timeSinceSpotWasFree_ms < GREEN_TIME_THRESHOLD_MS)

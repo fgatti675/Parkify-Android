@@ -2,6 +2,7 @@ package com.cahue.iweco.spots.query;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.cahue.iweco.R;
 import com.google.android.gms.maps.model.LatLng;
@@ -13,11 +14,13 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
 
     private static final String TAG = NearestSpotsQuery.class.getSimpleName();
 
+    @Nullable
     protected LatLng center;
+    @Nullable
     protected Integer limit;
 
 
-    public NearestSpotsQuery(Context context, LatLng center, Integer limit, ParkingSpotsUpdateListener listener) {
+    public NearestSpotsQuery(Context context, @Nullable LatLng center, @Nullable Integer limit, ParkingSpotsUpdateListener listener) {
         super(context, listener);
 
         if (center == null || limit == null)

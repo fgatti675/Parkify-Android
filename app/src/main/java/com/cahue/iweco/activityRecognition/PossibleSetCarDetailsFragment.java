@@ -7,6 +7,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.format.DateUtils;
@@ -41,6 +43,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
     // id of the fragment contructing this one
     private static final String ARG_DELEGATE_FRAGMENT_ID = "arg_delegate_fragment_id";
 
+    @Nullable
     private ParkingSpot spot;
 
     private CarDatabase carDatabase;
@@ -61,6 +64,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
      *
      * @return A new instance of fragment LongTapSetCarDetailsFragment.
      */
+    @NonNull
     public static DetailsFragment newInstance(ParkingSpot spot, String parentFragmentTag) {
         DetailsFragment fragment = new PossibleSetCarDetailsFragment();
         Bundle args = new Bundle();
@@ -106,7 +110,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_possible_set_car_details, container, false);
         if (spot != null) {
@@ -115,7 +119,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
             toolbar.inflateMenu(R.menu.possible_spot_menu);
             toolbar.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
+                public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
                     switch (menuItem.getItemId()) {
                         case R.id.action_delete:
                             possibleSpotDeletedListener.onPossibleSpotDeleted(spot);
@@ -212,7 +216,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
+        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
 
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;

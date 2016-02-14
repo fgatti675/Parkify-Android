@@ -3,6 +3,7 @@ package com.cahue.iweco.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -69,7 +70,7 @@ public class PreferencesUtil {
     }
 
 
-    public static void saveCameraPosition(Context context, CameraPosition cameraPosition) {
+    public static void saveCameraPosition(Context context, @NonNull CameraPosition cameraPosition) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit()
                 .putFloat(PREF_CAMERA_ZOOM, cameraPosition.zoom)

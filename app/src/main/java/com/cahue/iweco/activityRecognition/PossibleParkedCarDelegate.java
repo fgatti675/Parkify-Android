@@ -3,6 +3,8 @@ package com.cahue.iweco.activityRecognition;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -33,18 +35,22 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
     private static final String ARG_SPOT = "spot";
 
+    @Nullable
     ParkingSpot spot;
 
+    @Nullable
     Marker marker;
 
     private IconGenerator iconGenerator;
     private boolean following;
     private CarDatabase database;
 
-    public static String getFragmentTag(ParkingSpot spot) {
+    @NonNull
+    public static String getFragmentTag(@NonNull ParkingSpot spot) {
         return FRAGMENT_TAG + "." + spot.time.getTime();
     }
 
+    @NonNull
     public static PossibleParkedCarDelegate newInstance(ParkingSpot spot) {
         PossibleParkedCarDelegate fragment = new PossibleParkedCarDelegate();
         Bundle args = new Bundle();
@@ -95,7 +101,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
+    public boolean onMarkerClick(@NonNull Marker marker) {
         if (marker.equals(this.marker)) {
             activate();
             return true;
@@ -137,7 +143,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    public void onCarSelected(Car car) {
+    public void onCarSelected(@NonNull Car car) {
         clearMarker();
         CarsSync.updateCarFromPossibleSpot(database, getActivity(), car, spot);
         detailsViewManager.hideDetails();
@@ -150,7 +156,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    public void onPossibleSpotDeleted(ParkingSpot spot) {
+    public void onPossibleSpotDeleted(@NonNull ParkingSpot spot) {
         database.removeParkingSpot(spot);
         marker.remove();
         detailsViewManager.hideDetails();

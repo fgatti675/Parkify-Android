@@ -1,5 +1,7 @@
 package com.cahue.iweco.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +40,8 @@ public class CarButtonAdapter extends BaseAdapter {
     }
 
     // create a new Button for each item referenced by the Adapter
-    public View getView(int position, View convertView, ViewGroup parent) {
+    @Nullable
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         Button button;
         final Car car = cars.get(position);
         if (convertView == null) {

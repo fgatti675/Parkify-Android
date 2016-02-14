@@ -8,6 +8,8 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -150,7 +152,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         loginManager.registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(@NonNull LoginResult loginResult) {
                 AccessToken facebookAccessToken = loginResult.getAccessToken();
                 String facebookToken = facebookAccessToken.getToken();
                 onAuthTokenSet(facebookToken, LoginType.Facebook);
@@ -165,7 +167,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
 
             @Override
-            public void onError(FacebookException exception) {
+            public void onError(@NonNull FacebookException exception) {
                 Log.d(TAG, exception.toString());
                 setLoading(false);
             }
@@ -216,6 +218,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     protected void onAuthTokenSet(final String authToken, final LoginType type) {
         new AsyncTask<Void, Void, String>() {
 
+            @Nullable
             @Override
             protected String doInBackground(Void... params) {
                 try {
@@ -237,7 +240,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
 
             @Override
-            protected void onPostExecute(String regId) {
+            protected void onPostExecute(@Nullable String regId) {
                 if (regId != null) onGCMRegIdSet(regId, authToken, type);
                 else onGCMError(authToken);
             }
@@ -356,6 +359,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         new AsyncTask<Void, Void, String>() {
 
+            @Nullable
             @Override
             protected String doInBackground(Void[] objects) {
                 String mGoogleAuthToken = null;
@@ -364,7 +368,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 } catch (UserRecoverableAuthException userRecoverableException) {
                     // GooglePlayServices.apk is either old, disabled, or not present
                     // so we need to show the user some UI in the activity to recover.
-                } catch (IOException | GoogleAuthException e) {
+                } catch (@NonNull IOException | GoogleAuthException e) {
                     e.printStackTrace();
                 }
                 Log.d(TAG, "Google oAuth token: " + mGoogleAuthToken);
@@ -372,7 +376,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
 
             @Override
-            protected void onPostExecute(String authToken) {
+            protected void onPostExecute(@Nullable String authToken) {
                 if (authToken == null) {
                     onTokenRetrieveError();
                 } else {
@@ -393,7 +397,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
 
     @Override
-    public void onBackEndLogin(LoginResultBean loginResult, LoginType type) {
+    public void onBackEndLogin(@NonNull LoginResultBean loginResult, @NonNull LoginType type) {
 
         /**
          * Maybe there was some data there already due to that the app was being used
@@ -418,7 +422,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         goToMaps();
     }
 
-    private void finishLogin(Intent intent, LoginResultBean loginResult, LoginType type) {
+    private void finishLogin(@NonNull Intent intent, @NonNull LoginResultBean loginResult, @NonNull LoginType type) {
 
         String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 
@@ -477,7 +481,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 new GraphRequest.GraphJSONObjectCallback() {
                     @Override
                     public void onCompleted(
-                            JSONObject object,
+                            @NonNull JSONObject object,
                             GraphResponse response) {
                         Log.d(TAG, "Facebook result : " + object.toString());
                         try {

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -23,7 +24,7 @@ public class BluetoothDetector extends BroadcastReceiver {
      * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
      */
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 
         if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
@@ -73,7 +74,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         ActivityRecognitionService.startIfEnabled(context);
     }
 
-    public void onBtConnectedToCar(Context context, Car car) {
+    public void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
 
         /**
          * Stop activity recognition
@@ -90,7 +91,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
     }
 
-    public void onBtDisconnectedFromCar(Context context, Car car) {
+    public void onBtDisconnectedFromCar(@NonNull Context context, @NonNull Car car) {
 
         Log.d("Bluetooth", "onBtDisconnectedFromCar");
 

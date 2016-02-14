@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,7 +41,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+    public void onPerformSync(@Nullable Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
 
         Log.i(TAG, "Sync called");
 
@@ -77,7 +79,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 },
                 new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error) {
+                    public void onErrorResponse(@NonNull VolleyError error) {
                         Util.createUpperToast(getContext(), R.string.sync_error, Toast.LENGTH_SHORT);
                         error.printStackTrace();
                     }

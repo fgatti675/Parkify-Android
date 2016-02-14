@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.util.GMapV2Direction;
@@ -23,26 +24,22 @@ public class DirectionsDelegate {
     private static final String TAG = DirectionsDelegate.class.getSimpleName();
 
     private static final int DIRECTIONS_EXPIRY = 15000;
-
+    public boolean displayed = false;
     private Polyline directionsPolyline;
-
     /**
      * Actual lines representing the directions PolyLine
      */
     private List<LatLng> directionPoints;
-
     /**
      * Task for loading directions
      */
+    @Nullable
     private AsyncTask<Object, Object, Document> directionsAsyncTask;
-
     /**
      * Directions delegate
      */
     private GMapV2Direction gMapV2Direction;
-
-    public boolean displayed = false;
-
+    @Nullable
     private Date lastDirectionsUpdate;
     private GoogleMap mMap;
     private int color;
@@ -98,7 +95,7 @@ public class DirectionsDelegate {
      * @param to
      * @param mode
      */
-    public void drawDirections(final LatLng from, final LatLng to, final String mode) {
+    public void drawDirections(@Nullable final LatLng from, @Nullable final LatLng to, final String mode) {
 
         if (from == null || to == null)
             return;
@@ -125,6 +122,7 @@ public class DirectionsDelegate {
 
         directionsAsyncTask = new AsyncTask<Object, Object, Document>() {
 
+            @Nullable
             @Override
             protected Document doInBackground(Object[] objects) {
                 Log.d(TAG, "Fetching directions");

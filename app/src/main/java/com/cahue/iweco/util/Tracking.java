@@ -1,5 +1,6 @@
 package com.cahue.iweco.util;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -68,7 +69,7 @@ public class Tracking {
         sendEvent(category, action, label, null);
     }
 
-    public static void sendEvent(String category, String action, String label, Long value) {
+    public static void sendEvent(String category, String action, @Nullable String label, @Nullable Long value) {
         if (BuildConfig.DEBUG) return;
 
         Log.i("Tracking", "Event: " + action + " " + category + " " + label + " " + value);

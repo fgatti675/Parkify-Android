@@ -11,6 +11,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,12 +33,17 @@ public class BillingFragment extends Fragment {
 
     private static final String TAG = BillingFragment.class.getSimpleName();
 
+    @NonNull
     private static String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
+    @NonNull
     private static String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
+    @NonNull
     private static String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
 
     private String packageName;
+    @Nullable
     private IInAppBillingService iInAppBillingService;
+    @NonNull
     private ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -54,6 +61,7 @@ public class BillingFragment extends Fragment {
         }
     };
 
+    @NonNull
     public static BillingFragment newInstance() {
         BillingFragment fragment = new BillingFragment();
         Bundle args = new Bundle();
@@ -94,6 +102,7 @@ public class BillingFragment extends Fragment {
         Log.d(TAG, "onDestroy");
     }
 
+    @Nullable
     public Bundle queryAvailableItems() {
 
         Log.d(TAG, "Querying products");
@@ -121,6 +130,7 @@ public class BillingFragment extends Fragment {
         return iInAppBillingService != null;
     }
 
+    @Nullable
     public Bundle getPurchases() {
         try {
             Bundle bundle = iInAppBillingService.getPurchases(3, packageName, "inapp", null);

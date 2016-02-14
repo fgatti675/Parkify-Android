@@ -3,6 +3,7 @@ package com.cahue.iweco;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.support.annotation.NonNull;
 
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.util.PreferencesUtil;
@@ -26,8 +27,8 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-                                          String key) {
+    public void onSharedPreferenceChanged(@NonNull SharedPreferences sharedPreferences,
+                                          @NonNull String key) {
 
         if (key.equals(PreferencesUtil.PREF_MOVEMENT_RECOGNITION)) {
             boolean enableBtPreferences = sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true);

@@ -3,8 +3,7 @@ package com.cahue.iweco.login;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
-import java.util.Date;
+import android.support.annotation.Nullable;
 
 /**
  * Created by Francesco on 27/02/2015.
@@ -47,16 +46,19 @@ public class AuthUtils {
                 .apply();
     }
 
+    @Nullable
     public static String getLoggedUsername(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(PREF_USER_NAME, null);
     }
 
+    @Nullable
     public static String getEmail(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(PREF_USER_EMAIL, null);
     }
 
+    @Nullable
     public static String getProfilePicURL(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(PREF_USER_PICTURE_URL, null);

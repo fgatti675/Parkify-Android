@@ -2,6 +2,7 @@ package com.cahue.iweco.locationServices;
 
 import android.content.Context;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -28,7 +29,7 @@ public class CarMovedService extends LocationPollerService {
     private final static String TAG = CarMovedService.class.getSimpleName();
 
     @Override
-    protected boolean checkPreconditions(Car car) {
+    protected boolean checkPreconditions(@NonNull Car car) {
         if(BuildConfig.DEBUG) return true;
         long now = Calendar.getInstance().getTimeInMillis();
         if (car.time == null) return true;
@@ -40,7 +41,7 @@ public class CarMovedService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location spotLocation, Car car, Date startTime, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(@NonNull Context context, @NonNull Location spotLocation, @NonNull Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         CarDatabase carDatabase = CarDatabase.getInstance(context);
 
@@ -65,8 +66,7 @@ public class CarMovedService extends LocationPollerService {
     }
 
 
-
-    private void clearGeofence(final Car car, GoogleApiClient googleApiClient) {
+    private void clearGeofence(@NonNull final Car car, GoogleApiClient googleApiClient) {
         LocationServices.GeofencingApi.removeGeofences(
                 googleApiClient,
                 Arrays.asList(car.id)

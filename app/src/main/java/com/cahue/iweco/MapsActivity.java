@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -122,9 +123,10 @@ public class MapsActivity extends AppCompatActivity
     /**
      * If we get a new car position while we are using the app, we update the map
      */
+    @Nullable
     private final BroadcastReceiver carUpdateReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, @NonNull Intent intent) {
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId != null) {
                 Log.i(TAG, "Car update received: " + carId);
@@ -133,6 +135,7 @@ public class MapsActivity extends AppCompatActivity
         }
     };
 
+    @NonNull
     private Set<AbstractMarkerDelegate> delegates = new HashSet<>();
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -157,6 +160,7 @@ public class MapsActivity extends AppCompatActivity
      */
     private boolean mSkippedLogin;
 
+    @Nullable
     private LoginType loginType;
 
 
@@ -174,10 +178,12 @@ public class MapsActivity extends AppCompatActivity
     /**
      * Last component to request a camera update
      */
+    @Nullable
     private CameraUpdateRequester lastCameraUpdateRequester;
     /**
      *
      */
+    @NonNull
     private Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
     private MapFragment mapFragment;
     private boolean locationPermissionCurrentlyRequested = false;
@@ -203,7 +209,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
@@ -391,7 +397,7 @@ public class MapsActivity extends AppCompatActivity
         handleIntent(intent);
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(@Nullable Intent intent) {
         if (intent != null && intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST)) {
             initialCameraSet = true;
 
@@ -491,7 +497,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -557,7 +563,7 @@ public class MapsActivity extends AppCompatActivity
      * @return
      */
     @NonNull
-    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(ParkingSpot spot) {
+    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(@NonNull ParkingSpot spot) {
         PossibleParkedCarDelegate possibleParkedCarDelegate =
                 (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(spot));
         if (possibleParkedCarDelegate == null) {
@@ -797,7 +803,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
 
         super.onSaveInstanceState(savedInstanceState);
 
@@ -969,7 +975,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMapLongClick(LatLng latLng) {
+    public void onMapLongClick(@NonNull LatLng latLng) {
         Log.d(TAG, "Long tap event " + latLng.latitude + " " + latLng.longitude);
 
         Location location = new Location(Util.TAPPED_PROVIDER);
@@ -1094,7 +1100,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void doCameraUpdate(CameraUpdate cameraUpdate, final CameraUpdateRequester cameraUpdateRequester) {
+    public void doCameraUpdate(@NonNull CameraUpdate cameraUpdate, final CameraUpdateRequester cameraUpdateRequester) {
 
         if (mMap == null) return;
 

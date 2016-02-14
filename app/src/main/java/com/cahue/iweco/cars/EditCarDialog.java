@@ -6,6 +6,8 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -24,6 +26,7 @@ public class EditCarDialog extends DialogFragment {
     private final static String TAG = EditCarDialog.class.getSimpleName();
     private static final String ARG_CAR = "arg_car";
     private static final String ARG_NEW_CAR = "arg_new_car";
+    @Nullable
     Car car;
     boolean newCar;
     private CarEditedListener mListener;
@@ -35,6 +38,7 @@ public class EditCarDialog extends DialogFragment {
      * @param car Car being edited
      * @return A new instance of fragment MarkerDetailsFragment.
      */
+    @NonNull
     public static EditCarDialog newInstance(Car car, boolean newCar) {
         EditCarDialog fragment = new EditCarDialog();
         Bundle args = new Bundle();
@@ -45,7 +49,7 @@ public class EditCarDialog extends DialogFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         // Verify that the host activity implements the callback interface
         try {

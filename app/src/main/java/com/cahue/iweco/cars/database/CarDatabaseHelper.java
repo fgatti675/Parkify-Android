@@ -3,6 +3,7 @@ package com.cahue.iweco.cars.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.model.Car;
@@ -62,14 +63,14 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(@NonNull SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_CAR_ENTRIES);
         db.execSQL(SQL_ADD_OTHER_CAR);
         db.execSQL(SQL_CREATE_POSSIBLE_SPOTS_ENTRIES);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
 
         // add address column
         if (oldVersion < 3) {

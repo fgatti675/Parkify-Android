@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -32,7 +33,7 @@ public class CarsSync {
 
     private static final String TAG = CarsSync.class.getSimpleName();
 
-    public static void updateCarFromPossibleSpot(CarDatabase carDatabase, Context context, Car car, ParkingSpot spot) {
+    public static void updateCarFromPossibleSpot(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car, @NonNull ParkingSpot spot) {
 
         Log.i(TAG, "Updating car " + car + " " + spot);
 
@@ -50,7 +51,7 @@ public class CarsSync {
             postCar(car, context, carDatabase);
     }
 
-    public static void storeCar(CarDatabase carDatabase, Context context, Car car) {
+    public static void storeCar(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car) {
         Log.i(TAG, "Storing car " + car);
 
         if (BuildConfig.DEBUG)
@@ -67,7 +68,7 @@ public class CarsSync {
      *
      * @param car
      */
-    public static void clearLocation(CarDatabase carDatabase, Context context, Car car) {
+    public static void clearLocation(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car) {
 
         car.spotId = null;
         car.time = null;
@@ -78,7 +79,7 @@ public class CarsSync {
     }
 
 
-    public static void remove(final Context context, final Car car, final CarDatabase database) {
+    public static void remove(@NonNull final Context context, @NonNull final Car car, @NonNull final CarDatabase database) {
         // Instantiate the RequestQueue.
         RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
@@ -112,7 +113,7 @@ public class CarsSync {
                     },
                     new Response.ErrorListener() {
                         @Override
-                        public void onErrorResponse(VolleyError error) {
+                        public void onErrorResponse(@NonNull VolleyError error) {
                             Util.createUpperToast(context, R.string.delete_error, Toast.LENGTH_SHORT);
                             database.saveCarAndBroadcast(car);
                             error.printStackTrace();
@@ -132,7 +133,7 @@ public class CarsSync {
      *
      * @param context
      */
-    public static void postCar(Car car, final Context context, final CarDatabase carDatabase) {
+    public static void postCar(@NonNull Car car, @NonNull final Context context, @NonNull final CarDatabase carDatabase) {
 
         if (car.isOther()) return;
 
@@ -157,7 +158,7 @@ public class CarsSync {
                 jsonRequest,
                 new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(@NonNull JSONObject response) {
                         Log.d(TAG, response.toString());
                         Car car = Car.fromJSON(response);
                         carDatabase.updateSpotId(car);
@@ -165,7 +166,7 @@ public class CarsSync {
                 },
                 new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error) {
+                    public void onErrorResponse(@NonNull VolleyError error) {
                         error.printStackTrace();
                     }
                 });
@@ -185,7 +186,7 @@ public class CarsSync {
      * but the user is not actively waiting for that data, you should omit this flag; this will give
      * the OS additional freedom in scheduling your sync request.
      */
-    public static void TriggerRefresh(Context context, Account account) {
+    public static void TriggerRefresh(@NonNull Context context, Account account) {
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);

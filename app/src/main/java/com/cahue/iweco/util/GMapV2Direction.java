@@ -1,5 +1,7 @@
 package com.cahue.iweco.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -29,7 +31,8 @@ public class GMapV2Direction {
     public GMapV2Direction() {
     }
 
-    public Document getDocument(LatLng start, LatLng end, String mode) {
+    @Nullable
+    public Document getDocument(@NonNull LatLng start, @NonNull LatLng end, String mode) {
         String url = "http://maps.googleapis.com/maps/api/directions/xml?"
                 + "origin=" + start.latitude + "," + start.longitude
                 + "&destination=" + end.latitude + "," + end.longitude
@@ -43,7 +46,7 @@ public class GMapV2Direction {
                     future,
                     new Response.ErrorListener() {
                         @Override
-                        public void onErrorResponse(VolleyError error) {
+                        public void onErrorResponse(@NonNull VolleyError error) {
                             error.printStackTrace();
                         }
                     }) ;
@@ -57,7 +60,7 @@ public class GMapV2Direction {
                 DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 Document doc = builder.parse(stream);
                 return doc;
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (@NonNull InterruptedException | ExecutionException e) {
             }
 
         } catch (Exception e) {
@@ -66,7 +69,7 @@ public class GMapV2Direction {
         return null;
     }
 
-    public String getDurationText(Document doc) {
+    public String getDurationText(@NonNull Document doc) {
         try {
 
             NodeList nl1 = doc.getElementsByTagName("duration");
@@ -80,7 +83,7 @@ public class GMapV2Direction {
         }
     }
 
-    public int getDurationValue(Document doc) {
+    public int getDurationValue(@NonNull Document doc) {
         try {
             NodeList nl1 = doc.getElementsByTagName("duration");
             Node node1 = nl1.item(0);
@@ -93,7 +96,7 @@ public class GMapV2Direction {
         }
     }
 
-    public String getDistanceText(Document doc) {
+    public String getDistanceText(@NonNull Document doc) {
     /*
      * while (en.hasMoreElements()) { type type = (type) en.nextElement();
      *
@@ -126,7 +129,7 @@ public class GMapV2Direction {
      */
     }
 
-    public int getDistanceValue(Document doc) {
+    public int getDistanceValue(@NonNull Document doc) {
         try {
             NodeList nl1 = doc.getElementsByTagName("distance");
             Node node1 = null;
@@ -148,7 +151,7 @@ public class GMapV2Direction {
      */
     }
 
-    public String getStartAddress(Document doc) {
+    public String getStartAddress(@NonNull Document doc) {
         try {
             NodeList nl1 = doc.getElementsByTagName("start_address");
             Node node1 = nl1.item(0);
@@ -160,7 +163,7 @@ public class GMapV2Direction {
 
     }
 
-    public String getEndAddress(Document doc) {
+    public String getEndAddress(@NonNull Document doc) {
         try {
             NodeList nl1 = doc.getElementsByTagName("end_address");
             Node node1 = nl1.item(0);
@@ -171,7 +174,7 @@ public class GMapV2Direction {
         }
     }
 
-    public String getCopyRights(Document doc) {
+    public String getCopyRights(@NonNull Document doc) {
         try {
             NodeList nl1 = doc.getElementsByTagName("copyrights");
             Node node1 = nl1.item(0);
@@ -183,7 +186,8 @@ public class GMapV2Direction {
 
     }
 
-    public ArrayList<LatLng> getDirection(Document doc) {
+    @NonNull
+    public ArrayList<LatLng> getDirection(@Nullable Document doc) {
         NodeList nl1, nl2, nl3;
         ArrayList<LatLng> listGeopoints = new ArrayList<LatLng>();
         if(doc == null)
@@ -226,7 +230,7 @@ public class GMapV2Direction {
         return listGeopoints;
     }
 
-    private int getNodeIndex(NodeList nl, String nodename) {
+    private int getNodeIndex(@NonNull NodeList nl, String nodename) {
         for (int i = 0; i < nl.getLength(); i++) {
             if (nl.item(i).getNodeName().equals(nodename))
                 return i;
@@ -234,7 +238,8 @@ public class GMapV2Direction {
         return -1;
     }
 
-    private ArrayList<LatLng> decodePoly(String encoded) {
+    @NonNull
+    private ArrayList<LatLng> decodePoly(@NonNull String encoded) {
         ArrayList<LatLng> poly = new ArrayList<LatLng>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;

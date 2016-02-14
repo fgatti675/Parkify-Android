@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
@@ -30,7 +32,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
     public TextView address;
     public ImageView carImage;
 
-    public CarViewHolder(View itemView) {
+    public CarViewHolder(@NonNull View itemView) {
 
         super(itemView);
 
@@ -45,7 +47,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
         address = (TextView) itemView.findViewById(R.id.address);
     }
 
-    public void bind(Context context, final Car car, Location userLastLocation, BluetoothAdapter btAdapter) {
+    public void bind(@NonNull Context context, @NonNull final Car car, Location userLastLocation, @NonNull BluetoothAdapter btAdapter) {
 
         if (car.isOther()) {
             name.setText(context.getResources().getText(R.string.other));
@@ -93,7 +95,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
 
     }
 
-    private void updateAddress(Car car) {
+    private void updateAddress(@NonNull Car car) {
         if (car.address != null) {
             address.setText(car.address);
             address.setVisibility(View.VISIBLE);
@@ -105,7 +107,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    private void updateTime(Car car) {
+    private void updateTime(@NonNull Car car) {
         if (car.location != null && car.time != null) {
             time.setText(DateUtils.getRelativeTimeSpanString(car.time.getTime()));
             time.setVisibility(View.VISIBLE);
@@ -114,7 +116,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    public void updateDistance(Context context, Location userLocation, Location carLocation) {
+    public void updateDistance(Context context, @Nullable Location userLocation, @Nullable Location carLocation) {
         if (userLocation != null && carLocation != null) {
             float distanceM = carLocation.distanceTo(userLocation);
             if (PreferencesUtil.isUseMiles(context)) {

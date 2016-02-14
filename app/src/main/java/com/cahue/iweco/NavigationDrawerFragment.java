@@ -11,6 +11,8 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -56,6 +58,7 @@ public class NavigationDrawerFragment extends Fragment {
     /**
      * A pointer to the current callbacks instance (the Activity).
      */
+    @Nullable
     private OnCarClickedListener mCallbacks;
 
     /**
@@ -76,6 +79,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private Navigation navigation;
 
+    @NonNull
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
@@ -94,8 +98,10 @@ public class NavigationDrawerFragment extends Fragment {
     private AdView adView;
 
     private BillingFragment billingFragment;
+    @Nullable
     private BroadcastReceiver billingReadyReceiver;
 
+    @NonNull
     private BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -103,6 +109,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
     };
 
+    @NonNull
     private BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -126,7 +133,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         mDrawerListView = (RelativeLayout) inflater.inflate(
@@ -459,8 +466,9 @@ public class NavigationDrawerFragment extends Fragment {
 
         }
 
+        @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
             /**
              * Car
@@ -559,7 +567,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         }
 
-        private void bindCarManager(MenuViewHolder menuViewHolder) {
+        private void bindCarManager(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.edit_cars);
             menuViewHolder.icon.setImageResource(R.drawable.ic_edit_primary_blue_24dp);
             menuViewHolder.divider.setVisibility(View.VISIBLE);
@@ -573,7 +581,7 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindShare(MenuViewHolder menuViewHolder) {
+        private void bindShare(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.share);
             menuViewHolder.subtitle.setText(R.string.and_remove_ads);
             menuViewHolder.subtitle.setVisibility(View.VISIBLE);
@@ -587,7 +595,7 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindDonate(MenuViewHolder menuViewHolder) {
+        private void bindDonate(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.donate);
             menuViewHolder.icon.setImageResource(R.drawable.ic_favorite_24dp);
             menuViewHolder.subtitle.setText(R.string.and_remove_ads);
@@ -602,7 +610,7 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindPreferences(MenuViewHolder menuViewHolder) {
+        private void bindPreferences(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.preferences);
             menuViewHolder.icon.setImageResource(R.drawable.ic_settings_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -614,7 +622,7 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindHelp(MenuViewHolder menuViewHolder) {
+        private void bindHelp(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.help);
             menuViewHolder.icon.setImageResource(R.drawable.ic_help_circle);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -626,7 +634,7 @@ public class NavigationDrawerFragment extends Fragment {
             });
         }
 
-        private void bindSignOut(MenuViewHolder menuViewHolder) {
+        private void bindSignOut(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(skippedLogin ? R.string.sign_in : R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -651,7 +659,7 @@ public class NavigationDrawerFragment extends Fragment {
             public View divider;
             public View itemView;
 
-            public MenuViewHolder(View itemView) {
+            public MenuViewHolder(@NonNull View itemView) {
                 super(itemView);
                 this.itemView = itemView;
                 icon = (ImageView) itemView.findViewById(R.id.icon);

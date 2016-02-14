@@ -4,6 +4,7 @@ package com.cahue.iweco.cars.sync;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 /** Service to handle sync requests.
@@ -21,6 +22,7 @@ public class SyncService extends Service {
     private static final String TAG = "SyncService";
 
     private static final Object sSyncAdapterLock = new Object();
+    @Nullable
     private static SyncAdapter sSyncAdapter = null;
 
     /**

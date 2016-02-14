@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -105,7 +106,7 @@ public class DonateDialog extends DialogFragment {
             }
 
             @Override
-            protected void onPostExecute(Bundle skuDetails) {
+            protected void onPostExecute(@NonNull Bundle skuDetails) {
 
                 int response = skuDetails.getInt("RESPONSE_CODE");
 

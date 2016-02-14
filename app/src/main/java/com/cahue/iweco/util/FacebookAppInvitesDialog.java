@@ -10,6 +10,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -25,7 +26,7 @@ public class FacebookAppInvitesDialog extends DialogFragment {
 
     private static final String TAG = FacebookAppInvitesDialog.class.getSimpleName();
 
-    public static void showAppInviteDialog(final MapsActivity activity) {
+    public static void showAppInviteDialog(@NonNull final MapsActivity activity) {
 
         AppInviteDialog appInviteDialog = new AppInviteDialog(activity);
 
@@ -38,7 +39,7 @@ public class FacebookAppInvitesDialog extends DialogFragment {
         appInviteDialog.registerCallback(activity.getFacebookCallbackManager(),
                 new FacebookCallback<AppInviteDialog.Result>() {
                     @Override
-                    public void onSuccess(AppInviteDialog.Result result) {
+                    public void onSuccess(@NonNull AppInviteDialog.Result result) {
                         Log.d(TAG, "onSuccess: ");
                         PreferencesUtil.setAdsRemoved(activity, true);
                         activity.sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));

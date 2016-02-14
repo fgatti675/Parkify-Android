@@ -1,5 +1,7 @@
 package com.cahue.iweco.login;
 
+import android.support.annotation.NonNull;
+
 import com.cahue.iweco.model.Car;
 
 import org.json.JSONArray;
@@ -28,7 +30,8 @@ public class LoginResultBean {
 
     String authToken;
 
-    public static LoginResultBean fromJSON(JSONObject json) {
+    @NonNull
+    public static LoginResultBean fromJSON(@NonNull JSONObject json) {
         try {
             LoginResultBean loginResultBean = new LoginResultBean();
 

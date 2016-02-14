@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.android.volley.toolbox.RequestFuture;
@@ -42,12 +44,14 @@ public class Authenticator extends AbstractAccountAuthenticator {
         this.mContext = context;
     }
 
+    @NonNull
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse accountAuthenticatorResponse,
                                  String s) {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response,
                              String accountType,
@@ -66,6 +70,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
     }
 
+    @Nullable
     @Override
     public Bundle confirmCredentials(AccountAuthenticatorResponse accountAuthenticatorResponse,
                                      Account account, Bundle bundle)
@@ -73,8 +78,9 @@ public class Authenticator extends AbstractAccountAuthenticator {
         return null;
     }
 
+    @NonNull
     @Override
-    public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
+    public Bundle getAuthToken(AccountAuthenticatorResponse response, @NonNull Account account, String authTokenType, Bundle options) throws NetworkErrorException {
 
         // Extract the username and password from the Account Manager, and ask
         // the server for an appropriate AuthToken.
@@ -134,17 +140,19 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         try {
             return future.get(); // this will block
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (@NonNull InterruptedException | ExecutionException e) {
             // exception handling
             return null;
         }
     }
 
+    @NonNull
     @Override
     public String getAuthTokenLabel(String s) {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle updateCredentials(AccountAuthenticatorResponse accountAuthenticatorResponse,
                                     Account account, String s, Bundle bundle)
@@ -152,6 +160,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
         throw new UnsupportedOperationException();
     }
 
+    @NonNull
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse accountAuthenticatorResponse,
                               Account account, String[] strings)

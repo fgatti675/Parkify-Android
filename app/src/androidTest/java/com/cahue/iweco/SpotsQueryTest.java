@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.test.ActivityTestCase;
 import android.util.Log;
 
@@ -63,7 +64,7 @@ public class SpotsQueryTest extends ActivityTestCase {
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
 
                     @Override
-                    public void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result) {
+                    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull QueryResult result) {
                         spots.addAll(result.spots);
                         signal.countDown();
                     }

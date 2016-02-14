@@ -3,6 +3,8 @@ package com.cahue.iweco.tutorial;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,18 +19,20 @@ import com.cahue.iweco.R;
  */
 public class TutorialInstructionsFragment extends Fragment {
 
+    public static final String TYPE_SPOTS = "SPOTS";
+    public static final String TYPE_PARKING = "PARKING";
     private static final String ARG_HEADER_RES_ID = "ARG_HEADER_RES_ID";
     private static final String ARG_TEXT_RES_ID = "ARG_TEXT_RES_ID";
     private static final String ARG_TYPE = "ARG_TYPE";
-
-    public static final String TYPE_SPOTS = "SPOTS";
-
-    public static final String TYPE_PARKING = "PARKING";
-
     private int headerResId;
     private int textResId;
 
+    @Nullable
     private String type;
+
+    public TutorialInstructionsFragment() {
+        // Required empty public constructor
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -36,6 +40,7 @@ public class TutorialInstructionsFragment extends Fragment {
      *
      * @return A new instance of fragment TutorialWelcome.
      */
+    @NonNull
     public static TutorialInstructionsFragment newInstance(int headerResId, int textResId, String type) {
         TutorialInstructionsFragment fragment = new TutorialInstructionsFragment();
         Bundle args = new Bundle();
@@ -44,10 +49,6 @@ public class TutorialInstructionsFragment extends Fragment {
         args.putString(ARG_TYPE, type);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public TutorialInstructionsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -63,7 +64,7 @@ public class TutorialInstructionsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tutorial_instructions, container, false);
@@ -72,6 +73,7 @@ public class TutorialInstructionsFragment extends Fragment {
         return view;
     }
 
+    @Nullable
     public String getType() {
         return type;
     }

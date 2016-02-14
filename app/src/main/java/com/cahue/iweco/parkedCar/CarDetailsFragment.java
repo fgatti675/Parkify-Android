@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,15 +41,19 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     CarViewHolder carViewHolder;
     ParkedCarDelegate parkedCarDelegate;
     private Location userLocation;
+    @Nullable
     private String carId;
+    @Nullable
     private Car car;
+    @Nullable
     private OnCarPositionDeletedListener mListener;
     private CarDatabase carDatabase;
 
+    @NonNull
     private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, @NonNull Intent intent) {
             String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
             if (carId.equals(CarDetailsFragment.this.carId)) {
                 Log.d(TAG, "Received car update request" + carId);
@@ -68,6 +74,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
      *
      * @return A new instance of fragment CarDetailsFragment.
      */
+    @NonNull
     public static CarDetailsFragment newInstance(String carId) {
         CarDetailsFragment fragment = new CarDetailsFragment();
         Bundle args = new Bundle();
@@ -124,7 +131,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater,
+    public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -156,7 +163,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         try {
             mListener = (OnCarPositionDeletedListener) activity;
@@ -190,7 +197,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem menuItem) {
+    public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
         // Handle presses on the action bar items
         switch (menuItem.getItemId()) {
             case R.id.action_follow:

@@ -2,6 +2,7 @@ package com.cahue.iweco.parkedCar;
 
 import android.content.Context;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -30,7 +31,7 @@ public class ParkedCarService extends LocationPollerService {
     }
 
     @Override
-    public void onPreciseFixPolled(Context context, Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
+    public void onPreciseFixPolled(@NonNull Context context, Location location, @NonNull Car car, Date startTime, GoogleApiClient googleApiClient) {
 
         Log.i(TAG, "Received : " + location);
 

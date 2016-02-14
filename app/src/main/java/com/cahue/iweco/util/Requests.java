@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -39,6 +40,32 @@ public class Requests {
     public static final String AUTH_HEADER = "Authorization";
     public static final String DEVICE_HEADER = "Device";
 
+    @NonNull
+    public static Map<String, String> generateHeaders(@NonNull Context context) {
+
+        Map<String, String> headers = new HashMap<>();
+
+        AccountManager accountManager = AccountManager.get(context);
+        final Account availableAccounts[] = accountManager.getAccountsByType(context.getString(R.string.account_type));
+
+        String authToken = null;
+        try {
+            if (availableAccounts.length > 0)
+                authToken = accountManager.blockingGetAuthToken(availableAccounts[0], Authenticator.AUTH_TOKEN_TYPE, false);
+        } catch (@NonNull OperationCanceledException | IOException | AuthenticatorException e) {
+            e.printStackTrace();
+        }
+
+        if (authToken != null)
+            headers.put(AUTH_HEADER, authToken);
+
+        String regId = GCMUtil.getRegistrationId(context);
+        if (regId != null)
+            headers.put(DEVICE_HEADER, regId);
+
+        return headers;
+    }
+
     /**
      * Post a Form
      */
@@ -55,6 +82,7 @@ public class Requests {
                     BACKOFF_MULTIPLIER));
         }
 
+        @NonNull
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             return generateHeaders(context);
@@ -77,6 +105,7 @@ public class Requests {
                     BACKOFF_MULTIPLIER));
         }
 
+        @NonNull
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             return generateHeaders(context);
@@ -90,7 +119,7 @@ public class Requests {
 
         private final Context context;
 
-        public JsonArrayPostRequest(Context context, String url, JSONArray jsonArray, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
+        public JsonArrayPostRequest(Context context, String url, @NonNull JSONArray jsonArray, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
             super(Method.POST, url, jsonArray.toString(), listener, errorListener);
             this.context = context;
             setRetryPolicy(new DefaultRetryPolicy(
@@ -99,14 +128,16 @@ public class Requests {
                     BACKOFF_MULTIPLIER));
         }
 
+        @NonNull
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             return generateHeaders(context);
         }
 
         // Need this cause we cant extend a standard class, because the cant get json arrays as a parameter
+        @NonNull
         @Override
-        protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+        protected Response<JSONArray> parseNetworkResponse(@NonNull NetworkResponse response) {
             try {
                 String jsonString =
                         new String(response.data, HttpHeaderParser.parseCharset(response.headers));
@@ -136,14 +167,16 @@ public class Requests {
                     BACKOFF_MULTIPLIER));
         }
 
+        @NonNull
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             return generateHeaders(context);
         }
 
         // Need this cause we cant extend a standard class, because the cant get json arrays as a parameter
+        @NonNull
         @Override
-        protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+        protected Response<JSONArray> parseNetworkResponse(@NonNull NetworkResponse response) {
             try {
                 String jsonString =
                         new String(response.data, HttpHeaderParser.parseCharset(response.headers));
@@ -171,35 +204,11 @@ public class Requests {
                     BACKOFF_MULTIPLIER));
         }
 
+        @NonNull
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
             return generateHeaders(context);
         }
-    }
-
-    public static Map<String, String> generateHeaders(Context context) {
-
-        Map<String, String> headers = new HashMap<>();
-
-        AccountManager accountManager = AccountManager.get(context);
-        final Account availableAccounts[] = accountManager.getAccountsByType(context.getString(R.string.account_type));
-
-        String authToken = null;
-        try {
-            if (availableAccounts.length > 0)
-                authToken = accountManager.blockingGetAuthToken(availableAccounts[0], Authenticator.AUTH_TOKEN_TYPE, false);
-        } catch (OperationCanceledException | IOException | AuthenticatorException e) {
-            e.printStackTrace();
-        }
-
-        if (authToken != null)
-            headers.put(AUTH_HEADER, authToken);
-
-        String regId = GCMUtil.getRegistrationId(context);
-        if (regId != null)
-            headers.put(DEVICE_HEADER, regId);
-
-        return headers;
     }
 
 

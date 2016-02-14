@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
@@ -55,7 +56,7 @@ public class RatingDialog extends DialogFragment {
         return new Date(prefs.getLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, 0));
     }
 
-    public static void setRateDialogDate(Context context, Date date) {
+    public static void setRateDialogDate(Context context, @NonNull Date date) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, date.getTime()).apply();
     }

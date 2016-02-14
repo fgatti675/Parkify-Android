@@ -5,6 +5,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +35,7 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
 
     private static final String ARG_SPOT = "arg_spot";
 
+    @Nullable
     private ParkingSpot spot;
 
     private CarDatabase carDatabase;
@@ -51,6 +54,7 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
      *
      * @return A new instance of fragment LongTapSetCarDetailsFragment.
      */
+    @NonNull
     public static DetailsFragment newInstance(ParkingSpot spot) {
         DetailsFragment fragment = new LongTapSetCarDetailsFragment();
         Bundle args = new Bundle();
@@ -80,7 +84,7 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_long_tap_set_car_details, container, false);
         if (spot != null) {
@@ -165,7 +169,7 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
+        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
 
             if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
                 return;

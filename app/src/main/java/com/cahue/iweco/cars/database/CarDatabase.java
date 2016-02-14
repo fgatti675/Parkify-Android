@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -65,7 +67,7 @@ public class CarDatabase {
         this.context = context;
     }
 
-    public static CarDatabase getInstance(Context ctx) {
+    public static CarDatabase getInstance(@NonNull Context ctx) {
         /**
          * use the application context as suggested by CommonsWare.
          * this will ensure that you dont accidentally leak an Activitys
@@ -81,6 +83,7 @@ public class CarDatabase {
     /**
      * Create the 'Other' car
      */
+    @NonNull
     public Car generateOtherCar() {
         Car car = new Car();
         car.id = Car.OTHER_ID;
@@ -92,7 +95,7 @@ public class CarDatabase {
      *
      * @param cars
      */
-    public void clearSaveAndBroadcast(Collection<Car> cars) {
+    public void clearSaveAndBroadcast(@NonNull Collection<Car> cars) {
 
         cars.add(generateOtherCar());
 
@@ -123,7 +126,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateSpotId(Car car) {
+    public void updateSpotId(@NonNull Car car) {
 
         Log.i(TAG, "Updating spot: " + car);
 
@@ -150,7 +153,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateAddress(Car car) {
+    public void updateAddress(@NonNull Car car) {
 
         Log.i(TAG, "Updating address: " + car);
 
@@ -177,7 +180,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void saveCarAndBroadcast(Car car) {
+    public void saveCarAndBroadcast(@NonNull Car car) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -203,7 +206,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateCarRemoveSpotAndBroadcast(Car car, ParkingSpot spot) {
+    public void updateCarRemoveSpotAndBroadcast(@NonNull Car car, @NonNull ParkingSpot spot) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -227,7 +230,7 @@ public class CarDatabase {
     /**
      * Tell everyone interested that this car was updated
      */
-    private void broadCastCarUpdate(Car car) {
+    private void broadCastCarUpdate(@NonNull Car car) {
 
         Log.d(TAG, "Sending car update broadcast");
 
@@ -242,7 +245,8 @@ public class CarDatabase {
      * @param car
      * @return
      */
-    private ContentValues createCarContentValues(Car car) {
+    @NonNull
+    private ContentValues createCarContentValues(@NonNull Car car) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, car.id);
         values.put(COLUMN_NAME, car.name);
@@ -262,6 +266,7 @@ public class CarDatabase {
     }
 
 
+    @NonNull
     public Set<String> getPairedBTAddresses() {
         Set<String> addresses = new HashSet<>();
 
@@ -295,6 +300,7 @@ public class CarDatabase {
      * @param includeOther Should the "Other" car be included
      * @return
      */
+    @NonNull
     public List<String> getCarIds(boolean includeOther) {
         List<String> ids = new ArrayList<>();
 
@@ -331,6 +337,7 @@ public class CarDatabase {
      * @param includeOther Should the "Other" car be included
      * @return
      */
+    @NonNull
     public List<Car> retrieveCars(boolean includeOther) {
         List<Car> cars = new ArrayList<>();
 
@@ -364,6 +371,7 @@ public class CarDatabase {
      *
      * @return
      */
+    @NonNull
     public List<Car> retrieveParkedCars() {
         List<Car> cars = new ArrayList<>();
 
@@ -393,6 +401,7 @@ public class CarDatabase {
     }
 
 
+    @Nullable
     public Car findCar(String id) {
 
         Log.d(TAG, "Querying car by ID: " + id);
@@ -422,6 +431,7 @@ public class CarDatabase {
 
     }
 
+    @Nullable
     public Car findCarByBTAddress(String btAddress) {
         Car car;
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -450,7 +460,8 @@ public class CarDatabase {
     }
 
 
-    private Car cursorToCar(Cursor cursor) {
+    @NonNull
+    private Car cursorToCar(@NonNull Cursor cursor) {
 
         Car car = new Car();
         car.id = cursor.getString(0);
@@ -491,7 +502,7 @@ public class CarDatabase {
         }
     }
 
-    public void deleteCar(Car car) {
+    public void deleteCar(@NonNull Car car) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
@@ -536,7 +547,7 @@ public class CarDatabase {
         }
     }
 
-    public void addPossibleParkingSpot(ParkingSpot spot) {
+    public void addPossibleParkingSpot(@NonNull ParkingSpot spot) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
 
@@ -575,7 +586,8 @@ public class CarDatabase {
      * @param spot
      * @return
      */
-    private ContentValues createSpotContentValues(ParkingSpot spot) {
+    @NonNull
+    private ContentValues createSpotContentValues(@NonNull ParkingSpot spot) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_LATITUDE, spot.location.getLatitude());
         values.put(COLUMN_LONGITUDE, spot.location.getLongitude());
@@ -591,6 +603,7 @@ public class CarDatabase {
      *
      * @return
      */
+    @NonNull
     public List<ParkingSpot> retrievePossibleParkingSpots() {
         List<ParkingSpot> spots = new ArrayList<>();
 
@@ -624,7 +637,7 @@ public class CarDatabase {
      *
      * @param spot
      */
-    public void removeParkingSpot(ParkingSpot spot) {
+    public void removeParkingSpot(@NonNull ParkingSpot spot) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -638,7 +651,8 @@ public class CarDatabase {
 
     }
 
-    private ParkingSpot cursorToSpot(Cursor cursor) {
+    @NonNull
+    private ParkingSpot cursorToSpot(@NonNull Cursor cursor) {
 
         double latitude = cursor.getDouble(0);
         double longitude = cursor.getDouble(1);

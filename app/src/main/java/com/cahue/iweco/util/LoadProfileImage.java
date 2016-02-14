@@ -3,6 +3,7 @@ package com.cahue.iweco.util;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -18,6 +19,7 @@ public class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
         this.bmImage = bmImage;
     }
 
+    @Nullable
     protected Bitmap doInBackground(String... urls) {
         String urldisplay = urls[0];
         if (urldisplay == null || urldisplay.isEmpty())

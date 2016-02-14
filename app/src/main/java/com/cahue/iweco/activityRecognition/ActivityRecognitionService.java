@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -43,14 +44,14 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      *
      * @param context
      */
-    public static void startIfNoBT(Context context) {
+    public static void startIfNoBT(@NonNull Context context) {
         if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
             startIfEnabled(context);
         }
 
     }
 
-    public static void startIfEnabled(Context context) {
+    public static void startIfEnabled(@NonNull Context context) {
 
         if (!PreferencesUtil.isMovementRecognitionEnabled(context)) {
             return;
@@ -69,7 +70,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         }
     }
 
-    public static void stop(Context context) {
+    public static void stop(@NonNull Context context) {
         Intent intent = new Intent(context, ActivityRecognitionService.class);
         intent.setAction(Constants.ACTION_STOP_ACTIVITY_RECOGNITION);
         context.startService(intent);
@@ -110,7 +111,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
 
         this.intent = intent;
         this.startId = startId;
