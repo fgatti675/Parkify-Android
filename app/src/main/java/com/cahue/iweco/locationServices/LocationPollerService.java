@@ -178,10 +178,13 @@ public abstract class LocationPollerService extends Service implements
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
+        Log.d(TAG, "onLocationChanged: " + location);
+
         Date now = new Date();
 
         // do nothing before a few seconds
         if (now.getTime() - startTime.getTime() < MINIMUM_TIME_MS) {
+            Log.d(TAG, "Doing nothing because not enough time passed");
             return;
         }
 
