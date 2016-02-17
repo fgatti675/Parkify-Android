@@ -80,9 +80,7 @@ public class GcmIntentService extends IntentService {
                     if (deletedCarId != null)
                         deleteCar(URLDecoder.decode(deletedCarId, "UTF-8"));
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
+                } catch (JSONException | UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
 
@@ -100,7 +98,7 @@ public class GcmIntentService extends IntentService {
         CarDatabase.getInstance(this).saveCarAndBroadcast(car);
     }
 
-    private void deleteCar(String carId) throws JSONException {
+    private void deleteCar(String carId) {
         CarDatabase database = CarDatabase.getInstance(this);
         database.deleteCar(carId);
     }

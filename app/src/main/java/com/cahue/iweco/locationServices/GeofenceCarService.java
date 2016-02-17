@@ -44,7 +44,7 @@ public class GeofenceCarService extends LocationPollerService {
      * Result receiver that will send a notification when we are approaching a parked car.
      */
     @NonNull
-    private ResultReceiver geofenceResultReceiver = new ResultReceiver(new Handler()) {
+    private final ResultReceiver geofenceResultReceiver = new ResultReceiver(new Handler()) {
         @Override
         protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
 
@@ -236,9 +236,9 @@ public class GeofenceCarService extends LocationPollerService {
                         .setContentTitle("Approaching " + car.name);
 
         if (location != null)
-            mBuilder.setContentText(String.format("Distance: %d meters", location.distanceTo(car.location)));
+            mBuilder.setContentText(String.format("Distance: %f meters", location.distanceTo(car.location)));
 
-        int id = (int) Math.random();
+        int id = (int) (Math.random() * 10000);
         mNotifyMgr.notify("" + id, id, mBuilder.build());
     }
 
@@ -253,7 +253,7 @@ public class GeofenceCarService extends LocationPollerService {
                         .setContentTitle("Geofence ERROR for " + car.name)
                         .setContentText(error);
 
-        int id = (int) Math.random();
+        int id = (int) (Math.random() * 10000);
         mNotifyMgr.notify("" + id, id, mBuilder.build());
     }
 
@@ -267,7 +267,7 @@ public class GeofenceCarService extends LocationPollerService {
                         .setSmallIcon(R.drawable.crosshairs_gps)
                         .setContentTitle("Geofence set for " + car.name);
 
-        int id = (int) Math.random();
+        int id = (int) (Math.random() * 10000);
         mNotifyMgr.notify("" + id, id, mBuilder.build());
     }
 

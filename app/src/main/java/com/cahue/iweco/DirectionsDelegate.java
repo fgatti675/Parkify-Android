@@ -24,28 +24,28 @@ public class DirectionsDelegate {
     private static final String TAG = DirectionsDelegate.class.getSimpleName();
 
     private static final int DIRECTIONS_EXPIRY = 15000;
-    public boolean displayed = false;
-    private Polyline directionsPolyline;
     /**
      * Actual lines representing the directions PolyLine
      */
-    private List<LatLng> directionPoints;
+    private final List<LatLng> directionPoints;
+    /**
+     * Directions delegate
+     */
+    private final GMapV2Direction gMapV2Direction;
+    public boolean displayed = false;
+    private Polyline directionsPolyline;
     /**
      * Task for loading directions
      */
     @Nullable
     private AsyncTask<Object, Object, Document> directionsAsyncTask;
-    /**
-     * Directions delegate
-     */
-    private GMapV2Direction gMapV2Direction;
     @Nullable
     private Date lastDirectionsUpdate;
     private GoogleMap mMap;
     private int color;
 
     public DirectionsDelegate() {
-        directionPoints = new ArrayList<LatLng>();
+        directionPoints = new ArrayList<>();
         gMapV2Direction = new GMapV2Direction();
     }
 
@@ -126,8 +126,7 @@ public class DirectionsDelegate {
             @Override
             protected Document doInBackground(Object[] objects) {
                 Log.d(TAG, "Fetching directions");
-                Document doc = gMapV2Direction.getDocument(from, to, mode);
-                return doc;
+                return gMapV2Direction.getDocument(from, to, mode);
             }
 
             @Override

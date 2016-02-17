@@ -26,9 +26,9 @@ public class EditCarDialog extends DialogFragment {
     private final static String TAG = EditCarDialog.class.getSimpleName();
     private static final String ARG_CAR = "arg_car";
     private static final String ARG_NEW_CAR = "arg_new_car";
-    @Nullable
-    Car car;
     boolean newCar;
+    @Nullable
+    private Car car;
     private CarEditedListener mListener;
 
     /**

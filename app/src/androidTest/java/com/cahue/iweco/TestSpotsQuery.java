@@ -13,7 +13,7 @@ public class TestSpotsQuery extends ParkingSpotsQuery {
 
     private static final String TAG = TestSpotsQuery.class.getSimpleName();
 
-    protected LatLngBounds latLngBounds;
+    protected final LatLngBounds latLngBounds;
 
     public TestSpotsQuery(Context context, LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         super(context, listener);

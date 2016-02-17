@@ -22,7 +22,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
 
     private final int[] colorsValues;
     private final String[] colorNames;
-    private Context context;
+    private final Context context;
 
     public ColorSpinnerAdapter(@NonNull Context context) {
         this.context = context;

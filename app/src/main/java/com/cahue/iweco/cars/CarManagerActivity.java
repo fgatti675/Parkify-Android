@@ -30,8 +30,6 @@ public class CarManagerActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Tracking.sendView(Tracking.CATEGORY_CAR_MANAGER);
-
         setContentView(R.layout.activity_car_manager);
 
         /**
@@ -55,6 +53,12 @@ public class CarManagerActivity
         devicesBeingLoaded(loading);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Tracking.sendView(Tracking.CATEGORY_CAR_MANAGER);
+    }
 
     @Override
     protected void onPause() {

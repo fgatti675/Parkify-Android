@@ -10,11 +10,11 @@ import android.support.annotation.Nullable;
  */
 public class AuthUtils {
 
-    public static final String PREF_SKIPPED_LOGGED_IN = "PREF_SKIPPED_LOGGED_IN";
-    public static final String PREF_USER_NAME = "PREF_USER_NAME";
-    public static final String PREF_USER_EMAIL = "PREF_USER_EMAIL";
-    public static final String PREF_USER_PICTURE_URL = "PREF_USER_PICTURE_URL";
-    public static final String PREF_LOGIN_DATE = "PREF_LOGIN_DATE";
+    private static final String PREF_SKIPPED_LOGGED_IN = "PREF_SKIPPED_LOGGED_IN";
+    private static final String PREF_USER_NAME = "PREF_USER_NAME";
+    private static final String PREF_USER_EMAIL = "PREF_USER_EMAIL";
+    private static final String PREF_USER_PICTURE_URL = "PREF_USER_PICTURE_URL";
+    private static final String PREF_LOGIN_DATE = "PREF_LOGIN_DATE";
 
     public static void setSkippedLogin(Context context, boolean skipped) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

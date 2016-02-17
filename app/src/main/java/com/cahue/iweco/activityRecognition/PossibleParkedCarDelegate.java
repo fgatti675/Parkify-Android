@@ -36,10 +36,10 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     private static final String ARG_SPOT = "spot";
 
     @Nullable
-    ParkingSpot spot;
+    private ParkingSpot spot;
 
     @Nullable
-    Marker marker;
+    private Marker marker;
 
     private IconGenerator iconGenerator;
     private boolean following;

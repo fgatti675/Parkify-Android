@@ -124,7 +124,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     }
 
     @Override
-    public void setUserLocation(Location userLocation) {
+    public void setUserLocation(@Nullable Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
         if (view != null) {

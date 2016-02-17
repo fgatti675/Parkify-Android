@@ -34,14 +34,14 @@ import java.util.Map;
  */
 public class Requests {
 
-    public static final int RETRIES = 5;
-    public static final int BACKOFF_MULTIPLIER = 2;
+    private static final int RETRIES = 5;
+    private static final int BACKOFF_MULTIPLIER = 2;
 
-    public static final String AUTH_HEADER = "Authorization";
-    public static final String DEVICE_HEADER = "Device";
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String DEVICE_HEADER = "Device";
 
     @NonNull
-    public static Map<String, String> generateHeaders(@NonNull Context context) {
+    private static Map<String, String> generateHeaders(@NonNull Context context) {
 
         Map<String, String> headers = new HashMap<>();
 

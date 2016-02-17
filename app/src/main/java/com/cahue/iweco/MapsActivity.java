@@ -136,34 +136,29 @@ public class MapsActivity extends AppCompatActivity
     };
 
     @NonNull
-    private Set<AbstractMarkerDelegate> delegates = new HashSet<>();
-
+    private final Set<AbstractMarkerDelegate> delegates = new HashSet<>();
+    /**
+     *
+     */
+    @NonNull
+    private final Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
     private AccountManager mAccountManager;
-
     private CarDatabase carDatabase;
-
     private Toolbar mToolbar;
-
     private FloatingActionButton myLocationButton;
     private CardView detailsContainer;
     private DetailsFragment detailsFragment;
-
     private boolean detailsDisplayed = false;
     private boolean cameraFollowing;
-
     /**
      * The user didn't log in, but we still love him
      */
     private boolean mSkippedLogin;
-
     @Nullable
     private LoginType loginType;
-
-
     private CallbackManager mFacebookCallbackManager;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -180,11 +175,6 @@ public class MapsActivity extends AppCompatActivity
      */
     @Nullable
     private CameraUpdateRequester lastCameraUpdateRequester;
-    /**
-     *
-     */
-    @NonNull
-    private Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
     private MapFragment mapFragment;
     private boolean locationPermissionCurrentlyRequested = false;
 
@@ -212,8 +202,6 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
-        Tracking.sendView(Tracking.CATEGORY_MAP);
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
@@ -343,6 +331,8 @@ public class MapsActivity extends AppCompatActivity
     protected void onResume() {
 
         super.onResume();
+
+        Tracking.sendView(Tracking.CATEGORY_MAP);
 
         delegates.clear();
 
@@ -497,7 +487,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -508,7 +498,6 @@ public class MapsActivity extends AppCompatActivity
                     Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
                 }
                 locationPermissionCurrentlyRequested = false;
-                return;
             }
         }
     }
@@ -733,7 +722,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         Log.w(TAG, "onConnectionFailed");
         goToLogin();
     }
@@ -832,7 +821,7 @@ public class MapsActivity extends AppCompatActivity
         if (mGoogleApiClient.isConnected() && loginType == LoginType.Google) {
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
-                public void onResult(Status status) {
+                public void onResult(@NonNull Status status) {
                     Log.d(TAG, "Google Signed out!");
                 }
             });

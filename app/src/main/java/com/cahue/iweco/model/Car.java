@@ -52,7 +52,7 @@ public class Car implements Parcelable {
     @Nullable
     public String address;
 
-    public Car(@NonNull Parcel parcel) {
+    private Car(@NonNull Parcel parcel) {
         id = parcel.readString();
         name = parcel.readString();
         btAddress = parcel.readString();

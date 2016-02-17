@@ -35,14 +35,16 @@ public class ParkingSpot implements Parcelable {
                     return new ParkingSpot[size];
                 }
             };
-    private static long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
-    private static long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
+    private static final long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
+    private static final long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
+
     @Nullable
     public final Long id;
     public final Location location;
     public final Date time;
 
     public final boolean future;
+
     @Nullable
     public String address;
     private LatLng latLng;
@@ -59,7 +61,7 @@ public class ParkingSpot implements Parcelable {
         future = parcel.readByte() != 0;
     }
 
-    public ParkingSpot(Long id, Location location, String address, Date time, boolean future) {
+    public ParkingSpot(@Nullable Long id, Location location, @Nullable String address, Date time, boolean future) {
         this.id = id;
         this.location = location;
         this.address = address;

@@ -27,8 +27,10 @@ import java.util.Set;
 public abstract class ParkingSpotsQuery {
 
     private static final String TAG = ParkingSpotsQuery.class.getSimpleName();
-    protected Context context;
-    protected ParkingSpotsUpdateListener listener;
+
+    protected final Context context;
+    private final ParkingSpotsUpdateListener listener;
+
     public ParkingSpotsQuery(Context context, ParkingSpotsUpdateListener listener) {
         this.context = context;
         this.listener = listener;

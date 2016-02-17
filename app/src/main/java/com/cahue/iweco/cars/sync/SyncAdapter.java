@@ -33,7 +33,7 @@ import java.util.Set;
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final String TAG = SyncAdapter.class.getSimpleName();
-    private CarDatabase database;
+    private final CarDatabase database;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);

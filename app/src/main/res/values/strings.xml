@@ -73,7 +73,7 @@
     <string name="new_app" >New app!</string>
 
 
-    <string name="rating_message">You would really help us if you gave us a good rating in Play Store :)</string>
+    <string name="rating_message">You would really help us if you gave us a good rating in the Play Store :)</string>
     <string name="like_question" >Do you like this app?</string>
     <string name="rate">Rate</string>
 
@@ -86,5 +86,5 @@
 
 
     <string name="deprecated">Hey! This app is moving and this version will not be maintained. Get the new one clicking on this text!</string>
-    <string name="myAppFree">You have unlocked a special content for free by using myAppFree</string>
+    <string name="myAppFree">You have unlocked a special content for free by using myAppFree. No ads!!</string>
 </resources>

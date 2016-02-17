@@ -56,21 +56,6 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         delegateManager = null;

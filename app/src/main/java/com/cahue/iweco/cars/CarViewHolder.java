@@ -23,14 +23,14 @@ import com.cahue.iweco.util.PreferencesUtil;
  */
 public class CarViewHolder extends RecyclerView.ViewHolder {
 
-    public View cardView;
-    public Toolbar toolbar;
-    public TextView linkedDevice;
-    public TextView name;
-    public TextView time;
-    public TextView distance;
-    public TextView address;
-    public ImageView carImage;
+    public final View cardView;
+    public final Toolbar toolbar;
+    public final TextView linkedDevice;
+    public final TextView name;
+    public final TextView time;
+    public final TextView distance;
+    public final TextView address;
+    public final ImageView carImage;
 
     public CarViewHolder(@NonNull View itemView) {
 

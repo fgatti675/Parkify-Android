@@ -29,8 +29,8 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
     private final LoginListener loginResultListener;
     private final String registrationId;
     private final String authToken;
-    private Context context;
-    private LoginType type;
+    private final Context context;
+    private final LoginType type;
 
     public LoginAsyncTask(String gcmId, String authToken, LoginListener loginResultListener, Context context, LoginType type) {
         this.registrationId = gcmId;
@@ -94,8 +94,7 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
             Log.i(TAG, "Post result: " + jsonResult);
 
             return loginResultBean;
-        } catch (InterruptedException e) {
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
         }
 
         return null;

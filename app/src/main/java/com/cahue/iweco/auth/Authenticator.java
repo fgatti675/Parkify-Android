@@ -27,16 +27,14 @@ import java.util.concurrent.ExecutionException;
 public class Authenticator extends AbstractAccountAuthenticator {
 
 
-    public static final String ARG_ACCOUNT_TYPE = "arg_account_type";
-    public static final String ARG_AUTH_TOKEN_TYPE = "arg_auth_token_type";
-
     public static final String AUTH_TOKEN_TYPE = "iweco_cars";
     public static final String USER_ID = "user_id";
     public static final String LOGIN_TYPE = "login_type";
     public static final String LOGIN_DATE = "login_time";
-
-    private ParkifyAccountService parkifyAccountService;
-    private Context mContext;
+    private static final String ARG_ACCOUNT_TYPE = "arg_account_type";
+    private static final String ARG_AUTH_TOKEN_TYPE = "arg_auth_token_type";
+    private final ParkifyAccountService parkifyAccountService;
+    private final Context mContext;
 
     public Authenticator(ParkifyAccountService parkifyAccountService, Context context) {
         super(context);

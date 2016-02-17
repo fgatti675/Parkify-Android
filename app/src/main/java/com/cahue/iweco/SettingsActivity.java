@@ -1,16 +1,10 @@
 package com.cahue.iweco;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-
-import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
-import com.cahue.iweco.util.PreferencesUtil;
 
 /**
  * Created by f.gatti.gomez on 08/07/15.

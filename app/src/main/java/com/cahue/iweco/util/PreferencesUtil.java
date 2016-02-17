@@ -20,8 +20,8 @@ public class PreferencesUtil {
      */
     public static final String PREF_LONG_CLICK_SHOWN = "PREF_LONG_CLICK_SHOWN";
     public static final String PREF_RATED_DIALOG_ACCEPTED = "PREF_RATED_DIALOG_ACCEPTED";
-    public static final String PREF_RATED_DIALOG_SHOWN = "PREF_RATED_DIALOG_SHOWN";
     public static final String PREF_RATED_DIALOG_SHOWN_DATE = "PREF_RATED_DIALOG_SHOWN_DATE";
+    public static final String PREF_RATED_DIALOG_NEXT_INTERVAL_DAYS = "PREF_RATED_DIALOG_NEXT_INTERVAL_DAYS";
     public static final String PREF_TUTORIAL_SHOWN = "PREF_DIALOG_SHOWN";
     public static final String PREF_FACEBOOK_INVITES_DIALOG_SHOWN = "PREF_FACEBOOK_INVITES_DIALOG_SHOWN";
     public static final String PREF_UNINSTALL_WIMC_SHOWN = "PREF_UNINSTALL_WIMC_SHOWN";
@@ -88,12 +88,11 @@ public class PreferencesUtil {
         LatLng latLng = new LatLng(
                 (double) prefs.getInt(PREF_CAMERA_LAT, 0) / 10E6,
                 (double) prefs.getInt(PREF_CAMERA_LONG, 0) / 10E6);
-        CameraUpdate update = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+
+        return CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                 .target(latLng)
                 .zoom(prefs.getFloat(PREF_CAMERA_ZOOM, 12))
                 .build());
-
-        return update;
     }
 
     public static boolean isWIMCUninstallDialogShown(Context context) {
@@ -124,7 +123,6 @@ public class PreferencesUtil {
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
                 .remove(PREF_TUTORIAL_SHOWN)
                 .remove(PREF_LONG_CLICK_SHOWN)
-                .remove(PREF_RATED_DIALOG_SHOWN)
                 .apply();
     }
 

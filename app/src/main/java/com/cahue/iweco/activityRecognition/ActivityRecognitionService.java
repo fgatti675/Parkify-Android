@@ -26,7 +26,7 @@ import com.google.android.gms.location.ActivityRecognition;
  */
 public class ActivityRecognitionService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    public static final long DETECTION_INTERVAL_IN_MILLISECONDS = 5000;
+    private static final long DETECTION_INTERVAL_IN_MILLISECONDS = 5000;
 
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
 
@@ -168,7 +168,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 

@@ -215,7 +215,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     @Override
     public void onCarEdited(@NonNull Car car, boolean newCar) {
 
-        int carPosition = 0;
+        int carPosition;
         if (newCar) {
             cars.add(car);
             selectedDeviceAddresses.add(car.btAddress);
@@ -432,8 +432,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     public final static class DeviceViewHolder extends RecyclerView.ViewHolder {
 
-        private View layout;
-        private TextView title;
+        private final View layout;
+        private final TextView title;
 
         public DeviceViewHolder(@NonNull View view) {
             super(view);
@@ -527,7 +527,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
              */
             else if (viewType == BT_DEVICE_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
-                        inflate(R.layout.list_item_device,
+                        inflate(R.layout.layout_item_device,
                                 viewGroup,
                                 false);
 
@@ -624,7 +624,6 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         private final int initialMargin;
 
         public FirstItemDecoration(@NonNull Context context) {
-            float dimension = context.getResources().getDimension(R.dimen.default_padding);
             initialMargin = (int) context.getResources().getDimension(R.dimen.default_padding);
         }
 

@@ -14,8 +14,8 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class ParkifyApp extends Application {
 
-    public static GoogleAnalytics analytics;
-    public static Tracker tracker;
+    private static GoogleAnalytics analytics;
+    private static Tracker tracker;
     private static ParkifyApp parkifyApp;
     private RequestQueue mRequestQueue;
 
@@ -43,7 +43,7 @@ public class ParkifyApp extends Application {
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
         tracker.enableAdvertisingIdCollection(true);
-        tracker.enableAutoActivityTracking(true);
+//        tracker.enableAutoActivityTracking(true);
 
         // Strict mode
         if (BuildConfig.DEBUG) {

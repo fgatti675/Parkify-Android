@@ -34,17 +34,17 @@ public class BillingFragment extends Fragment {
     private static final String TAG = BillingFragment.class.getSimpleName();
 
     @NonNull
-    private static String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
+    private static final String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
     @NonNull
-    private static String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
+    private static final String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
     @NonNull
-    private static String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
+    private static final String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
 
     private String packageName;
     @Nullable
     private IInAppBillingService iInAppBillingService;
     @NonNull
-    private ServiceConnection mBillingServiceConn = new ServiceConnection() {
+    private final ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             iInAppBillingService = null;
@@ -56,7 +56,7 @@ public class BillingFragment extends Fragment {
             /**
              * Tell everyone the billing service is ready
              */
-            if(getActivity() != null)
+            if (getActivity() != null)
                 getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
         }
     };
@@ -108,7 +108,7 @@ public class BillingFragment extends Fragment {
         Log.d(TAG, "Querying products");
 
         try {
-            ArrayList<String> skuList = new ArrayList<String>();
+            ArrayList<String> skuList = new ArrayList<>();
             if (BuildConfig.DEBUG) {
                 skuList.add("android.test.purchased");
                 skuList.add("android.test.canceled");
@@ -133,8 +133,7 @@ public class BillingFragment extends Fragment {
     @Nullable
     public Bundle getPurchases() {
         try {
-            Bundle bundle = iInAppBillingService.getPurchases(3, packageName, "inapp", null);
-            return bundle;
+            return iInAppBillingService.getPurchases(3, packageName, "inapp", null);
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
@@ -151,7 +150,7 @@ public class BillingFragment extends Fragment {
 //            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
 //            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
 
-            if (resultCode == getActivity().RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
 //                try {
 //                    JSONObject jo = new JSONObject(purchaseData);
 //                    String sku = jo.getString("productId");
@@ -182,13 +181,10 @@ public class BillingFragment extends Fragment {
                 Util.createUpperToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
             } else {
                 getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
-                        1001, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
-                        Integer.valueOf(0));
+                        1001, new Intent(), 0, 0, 0);
             }
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (IntentSender.SendIntentException e) {
+        } catch (RemoteException | IntentSender.SendIntentException e) {
             e.printStackTrace();
         }
     }

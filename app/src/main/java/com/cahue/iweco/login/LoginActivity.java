@@ -47,7 +47,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.myappfree.appvalidator.AppValidator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,8 +89,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
-        Tracking.sendView(Tracking.CATEGORY_LOGIN);
 
         gcm = GoogleCloudMessaging.getInstance(this);
 
@@ -182,16 +179,22 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         });
 
 
-        // TODO remove
-        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
-            @Override
-            public void validated() {
-                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-                PreferencesUtil.setAdsRemoved(LoginActivity.this, true);
-                AppValidator.showDialog(LoginActivity.this, getString(R.string.myAppFree));
-            }
-        });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Tracking.sendView(Tracking.CATEGORY_LOGIN);
+
+        // TODO remove
+//        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
+//            @Override
+//            public void validated() {
+//                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+//                PreferencesUtil.setAdsRemoved(LoginActivity.this, true);
+//                AppValidator.showDialog(LoginActivity.this, getString(R.string.myAppFree));
+//            }
+//        });
     }
 
     public void onLoginSkipped() {
@@ -294,9 +297,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             public void run() {
                 try {
                     GoogleAuthUtil.clearToken(LoginActivity.this, authToken);
-                } catch (GoogleAuthException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                } catch (GoogleAuthException | IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -503,7 +504,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
 }
 

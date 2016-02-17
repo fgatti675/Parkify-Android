@@ -38,25 +38,23 @@ public class TutorialActivity extends AppCompatActivity
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    private ViewPager mViewPager;
 
-    Button next;
-    Button previous;
-    Button ok;
+    private Button next;
+    private Button previous;
+    private Button ok;
 
-    ProgressBar progressBar;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
-        Tracking.sendView(Tracking.CATEGORY_TUTORIAL);
 
         setContentView(R.layout.activity_tutorial);
 
@@ -122,6 +120,13 @@ public class TutorialActivity extends AppCompatActivity
         mViewPager.setOffscreenPageLimit(TOTAL_NUMBER_PAGES - 1);
         mViewPager.setOnPageChangeListener(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Tracking.sendView(Tracking.CATEGORY_TUTORIAL);
     }
 
     @Override

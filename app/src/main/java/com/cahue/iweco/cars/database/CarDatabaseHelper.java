@@ -16,12 +16,12 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Schema version.
      */
-    public static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 5;
 
     /**
      * Filename for SQLite file.
      */
-    public static final String DATABASE_NAME = "cars.db";
+    private static final String DATABASE_NAME = "cars.db";
 
     private static final String TYPE_TEXT = " TEXT";
     private static final String TYPE_INTEGER = " INTEGER";

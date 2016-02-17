@@ -73,7 +73,7 @@ public abstract class LocationPollerService extends Service implements
 
 
     @Nullable
-    private Runnable finishTimeoutRunnable = new Runnable() {
+    private final Runnable finishTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "Handler finished " + LocationPollerService.this.getClass().getSimpleName() + " service");
@@ -198,7 +198,6 @@ public abstract class LocationPollerService extends Service implements
 
         if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
             notifyFixLocation(bestAccuracyLocation);
-            return;
         }
 
     }
@@ -241,7 +240,7 @@ public abstract class LocationPollerService extends Service implements
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.w(TAG, "GoogleApiClient connection has failed");
         stopSelf();
     }

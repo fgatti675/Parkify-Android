@@ -15,9 +15,10 @@ public class NearestSpotsQuery extends ParkingSpotsQuery {
     private static final String TAG = NearestSpotsQuery.class.getSimpleName();
 
     @Nullable
-    protected LatLng center;
+    private LatLng center;
+
     @Nullable
-    protected Integer limit;
+    private Integer limit;
 
 
     public NearestSpotsQuery(Context context, @Nullable LatLng center, @Nullable Integer limit, ParkingSpotsUpdateListener listener) {

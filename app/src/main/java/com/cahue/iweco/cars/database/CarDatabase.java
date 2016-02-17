@@ -51,7 +51,8 @@ public class CarDatabase {
             COLUMN_ADDRESS,
             COLUMN_SPOT_ID
     };
-    public static final String[] SPOT_PROJECTION = new String[]{
+
+    private static final String[] SPOT_PROJECTION = new String[]{
             COLUMN_LATITUDE,
             COLUMN_LONGITUDE,
             COLUMN_ACCURACY,
@@ -61,7 +62,7 @@ public class CarDatabase {
     private static final int MAX_POSSIBLE_SPOTS = 5;
     private static final String TAG = CarDatabase.class.getSimpleName();
     private static CarDatabase mInstance;
-    private Context context;
+    private final Context context;
 
     private CarDatabase(Context context) {
         this.context = context;

@@ -19,8 +19,8 @@ import java.util.List;
  */
 public class CarButtonAdapter extends BaseAdapter {
 
-    private OnCarClickedListener carSelectedListener;
-    private List<Car> cars;
+    private final OnCarClickedListener carSelectedListener;
+    private final List<Car> cars;
 
     public CarButtonAdapter(OnCarClickedListener carSelectedListener, List<Car> cars) {
         this.carSelectedListener = carSelectedListener;

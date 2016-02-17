@@ -50,7 +50,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     private CarDatabase carDatabase;
 
     @NonNull
-    private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, @NonNull Intent intent) {

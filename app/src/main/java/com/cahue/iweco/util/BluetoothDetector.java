@@ -17,12 +17,11 @@ import com.cahue.iweco.parkedCar.ParkedCarService;
 
 import java.util.Set;
 
+/**
+ * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
+ */
 public class BluetoothDetector extends BroadcastReceiver {
 
-
-    /**
-     * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
-     */
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 
@@ -74,7 +73,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         ActivityRecognitionService.startIfEnabled(context);
     }
 
-    public void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
+    private void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
 
         /**
          * Stop activity recognition
@@ -91,7 +90,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
     }
 
-    public void onBtDisconnectedFromCar(@NonNull Context context, @NonNull Car car) {
+    private void onBtDisconnectedFromCar(@NonNull Context context, @NonNull Car car) {
 
         Log.d("Bluetooth", "onBtDisconnectedFromCar");
 

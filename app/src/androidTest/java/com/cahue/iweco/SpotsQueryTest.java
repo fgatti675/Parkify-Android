@@ -56,7 +56,7 @@ public class SpotsQueryTest extends ActivityTestCase {
                 .include(new LatLng(48.123913, 11.553905))
                 .build();
 
-        final List<ParkingSpot> spots = new ArrayList<ParkingSpot>();
+        final List<ParkingSpot> spots = new ArrayList<>();
 
         final ParkingSpotsQuery parkingSpotsQuery = new TestSpotsQuery(
                 getActivity(),

@@ -74,13 +74,8 @@ public class NavigationDrawerFragment extends Fragment {
     private LinearLayoutManager layoutManager;
     private RecyclerViewDrawerAdapter adapter;
     private List<Car> cars;
-
-    private Location mLastUserLocation;
-
-    private Navigation navigation;
-
     @NonNull
-    private BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -89,33 +84,31 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
     };
+    private Location mLastUserLocation;
+    private Navigation navigation;
     private View userDetailsView;
     private ImageView userImage;
     private TextView usernameTextView;
     private TextView emailTextView;
     private boolean skippedLogin;
-
-    private AdView adView;
-
-    private BillingFragment billingFragment;
-    @Nullable
-    private BroadcastReceiver billingReadyReceiver;
-
     @NonNull
-    private BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            adView.setVisibility(View.GONE);
-        }
-    };
-
-    @NonNull
-    private BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             setUpUserDetails();
         }
     };
+    private AdView adView;
+    @NonNull
+    private final BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            adView.setVisibility(View.GONE);
+        }
+    };
+    private BillingFragment billingFragment;
+    @Nullable
+    private BroadcastReceiver billingReadyReceiver;
 
     public NavigationDrawerFragment() {
     }
@@ -321,6 +314,8 @@ public class NavigationDrawerFragment extends Fragment {
                     return;
                 }
 
+                Tracking.sendView(Tracking.CATEGORY_NAVIGATION_DRAWER);
+
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -381,11 +376,6 @@ public class NavigationDrawerFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         adView.destroy();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -653,11 +643,11 @@ public class NavigationDrawerFragment extends Fragment {
 
         public class MenuViewHolder extends RecyclerView.ViewHolder {
 
-            public ImageView icon;
-            public TextView title;
-            public TextView subtitle;
-            public View divider;
-            public View itemView;
+            public final ImageView icon;
+            public final TextView title;
+            public final TextView subtitle;
+            public final View divider;
+            public final View itemView;
 
             public MenuViewHolder(@NonNull View itemView) {
                 super(itemView);

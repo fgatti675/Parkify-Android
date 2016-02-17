@@ -58,8 +58,7 @@ public class GMapV2Direction {
                 InputStream stream = new ByteArrayInputStream(future.get().getBytes());
 
                 DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                Document doc = builder.parse(stream);
-                return doc;
+                return builder.parse(stream);
             } catch (@NonNull InterruptedException | ExecutionException e) {
             }
 
@@ -189,7 +188,7 @@ public class GMapV2Direction {
     @NonNull
     public ArrayList<LatLng> getDirection(@Nullable Document doc) {
         NodeList nl1, nl2, nl3;
-        ArrayList<LatLng> listGeopoints = new ArrayList<LatLng>();
+        ArrayList<LatLng> listGeopoints = new ArrayList<>();
         if(doc == null)
             return listGeopoints;
 
@@ -240,7 +239,7 @@ public class GMapV2Direction {
 
     @NonNull
     private ArrayList<LatLng> decodePoly(@NonNull String encoded) {
-        ArrayList<LatLng> poly = new ArrayList<LatLng>();
+        ArrayList<LatLng> poly = new ArrayList<>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
         while (index < len) {

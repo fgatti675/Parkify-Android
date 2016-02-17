@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 /**
  * Created by Francesco on 25/02/2015.
@@ -25,8 +26,8 @@ public class CarsProvider extends ContentProvider {
      * Return an empty String for MIME type
      */
     @Override
-    public String getType(Uri uri) {
-        return new String();
+    public String getType(@NonNull Uri uri) {
+        return "";
     }
 
     /*
@@ -35,32 +36,32 @@ public class CarsProvider extends ContentProvider {
      */
     @Override
     public Cursor query(
-            Uri uri,
-            String[] projection,
-            String selection,
-            String[] selectionArgs,
-            String sortOrder) {
+            @NonNull Uri uri,
+            @NonNull String[] projection,
+            @NonNull String selection,
+            @NonNull String[] selectionArgs,
+            @NonNull String sortOrder) {
         return null;
     }
     /*
      * insert() always returns null (no URI)
      */
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         return null;
     }
     /*
      * deleteCar() always returns "no rows affected" (0)
      */
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         return 0;
     }
     /*
      * update() always returns "no rows affected" (0)
      */
     public int update(
-            Uri uri,
+            @NonNull Uri uri,
             ContentValues values,
             String selection,
             String[] selectionArgs) {

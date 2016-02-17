@@ -2,7 +2,6 @@ package com.cahue.iweco.spots.query;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.cahue.iweco.R;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -15,7 +14,7 @@ public class AreaSpotsQuery extends ParkingSpotsQuery {
     private static final String TAG = AreaSpotsQuery.class.getSimpleName();
 
     private final Context context;
-    protected LatLngBounds latLngBounds;
+    private final LatLngBounds latLngBounds;
 
     public AreaSpotsQuery(Context context,LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         super(context, listener);

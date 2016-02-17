@@ -45,14 +45,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         implements ParkingSpotsQuery.ParkingSpotsUpdateListener,
         CameraUpdateRequester {
 
-    // distance we are adding to the bounds query on each one of the 4 sides to get also results outside the screen
-    public static final int OFFSET_METERS = 2000;
     public static final String FRAGMENT_TAG = "SPOTS_DELEGATE";
+    // distance we are adding to the bounds query on each one of the 4 sides to get also results outside the screen
+    private static final int OFFSET_METERS = 2000;
 
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    public final static float MAX_ZOOM = 4F;
+    private final static float MAX_ZOOM = 4F;
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     private static final String TAG = "SpotsDelegate";
@@ -73,7 +73,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private static final float MAX_DIRECTIONS_DISTANCE = 40000; // 40 km
 
     private final Handler handler = new Handler();
-    int displayedMarkers;
+    private int displayedMarkers;
     private Set<ParkingSpot> spots;
 
     private Map<ParkingSpot, Marker> spotMarkersMap;
@@ -546,7 +546,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         selectedSpot = null;
     }
 
-    public boolean updateCameraIfFollowing() {
+    private boolean updateCameraIfFollowing() {
 
         if (!isMapReady() || !isResumed()) return false;
 
@@ -558,7 +558,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     @NonNull
-    public LatLng getOffsetLatLng(@NonNull LatLng original, double offsetNorth, double offsetEast) {
+    private LatLng getOffsetLatLng(@NonNull LatLng original, double offsetNorth, double offsetEast) {
 
         // Coordinate offsets in radians
         double dLat = offsetNorth / EARTH_RADIUS;
@@ -582,7 +582,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     /**
      * This method zooms to see both user and the car.
      */
-    protected boolean zoomToSeeBoth() {
+    private boolean zoomToSeeBoth() {
 
         if (delegateManager == null)
             return false;

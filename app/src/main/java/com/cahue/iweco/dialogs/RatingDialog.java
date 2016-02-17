@@ -32,33 +32,43 @@ public class RatingDialog extends DialogFragment {
 
         Date lastDisplayed = getRateDialogLastDisplayed(context);
         if (lastDisplayed == null) {
-            setRateDialogDate(context, new Date());
+            setRateDialogLastDisplayed(context, new Date());
             return false;
         }
 
-        return (System.currentTimeMillis() - lastDisplayed.getTime()) > 6 * 24 * 60 * 60 * 1000;
+        return (System.currentTimeMillis() - lastDisplayed.getTime()) > (getNextShowIntervalDays(context) * 24 * 60 * 60 * 1000);
     }
 
-    public static boolean isDialogAccepted(Context context) {
+    private static boolean isDialogAccepted(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, false);
     }
 
-    public static void setRatedDialogShown(Context context, boolean shown) {
+    private static void setRatedDialogAccepted(Context context, boolean accepted) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PreferencesUtil.PREF_RATED_DIALOG_SHOWN, shown).apply();
+        prefs.edit().putBoolean(PreferencesUtil.PREF_RATED_DIALOG_ACCEPTED, accepted).apply();
     }
 
-    public static Date getRateDialogLastDisplayed(Context context) {
+    private static Date getRateDialogLastDisplayed(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         if (!prefs.contains(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE))
             return null;
         return new Date(prefs.getLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, 0));
     }
 
-    public static void setRateDialogDate(Context context, @NonNull Date date) {
+    private static void setRateDialogLastDisplayed(Context context, @NonNull Date date) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putLong(PreferencesUtil.PREF_RATED_DIALOG_SHOWN_DATE, date.getTime()).apply();
+    }
+
+    private static int getNextShowIntervalDays(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getInt(PreferencesUtil.PREF_RATED_DIALOG_NEXT_INTERVAL_DAYS, 6);
+    }
+
+    private static void setNextShowIntervalDays(Context context, int days) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putInt(PreferencesUtil.PREF_RATED_DIALOG_NEXT_INTERVAL_DAYS, days).apply();
     }
 
     @Override
@@ -73,18 +83,19 @@ public class RatingDialog extends DialogFragment {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID));
                         startActivity(intent);
-                        setRatedDialogShown(getActivity(), true);
+                        setRatedDialogAccepted(getActivity(), true);
                         Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_ACCEPT);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        setRatedDialogShown(getActivity(), true);
+                        int currentInterval = getNextShowIntervalDays(getActivity());
+                        setNextShowIntervalDays(getActivity(), currentInterval + 3);
                         Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_DISMISS);
                     }
                 });
 
-        setRateDialogDate(getActivity(), new Date());
+        setRateDialogLastDisplayed(getActivity(), new Date());
 
         // Create the AlertDialog object and return it
         return builder.create();

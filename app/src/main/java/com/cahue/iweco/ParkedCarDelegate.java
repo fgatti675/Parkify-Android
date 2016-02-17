@@ -265,8 +265,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         updateCameraIfFollowing();
     }
 
-
-    public boolean updateCameraIfFollowing() {
+    private boolean updateCameraIfFollowing() {
 
         if (!isMapReady() || !isResumed()) return false;
 
@@ -280,7 +279,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     /**
      * This method zooms to see both user and the car.
      */
-    protected boolean zoomToSeeBoth() {
+    private boolean zoomToSeeBoth() {
 
         if (delegateManager == null)
             return false;
