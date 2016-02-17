@@ -50,11 +50,11 @@ public class ParkifyApp extends Application {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectAll()   // or .detectAll() for all detectable problems
                     .penaltyLog()
+                    .penaltyFlashScreen()
                     .build());
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
-                    .penaltyDeath()
                     .build());
         }
     }

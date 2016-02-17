@@ -80,6 +80,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.myappfree.appvalidator.AppValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -304,6 +305,9 @@ public class MapsActivity extends AppCompatActivity
         detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
 
+        // Facebook callback registration
+        mFacebookCallbackManager = CallbackManager.Factory.create();
+
         // show help dialog only on first run of the app
         if (!PreferencesUtil.isTutorialShown(this)) {
             goToTutorial();
@@ -311,9 +315,22 @@ public class MapsActivity extends AppCompatActivity
         }
 
         checkLocationPermission();
+        myAppFree();
 
-        // Facebook callback registration
-        mFacebookCallbackManager = CallbackManager.Factory.create();
+    }
+
+    private void myAppFree() {
+//        AppValidator.DEBUG = true;
+
+        // TODO remove
+        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
+            @Override
+            public void validated() {
+                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+                PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
+                AppValidator.showDialog(MapsActivity.this, getString(R.string.myAppFree));
+            }
+        });
     }
 
     @Override
@@ -325,6 +342,7 @@ public class MapsActivity extends AppCompatActivity
         handleIntent(getIntent());
 
         mGoogleApiClient.connect();
+
     }
 
     @Override
@@ -762,6 +780,7 @@ public class MapsActivity extends AppCompatActivity
 
         if (requestCode == REQUEST_CODE_START_TUTORIAL) {
             checkLocationPermission();
+            myAppFree();
         } else if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
             BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
             billingFragment.onActivityResult(requestCode, resultCode, data);

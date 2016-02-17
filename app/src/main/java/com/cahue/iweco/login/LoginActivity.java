@@ -185,16 +185,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     protected void onResume() {
         super.onResume();
         Tracking.sendView(Tracking.CATEGORY_LOGIN);
-
-        // TODO remove
-//        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
-//            @Override
-//            public void validated() {
-//                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-//                PreferencesUtil.setAdsRemoved(LoginActivity.this, true);
-//                AppValidator.showDialog(LoginActivity.this, getString(R.string.myAppFree));
-//            }
-//        });
     }
 
     public void onLoginSkipped() {
