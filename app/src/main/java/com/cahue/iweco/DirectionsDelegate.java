@@ -71,7 +71,7 @@ public class DirectionsDelegate {
         if (directionPoints.isEmpty())
             return;
 
-        Log.d(TAG, "Drawing directions");
+        Log.v(TAG, "Drawing directions");
 
         PolylineOptions rectLine = new PolylineOptions().width(10).color(color);
 
@@ -100,7 +100,7 @@ public class DirectionsDelegate {
         if (from == null || to == null)
             return;
 
-        Log.d(TAG, "drawDirections " + directionPoints.size());
+        Log.v(TAG, "drawDirections " + directionPoints.size());
 
         displayed = true;
 

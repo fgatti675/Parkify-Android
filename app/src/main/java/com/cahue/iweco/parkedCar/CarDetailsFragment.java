@@ -54,7 +54,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         @Override
         public void onReceive(Context context, @NonNull Intent intent) {
-            String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
+            String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
             if (carId.equals(CarDetailsFragment.this.carId)) {
                 Log.d(TAG, "Received car update request" + carId);
                 car = carDatabase.findCar(carId);

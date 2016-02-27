@@ -22,7 +22,7 @@
             android:gravity="center"
             android:paddingTop="@dimen/default_padding"
             android:text="@string/info_parking_text_header"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <TextView
             android:id="@+id/textView"

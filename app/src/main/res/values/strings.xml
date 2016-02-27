@@ -85,6 +85,4 @@
     <string name="long_click_instructions">Long click to set your car\'s position. Next time it will be automatic!</string>
 
 
-    <string name="deprecated">Hey! This app is moving and this version will not be maintained. Get the new one clicking on this text!</string>
-    <string name="myAppFree">You have unlocked a special content for free by using myAppFree. No ads!!</string>
 </resources>

@@ -29,6 +29,10 @@
 
     </style>
 
+    <style name="CahueTheme.TranslucentBars">
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
     <style name="CahueTheme.Dark">
         <item name="android:colorBackground">@color/theme_primary</item>
 

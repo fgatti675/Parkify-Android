@@ -24,7 +24,7 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
 
         CarDatabase database = CarDatabase.getInstance(context);
 
-        String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
+        String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
         Car car = database.findCar(carId);
 
         // this should happen only if the user was logged out at that particular moment...
@@ -34,7 +34,7 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
             return;
         }
 
-        ParkingSpot possibleSpot = intent.getExtras().getParcelable(Constants.INTENT_SPOT_EXTRA);
+        ParkingSpot possibleSpot = intent.getExtras().getParcelable(Constants.EXTRA_SPOT);
 
         CarsSync.updateCarFromPossibleSpot(database, context, car, possibleSpot);
 

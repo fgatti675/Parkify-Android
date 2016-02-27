@@ -85,7 +85,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, CarMovedService.class);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
+        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
         context.startService(intent);
 
     }
@@ -97,7 +97,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         // we create an intent to start the location poller service, as declared in manifest
         Intent intent = new Intent();
         intent.setClass(context, ParkedCarService.class);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
+        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
         context.startService(intent);
 
         /**

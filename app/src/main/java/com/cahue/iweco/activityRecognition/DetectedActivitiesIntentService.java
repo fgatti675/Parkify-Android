@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
+import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -73,87 +74,125 @@ public class DetectedActivitiesIntentService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
+
         if (ActivityRecognitionResult.hasResult(intent)) {
+
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
-            handleDetectedActivities(result);
-        }
-    }
 
+            if (previousActivity == null)
+                previousActivity = getStoredDetectedActivity();
 
-    private void handleDetectedActivities(@NonNull ActivityRecognitionResult result) {
+            DetectedActivity mostProbableActivity = result.getMostProbableActivity();
 
-        if (previousActivity == null)
-            previousActivity = getStoredDetectedActivity();
+            // Check if still
+//        if (isStill(mostProbableActivity)) {
+//            stillCounter++;
+//            if (stillCounter > 5) {
+//                // reset if still for too long
+//                previousActivity = null;
+//                savePreviousActivity(null);
+//            }
+//        } else {
+//            stillCounter = 0;
+//        }
 
-        DetectedActivity mostProbableActivity = result.getMostProbableActivity();
-
-        // Check if still
-        if (isStill(mostProbableActivity)) {
-            stillCounter++;
-            if (stillCounter > 5) {
-                // reset if still for too long
-                previousActivity = null;
-                savePreviousActivity(null);
-            }
-        } else {
-            stillCounter = 0;
-        }
-
-        // check if really in a vehicle
-        if (isVehicleRelated(mostProbableActivity)) {
-            vehicleCounter++;
-            if (vehicleCounter > 3) definitelyInAVehicle = true;
-        } else {
-            vehicleCounter = 0;
-        }
-
-        // If not on foot or in vehicle we are not interested
-        if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
-            return;
-
-        // Log each activity.
-        Log.d(TAG, "Activities detected");
-        for (DetectedActivity da : result.getProbableActivities()) {
-            Log.v(TAG, da.toString());
-        }
-
-        if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                && mostProbableActivity.getConfidence() == 100) {
-
-            if (BuildConfig.DEBUG) {
-                showDebugNotification(result, mostProbableActivity);
+            // check if really in a vehicle
+            if (isVehicleRelated(mostProbableActivity)) {
+                vehicleCounter++;
+                if (vehicleCounter > 3) definitelyInAVehicle = true;
+            } else {
+                vehicleCounter = 0;
             }
 
-            if (previousActivity != null) {
+            // If not on foot or in vehicle we are not interested
+            if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
+                return;
 
-                // If switched to on foot, previously in vehicle
-                if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity) && definitelyInAVehicle) {
-                    handleVehicleToFoot();
-                } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
-                    handleFootToVehicle();
+            // Log each activity.
+            Log.d(TAG, "Activities detected");
+            for (DetectedActivity da : result.getProbableActivities()) {
+                Log.v(TAG, da.toString());
+            }
+
+            if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
+                    && mostProbableActivity.getConfidence() == 100) {
+
+                if (BuildConfig.DEBUG) {
+                    showDebugNotification(result, mostProbableActivity);
                 }
 
-                // reset this
-                definitelyInAVehicle = false;
+                if (previousActivity != null) {
+
+                    // If switched to on foot, previously in vehicle
+                    if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity) && definitelyInAVehicle) {
+                        handleVehicleToFoot();
+                    } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
+                        handleFootToVehicle();
+                    }
+
+                    // reset this
+                    definitelyInAVehicle = false;
+                }
+
+                previousActivity = mostProbableActivity;
+
+                savePreviousActivity(previousActivity);
             }
 
-            previousActivity = mostProbableActivity;
-
-            savePreviousActivity(previousActivity);
         }
-
     }
 
     private void handleVehicleToFoot() {
-        // we create an intent to start the location poller service, as declared in manifest
-        Intent intent = new Intent(this, PossibleParkedCarService.class);
-        this.startService(intent);
+        // notify change
+        Intent activityChangedIntent = new Intent(Constants.INTENT_ACTIVITY_CHANGED);
+        activityChangedIntent.setAction(Constants.ACTION_VEHICLE_TO_FOOT);
+        sendBroadcast(activityChangedIntent);
+
+        ActivityRecognitionService.startIfEnabled(this);
+
+        // start the location poller service, as declared in manifest
+        this.startService(new Intent(this, PossibleParkedCarService.class));
+
+        if (BuildConfig.DEBUG) {
+            long[] pattern = {0, 100, 1000};
+            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    new Notification.Builder(this)
+                            .setVibrate(pattern)
+                            .setSmallIcon(R.drawable.ic_access_time_black_18px)
+                            .setColor(getResources().getColor(R.color.theme_primary))
+                            .setContentTitle("Vehicle -> Foot");
+
+            mNotifyMgr.notify(null, 564543, mBuilder.build());
+        }
     }
 
     private void handleFootToVehicle() {
+
+        // notify change
+        Intent activityChangedIntent = new Intent(Constants.INTENT_ACTIVITY_CHANGED);
+        activityChangedIntent.setAction(Constants.ACTION_FOOT_TO_VEHICLE);
+        sendBroadcast(activityChangedIntent);
+
+        ActivityRecognitionService.startIfEnabledFastRecognition(this);
+
+        // enable BT is requested in preferences
         if (PreferencesUtil.isBtOnEnteringVehicleEnabled(this)) {
             BluetoothAdapter.getDefaultAdapter().enable();
             ActivityRecognitionService.stop(this);
+        }
+
+        if (BuildConfig.DEBUG) {
+            long[] pattern = {0, 100, 1000};
+            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    new Notification.Builder(this)
+                            .setVibrate(pattern)
+                            .setSmallIcon(R.drawable.ic_access_time_black_18px)
+                            .setColor(getResources().getColor(R.color.theme_primary))
+                            .setContentTitle("Foot -> Vehicle");
+
+            mNotifyMgr.notify(null, 564543, mBuilder.build());
         }
     }
 
@@ -181,16 +220,9 @@ public class DetectedActivitiesIntentService extends IntentService {
         mNotifyMgr.notify(null, 7908772, mBuilder.build());
     }
 
-    private boolean isInteresting(@NonNull DetectedActivity detectedActivity) {
-        return (detectedActivity.getType() == DetectedActivity.IN_VEHICLE && detectedActivity.getConfidence() > 95)
-                || (detectedActivity.getType() == DetectedActivity.ON_FOOT && detectedActivity.getConfidence() > 100);
-    }
-
-
     private boolean isStill(@NonNull DetectedActivity detectedActivity) {
         return detectedActivity.getType() == DetectedActivity.STILL && detectedActivity.getConfidence() > 90;
     }
-
 
     private boolean isVehicleRelated(@NonNull DetectedActivity detectedActivity) {
         if (BuildConfig.DEBUG && detectedActivity.getType() == DetectedActivity.ON_BICYCLE)

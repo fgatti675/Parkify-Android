@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:cahue="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-    <include
-        android:id="@+id/toolbar_actionbar"
-        layout="@layout/toolbar_main" />
 
     <!-- A DrawerLayout is intended to be used as the top-level content view using match_parent for both width and height to consume the full space available. -->
     <android.support.v4.widget.DrawerLayout
@@ -18,51 +15,64 @@
         tools:context=".MainActivity">
 
         <RelativeLayout
-            android:id="@+id/main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <include
+                android:id="@+id/toolbar_actionbar"
+                layout="@layout/toolbar_main" />
 
             <fragment
                 android:id="@+id/map"
                 class="com.google.android.gms.maps.MapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_below="@id/toolbar_actionbar" />
 
-            <android.support.v7.widget.CardView
-                android:id="@+id/marker_details_container"
-                android:layout_width="400dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_gravity="center|start"
-                android:layout_marginBottom="@dimen/default_padding"
-                android:layout_marginLeft="@dimen/default_padding"
-                android:layout_marginRight="@dimen/default_padding"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:maxWidth="400dp"
-                android:visibility="invisible"
-                cahue:cardBackgroundColor="@color/white"
-                cahue:cardCornerRadius="@dimen/cardCornerRadius"
-                tools:context="com.cahue.iweco.spots.SpotDetailsFragment"
-                tools:layout_height="120dp"
-                tools:visibility="visible" />
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/my_location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/marker_details_container"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_margin="@dimen/large_padding"
-                android:elevation="@dimen/elevation"
-                android:src="@drawable/crosshairs_gps"
-                cahue:borderWidth="0dp" />
+            <RelativeLayout
+                android:id="@+id/details_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <include layout="@layout/debug_layout" />
+                <android.support.v7.widget.CardView
+                    android:id="@+id/card_details_container"
+                    android:layout_width="400dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_gravity="center|start"
+                    android:layout_marginBottom="@dimen/default_padding"
+                    android:layout_marginLeft="@dimen/default_padding"
+                    android:layout_marginRight="@dimen/default_padding"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:maxWidth="400dp"
+                    android:visibility="invisible"
+                    cahue:cardBackgroundColor="@color/white"
+                    cahue:cardCornerRadius="@dimen/cardCornerRadius"
+                    tools:context="com.cahue.iweco.spots.SpotDetailsFragment"
+                    tools:layout_height="120dp"
+                    tools:visibility="visible" />
 
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/my_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@+id/card_details_container"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_margin="@dimen/large_padding"
+                    android:elevation="@dimen/elevation"
+                    android:src="@drawable/crosshairs_gps"
+                    cahue:borderWidth="0dp" />
+
+                <include layout="@layout/debug_layout" />
+
+            </RelativeLayout>
         </RelativeLayout>
 
         <!-- android:layout_gravity="startIfEnabled" tells DrawerLayout to treat
@@ -81,4 +91,4 @@
             tools:layout="@layout/fragment_navigation_drawer" />
 
     </android.support.v4.widget.DrawerLayout>
-</LinearLayout>
+</FrameLayout>

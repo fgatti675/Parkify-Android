@@ -81,8 +81,7 @@
     <string name="based_on_activity_recognition">Parece que has bajado de un vehículo aquí, basado en la detección de movimiento</string>
     <string name="did_you_park">¿Has aparcado aquí?</string>
     <string name="clear">Borrar</string>
-    <string name="deprecated">Hola! Esta aplicacion se translada y no se va a mantener mas esta version! Haz click aqui para obtener la original, que se seguirá desarrollando. Tranquilo, todas las funciones y los coches seguiran ahi!</string>
-    <string name="myAppFree">Parkify sin anuncios gracias a myAppFree</string>
-    <string name="and_remove_ads">⁄¡Y elimina los anuncios!</string>
+
+    <string name="and_remove_ads">¡Y elimina los anuncios!</string>
 
 </resources>

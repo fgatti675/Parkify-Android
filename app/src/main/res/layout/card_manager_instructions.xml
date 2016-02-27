@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    android:layout_marginBottom="@dimen/default_padding"
     android:layout_marginLeft="@dimen/default_padding"
     android:layout_marginRight="@dimen/default_padding"
-    android:layout_marginBottom="@dimen/default_padding"
     cahue:cardBackgroundColor="@color/white">
 
     <LinearLayout
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/small_padding"
             android:text="@string/cars"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@color/body_text_1" />
 
         <TextView

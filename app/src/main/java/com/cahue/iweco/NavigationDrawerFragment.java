@@ -39,6 +39,7 @@ import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
@@ -55,6 +56,12 @@ public class NavigationDrawerFragment extends Fragment {
     private static final boolean ADS_ENABLED = true;
 
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
+
+    private boolean skippedLogin;
+    private List<Car> cars;
+    private Location mLastUserLocation;
+    private Navigation navigation;
+
     /**
      * A pointer to the current callbacks instance (the Activity).
      */
@@ -67,30 +74,14 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private RelativeLayout mDrawerListView;
 
-    private View mFragmentContainerView;
-    private RecyclerView recyclerView;
-    private LinearLayoutManager layoutManager;
     private RecyclerViewDrawerAdapter adapter;
-    private List<Car> cars;
-    @NonNull
-    private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+    private View mFragmentContainerView;
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            retrieveCarsFromDB();
-            adapter.notifyDataSetChanged();
-        }
-
-    };
-    private Location mLastUserLocation;
-    private Navigation navigation;
     private View userDetailsView;
     private ImageView userImage;
     private TextView usernameTextView;
     private TextView emailTextView;
-    private boolean skippedLogin;
     @NonNull
     private final BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
         @Override
@@ -99,14 +90,36 @@ public class NavigationDrawerFragment extends Fragment {
         }
     };
     private AdView adView;
+    /**
+     * Are ads currently displayed
+     */
+    private boolean adsDisplayed = false;
     @NonNull
     private final BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            adView.setVisibility(View.GONE);
+            if (adsDisplayed) {
+                adsDisplayed = false;
+                adapter.setUpElements();
+                adapter.notifyItemRemoved(0);
+            }
         }
     };
+    @NonNull
+    private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            retrieveCarsFromDB();
+
+            adapter.setUpElements();
+            adapter.notifyDataSetChanged();
+        }
+
+    };
+    private int bottomMargin;
     private BillingFragment billingFragment;
+
     @Nullable
     private BroadcastReceiver billingReadyReceiver;
 
@@ -118,6 +131,8 @@ public class NavigationDrawerFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         skippedLogin = AuthUtils.isSkippedLogin(getActivity());
+
+        retrieveCarsFromDB();
     }
 
     @Override
@@ -129,7 +144,7 @@ public class NavigationDrawerFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mDrawerListView = (RelativeLayout) inflater.inflate(
+        RelativeLayout mDrawerListView = (RelativeLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer,
                 container,
                 false);
@@ -143,22 +158,24 @@ public class NavigationDrawerFragment extends Fragment {
         /**
          * RecyclerView
          */
-        recyclerView = (RecyclerView) mDrawerListView.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = (RecyclerView) mDrawerListView.findViewById(R.id.recycler_view);
 
-        layoutManager = new LinearLayoutManager(getActivity());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
 
 
         adapter = new RecyclerViewDrawerAdapter();
+        adapter.setUpElements();
         recyclerView.setAdapter(adapter);
 
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // Create adView.
-        adView = (AdView) mDrawerListView.findViewById(R.id.adView);
-        adView.setVisibility(View.GONE);
+        adView = new AdView(getActivity());
+        adView.setAdSize(AdSize.BANNER);
+        adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
 
         return mDrawerListView;
     }
@@ -169,6 +186,8 @@ public class NavigationDrawerFragment extends Fragment {
 
         retrieveCarsFromDB();
 
+//        adapter.setUpElements();
+        adapter.notifyDataSetChanged();
 
         billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
         if (billingFragment == null)
@@ -212,8 +231,6 @@ public class NavigationDrawerFragment extends Fragment {
             if (car.isOther() && car.location == null) iterator.remove();
         }
 
-        adapter.setUpElements();
-        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -256,14 +273,20 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             protected void onPostExecute(Boolean displayAd) {
                 Log.d(TAG, "Display ads returned " + displayAd);
+
                 if (displayAd) {
-                    adView.setVisibility(View.VISIBLE);
                     // Ad request
                     AdRequest adRequest = new AdRequest.Builder().setLocation(mLastUserLocation).build();
                     adView.loadAd(adRequest);
-                } else {
-                    adView.setVisibility(View.GONE);
+
+                    if (!adsDisplayed) {
+                        adsDisplayed = true;
+                        adapter.setUpElements();
+                        adapter.notifyDataSetChanged();
+
+                    }
                 }
+
             }
         }.execute();
 
@@ -369,6 +392,7 @@ public class NavigationDrawerFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
+        navigation = null;
     }
 
 
@@ -391,7 +415,6 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void setUserLocation(Location userLocation) {
         this.mLastUserLocation = userLocation;
-//        recyclerView.getAdapter().notifyDataSetChanged();
     }
 
 
@@ -416,8 +439,13 @@ public class NavigationDrawerFragment extends Fragment {
 
     }
 
+    public void setBottomMargin(int bottomMargin) {
+        this.bottomMargin = bottomMargin;
+    }
+
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+        public static final int AD_TYPE = -1;
         public static final int CAR_TYPE = 0;
         public static final int CAR_MANAGER_TYPE = 1;
         public static final int SHARE_TYPE = 2;
@@ -427,33 +455,36 @@ public class NavigationDrawerFragment extends Fragment {
         public static final int SIGN_OUT_TYPE = 6;
 
         // each entry represents an item in the drawer
-        private int[] itemTypes;
-
+        private List<Integer> itemTypes;
 
         public void setUpElements() {
 
-            int totalElements = cars.size() + (AppInviteDialog.canShow() ? 6 : 5);
+            int totalElements = cars.size() + 5;
 
-            itemTypes = new int[totalElements];
+            if (adsDisplayed) totalElements++;
+            if (AppInviteDialog.canShow()) totalElements++;
 
-            int i = 0;
-            for (; i < cars.size(); ) {
-                itemTypes[i++] = CAR_TYPE;
+            itemTypes = new ArrayList(totalElements);
+
+            if (adsDisplayed)
+                itemTypes.add(AD_TYPE);
+
+            for (int i = 0; i < cars.size(); i++) {
+                itemTypes.add(CAR_TYPE);
             }
 
-            itemTypes[i++] = CAR_MANAGER_TYPE;
-            if (AppInviteDialog.canShow()) itemTypes[i++] = SHARE_TYPE;
-            itemTypes[i++] = DONATE_TYPE;
-            itemTypes[i++] = PREFERENCES_TYPE;
-            itemTypes[i++] = HELP_TYPE;
-            itemTypes[i++] = SIGN_OUT_TYPE;
+            itemTypes.add(CAR_MANAGER_TYPE);
+            if (AppInviteDialog.canShow())
+                itemTypes.add(SHARE_TYPE);
+            itemTypes.add(DONATE_TYPE);
+            itemTypes.add(PREFERENCES_TYPE);
+            itemTypes.add(HELP_TYPE);
+            itemTypes.add(SIGN_OUT_TYPE);
         }
 
         @Override
         public int getItemViewType(int position) {
-
-            return itemTypes[position];
-
+            return itemTypes.get(position);
         }
 
         @NonNull
@@ -461,9 +492,15 @@ public class NavigationDrawerFragment extends Fragment {
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
             /**
+             * Ad
+             */
+            if (viewType == AD_TYPE) {
+                return new AdViewHolder(adView);
+            }
+            /**
              * Car
              */
-            if (viewType == CAR_TYPE) {
+            else if (viewType == CAR_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
                         inflate(R.layout.layout_car_details,
                                 viewGroup,
@@ -495,13 +532,19 @@ public class NavigationDrawerFragment extends Fragment {
             int viewType = getItemViewType(position);
 
             /**
+             * Ad
+             */
+            if (viewType == AD_TYPE) {
+
+            }
+            /**
              * Car
              */
-            if (viewType == CAR_TYPE) {
+            else if (viewType == CAR_TYPE) {
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
-                final Car car = cars.get(position);
+                final Car car = cars.get(position - (adsDisplayed ? 1 : 0));
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, BluetoothAdapter.getDefaultAdapter());
 
                 /**
@@ -625,6 +668,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         private void bindSignOut(@NonNull MenuViewHolder menuViewHolder) {
+            menuViewHolder.itemView.setPadding(0, 0, 0, bottomMargin);
             menuViewHolder.title.setText(skippedLogin ? R.string.sign_in : R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -638,7 +682,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return itemTypes.length;
+            return itemTypes.size();
         }
 
         public class MenuViewHolder extends RecyclerView.ViewHolder {
@@ -656,6 +700,12 @@ public class NavigationDrawerFragment extends Fragment {
                 title = (TextView) itemView.findViewById(R.id.title);
                 subtitle = (TextView) itemView.findViewById(R.id.subtitle);
                 divider = itemView.findViewById(R.id.divider);
+            }
+        }
+
+        public class AdViewHolder extends RecyclerView.ViewHolder {
+            public AdViewHolder(@NonNull View itemView) {
+                super(itemView);
             }
         }
     }

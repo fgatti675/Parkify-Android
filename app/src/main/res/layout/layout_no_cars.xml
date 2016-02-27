@@ -1,50 +1,50 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:layout_centerVertical="true"
     android:background="?android:attr/selectableItemBackground"
-    android:layout_centerVertical="true">
+    android:orientation="horizontal">
 
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:padding="@dimen/large_padding"
-        android:src="@drawable/ic_car_grey600_24dp"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
-        android:scaleType="fitStart" />
+        android:padding="@dimen/large_padding"
+        android:scaleType="fitStart"
+        android:src="@drawable/ic_car_grey600_24dp" />
 
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="@dimen/large_padding">
 
             <TextView
                 android:id="@+id/no_cars_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/no_cars"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="@color/body_text_1" />
 
             <TextView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/default_padding"
                 android:paddingBottom="@dimen/default_padding"
+                android:paddingTop="@dimen/default_padding"
                 android:text="@string/add_car_instructions"/>
 
             <Button
                 android:id="@+id/add_car"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:text="@string/add"
-                android:theme="@style/CahueTheme.Button.Accent"
-                android:layout_gravity="center_horizontal" />
+                android:theme="@style/CahueTheme.Button.Accent" />
 
         </LinearLayout>
 

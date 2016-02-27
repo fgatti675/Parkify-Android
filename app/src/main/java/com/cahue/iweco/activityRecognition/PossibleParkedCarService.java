@@ -96,8 +96,8 @@ public class PossibleParkedCarService extends LocationPollerService {
 
         // Intent to start the activity and show a just parked dialog
         Intent intent = new Intent(this, MapsActivity.class);
-        intent.setAction(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST);
-        intent.putExtra(Constants.INTENT_SPOT_EXTRA, possibleParkingSpot);
+        intent.setAction(Constants.ACTION_POSSIBLE_PARKED_CAR);
+        intent.putExtra(Constants.EXTRA_SPOT, possibleParkingSpot);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -128,8 +128,8 @@ public class PossibleParkedCarService extends LocationPollerService {
     private NotificationCompat.Action createCarSaveAction(@NonNull Car car, ParkingSpot possibleSpot, int index) {
 
         Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
-        intent.putExtra(Constants.INTENT_SPOT_EXTRA, possibleSpot);
+        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
+        intent.putExtra(Constants.EXTRA_SPOT, possibleSpot);
 
         PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         String name = car.isOther() ? getResources().getString(R.string.other) : car.name;

@@ -11,8 +11,7 @@
         android:id="@+id/logo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingTop="@dimen/default_padding"
+        android:padding="@dimen/default_padding"
         android:scaleType="fitStart"
         android:src="@drawable/parkify_logo">
     </ImageView>

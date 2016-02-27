@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center_vertical"
-                android:textAppearance="?android:attr/textAppearanceListItem"
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu"
                 android:textColor="@color/body_text_1"
                 tools:text="Title" />
 
@@ -44,10 +44,11 @@
                 android:layout_below="@+id/title"
                 android:layout_gravity="center"
                 android:gravity="top"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textColor="@color/body_text_3"
                 android:visibility="gone"
-                tools:text="Subtitle" />
+                tools:text="Subtitle"
+                tools:visibility="visible" />
 
         </RelativeLayout>
 
@@ -57,10 +58,10 @@
         android:id="@+id/divider"
         android:layout_width="fill_parent"
         android:layout_height="0.2dp"
-        android:layout_marginBottom="@dimen/default_padding"
+        android:layout_marginBottom="@dimen/small_padding"
         android:layout_marginLeft="54dp"
         android:layout_marginStart="54dp"
-        android:layout_marginTop="@dimen/default_padding"
+        android:layout_marginTop="@dimen/small_padding"
         android:background="@color/divider"
         android:visibility="gone"
         tools:visibility="visible" />

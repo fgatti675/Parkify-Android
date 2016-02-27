@@ -52,7 +52,9 @@
 
     </style>
 
-    <style name="CahueTheme.Dark.TranslucentBars"></style>
+    <style name="CahueTheme.Dark.TranslucentBars" />
+
+    <style name="CahueTheme.TranslucentBars" />
 
     <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
         <item name="colorButtonNormal">@color/theme_accent</item>
@@ -97,20 +99,17 @@
         <item name="android:textColor">@color/theme_primary</item>
     </style>
 
-    <style name="TextAddress">
+    <style name="TextAddress" parent="TextAppearance.AppCompat.Small">
         <item name="android:drawableStart">@drawable/ic_location_city_black_18px</item>
         <item name="android:drawableLeft">@drawable/ic_location_city_black_18px</item>
         <item name="android:drawablePadding">@dimen/default_padding</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@color/body_text_2</item>
     </style>
 
-    <style name="TextTime">
-        <item name="android:textStyle">bold</item>
+    <style name="TextTime" parent="TextAppearance.AppCompat.Small">
         <item name="android:drawableStart">@drawable/ic_access_time_black_18px</item>
         <item name="android:drawableLeft">@drawable/ic_access_time_black_18px</item>
         <item name="android:drawablePadding">@dimen/default_padding</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@color/theme_primary</item>
     </style>
 

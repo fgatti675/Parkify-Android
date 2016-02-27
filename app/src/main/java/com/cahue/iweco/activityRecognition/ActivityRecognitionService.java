@@ -26,7 +26,8 @@ import com.google.android.gms.location.ActivityRecognition;
  */
 public class ActivityRecognitionService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final long DETECTION_INTERVAL_IN_MILLISECONDS = 5000;
+    private static final long DETECTION_INTERVAL_IN_MILLISECONDS_ON_FOOT = 10000;
+    private static final long DETECTION_INTERVAL_IN_MILLISECONDS_IN_VEHICLE = 3000;
 
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
 
@@ -48,7 +49,6 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
             startIfEnabled(context);
         }
-
     }
 
     public static void startIfEnabled(@NonNull Context context) {
@@ -58,30 +58,25 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         }
 
         Intent intent = new Intent(context, ActivityRecognitionService.class);
-        intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION);
+        intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION_DEFAULT);
         context.startService(intent);
-        if (BuildConfig.DEBUG) {
-            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-            Notification.Builder mBuilder =
-                    new Notification.Builder(context)
-                            .setSmallIcon(R.drawable.ic_action_action_settings_dark)
-                            .setContentTitle("Recognition Activated");
-            mNotifyMgr.notify(null, 6472837, mBuilder.build());
+    }
+
+    public static void startIfEnabledFastRecognition(@NonNull Context context) {
+
+        if (!PreferencesUtil.isMovementRecognitionEnabled(context)) {
+            return;
         }
+
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        intent.setAction(Constants.ACTION_START_ACTIVITY_RECOGNITION_FAST);
+        context.startService(intent);
     }
 
     public static void stop(@NonNull Context context) {
         Intent intent = new Intent(context, ActivityRecognitionService.class);
         intent.setAction(Constants.ACTION_STOP_ACTIVITY_RECOGNITION);
         context.startService(intent);
-        if (BuildConfig.DEBUG) {
-            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-            Notification.Builder mBuilder =
-                    new Notification.Builder(context)
-                            .setSmallIcon(R.drawable.ic_navigation_cancel)
-                            .setContentTitle("Recognition Stopped");
-            mNotifyMgr.notify(null, 6472837, mBuilder.build());
-        }
     }
 
     @Override
@@ -118,10 +113,11 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         Log.v(TAG, "onStartCommand");
 
-        if (intent.getAction() != null)
+        if (intent.getAction() != null) {
             mGoogleApiClient.connect();
-        else
+        } else {
             stopSelf(startId);
+        }
 
         return Service.START_NOT_STICKY;
     }
@@ -131,8 +127,10 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         Log.v(TAG, "onConnected");
 
-        if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION)) {
-            startActivityRecognition();
+        if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION_DEFAULT)) {
+            startActivityRecognition(DETECTION_INTERVAL_IN_MILLISECONDS_ON_FOOT);
+        } else if (intent.getAction().equals(Constants.ACTION_START_ACTIVITY_RECOGNITION_FAST)) {
+            startActivityRecognition(DETECTION_INTERVAL_IN_MILLISECONDS_IN_VEHICLE);
         } else if (intent.getAction().equals(Constants.ACTION_STOP_ACTIVITY_RECOGNITION)) {
             stopActivityDetection();
         } else {
@@ -142,15 +140,25 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         stopSelf(startId);
     }
 
-    private void startActivityRecognition() {
+    private void startActivityRecognition(long detectionInterval) {
 
-        Log.i(TAG, "Starting activity recognition");
+        Log.i(TAG, "Starting activity recognition : " + detectionInterval);
 
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(
                 mGoogleApiClient,
-                DETECTION_INTERVAL_IN_MILLISECONDS,
+                detectionInterval,
                 getActivityDetectionPendingIntent()
         );
+
+        if (BuildConfig.DEBUG) {
+            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    new Notification.Builder(this)
+                            .setSmallIcon(R.drawable.ic_action_action_settings_dark)
+                            .setContentTitle("Recognition Activated")
+                            .setContentText(String.valueOf(detectionInterval));
+            mNotifyMgr.notify(null, 6472837, mBuilder.build());
+        }
 
     }
 
@@ -159,6 +167,15 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         Log.i(TAG, "Stopping activity recognition");
 
         ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
+
+        if (BuildConfig.DEBUG) {
+            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    new Notification.Builder(this)
+                            .setSmallIcon(R.drawable.ic_action_action_settings_dark)
+                            .setContentTitle("Recognition Stopped");
+            mNotifyMgr.notify(null, 6472837, mBuilder.build());
+        }
 
     }
 

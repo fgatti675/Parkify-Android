@@ -22,6 +22,8 @@ public class Tracking {
 
     public static final String CATEGORY_RATING_DIALOG = "Rating Dialog";
 
+    public static final String CATEGORY_DONATION_DIALOG = "Donation Dialog";
+
     public static final String ACTION_DO_LOGIN = "Do login";
 
     public static final String ACTION_SKIP_LOGIN = "Skip login";
@@ -49,6 +51,10 @@ public class Tracking {
 
     public static final String ACTION_ACCEPT = "Accepted";
     public static final String ACTION_DISMISS = "Dismissed";
+
+    public static final String ACTION_PURCHASE_ERROR = "Purchase error";
+    public static final String ACTION_PURCHASE_SUCCESSFUL = "Purchase successful";
+    public static final String ACTION_PURCHASE_CANCELLED = "Started purchase cancelled";
 
 
     public static void sendView(String screenName) {

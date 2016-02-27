@@ -17,7 +17,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -33,17 +37,12 @@ public class BillingFragment extends Fragment {
 
     private static final String TAG = BillingFragment.class.getSimpleName();
 
-    @NonNull
     private static final String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
-    @NonNull
     private static final String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
-    @NonNull
     private static final String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
 
-    private String packageName;
-    @Nullable
     private IInAppBillingService iInAppBillingService;
-    @NonNull
+
     private final ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -53,6 +52,7 @@ public class BillingFragment extends Fragment {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
+
             /**
              * Tell everyone the billing service is ready
              */
@@ -78,8 +78,10 @@ public class BillingFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        packageName = BuildConfig.APPLICATION_ID;
-        bindBillingService();
+
+        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        getActivity().bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -90,11 +92,6 @@ public class BillingFragment extends Fragment {
         }
     }
 
-    private void bindBillingService() {
-        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        getActivity().bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
-    }
 
     @Override
     public void onDestroy() {
@@ -119,7 +116,7 @@ public class BillingFragment extends Fragment {
             skuList.add(PRODUCT_DONATION_5_ADMINISTERED);
             Bundle querySkus = new Bundle();
             querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
-            return iInAppBillingService.getSkuDetails(3, packageName, "inapp", querySkus);
+            return iInAppBillingService.getSkuDetails(3, BuildConfig.APPLICATION_ID, "inapp", querySkus);
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
@@ -133,37 +130,10 @@ public class BillingFragment extends Fragment {
     @Nullable
     public Bundle getPurchases() {
         try {
-            return iInAppBillingService.getPurchases(3, packageName, "inapp", null);
+            return iInAppBillingService.getPurchases(3, BuildConfig.APPLICATION_ID, "inapp", null);
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // element purchase
-        if (requestCode == REQUEST_ON_PURCHASE) {
-
-//            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-//            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-//            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-
-            if (resultCode == Activity.RESULT_OK) {
-//                try {
-//                    JSONObject jo = new JSONObject(purchaseData);
-//                    String sku = jo.getString("productId");
-                Util.createUpperToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
-//                } catch (JSONException e) {
-//                    Util.createUpperToast(this, "Failed to parse purchase data.", Toast.LENGTH_LONG);
-//                    e.printStackTrace();
-//                }
-
-                getActivity().sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -171,7 +141,7 @@ public class BillingFragment extends Fragment {
         try {
 
             Bundle buyIntentBundle = iInAppBillingService.getBuyIntent(3,
-                    packageName,
+                    BuildConfig.APPLICATION_ID,
                     sku,
                     "inapp",
                     UUID.randomUUID().toString());
@@ -179,6 +149,7 @@ public class BillingFragment extends Fragment {
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
             if (pendingIntent == null) {
                 Util.createUpperToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
+                Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_ERROR);
             } else {
                 getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
                         1001, new Intent(), 0, 0, 0);
@@ -186,6 +157,47 @@ public class BillingFragment extends Fragment {
 
         } catch (RemoteException | IntentSender.SendIntentException e) {
             e.printStackTrace();
+            Tracking.sendException(Tracking.CATEGORY_DONATION_DIALOG, e.getMessage(), false);
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // element purchase
+        if (requestCode == REQUEST_ON_PURCHASE) {
+
+            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+
+            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
+            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+
+            if (resultCode == Activity.RESULT_OK) {
+
+                if (purchaseData != null) {
+                    try {
+
+                        JSONObject jo = new JSONObject(purchaseData);
+                        String sku = jo.getString("productId");
+
+                        Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_SUCCESSFUL, sku);
+
+                    } catch (JSONException e) {
+                    }
+
+                } else {
+                    Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_SUCCESSFUL);
+                }
+
+                Util.createUpperToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
+                getActivity().sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_CANCELLED);
+            }
+        }
+
     }
 }

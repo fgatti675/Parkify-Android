@@ -236,7 +236,7 @@ public class CarDatabase {
         Log.d(TAG, "Sending car update broadcast");
 
         Intent intent = new Intent(Constants.INTENT_CAR_UPDATED);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
+        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
         context.sendBroadcast(intent);
     }
 

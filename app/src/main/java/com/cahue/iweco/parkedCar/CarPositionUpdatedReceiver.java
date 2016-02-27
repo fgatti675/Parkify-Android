@@ -38,7 +38,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
 
         database = CarDatabase.getInstance(context);
 
-        String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
+        String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
         car = database.findCar(carId);
 
         // this should happen only if the user was logged out at that particular moment...
@@ -81,8 +81,8 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             Log.d(TAG, "Sending car update broadcast");
 
             Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
-            intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
-            intent.putExtra(Constants.INTENT_CAR_EXTRA_ADDRESS, car.address);
+            intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
+            intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
             context.sendBroadcast(intent);
 
         }

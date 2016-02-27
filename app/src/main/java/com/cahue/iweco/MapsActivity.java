@@ -10,10 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,9 +29,12 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -80,7 +85,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.myappfree.appvalidator.AppValidator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -110,14 +114,14 @@ public class MapsActivity extends AppCompatActivity
 
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10;
+    private static final int REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION = 10;
 
     private static final int REQUEST_CODE_START_TUTORIAL = 2345;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(3000)         // 5 seconds
+            .setInterval(3000)         // 3 seconds
             .setFastestInterval(32)    // 32ms = 30fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
@@ -128,7 +132,7 @@ public class MapsActivity extends AppCompatActivity
     private final BroadcastReceiver carUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, @NonNull Intent intent) {
-            String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
+            String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
             if (carId != null) {
                 Log.i(TAG, "Car update received: " + carId);
                 initParkedCarDelegate(carId).update(true);
@@ -138,46 +142,64 @@ public class MapsActivity extends AppCompatActivity
 
     @NonNull
     private final Set<AbstractMarkerDelegate> delegates = new HashSet<>();
+
     /**
-     *
+     * Set of components that can move the camera in the map
      */
     @NonNull
     private final Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
     private AccountManager mAccountManager;
+
     private CarDatabase carDatabase;
     private Toolbar mToolbar;
     private FloatingActionButton myLocationButton;
-    private CardView detailsContainer;
+
+    private CardView cardDetailsContainer;
+
     private DetailsFragment detailsFragment;
+
     private boolean detailsDisplayed = false;
+
     private boolean cameraFollowing;
+
     /**
      * The user didn't log in, but we still love him
      */
     private boolean mSkippedLogin;
+
     @Nullable
     private LoginType loginType;
+
     private CallbackManager mFacebookCallbackManager;
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+
     /**
      * Current logged user
      */
     private Account mAccount;
     private boolean mapInitialised = false;
     private boolean initialCameraSet = false;
+
     /**
      * Last component to request a camera update
      */
     @Nullable
     private CameraUpdateRequester lastCameraUpdateRequester;
+
     private MapFragment mapFragment;
+
     private boolean locationPermissionCurrentlyRequested = false;
+
+    private int navBarHeight = 0;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -263,6 +285,33 @@ public class MapsActivity extends AppCompatActivity
         mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
 
+
+        /**
+         * If translucent bars, apply the proper margins
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Resources resources = getResources();
+
+            RelativeLayout detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
+            if (resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                int navBarResId = resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android");
+                int navBarLandscapeHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
+                detailsContainer.setPadding(0, 0, navBarLandscapeHeight, 0);
+            } else {
+                int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+                navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
+                detailsContainer.setPadding(0, 0, 0, navBarHeight);
+            }
+
+            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
+            int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+            ViewGroup mainContainer = (ViewGroup) findViewById(R.id.main_container);
+            mainContainer.setPadding(0, statusBarHeight, 0, 0);
+        }
+
+        /**
+         * Navigation drawer
+         */
         setUpNavigationDrawer();
 
         myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
@@ -301,8 +350,9 @@ public class MapsActivity extends AppCompatActivity
          * Details
          */
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
-        detailsContainer = (CardView) findViewById(R.id.marker_details_container);
-        detailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
+        cardDetailsContainer = (CardView) findViewById(R.id.card_details_container);
+        cardDetailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
+
 
 
         // Facebook callback registration
@@ -315,22 +365,7 @@ public class MapsActivity extends AppCompatActivity
         }
 
         checkLocationPermission();
-        myAppFree();
 
-    }
-
-    private void myAppFree() {
-//        AppValidator.DEBUG = true;
-
-        // TODO remove
-        AppValidator.isIapToUnlock(this, new AppValidator.OnAppValidatorListener() {
-            @Override
-            public void validated() {
-                sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-                PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
-                AppValidator.showDialog(MapsActivity.this, getString(R.string.myAppFree));
-            }
-        });
     }
 
     @Override
@@ -406,11 +441,11 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void handleIntent(@Nullable Intent intent) {
-        if (intent != null && intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CAR_EXTRA_UPDATE_REQUEST)) {
+        if (intent != null && intent.getAction() != null && intent.getAction().equals(Constants.ACTION_POSSIBLE_PARKED_CAR)) {
             initialCameraSet = true;
 
-            ParkingSpot spot = intent.getParcelableExtra(Constants.INTENT_SPOT_EXTRA);
-            initPossibleParkedCarDelegate(spot).activate();
+            ParkingSpot possibleSpot = intent.getParcelableExtra(Constants.EXTRA_SPOT);
+            initPossibleParkedCarDelegate(possibleSpot).activate();
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
             mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
@@ -439,6 +474,7 @@ public class MapsActivity extends AppCompatActivity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mNavigationDrawerFragment.setUserLocation(getUserLocation());
+        mNavigationDrawerFragment.setBottomMargin(navBarHeight);
 
         // Set up the drawer.
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -458,9 +494,9 @@ public class MapsActivity extends AppCompatActivity
 
         mMap = googleMap;
 
-        setUpMapLocation();
+        setUpMapUserLocation();
         setUpMap();
-        setUpMapListeners();
+        setMapPadding(0);
 
         /**
          * Initial zoom
@@ -494,7 +530,7 @@ public class MapsActivity extends AppCompatActivity
         if (!locationPermissionCurrentlyRequested) {
             Log.i(TAG, "Requesting location permission");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION);
             locationPermissionCurrentlyRequested = true;
         }
     }
@@ -507,11 +543,11 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+            case REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setUpMapLocation();
+                    setUpMapUserLocation();
                 } else {
                     Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
                 }
@@ -520,13 +556,19 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    private void setUpMapLocation() {
+    private void setUpMapUserLocation() {
 
-        if (mMap == null || !isLocationPermissionGranted()) return;
+        if (mMap == null) return;
+
+        // permission not granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            return;
 
         if (!mGoogleApiClient.isConnected()) return;
 
         mMap.setMyLocationEnabled(true);
+
         // Connected to Google Play services!
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 REQUEST,
@@ -605,31 +647,43 @@ public class MapsActivity extends AppCompatActivity
 
     private void setMapPadding(int bottomPadding) {
         if (mMap == null) return;
-        mMap.setPadding(0, Util.getActionBarSize(MapsActivity.this), 0, bottomPadding);
+        mMap.setPadding(0, 0, 0, bottomPadding + navBarHeight);
     }
-
 
     private void showDetails() {
 
-        detailsContainer.setVisibility(View.VISIBLE);
+        cardDetailsContainer.setVisibility(View.VISIBLE);
 
-        detailsContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        cardDetailsContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
 
+                // should the location button be animated too
                 final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
 
-                final int height = detailsContainer.getMeasuredHeight();
+                final int height = cardDetailsContainer.getMeasuredHeight();
 
                 setMapPadding(height);
                 for (CameraUpdateRequester requester : cameraUpdateRequesterList)
                     requester.onMapResized();
 
-                TranslateAnimation animation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
-                int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-                animation.setDuration(mediumAnimTime);
-                animation.setInterpolator(new AccelerateDecelerateInterpolator());
-                animation.setAnimationListener(new Animation.AnimationListener() {
+                AnimationSet animationSet = new AnimationSet(true);
+
+                AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
+                animationSet.setInterpolator(interpolator);
+
+                int durationMillis = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                animationSet.setDuration(durationMillis);
+
+                TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, detailsDisplayed ? 0 : height, 0);
+                translateAnimation.setInterpolator(interpolator);
+                translateAnimation.setDuration(durationMillis);
+
+                AlphaAnimation alphaAnimation = new AlphaAnimation(0F, 1F);
+                animationSet.addAnimation(alphaAnimation);
+
+                animationSet.addAnimation(translateAnimation);
+                animationSet.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
                         if (moveLocationButton) {
@@ -648,12 +702,13 @@ public class MapsActivity extends AppCompatActivity
 
                     }
                 });
-                detailsContainer.startAnimation(animation);
-                if (moveLocationButton) myLocationButton.startAnimation(animation);
+
+                cardDetailsContainer.startAnimation(animationSet);
+                if (moveLocationButton) myLocationButton.startAnimation(translateAnimation);
 
                 detailsDisplayed = true;
 
-                detailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                cardDetailsContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
 
@@ -671,17 +726,29 @@ public class MapsActivity extends AppCompatActivity
             return;
         }
 
+        // should the location button be animated toov
         final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
 
         detailsDisplayed = false;
 
         setMapPadding(0);
 
-        TranslateAnimation animation = new TranslateAnimation(0, 0, 0, detailsContainer.getHeight());
+        AnimationSet animationSet = new AnimationSet(true);
+
+        AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
+        animationSet.setInterpolator(interpolator);
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-        animation.setDuration(mediumAnimTime);
-        animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setAnimationListener(new Animation.AnimationListener() {
+        animationSet.setDuration(mediumAnimTime);
+
+        AlphaAnimation alphaAnimation = new AlphaAnimation(1F, 0F);
+        animationSet.addAnimation(alphaAnimation);
+
+        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, 0, cardDetailsContainer.getHeight());
+        translateAnimation.setDuration(mediumAnimTime);
+        translateAnimation.setInterpolator(interpolator);
+        animationSet.addAnimation(translateAnimation);
+
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
                 setMapPadding(0);
@@ -689,8 +756,8 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                detailsContainer.setVisibility(View.INVISIBLE);
-                detailsContainer.removeAllViews();
+                cardDetailsContainer.setVisibility(View.INVISIBLE);
+                cardDetailsContainer.removeAllViews();
 
                 if (moveLocationButton) {
                     RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) myLocationButton.getLayoutParams();
@@ -704,8 +771,8 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        detailsContainer.startAnimation(animation);
-        if (moveLocationButton) myLocationButton.startAnimation(animation);
+        cardDetailsContainer.startAnimation(animationSet);
+        if (moveLocationButton) myLocationButton.startAnimation(translateAnimation);
     }
 
     private void showOnLongClickToast() {
@@ -728,7 +795,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.w(TAG, "onConnected");
-        setUpMapLocation();
+        setUpMapUserLocation();
     }
 
     @Override
@@ -780,7 +847,6 @@ public class MapsActivity extends AppCompatActivity
 
         if (requestCode == REQUEST_CODE_START_TUTORIAL) {
             checkLocationPermission();
-            myAppFree();
         } else if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
             BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
             billingFragment.onActivityResult(requestCode, resultCode, data);
@@ -894,15 +960,12 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.setPadding(0, Util.getActionBarSize(this), 0, 0);
-    }
-
-    private void setUpMapListeners() {
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraChangeListener(this);
     }
+
 
     public void openShareDialog() {
         FacebookAppInvitesDialog.showAppInviteDialog(this);
@@ -1006,6 +1069,9 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private Location getUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
@@ -1076,7 +1142,7 @@ public class MapsActivity extends AppCompatActivity
         detailsFragment.setRetainInstance(true);
         detailsFragment.setUserLocation(getUserLocation());
 
-        fragTransaction.add(detailsContainer.getId(), detailsFragment, DETAILS_FRAGMENT_TAG);
+        fragTransaction.add(cardDetailsContainer.getId(), detailsFragment, DETAILS_FRAGMENT_TAG);
         fragTransaction.commitAllowingStateLoss();
 
         showDetails();
@@ -1217,7 +1283,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carDatabase.retrieveCars(true).iterator().next().id);
+                intent.putExtra(Constants.EXTRA_CAR_ID, carDatabase.retrieveCars(true).iterator().next().id);
                 startService(intent);
             }
         });
@@ -1230,7 +1296,7 @@ public class MapsActivity extends AppCompatActivity
                 List<Car> cars = carDatabase.retrieveCars(true);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
-                intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
+                intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
                 startService(intent);
             }
         });

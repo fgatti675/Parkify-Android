@@ -99,7 +99,7 @@ public class GeofenceCarService extends LocationPollerService {
      */
     public static void startDelayedGeofenceService(@NonNull Context context, String carId) {
         Intent intent = new Intent(context, GeofenceCarService.class);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, carId);
+        intent.putExtra(Constants.EXTRA_CAR_ID, carId);
         PendingIntent pIntent = PendingIntent.getService(context, 0, intent, 0);
         AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Log.i(TAG, "Starting delayed geofence service");
@@ -216,7 +216,7 @@ public class GeofenceCarService extends LocationPollerService {
         }
 
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        intent.putExtra(Constants.INTENT_CAR_EXTRA_ID, car.id);
+        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
         intent.putExtra(GeofenceTransitionsIntentService.RECEIVER, geofenceResultReceiver);
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when

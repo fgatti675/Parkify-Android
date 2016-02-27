@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/abc_control_inset_material"
         android:text="@string/car_name_select"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
     <EditText
         android:id="@+id/name_edit"

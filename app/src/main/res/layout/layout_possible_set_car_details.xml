@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/did_you_park"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="@color/body_text_1" />
         </android.support.v7.widget.Toolbar>
 
@@ -84,7 +84,6 @@
                 style="@style/TextAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_padding"
                 tools:text="Lindwurmstr. 143" />
 
             <GridView

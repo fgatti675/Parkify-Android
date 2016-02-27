@@ -101,7 +101,7 @@ public abstract class LocationPollerService extends Service implements
         if (intent != null) {
 
             if (intent.getExtras() != null) {
-                String carId = intent.getExtras().getString(Constants.INTENT_CAR_EXTRA_ID);
+                String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
                 if (carId != null) {
                     car = CarDatabase.getInstance(this).findCar(carId);
                     if (car == null) {
@@ -248,7 +248,7 @@ public abstract class LocationPollerService extends Service implements
         stopSelf();
     }
 
-    @Nullable
+    @NonNull
     public Car getCar() {
         return car;
     }

@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/what_car_is_parked"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/body_text_1" />
 
         <RelativeLayout
@@ -64,7 +64,6 @@
             style="@style/TextAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/small_padding"
             tools:text="Lindwurmstr. 143" />
 
         <GridView
