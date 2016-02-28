@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,25 +34,31 @@ import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.util.LoadProfileImage;
+import com.cahue.iweco.util.LoadImageTask;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.formats.NativeAdOptions;
+import com.google.android.gms.ads.formats.NativeAppInstallAd;
+import com.google.android.gms.ads.formats.NativeAppInstallAdView;
+import com.google.android.gms.ads.formats.NativeContentAd;
+import com.google.android.gms.ads.formats.NativeContentAdView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends Fragment implements NativeAppInstallAd.OnAppInstallAdLoadedListener, NativeContentAd.OnContentAdLoadedListener {
 
     private static final boolean ADS_ENABLED = true;
 
@@ -89,7 +96,10 @@ public class NavigationDrawerFragment extends Fragment {
             setUpUserDetails();
         }
     };
-    private AdView adView;
+
+    private View currentAdView;
+    private NativeContentAdView nativeContentAdView;
+    private NativeAppInstallAdView nativeAppInstallAdView;
     /**
      * Are ads currently displayed
      */
@@ -172,10 +182,8 @@ public class NavigationDrawerFragment extends Fragment {
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        // Create adView.
-        adView = new AdView(getActivity());
-        adView.setAdSize(AdSize.BANNER);
-        adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
+        nativeContentAdView = (NativeContentAdView) inflater.inflate(R.layout.native_content_ad_view, container, false);
+        nativeAppInstallAdView = (NativeAppInstallAdView) inflater.inflate(R.layout.native_app_install_ad_view, container, false);
 
         return mDrawerListView;
     }
@@ -186,7 +194,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         retrieveCarsFromDB();
 
-//        adapter.setUpElements();
+        adapter.setUpElements();
         adapter.notifyDataSetChanged();
 
         billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
@@ -204,7 +212,7 @@ public class NavigationDrawerFragment extends Fragment {
          * Wait for it otherwise
          */
         else {
-            Log.d(TAG, "Witing billing service");
+            Log.d(TAG, "Waiting for billing service");
             billingReadyReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -214,7 +222,6 @@ public class NavigationDrawerFragment extends Fragment {
             };
             getActivity().registerReceiver(billingReadyReceiver, new IntentFilter(Constants.INTENT_BILLING_READY));
         }
-
 
         getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
         getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
@@ -252,11 +259,8 @@ public class NavigationDrawerFragment extends Fragment {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
-
                 /**
                  * Check if the user has purchases. If there is an error we don't display just in case
-                 *
-                 * @return
                  */
                 boolean displayAd = false;
                 Bundle ownedItems = billingFragment.getPurchases();
@@ -277,13 +281,21 @@ public class NavigationDrawerFragment extends Fragment {
                 if (displayAd) {
                     // Ad request
                     AdRequest adRequest = new AdRequest.Builder().setLocation(mLastUserLocation).build();
-                    adView.loadAd(adRequest);
+
+                    AdLoader adLoader = new AdLoader.Builder(getActivity(), "ca-app-pub-3940256099942544/2247696110") // TODO: replace with out ad unit id. This is test
+                            .forAppInstallAd(NavigationDrawerFragment.this)
+                            .forContentAd(NavigationDrawerFragment.this)
+                            .withAdListener(new AdListener() {
+                                @Override
+                                public void onAdFailedToLoad(int errorCode) {
+                                    // Handle the failure by logging, altering the UI, etc.
+                                }
+                            })
+                            .withNativeAdOptions(new NativeAdOptions.Builder().build())
+                            .build();
+                    adLoader.loadAd(adRequest);
 
                     if (!adsDisplayed) {
-                        adsDisplayed = true;
-                        adapter.setUpElements();
-                        adapter.notifyDataSetChanged();
-
                     }
                 }
 
@@ -360,7 +372,6 @@ public class NavigationDrawerFragment extends Fragment {
 
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
         getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
-        adView.resume();
 
         setUpUserDetails();
     }
@@ -369,7 +380,6 @@ public class NavigationDrawerFragment extends Fragment {
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(carUpdatedReceiver);
-        adView.pause();
     }
 
     @Override
@@ -399,7 +409,6 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        adView.destroy();
     }
 
     @Override
@@ -435,12 +444,57 @@ public class NavigationDrawerFragment extends Fragment {
         emailTextView.setText(AuthUtils.getEmail(getActivity()));
         String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
         if (profilePicURL != null)
-            new LoadProfileImage(userImage).execute(profilePicURL);
+            new LoadImageTask(userImage).execute(profilePicURL);
 
     }
 
     public void setBottomMargin(int bottomMargin) {
         this.bottomMargin = bottomMargin;
+    }
+
+    @Override
+    public void onAppInstallAdLoaded(NativeAppInstallAd nativeAppInstallAd) {
+        // Show the app install ad.
+        currentAdView = nativeAppInstallAdView;
+
+        ImageView logo = (ImageView) nativeAppInstallAdView.findViewById(R.id.icon);
+        logo.setImageDrawable(nativeAppInstallAd.getIcon().getDrawable());
+        nativeAppInstallAdView.setIconView(logo);
+
+        Button callToActionButton = (Button) nativeAppInstallAdView.findViewById(R.id.call_to_action);
+        callToActionButton.setText(nativeAppInstallAd.getCallToAction());
+        nativeAppInstallAdView.setCallToActionView(callToActionButton);
+
+        TextView headlineView = (TextView) nativeAppInstallAdView.findViewById(R.id.headline);
+        headlineView.setText(nativeAppInstallAd.getHeadline());
+        nativeAppInstallAdView.setHeadlineView(headlineView);
+
+        adsDisplayed = true;
+        adapter.setUpElements();
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onContentAdLoaded(NativeContentAd nativeContentAd) {
+
+        // Show the content ad.
+        currentAdView = nativeContentAdView;
+
+        ImageView logo = (ImageView) nativeContentAdView.findViewById(R.id.logo);
+        logo.setImageDrawable(nativeContentAd.getImages().get(0).getDrawable());
+        nativeContentAdView.setLogoView(logo);
+
+        Button callToActionButton = (Button) nativeContentAdView.findViewById(R.id.call_to_action);
+        callToActionButton.setText(nativeContentAd.getCallToAction());
+        nativeContentAdView.setCallToActionView(callToActionButton);
+
+        TextView headlineView = (TextView) nativeContentAdView.findViewById(R.id.headline);
+        headlineView.setText(nativeContentAd.getHeadline());
+        nativeContentAdView.setHeadlineView(headlineView);
+
+        adsDisplayed = true;
+        adapter.setUpElements();
+        adapter.notifyDataSetChanged();
     }
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -495,7 +549,7 @@ public class NavigationDrawerFragment extends Fragment {
              * Ad
              */
             if (viewType == AD_TYPE) {
-                return new AdViewHolder(adView);
+                return new AdViewHolder(currentAdView);
             }
             /**
              * Car
@@ -523,7 +577,7 @@ public class NavigationDrawerFragment extends Fragment {
                 return new MenuViewHolder(itemView);
             }
 
-            throw new IllegalStateException("New type added to the recycler view but no view holder associated");
+            throw new IllegalStateException("New type added to the recycler view but no view holder associated : " + viewType);
         }
 
         @Override
@@ -575,27 +629,18 @@ public class NavigationDrawerFragment extends Fragment {
                  */
                 carViewHolder.toolbar.setOnClickListener(clickListener);
 
-            } else if (viewType == CAR_MANAGER_TYPE
-                    || viewType == SHARE_TYPE
-                    || viewType == DONATE_TYPE
-                    || viewType == PREFERENCES_TYPE
-                    || viewType == HELP_TYPE
-                    || viewType == SIGN_OUT_TYPE) {
-
-                MenuViewHolder menuViewHolder = (MenuViewHolder) viewHolder;
-                if (viewType == CAR_MANAGER_TYPE) {
-                    bindCarManager(menuViewHolder);
-                } else if (viewType == SHARE_TYPE) {
-                    bindShare(menuViewHolder);
-                } else if (viewType == DONATE_TYPE) {
-                    bindDonate(menuViewHolder);
-                } else if (viewType == PREFERENCES_TYPE) {
-                    bindHelp(menuViewHolder);
-                } else if (viewType == HELP_TYPE) {
-                    bindPreferences(menuViewHolder);
-                } else if (viewType == SIGN_OUT_TYPE) {
-                    bindSignOut(menuViewHolder);
-                }
+            } else if (viewType == CAR_MANAGER_TYPE) {
+                bindCarManager((MenuViewHolder) viewHolder);
+            } else if (viewType == SHARE_TYPE) {
+                bindShare((MenuViewHolder) viewHolder);
+            } else if (viewType == DONATE_TYPE) {
+                bindDonate((MenuViewHolder) viewHolder);
+            } else if (viewType == PREFERENCES_TYPE) {
+                bindHelp((MenuViewHolder) viewHolder);
+            } else if (viewType == HELP_TYPE) {
+                bindPreferences((MenuViewHolder) viewHolder);
+            } else if (viewType == SIGN_OUT_TYPE) {
+                bindSignOut((MenuViewHolder) viewHolder);
             }
 
         }

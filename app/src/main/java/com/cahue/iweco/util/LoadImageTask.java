@@ -12,10 +12,11 @@ import java.io.InputStream;
 /**
  * Background Async task to load user profile picture from url
  */
-public class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
+public class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
+
     final ImageView bmImage;
 
-    public LoadProfileImage(ImageView bmImage) {
+    public LoadImageTask(ImageView bmImage) {
         this.bmImage = bmImage;
     }
 
@@ -38,4 +39,5 @@ public class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
     protected void onPostExecute(Bitmap result) {
         bmImage.setImageBitmap(result);
     }
+
 }
