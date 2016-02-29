@@ -8,36 +8,29 @@
     android:orientation="vertical"
     android:padding="@dimen/large_padding">
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/abc_control_inset_material"
-        android:text="@string/car_name_select"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-    <EditText
-        android:id="@+id/name_edit"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/input_layout_password"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/car_name_select"
-        android:inputType="textNoSuggestions|textCapWords" />
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/name_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/car_name_select"
+            android:inputType="textNoSuggestions|textCapWords" />
+
+    </android.support.design.widget.TextInputLayout>
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="@dimen/abc_control_inset_material" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/abc_control_inset_material"
-        android:text="@string/pick_color"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
     <Spinner
         android:id="@+id/color_spinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@color/body_text_1" />
 
 
 </LinearLayout>

@@ -174,6 +174,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         // Create adView.
         adView = new AdView(getActivity());
+        adView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         adView.setAdSize(AdSize.BANNER);
         adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
 

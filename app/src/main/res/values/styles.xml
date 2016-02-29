@@ -20,6 +20,7 @@
 
     </style>
 
+
     <style name="ActionBarThemeOverlay" parent="CahueTheme">
         <item name="android:background">@color/theme_primary</item>
         <item name="android:textColorPrimary">@color/white</item>
@@ -31,7 +32,7 @@
     <!-- Base application theme. -->
     <style name="CahueTheme.Dark">
 
-        <item name="android:background">@color/theme_primary</item>
+        <item name="android:colorBackground">@color/theme_primary</item>
 
         <item name="android:textColor">@color/body_text_1_inverse</item>
         <item name="android:textColorPrimary">@color/body_text_1_inverse</item>
@@ -40,13 +41,37 @@
         <item name="colorAccent">@color/theme_accent</item>
 
         <item name="colorButtonNormal">@color/theme_primary_dark</item>
+
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="android:alertDialogTheme">@style/Dialog.Dark</item>
+        <item name="alertDialogTheme">@style/Dialog.Dark</item>
     </style>
+
+    <style name="Dialog.Dark" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+        <item name="android:windowBackground">@color/theme_primary</item>
+        <item name="android:textColor">@color/body_text_1_inverse</item>
+        <item name="android:textColorAlertDialogListItem">@color/body_text_1_inverse</item>
+
+
+        <!--<item name="android:textColorHint">@color/body_text_1</item>-->
+        <!--<item name="android:textColorPrimaryInverse">@color/body_text_1</item>-->
+        <!--<item name="android:textColorSecondary">@color/body_text_1</item>-->
+        <!--<item name="android:textColorHighlight">@color/theme_primary</item>-->
+        <!--<item name="android:textColorPrimary">@color/theme_primary</item>-->
+
+        <!--<item name="colorControlNormal">@color/theme_primary</item>-->
+        <!--<item name="colorControlActivated">@color/red</item>-->
+    </style>
+
 
     <!-- Base application theme. -->
     <style name="CahueTheme.Dark.Tutorial" parent="Theme.AppCompat">
 
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+        <!--<item name="windowActionBar">false</item>-->
+        <!--<item name="windowNoTitle">true</item>-->
 
         <!--<item name="android:background">@color/light_grey</item>-->
 

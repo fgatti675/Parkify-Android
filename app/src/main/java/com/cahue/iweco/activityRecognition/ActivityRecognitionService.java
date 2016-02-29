@@ -26,7 +26,7 @@ import com.google.android.gms.location.ActivityRecognition;
  */
 public class ActivityRecognitionService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final long DETECTION_INTERVAL_IN_MILLISECONDS_ON_FOOT = 10000;
+    private static final long DETECTION_INTERVAL_IN_MILLISECONDS_ON_FOOT = 8000;
     private static final long DETECTION_INTERVAL_IN_MILLISECONDS_IN_VEHICLE = 3000;
 
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();

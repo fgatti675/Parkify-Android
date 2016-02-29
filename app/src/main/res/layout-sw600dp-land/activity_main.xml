@@ -60,7 +60,6 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:maxWidth="400dp"
                 android:visibility="invisible"
-                cahue:cardBackgroundColor="@color/white"
                 cahue:cardCornerRadius="@dimen/cardCornerRadius"
                 tools:context="com.cahue.iweco.spots.SpotDetailsFragment"
                 tools:layout_height="120dp"
