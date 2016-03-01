@@ -228,6 +228,12 @@ public class MapsActivity extends AppCompatActivity
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
+        // TODO: remove
+        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
+            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+            PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
+        }
+
         /**
          * Bind service used for donations
          */
@@ -352,7 +358,6 @@ public class MapsActivity extends AppCompatActivity
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
         cardDetailsContainer = (CardView) findViewById(R.id.card_details_container);
         cardDetailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
-
 
 
         // Facebook callback registration
@@ -952,7 +957,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p/>
+     * <p>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
