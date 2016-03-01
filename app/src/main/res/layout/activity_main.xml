@@ -49,7 +49,6 @@
                     android:layout_marginRight="@dimen/default_padding"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:visibility="invisible"
-                    app:cardBackgroundColor="@color/white"
                     app:cardCornerRadius="@dimen/cardCornerRadius"
                     tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 

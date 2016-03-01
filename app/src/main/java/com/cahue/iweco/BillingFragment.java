@@ -87,7 +87,7 @@ public class BillingFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (iInAppBillingService != null) {
+        if (mBillingServiceConn != null) {
             getActivity().unbindService(mBillingServiceConn);
         }
     }

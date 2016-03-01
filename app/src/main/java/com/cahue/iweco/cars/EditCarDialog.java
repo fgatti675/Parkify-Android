@@ -26,9 +26,12 @@ public class EditCarDialog extends DialogFragment {
     private final static String TAG = EditCarDialog.class.getSimpleName();
     private static final String ARG_CAR = "arg_car";
     private static final String ARG_NEW_CAR = "arg_new_car";
+
     boolean newCar;
+
     @Nullable
     private Car car;
+
     private CarEditedListener mListener;
 
     /**
@@ -88,8 +91,8 @@ public class EditCarDialog extends DialogFragment {
          */
         name.setText(car.name);
         name.requestFocus();
-        int position = spinnerAdapter.getPositionOf(car.color);
-        spinner.setSelection(position);
+        int colorPosition = spinnerAdapter.getPositionOf(car.color);
+        spinner.setSelection(colorPosition);
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
