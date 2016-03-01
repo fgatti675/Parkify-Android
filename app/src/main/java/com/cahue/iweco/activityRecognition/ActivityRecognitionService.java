@@ -186,7 +186,6 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     private PendingIntent getActivityDetectionPendingIntent() {
