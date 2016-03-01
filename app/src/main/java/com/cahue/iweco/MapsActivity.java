@@ -799,7 +799,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.w(TAG, "onConnected");
+        Log.d(TAG, "onConnected");
         setUpMapUserLocation();
     }
 
@@ -808,7 +808,7 @@ public class MapsActivity extends AppCompatActivity
         // The connection has been interrupted.
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
-        Log.w(TAG, "onConnectionSuspended");
+        Log.d(TAG, "onConnectionSuspended");
     }
 
     @Override

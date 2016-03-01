@@ -187,7 +187,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         retrieveCarsFromDB();
 
-//        adapter.setUpElements();
+        adapter.setUpElements();
         adapter.notifyDataSetChanged();
 
         billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
