@@ -29,8 +29,8 @@ android {
             productFlavors {
                 wimc {
                     applicationId "com.whereismycar"
-                    versionCode 61
-                    versionName "3.2.0"
+                    versionCode 62
+                    versionName "3.2.1"
                     signingConfig signingConfigs.wimc
                 }
             }

@@ -320,6 +320,8 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
                     return;
                 }
 
+                Tracking.sendView(Tracking.CATEGORY_MAP);
+
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 

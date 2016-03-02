@@ -24,6 +24,8 @@ public class Tracking {
 
     public static final String CATEGORY_DONATION_DIALOG = "Donation Dialog";
 
+    public static final String CATEGORY_ADVERTISING = "Advertising";
+
     public static final String ACTION_DO_LOGIN = "Do login";
 
     public static final String ACTION_SKIP_LOGIN = "Skip login";
@@ -33,6 +35,8 @@ public class Tracking {
     public static final String ACTION_FREE_SPOT_SELECTED = "Spot selected";
 
     public static final String ACTION_CAR_EDIT = "Car edited";
+
+    public static final String ACTION_AD_CLICKED = "Ad clicked";
 
     public static final String LABEL_FACEBOOK_LOGIN = "Facebook login";
 
@@ -58,10 +62,12 @@ public class Tracking {
 
 
     public static void sendView(String screenName) {
+
+        Log.i("Tracking", "View: " + screenName);
+
         if (BuildConfig.DEBUG) return;
 
         getTracker().setScreenName(screenName);
-        Log.i("Tracking", "View: " + screenName);
         HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder();
         getTracker().send(builder.build());
 
@@ -76,9 +82,11 @@ public class Tracking {
     }
 
     public static void sendEvent(String category, String action, @Nullable String label, @Nullable Long value) {
-        if (BuildConfig.DEBUG) return;
 
         Log.i("Tracking", "Event: " + action + " " + category + " " + label + " " + value);
+
+        if (BuildConfig.DEBUG) return;
+
         HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
         builder.setAction(action);
         builder.setCategory(category);
@@ -90,9 +98,10 @@ public class Tracking {
     }
 
     public static void sendException(String location, String message, boolean fatal) {
-        if (BuildConfig.DEBUG) return;
 
         Log.i("Tracking", "Event: " + location + " " + message);
+
+        if (BuildConfig.DEBUG) return;
 
         // Build and send exception.
         getTracker().send(new HitBuilders.ExceptionBuilder()
