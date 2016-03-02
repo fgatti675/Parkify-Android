@@ -15,6 +15,7 @@ import java.io.InputStream;
 public class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     final ImageView bmImage;
+    private OnLoadImageFinishedListener listener;
 
     public LoadImageTask(ImageView bmImage) {
         this.bmImage = bmImage;
@@ -37,7 +38,16 @@ public class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
     }
 
     protected void onPostExecute(Bitmap result) {
+        if (listener != null) listener.onLoadImageFinished(result);
         bmImage.setImageBitmap(result);
+
     }
 
+    public void setListener(OnLoadImageFinishedListener listener) {
+        this.listener = listener;
+    }
+
+    public interface OnLoadImageFinishedListener {
+        void onLoadImageFinished(Bitmap result);
+    }
 }

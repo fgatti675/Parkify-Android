@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.cahue.iweco.tutorial.TutorialActivity">
 
@@ -12,48 +12,48 @@
         android:background="@drawable/tutorial_drawable" />
 
     <Button
+        android:id="@+id/previous"
+        style="@android:style/Widget.Material.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:alpha="0"
-        android:text="@string/previous"
-        style="@android:style/Widget.Material.Button.Borderless"
-        android:id="@+id/previous"
-        android:layout_alignParentBottom="true" />
+        android:text="@string/previous" />
 
     <Button
+        android:id="@+id/next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/next"
-        android:id="@+id/next"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true"
+        android:text="@string/next" />
 
     <Button
+        android:id="@+id/ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:alpha="0"
         android:text="@string/ok"
         android:theme="@style/CahueTheme.Button.Accent"
-        android:visibility="gone"
-        android:id="@+id/ok"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/progress_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:background="@android:color/transparent"
         android:visibility="invisible">
 
         <ProgressBar
+            android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/progress_bar"
             android:background="@android:color/transparent"
             android:visibility="invisible" />
 

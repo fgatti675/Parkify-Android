@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,27 +39,23 @@ import com.cahue.iweco.util.LoadImageTask;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdChoicesView;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdListener;
+import com.facebook.ads.NativeAd;
 import com.facebook.share.widget.AppInviteDialog;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.formats.NativeAdOptions;
-import com.google.android.gms.ads.formats.NativeAppInstallAd;
-import com.google.android.gms.ads.formats.NativeAppInstallAdView;
-import com.google.android.gms.ads.formats.NativeContentAd;
-import com.google.android.gms.ads.formats.NativeContentAdView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment implements NativeAppInstallAd.OnAppInstallAdLoadedListener, NativeContentAd.OnContentAdLoadedListener {
+public class NavigationDrawerFragment extends Fragment implements AdListener {
 
     private static final boolean ADS_ENABLED = true;
 
@@ -96,10 +93,9 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
             setUpUserDetails();
         }
     };
+    private ViewGroup adView;
+    private NativeAd nativeAd;
 
-    private View currentAdView;
-    private NativeContentAdView nativeContentAdView;
-    private NativeAppInstallAdView nativeAppInstallAdView;
     /**
      * Are ads currently displayed
      */
@@ -132,6 +128,7 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
 
     @Nullable
     private BroadcastReceiver billingReadyReceiver;
+    private AdChoicesView adChoicesView;
 
     public NavigationDrawerFragment() {
     }
@@ -182,8 +179,8 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        nativeContentAdView = (NativeContentAdView) inflater.inflate(R.layout.native_content_ad_view, container, false);
-        nativeAppInstallAdView = (NativeAppInstallAdView) inflater.inflate(R.layout.native_app_install_ad_view, container, false);
+        adView = (ViewGroup) inflater.inflate(R.layout.native_app_install_ad_view, container, false);
+        adView.setVisibility(View.GONE);
 
         return mDrawerListView;
     }
@@ -278,25 +275,10 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
             protected void onPostExecute(Boolean displayAd) {
                 Log.d(TAG, "Display ads returned " + displayAd);
 
-                if (displayAd) {
-                    // Ad request
-                    AdRequest adRequest = new AdRequest.Builder().setLocation(mLastUserLocation).build();
-
-                    AdLoader adLoader = new AdLoader.Builder(getActivity(), "ca-app-pub-3940256099942544/2247696110") // TODO: replace with out ad unit id. This is test
-                            .forAppInstallAd(NavigationDrawerFragment.this)
-                            .forContentAd(NavigationDrawerFragment.this)
-                            .withAdListener(new AdListener() {
-                                @Override
-                                public void onAdFailedToLoad(int errorCode) {
-                                    // Handle the failure by logging, altering the UI, etc.
-                                }
-                            })
-                            .withNativeAdOptions(new NativeAdOptions.Builder().build())
-                            .build();
-                    adLoader.loadAd(adRequest);
-
-                    if (!adsDisplayed) {
-                    }
+                if (displayAd && isAdded()) {
+                    nativeAd = new NativeAd(getActivity(), getString(R.string.facebook_drawer_placement_id));
+                    nativeAd.setAdListener(NavigationDrawerFragment.this);
+                    nativeAd.loadAd();
                 }
 
             }
@@ -452,22 +434,77 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
         this.bottomMargin = bottomMargin;
     }
 
+
     @Override
-    public void onAppInstallAdLoaded(NativeAppInstallAd nativeAppInstallAd) {
-        // Show the app install ad.
-        currentAdView = nativeAppInstallAdView;
+    public void onError(Ad ad, AdError adError) {
+        Log.d(TAG, "onAdError: ");
 
-        ImageView logo = (ImageView) nativeAppInstallAdView.findViewById(R.id.icon);
-        logo.setImageDrawable(nativeAppInstallAd.getIcon().getDrawable());
-        nativeAppInstallAdView.setIconView(logo);
+        adView.setVisibility(View.VISIBLE);
+    }
 
-        Button callToActionButton = (Button) nativeAppInstallAdView.findViewById(R.id.call_to_action);
-        callToActionButton.setText(nativeAppInstallAd.getCallToAction());
-        nativeAppInstallAdView.setCallToActionView(callToActionButton);
+    @Override
+    public void onAdLoaded(Ad ad) {
 
-        TextView headlineView = (TextView) nativeAppInstallAdView.findViewById(R.id.headline);
-        headlineView.setText(nativeAppInstallAd.getHeadline());
-        nativeAppInstallAdView.setHeadlineView(headlineView);
+        Log.d(TAG, "onAdLoaded: ");
+
+        adView.setVisibility(View.VISIBLE);
+
+        nativeAd.unregisterView();
+
+        final ViewGroup leftLayout = (ViewGroup) adView.findViewById(R.id.ad_left_layout);
+
+        // Create native UI using the ad metadata.
+        ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
+        TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
+        TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
+//        MediaView nativeAdMedia = (MediaView) adView.findViewById(R.id.native_ad_media);
+//        TextView nativeAdSocialContext = (TextView) adView.findViewById(R.id.native_ad_social_context);
+        Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
+
+        // Setting the Text.
+//        nativeAdSocialContext.setText(nativeAd.getAdSocialContext());
+        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+        nativeAdTitle.setText(nativeAd.getAdTitle());
+        nativeAdBody.setText(nativeAd.getAdBody());
+
+        // Downloading and setting the ad icon.
+        NativeAd.Image adIcon = nativeAd.getAdIcon();
+        if (adIcon != null) {
+            NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
+//            LoadImageTask loadImageTask = new LoadImageTask(nativeAdIcon);
+////            loadImageTask.setListener(new LoadImageTask.OnLoadImageFinishedListener() {
+////                @Override
+////                public void onLoadImageFinished(Bitmap result) {
+////                    Palette palette = Palette.from(result).generate();
+////                    Palette.Swatch swatch = palette.getLightVibrantSwatch();
+////                    if (swatch != null)
+////                        leftLayout.setBackgroundColor(swatch.getRgb());
+////                }
+////            });
+//            loadImageTask.execute(adIcon.getUrl());
+        }
+
+        // Download and setting the cover image.
+//        NativeAd.Image adCoverImage = nativeAd.getAdCoverImage();
+//        nativeAdMedia.setNativeAd(nativeAd);
+
+        // Add adChoices icon
+        if (adChoicesView == null) {
+            ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
+            adChoicesView = new AdChoicesView(getActivity(), nativeAd, true);
+            adChoicesView.setGravity(Gravity.TOP | Gravity.END);
+            adChoicesWrap.addView(adChoicesView);
+        }
+
+        View adContainer = adView.findViewById(R.id.ad_container);
+        nativeAd.registerViewForInteraction(adContainer);
+
+
+        adContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
 
         adsDisplayed = true;
         adapter.setUpElements();
@@ -475,26 +512,8 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
     }
 
     @Override
-    public void onContentAdLoaded(NativeContentAd nativeContentAd) {
-
-        // Show the content ad.
-        currentAdView = nativeContentAdView;
-
-        ImageView logo = (ImageView) nativeContentAdView.findViewById(R.id.logo);
-        logo.setImageDrawable(nativeContentAd.getImages().get(0).getDrawable());
-        nativeContentAdView.setLogoView(logo);
-
-        Button callToActionButton = (Button) nativeContentAdView.findViewById(R.id.call_to_action);
-        callToActionButton.setText(nativeContentAd.getCallToAction());
-        nativeContentAdView.setCallToActionView(callToActionButton);
-
-        TextView headlineView = (TextView) nativeContentAdView.findViewById(R.id.headline);
-        headlineView.setText(nativeContentAd.getHeadline());
-        nativeContentAdView.setHeadlineView(headlineView);
-
-        adsDisplayed = true;
-        adapter.setUpElements();
-        adapter.notifyDataSetChanged();
+    public void onAdClicked(Ad ad) {
+        Log.d(TAG, "onAdClicked: ");
     }
 
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -520,14 +539,15 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
 
             itemTypes = new ArrayList(totalElements);
 
-            if (adsDisplayed)
-                itemTypes.add(AD_TYPE);
-
             for (int i = 0; i < cars.size(); i++) {
                 itemTypes.add(CAR_TYPE);
             }
 
             itemTypes.add(CAR_MANAGER_TYPE);
+
+            if (adsDisplayed)
+                itemTypes.add(AD_TYPE);
+
             if (AppInviteDialog.canShow())
                 itemTypes.add(SHARE_TYPE);
             itemTypes.add(DONATE_TYPE);
@@ -549,7 +569,7 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
              * Ad
              */
             if (viewType == AD_TYPE) {
-                return new AdViewHolder(currentAdView);
+                return new AdViewHolder(adView);
             }
             /**
              * Car
@@ -598,7 +618,7 @@ public class NavigationDrawerFragment extends Fragment implements NativeAppInsta
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
-                final Car car = cars.get(position - (adsDisplayed ? 1 : 0));
+                final Car car = cars.get(position);
                 carViewHolder.bind(getActivity(), car, mLastUserLocation, BluetoothAdapter.getDefaultAdapter());
 
                 /**
