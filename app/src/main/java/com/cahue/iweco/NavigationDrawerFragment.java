@@ -38,6 +38,7 @@ import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
@@ -278,6 +279,13 @@ public class NavigationDrawerFragment extends Fragment {
                 if (displayAd) {
                     // Ad request
                     AdRequest adRequest = new AdRequest.Builder().setLocation(mLastUserLocation).build();
+                    adView.setAdListener(new AdListener() {
+                        @Override
+                        public void onAdOpened() {
+                            super.onAdOpened();
+                            Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "AdMob");
+                        }
+                    });
                     adView.loadAd(adRequest);
 
                     if (!adsDisplayed) {
@@ -326,6 +334,8 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
+
+                Tracking.sendView(Tracking.CATEGORY_MAP);
 
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
