@@ -17,6 +17,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.cahue.iweco.AppturboUnlockTools;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
@@ -178,6 +179,12 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
         });
 
+        // TODO: remove
+        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
+            findViewById(R.id.app_turbo_ads_free).setVisibility(View.VISIBLE);
+            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+            PreferencesUtil.setAdsRemoved(this, true);
+        }
 
     }
 

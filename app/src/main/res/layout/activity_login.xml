@@ -6,63 +6,98 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="@dimen/large_padding"
+    android:stateListAnimator="@anim/abc_fade_in"
     tools:context="com.cahue.iweco.login.LoginActivity">
 
-    <include layout="@layout/layout_intro" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/weco_anim"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center">
+        android:layout_gravity="center_horizontal"
+        android:adjustViewBounds="true"
+        android:src="@drawable/weco_anim"
+        tools:showIn="@layout/activity_login" />
 
-        <!-- Login progress -->
-        <ProgressBar
-            android:id="@+id/login_progress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:visibility="invisible" />
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="@dimen/large_padding"
+        android:paddingTop="@dimen/large_padding"
+        android:src="@drawable/parkify_logo" />
 
-        <LinearLayout
-            android:id="@+id/buttons"
+
+    <TextView
+        android:id="@+id/app_turbo_ads_free"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="@dimen/default_padding"
+        android:text="@string/ad_free_appturbo"
+        android:visibility="gone" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:padding="@dimen/large_padding">
 
-            <Button
-                android:id="@+id/facebook_login_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/facebook_sign_in"
-                android:theme="@style/CahueTheme.Button.Facebook" />
-
-            <Button
-                android:id="@+id/plus_sign_in_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/google_sign_in"
-                android:theme="@style/CahueTheme.Button.Google" />
-
-            <TextView
+            <!-- Login progress -->
+            <ProgressBar
+                android:id="@+id/login_progress"
+                style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:padding="@dimen/default_padding"
-                android:text="@string/login_benefits" />
+                android:layout_centerHorizontal="true"
+                android:visibility="invisible" />
 
-            <Button
-                android:id="@+id/no_sign_in"
-                style="?android:attr/borderlessButtonStyle"
+            <LinearLayout
+                android:id="@+id/buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/no_sign_in" />
-        </LinearLayout>
+                android:orientation="vertical">
 
-    </RelativeLayout>
+                <Button
+                    android:id="@+id/facebook_login_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/facebook_sign_in"
+                    android:theme="@style/CahueTheme.Button.Facebook" />
 
+                <Button
+                    android:id="@+id/plus_sign_in_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/google_sign_in"
+                    android:theme="@style/CahueTheme.Button.Google" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="@dimen/default_padding"
+                    android:text="@string/login_benefits" />
+
+                <Button
+                    android:id="@+id/no_sign_in"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_sign_in" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 </LinearLayout>
-
-
-

@@ -228,12 +228,6 @@ public class MapsActivity extends AppCompatActivity
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
-        // TODO: remove
-        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
-            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-            PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
-        }
-
         /**
          * Bind service used for donations
          */
