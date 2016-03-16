@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Parkify</string>
+    <string name="app_name">Parkify! ¿Dónde está mi coche?</string>
 
     <!-- DeviceListActivity -->
     <string name="scanning">Buscando dispositivos…</string>
@@ -83,6 +83,5 @@
     <string name="clear">Borrar</string>
 
     <string name="and_remove_ads">¡Y elimina los anuncios!</string>
-    <string name="ad_free_appturbo">Version sin anuncion gracias a App of the Day!</string>
 
 </resources>

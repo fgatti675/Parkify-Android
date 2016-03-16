@@ -29,16 +29,6 @@
         android:src="@drawable/parkify_logo" />
 
 
-    <TextView
-        android:id="@+id/app_turbo_ads_free"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:padding="@dimen/default_padding"
-        android:text="@string/ad_free_appturbo"
-        android:visibility="gone" />
-
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="wrap_content"
