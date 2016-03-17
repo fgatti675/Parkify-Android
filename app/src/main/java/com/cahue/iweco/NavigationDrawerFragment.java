@@ -19,7 +19,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -119,10 +118,13 @@ public class NavigationDrawerFragment extends Fragment {
 
     };
     private int bottomMargin;
+    private int topMargin;
+
     private BillingFragment billingFragment;
 
     @Nullable
     private BroadcastReceiver billingReadyReceiver;
+    private RelativeLayout mRootView;
 
     public NavigationDrawerFragment() {
     }
@@ -145,21 +147,21 @@ public class NavigationDrawerFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        RelativeLayout mDrawerListView = (RelativeLayout) inflater.inflate(
+        mRootView = (RelativeLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer,
                 container,
                 false);
 
-        userDetailsView = mDrawerListView.findViewById(R.id.user_details);
+        userDetailsView = mRootView.findViewById(R.id.user_details);
 
-        userImage = (ImageView) mDrawerListView.findViewById(R.id.profile_image);
-        usernameTextView = (TextView) mDrawerListView.findViewById(R.id.username);
-        emailTextView = (TextView) mDrawerListView.findViewById(R.id.email);
+        userImage = (ImageView) mRootView.findViewById(R.id.profile_image);
+        usernameTextView = (TextView) mRootView.findViewById(R.id.username);
+        emailTextView = (TextView) mRootView.findViewById(R.id.email);
 
         /**
          * RecyclerView
          */
-        RecyclerView recyclerView = (RecyclerView) mDrawerListView.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = (RecyclerView) mRootView.findViewById(R.id.recycler_view);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -179,7 +181,7 @@ public class NavigationDrawerFragment extends Fragment {
         adView.setAdSize(AdSize.BANNER);
         adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
 
-        return mDrawerListView;
+        return mRootView;
     }
 
     @Override
@@ -310,9 +312,8 @@ public class NavigationDrawerFragment extends Fragment {
      *
      * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
-     * @param mToolbar
      */
-    public void setUpDrawer(int fragmentId, DrawerLayout drawerLayout, Toolbar mToolbar) {
+    public void setUpDrawer(int fragmentId, DrawerLayout drawerLayout) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
@@ -324,7 +325,7 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerToggle = new ActionBarDrawerToggle(
                 getActivity(),                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
-                mToolbar,
+                null,
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -448,6 +449,11 @@ public class NavigationDrawerFragment extends Fragment {
         if (profilePicURL != null)
             new LoadProfileImage(userImage).execute(profilePicURL);
 
+    }
+
+    public void setTopMargin(int topMargin) {
+        this.topMargin = topMargin;
+        mRootView.setPadding(0, topMargin, 0, 0);
     }
 
     public void setBottomMargin(int bottomMargin) {

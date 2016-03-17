@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/light_grey"
     android:orientation="vertical"
     tools:context=".NavigationDrawerFragment">
 
@@ -12,9 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/light_grey"
         android:elevation="@dimen/elevation_small"
+        android:orientation="horizontal"
         android:padding="@dimen/default_padding">
+
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
@@ -56,6 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/user_details"
+        android:background="@color/white"
         tools:listitem="@layout/layout_item_drawer_navigation" />
 
 

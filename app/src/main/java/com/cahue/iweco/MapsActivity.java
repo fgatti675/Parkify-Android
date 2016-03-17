@@ -22,14 +22,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -37,6 +36,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -156,7 +156,7 @@ public class MapsActivity extends AppCompatActivity
     private AccountManager mAccountManager;
 
     private CarDatabase carDatabase;
-    private Toolbar mToolbar;
+    private View drawerToggle;
     private FloatingActionButton myLocationButton;
 
     private CardView cardDetailsContainer;
@@ -200,6 +200,9 @@ public class MapsActivity extends AppCompatActivity
     private boolean locationPermissionCurrentlyRequested = false;
 
     private int navBarHeight = 0;
+    private int statusBarHeight = 0;
+    private RelativeLayout detailsContainer;
+    private DrawerLayout drawerLayout;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -282,9 +285,15 @@ public class MapsActivity extends AppCompatActivity
             setDebugConfig();
         }
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
+        drawerToggle = findViewById(R.id.nav_drawer_toggle);
+        drawerToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
+        detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
 
         /**
          * If translucent bars, apply the proper margins
@@ -292,7 +301,6 @@ public class MapsActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Resources resources = getResources();
 
-            RelativeLayout detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
             if (resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 int navBarResId = resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android");
                 int navBarLandscapeHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
@@ -304,9 +312,10 @@ public class MapsActivity extends AppCompatActivity
             }
 
             int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
-            int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
-            ViewGroup mainContainer = (ViewGroup) findViewById(R.id.main_container);
-            mainContainer.setPadding(0, statusBarHeight, 0, 0);
+            statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) drawerToggle.getLayoutParams();
+            lp.setMargins(lp.leftMargin, lp.topMargin + statusBarHeight, lp.rightMargin, lp.bottomMargin);
+            drawerToggle.setLayoutParams(lp);
         }
 
         /**
@@ -473,15 +482,15 @@ public class MapsActivity extends AppCompatActivity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mNavigationDrawerFragment.setUserLocation(getUserLocation());
+        mNavigationDrawerFragment.setTopMargin(statusBarHeight);
         mNavigationDrawerFragment.setBottomMargin(navBarHeight);
 
         // Set up the drawer.
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawerLayout != null) {
             mNavigationDrawerFragment.setUpDrawer(
                     R.id.navigation_drawer,
-                    drawerLayout,
-                    mToolbar);
+                    drawerLayout);
         }
 
     }
@@ -516,6 +525,8 @@ public class MapsActivity extends AppCompatActivity
             delegate.setMap(mMap);
         }
 
+        detailsContainer.setVisibility(View.VISIBLE);
+        drawerToggle.setVisibility(View.VISIBLE);
 
         if (detailsDisplayed) showDetails();
         else hideDetails();
@@ -646,7 +657,7 @@ public class MapsActivity extends AppCompatActivity
 
     private void setMapPadding(int bottomPadding) {
         if (mMap == null) return;
-        mMap.setPadding(0, 0, 0, bottomPadding + navBarHeight);
+        mMap.setPadding(0, statusBarHeight, 0, bottomPadding + navBarHeight);
     }
 
     private void showDetails() {
@@ -678,8 +689,10 @@ public class MapsActivity extends AppCompatActivity
                 translateAnimation.setInterpolator(interpolator);
                 translateAnimation.setDuration(durationMillis);
 
-                AlphaAnimation alphaAnimation = new AlphaAnimation(0F, 1F);
-                animationSet.addAnimation(alphaAnimation);
+                if (!detailsDisplayed) {
+                    AlphaAnimation alphaAnimation = new AlphaAnimation(0F, 1F);
+                    animationSet.addAnimation(alphaAnimation);
+                }
 
                 animationSet.addAnimation(translateAnimation);
                 animationSet.setAnimationListener(new Animation.AnimationListener() {
@@ -951,7 +964,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p>
+     * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {

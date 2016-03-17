@@ -10,6 +10,10 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
+        applicationId "com.whereismycar"
+        versionCode 65
+        versionName "3.2.4"
+        signingConfig signingConfigs.wimc
     }
 
     dexOptions {
@@ -17,22 +21,13 @@ android {
         javaMaxHeapSize "4g"
     }
 
-
-
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.wimc
 
-            productFlavors {
-                wimc {
-                    applicationId "com.whereismycar"
-                    versionCode 65
-                    versionName "3.2.4"
-                    signingConfig signingConfigs.wimc
-                }
-            }
         }
     }
 }

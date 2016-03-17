@@ -79,7 +79,9 @@
 
     <style name="CahueTheme.Dark.TranslucentBars" />
 
-    <style name="CahueTheme.TranslucentBars" />
+    <style name="CahueTheme.Main">
+        <item name="android:windowBackground">@drawable/parkify_logo</item>
+    </style>
 
     <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
         <item name="colorButtonNormal">@color/theme_accent</item>

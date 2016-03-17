@@ -43,10 +43,11 @@
         <item name="alertDialogTheme">@style/Dialog.Dark</item>
     </style>
 
-    <style name="CahueTheme.TranslucentBars">
+    <style name="CahueTheme.Main">
+        <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
-
 
     <style name="CahueTheme.Dark.TranslucentBars">
         <item name="android:windowTranslucentNavigation">true</item>

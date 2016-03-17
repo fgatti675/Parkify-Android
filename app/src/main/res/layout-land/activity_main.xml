@@ -14,13 +14,9 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <include
-                android:id="@+id/toolbar_actionbar"
-                layout="@layout/toolbar_main" />
 
             <fragment
                 android:id="@+id/map"
@@ -29,6 +25,13 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/toolbar_actionbar" />
 
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_actionbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_gravity="top"
+                android:background="@android:color/transparent"
+                android:theme="@style/ActionBarThemeOverlay" />
 
             <RelativeLayout
                 android:id="@+id/details_container"
@@ -72,7 +75,7 @@
                 <include layout="@layout/debug_layout" />
 
             </RelativeLayout>
-        </RelativeLayout>
+        </FrameLayout>
 
         <!-- android:layout_gravity="startIfEnabled" tells DrawerLayout to treat
              this as a sliding drawer on the left side for left-to-right
