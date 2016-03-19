@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Parkify</string>
+    <string name="app_name">Parkify! Dov\'e la macchina?</string>
 
     <!-- DeviceListActivity -->
     <string name="scanning">Cercando dispositivi</string>

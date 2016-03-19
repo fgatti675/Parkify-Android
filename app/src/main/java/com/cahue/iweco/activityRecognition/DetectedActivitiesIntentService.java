@@ -192,7 +192,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                             .setColor(getResources().getColor(R.color.theme_primary))
                             .setContentTitle("Foot -> Vehicle");
 
-            mNotifyMgr.notify(null, 564543, mBuilder.build());
+            mNotifyMgr.notify(null, 564544, mBuilder.build());
         }
     }
 

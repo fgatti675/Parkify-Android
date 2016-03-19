@@ -18,20 +18,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/light_grey" />
+
             <fragment
                 android:id="@+id/map"
                 class="com.google.android.gms.maps.MapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/toolbar_actionbar" />
+                android:layout_height="match_parent" />
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar_actionbar"
-                android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
+            <ImageButton
+                android:id="@+id/navigation_drawer_toggle"
+                style="@style/NavigationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="top"
-                android:background="@android:color/transparent"
-                android:theme="@style/ActionBarThemeOverlay" />
+                android:contentDescription="@string/navigation_drawer_open"
+                android:padding="@dimen/large_padding"
+                android:src="@drawable/ic_menu_24dp" />
 
             <RelativeLayout
                 android:id="@+id/details_container"

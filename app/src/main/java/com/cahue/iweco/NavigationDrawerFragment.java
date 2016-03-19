@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -82,6 +83,8 @@ public class NavigationDrawerFragment extends Fragment {
     private ImageView userImage;
     private TextView usernameTextView;
     private TextView emailTextView;
+    private Button signInButton;
+
     @NonNull
     private final BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
         @Override
@@ -157,6 +160,14 @@ public class NavigationDrawerFragment extends Fragment {
         userImage = (ImageView) mRootView.findViewById(R.id.profile_image);
         usernameTextView = (TextView) mRootView.findViewById(R.id.username);
         emailTextView = (TextView) mRootView.findViewById(R.id.email);
+
+        signInButton = (Button) mRootView.findViewById(R.id.sign_in_button);
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigation.signOutAndGoToLoginScreen(false);
+            }
+        });
 
         /**
          * RecyclerView
@@ -432,23 +443,24 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void setUpUserDetails() {
 
-        userDetailsView.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
+        if (skippedLogin) {
+            userDetailsView.setVisibility(View.GONE);
+            signInButton.setVisibility(View.VISIBLE);
+        } else {
+            userDetailsView.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.GONE);
+            String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
 
-        if (skippedLogin)
-            return;
+            // in case it is being loaded in the background
+            if (loggedUsername == null)
+                return;
 
-        String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
-
-        // in case it is being loaded in the background
-        if (loggedUsername == null)
-            return;
-
-        usernameTextView.setText(loggedUsername);
-        emailTextView.setText(AuthUtils.getEmail(getActivity()));
-        String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
-        if (profilePicURL != null)
-            new LoadProfileImage(userImage).execute(profilePicURL);
-
+            usernameTextView.setText(loggedUsername);
+            emailTextView.setText(AuthUtils.getEmail(getActivity()));
+            String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
+            if (profilePicURL != null)
+                new LoadProfileImage(userImage).execute(profilePicURL);
+        }
     }
 
     public void setTopMargin(int topMargin) {
@@ -476,10 +488,11 @@ public class NavigationDrawerFragment extends Fragment {
 
         public void setUpElements() {
 
-            int totalElements = cars.size() + 5;
+            int totalElements = cars.size() + 4;
 
             if (adsDisplayed) totalElements++;
             if (AppInviteDialog.canShow()) totalElements++;
+            if (!skippedLogin) totalElements++;
 
             itemTypes = new ArrayList(totalElements);
 
@@ -496,7 +509,8 @@ public class NavigationDrawerFragment extends Fragment {
             itemTypes.add(DONATE_TYPE);
             itemTypes.add(PREFERENCES_TYPE);
             itemTypes.add(HELP_TYPE);
-            itemTypes.add(SIGN_OUT_TYPE);
+            if (!skippedLogin)
+                itemTypes.add(SIGN_OUT_TYPE);
         }
 
         @Override
@@ -686,12 +700,12 @@ public class NavigationDrawerFragment extends Fragment {
 
         private void bindSignOut(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.itemView.setPadding(0, 0, 0, bottomMargin);
-            menuViewHolder.title.setText(skippedLogin ? R.string.sign_in : R.string.disconnect);
+            menuViewHolder.title.setText(R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigation.signOut();
+                    navigation.signOutAndGoToLoginScreen(true);
                     Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SIGN_OUT);
                 }
             });

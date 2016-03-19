@@ -214,7 +214,9 @@ public class MapsActivity extends AppCompatActivity
 
             clearAccounts();
             Log.d(TAG, "goToLogin");
-            startActivity(new Intent(this, LoginActivity.class));
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             finish();
         }
     }
@@ -229,14 +231,9 @@ public class MapsActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
 
-        mSkippedLogin = AuthUtils.isSkippedLogin(this);
-
-        /**
-         * Bind service used for donations
-         */
-        setUpBillingFragment();
-
         carDatabase = CarDatabase.getInstance(this);
+
+        mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
@@ -249,6 +246,11 @@ public class MapsActivity extends AppCompatActivity
         else if (availableAccounts.length > 1) {
             Log.w(TAG, "Multiple accounts found");
         }
+
+        /**
+         * Bind service used for donations
+         */
+        setUpBillingFragment();
 
         loginType = null;
 
@@ -281,11 +283,7 @@ public class MapsActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        if (BuildConfig.DEBUG) {
-            setDebugConfig();
-        }
-
-        drawerToggle = findViewById(R.id.nav_drawer_toggle);
+        drawerToggle = findViewById(R.id.navigation_drawer_toggle);
         drawerToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -332,6 +330,16 @@ public class MapsActivity extends AppCompatActivity
                 setCameraFollowing(true);
             }
         });
+
+        if (BuildConfig.DEBUG) {
+            myLocationButton.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    setDebugConfig();
+                    return false;
+                }
+            });
+        }
 
         /**
          * Try to reuse map
@@ -418,15 +426,6 @@ public class MapsActivity extends AppCompatActivity
          * If BT is not enabled, start activity recognition service (if enabled)
          */
         ActivityRecognitionService.startIfNoBT(this);
-
-        /**
-         * Set no cars details if database is empty
-         */
-        if (carDatabase.isEmptyOfCars()) {
-            setNoCars();
-        } else {
-            if (detailsFragment instanceof NoCarsFragment) hideDetails();
-        }
 
         // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
@@ -733,11 +732,6 @@ public class MapsActivity extends AppCompatActivity
 
         if (!detailsDisplayed) return;
 
-        if (carDatabase.isEmptyOfCars()) {
-            setNoCars();
-            return;
-        }
-
         // should the location button be animated toov
         final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
 
@@ -838,20 +832,13 @@ public class MapsActivity extends AppCompatActivity
                 delegate.setCameraFollowing(false);
             }
 
-            if (detailsFragment instanceof NoCarsFragment) {
-                super.onBackPressed();
-            } else {
-                hideDetails();
-            }
+            hideDetails();
+
         } else {
             super.onBackPressed();
         }
     }
 
-
-    private void setNoCars() {
-        setDetailsFragment(NoCarsFragment.newInstance());
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -912,7 +899,7 @@ public class MapsActivity extends AppCompatActivity
     /**
      * Sign out the user (so they can switch to another account).
      */
-    public void signOut() {
+    public void signOutAndGoToLoginScreen(boolean resetPreferences) {
 
         // We only want to sign out if we're connected.
         if (mGoogleApiClient.isConnected() && loginType == LoginType.Google) {
@@ -930,7 +917,9 @@ public class MapsActivity extends AppCompatActivity
 
         Tracking.setTrackerUserId(null);
 
-        PreferencesUtil.clear(this);
+        if (resetPreferences)
+            PreferencesUtil.clear(this);
+
         AuthUtils.clearLoggedUserDetails(this);
 
         Log.v(TAG, "Sign out successful!");

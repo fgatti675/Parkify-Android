@@ -4,14 +4,13 @@
 
     <item
         android:id="@+id/action_follow"
-        android:title="@string/follow"
         android:icon="@drawable/ic_action_maps_navigation"
+        android:title="@string/follow"
         cahue:showAsAction="always" />
 
     <item
         android:id="@+id/action_clear"
         android:title="@string/remove_location"
-        android:icon="@drawable/ic_action_navigation_close"
         cahue:showAsAction="never" />
 
 </menu>

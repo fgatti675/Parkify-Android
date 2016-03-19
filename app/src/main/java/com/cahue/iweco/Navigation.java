@@ -5,7 +5,7 @@ package com.cahue.iweco;
  */
 public interface Navigation {
 
-    void signOut();
+    void signOutAndGoToLoginScreen(boolean resetPreferences);
 
     void goToPreferences();
 
