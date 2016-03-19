@@ -19,7 +19,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -86,6 +85,8 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
     private ImageView userImage;
     private TextView usernameTextView;
     private TextView emailTextView;
+    private Button signInButton;
+
     @NonNull
     private final BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
         @Override
@@ -124,11 +125,14 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
 
     };
     private int bottomMargin;
+    private int topMargin;
+
     private BillingFragment billingFragment;
 
     @Nullable
     private BroadcastReceiver billingReadyReceiver;
     private AdChoicesView adChoicesView;
+    private RelativeLayout mRootView;
 
     public NavigationDrawerFragment() {
     }
@@ -151,21 +155,29 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        RelativeLayout mDrawerListView = (RelativeLayout) inflater.inflate(
+        mRootView = (RelativeLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer,
                 container,
                 false);
 
-        userDetailsView = mDrawerListView.findViewById(R.id.user_details);
+        userDetailsView = mRootView.findViewById(R.id.user_details);
 
-        userImage = (ImageView) mDrawerListView.findViewById(R.id.profile_image);
-        usernameTextView = (TextView) mDrawerListView.findViewById(R.id.username);
-        emailTextView = (TextView) mDrawerListView.findViewById(R.id.email);
+        userImage = (ImageView) mRootView.findViewById(R.id.profile_image);
+        usernameTextView = (TextView) mRootView.findViewById(R.id.username);
+        emailTextView = (TextView) mRootView.findViewById(R.id.email);
+
+        signInButton = (Button) mRootView.findViewById(R.id.sign_in_button);
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigation.signOutAndGoToLoginScreen(true);
+            }
+        });
 
         /**
          * RecyclerView
          */
-        RecyclerView recyclerView = (RecyclerView) mDrawerListView.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = (RecyclerView) mRootView.findViewById(R.id.recycler_view);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -182,7 +194,7 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         adView = (ViewGroup) inflater.inflate(R.layout.native_app_install_ad_view, container, false);
         adView.setVisibility(View.GONE);
 
-        return mDrawerListView;
+        return mRootView;
     }
 
     @Override
@@ -295,9 +307,8 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
      *
      * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
-     * @param mToolbar
      */
-    public void setUpDrawer(int fragmentId, DrawerLayout drawerLayout, Toolbar mToolbar) {
+    public void setUpDrawer(int fragmentId, DrawerLayout drawerLayout) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
@@ -309,7 +320,7 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         mDrawerToggle = new ActionBarDrawerToggle(
                 getActivity(),                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
-                mToolbar,
+                null,
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -413,24 +424,32 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
 
     private void setUpUserDetails() {
 
-        userDetailsView.setVisibility(skippedLogin ? View.GONE : View.VISIBLE);
+        if (skippedLogin) {
+            userDetailsView.setVisibility(View.GONE);
+            signInButton.setVisibility(View.VISIBLE);
+        } else {
+            userDetailsView.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.GONE);
+            String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
 
-        if (skippedLogin)
-            return;
+            // in case it is being loaded in the background
+            if (loggedUsername == null)
+                return;
 
-        String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
+            usernameTextView.setText(loggedUsername);
+            emailTextView.setText(AuthUtils.getEmail(getActivity()));
+            String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
+            if (profilePicURL != null)
+                new LoadImageTask(userImage).execute(profilePicURL);
 
-        // in case it is being loaded in the background
-        if (loggedUsername == null)
-            return;
-
-        usernameTextView.setText(loggedUsername);
-        emailTextView.setText(AuthUtils.getEmail(getActivity()));
-        String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
-        if (profilePicURL != null)
-            new LoadImageTask(userImage).execute(profilePicURL);
-
+        }
     }
+
+    public void setTopMargin(int topMargin) {
+        this.topMargin = topMargin;
+        mRootView.setPadding(0, topMargin, 0, 0);
+    }
+       
 
     public void setBottomMargin(int bottomMargin) {
         this.bottomMargin = bottomMargin;
@@ -534,10 +553,11 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
 
         public void setUpElements() {
 
-            int totalElements = cars.size() + 5;
+            int totalElements = cars.size() + 4;
 
             if (adsDisplayed) totalElements++;
             if (AppInviteDialog.canShow()) totalElements++;
+            if (!skippedLogin) totalElements++;
 
             itemTypes = new ArrayList(totalElements);
 
@@ -555,7 +575,8 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
             itemTypes.add(DONATE_TYPE);
             itemTypes.add(PREFERENCES_TYPE);
             itemTypes.add(HELP_TYPE);
-            itemTypes.add(SIGN_OUT_TYPE);
+            if (!skippedLogin)
+                itemTypes.add(SIGN_OUT_TYPE);
         }
 
         @Override
@@ -736,12 +757,12 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
 
         private void bindSignOut(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.itemView.setPadding(0, 0, 0, bottomMargin);
-            menuViewHolder.title.setText(skippedLogin ? R.string.sign_in : R.string.disconnect);
+            menuViewHolder.title.setText(R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
             menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    navigation.signOut();
+                    navigation.signOutAndGoToLoginScreen(true);
                     Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SIGN_OUT);
                 }
             });

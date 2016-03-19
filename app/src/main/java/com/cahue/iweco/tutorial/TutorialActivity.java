@@ -2,6 +2,7 @@ package com.cahue.iweco.tutorial;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.cars.EditCarDialog;
@@ -134,7 +136,7 @@ public class TutorialActivity extends AppCompatActivity
         super.onPause();
 
         //closing transition animations
-        overridePendingTransition(R.anim.activity_open_scale, R.anim.activity_close_translate);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
     @Override
@@ -180,6 +182,14 @@ public class TutorialActivity extends AppCompatActivity
     @Override
     public void onCarEdited(@NonNull Car car, boolean newCar) {
         ((CarManagerFragment) mSectionsPagerAdapter.getItem(3)).onCarEdited(car, newCar);
+    }
+
+    @Override
+    public void finish() {
+        Intent intent = new Intent(TutorialActivity.this, MapsActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        super.finish();
     }
 
     /**
@@ -233,5 +243,4 @@ public class TutorialActivity extends AppCompatActivity
             return super.isViewFromObject(view, object);
         }
     }
-
 }

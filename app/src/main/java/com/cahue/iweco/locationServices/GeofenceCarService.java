@@ -249,7 +249,7 @@ public class GeofenceCarService extends LocationPollerService {
         Notification.Builder mBuilder =
                 new Notification.Builder(this)
                         .setVibrate(pattern)
-                        .setSmallIcon(R.drawable.ic_action_navigation_close)
+                        .setSmallIcon(R.drawable.crosshairs_gps)
                         .setContentTitle("Geofence ERROR for " + car.name)
                         .setContentText(error);
 
