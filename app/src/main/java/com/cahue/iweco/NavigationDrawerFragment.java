@@ -165,7 +165,7 @@ public class NavigationDrawerFragment extends Fragment {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                navigation.signOutAndGoToLoginScreen(false);
+                navigation.signOutAndGoToLoginScreen(true);
             }
         });
 

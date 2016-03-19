@@ -10,11 +10,8 @@
     tools:context=".MainActivity">
 
     <FrameLayout
-        android:id="@+id/main_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:clipChildren="false">
+        android:layout_height="match_parent">
 
         <View
             android:layout_width="match_parent"
@@ -27,58 +24,83 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <ImageButton
-            android:id="@+id/navigation_drawer_toggle"
-            style="@style/NavigationButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:contentDescription="@string/navigation_drawer_open"
-            android:padding="@dimen/large_padding"
-            android:src="@drawable/ic_menu_24dp" />
-
         <RelativeLayout
-            android:id="@+id/details_container"
+            android:id="@+id/main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
             android:clipChildren="false"
-            android:clipToPadding="false"
-            android:visibility="invisible"
-            tools:visibility="visible">
+            android:clipToPadding="false">
 
-            <android.support.v7.widget.CardView
-                android:id="@+id/card_details_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/default_padding"
-                android:layout_marginLeft="@dimen/default_padding"
-                android:layout_marginRight="@dimen/default_padding"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:visibility="invisible"
-                app:cardCornerRadius="@dimen/cardCornerRadius"
-                tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/my_location"
+            <ImageButton
+                android:id="@+id/navigation_drawer_toggle"
+                style="@style/NavigationButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/card_details_container"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
+                android:layout_gravity="top"
+
+                android:contentDescription="@string/navigation_drawer_open"
+                android:padding="@dimen/large_padding"
+                android:src="@drawable/ic_menu_24dp" />
+
+
+            <Button
+                android:id="@+id/no_cars_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_margin="@dimen/large_padding"
-                android:elevation="@dimen/elevation"
-                android:src="@drawable/crosshairs_gps"
-                app:borderWidth="0dp" />
+                android:layout_margin="@dimen/default_padding"
+                android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
+                android:drawableRight="@drawable/ic_keyboard_arrow_right_24dp"
+                android:text="@string/no_cars"
+                android:textColor="@color/white" />
 
-            <include layout="@layout/debug_layout" />
 
+            <RelativeLayout
+                android:id="@+id/details_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:visibility="invisible"
+                tools:visibility="visible">
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/card_details_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="@dimen/default_padding"
+                    android:layout_marginLeft="@dimen/default_padding"
+                    android:layout_marginRight="@dimen/default_padding"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:visibility="invisible"
+                    app:cardCornerRadius="@dimen/cardCornerRadius"
+                    tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/my_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_above="@+id/card_details_container"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_margin="@dimen/large_padding"
+                    android:elevation="@dimen/elevation"
+                    android:src="@drawable/crosshairs_gps"
+                    app:borderWidth="0dp" />
+
+                <include layout="@layout/debug_layout" />
+
+            </RelativeLayout>
         </RelativeLayout>
+
     </FrameLayout>
+
 
     <!-- android:layout_gravity="start" tells DrawerLayout to treat
          this as a sliding drawer on the left side for left-to-right

@@ -36,7 +36,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -116,8 +115,6 @@ public class MapsActivity extends AppCompatActivity
 
     private static final int REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION = 10;
 
-    private static final int REQUEST_CODE_START_TUTORIAL = 2345;
-
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -159,6 +156,7 @@ public class MapsActivity extends AppCompatActivity
     private View drawerToggle;
     private FloatingActionButton myLocationButton;
 
+    private Button noCarsButton;
     private CardView cardDetailsContainer;
 
     private DetailsFragment detailsFragment;
@@ -215,9 +213,10 @@ public class MapsActivity extends AppCompatActivity
             clearAccounts();
             Log.d(TAG, "goToLogin");
             Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         }
     }
 
@@ -291,6 +290,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
+        RelativeLayout mainContainer = (RelativeLayout) findViewById(R.id.main_container);
         detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
 
         /**
@@ -299,21 +299,18 @@ public class MapsActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Resources resources = getResources();
 
+            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
+            statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+
             if (resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 int navBarResId = resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android");
                 int navBarLandscapeHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-                detailsContainer.setPadding(0, 0, navBarLandscapeHeight, 0);
+                mainContainer.setPadding(0, statusBarHeight, navBarLandscapeHeight, 0);
             } else {
                 int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
                 navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-                detailsContainer.setPadding(0, 0, 0, navBarHeight);
+                mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
             }
-
-            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
-            statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) drawerToggle.getLayoutParams();
-            lp.setMargins(lp.leftMargin, lp.topMargin + statusBarHeight, lp.rightMargin, lp.bottomMargin);
-            drawerToggle.setLayoutParams(lp);
         }
 
         /**
@@ -374,11 +371,13 @@ public class MapsActivity extends AppCompatActivity
         // Facebook callback registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
 
-        // show help dialog only on first run of the app
-        if (!PreferencesUtil.isTutorialShown(this)) {
-            goToTutorial();
-            return;
-        }
+        noCarsButton = (Button) findViewById(R.id.no_cars_button);
+        noCarsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToCarManager();
+            }
+        });
 
         checkLocationPermission();
 
@@ -433,6 +432,8 @@ public class MapsActivity extends AppCompatActivity
         setInitialCamera();
 
         showOnLongClickToast();
+
+        noCarsButton.setVisibility(carDatabase.isEmptyOfCars() ? View.VISIBLE : View.GONE);
 
         mapFragment.getMapAsync(this);
 
@@ -844,9 +845,7 @@ public class MapsActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_START_TUTORIAL) {
-            checkLocationPermission();
-        } else if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
+        if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
             BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
             billingFragment.onActivityResult(requestCode, resultCode, data);
         }
@@ -933,9 +932,9 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public void goToTutorial() {
-        startActivityForResult(new Intent(this, TutorialActivity.class), REQUEST_CODE_START_TUTORIAL);
+        startActivity(new Intent(this, TutorialActivity.class));
         // animation
-        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         PreferencesUtil.setTutorialShown(this, true);
     }
 
@@ -983,6 +982,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void goToCarManager() {
         startActivity(new Intent(MapsActivity.this, CarManagerActivity.class));
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     /**

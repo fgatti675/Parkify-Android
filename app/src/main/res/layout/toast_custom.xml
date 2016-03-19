@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@color/theme_primary"
     android:orientation="horizontal"
-    android:padding="@dimen/large_padding">
+    android:padding="@dimen/default_padding">
 
     <TextView
         android:id="@+id/error_text"

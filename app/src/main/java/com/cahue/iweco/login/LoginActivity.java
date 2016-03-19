@@ -24,6 +24,7 @@ import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
+import com.cahue.iweco.tutorial.TutorialActivity;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
@@ -191,11 +192,13 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         database.saveCarAndBroadcast(database.generateOtherCar());
         AuthUtils.setSkippedLogin(LoginActivity.this, true);
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
-        goToMaps();
+        goToNextActivity();
     }
 
-    private void goToMaps() {
-        startActivity(new Intent(this, MapsActivity.class));
+    public void goToNextActivity() {
+        Intent intent = new Intent(this, PreferencesUtil.isTutorialShown(this) ? MapsActivity.class : TutorialActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
     }
 
@@ -406,14 +409,13 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
-        finishLogin(resultIntent, loginResult, type);
-
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
 
-        goToMaps();
+        finalizeLogin(resultIntent, loginResult, type);
+
     }
 
-    private void finishLogin(@NonNull Intent intent, @NonNull LoginResultBean loginResult, @NonNull LoginType type) {
+    private void finalizeLogin(@NonNull Intent intent, @NonNull LoginResultBean loginResult, @NonNull LoginType type) {
 
         String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 
@@ -449,7 +451,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
 
         setResult(RESULT_OK, intent);
-        finish();
+
+        goToNextActivity();
     }
 
     @Override
