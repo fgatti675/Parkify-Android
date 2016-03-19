@@ -45,9 +45,6 @@ public class CarManagerActivity
 
         progressBar = (ProgressBar) toolbar.findViewById(R.id.progress_bar);
 
-        // animation
-        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
-
         boolean loading = carFragment.areDevicesBeingLoaded();
         Log.d(TAG, "Devices being loaded on create: " + loading);
         devicesBeingLoaded(loading);
@@ -64,7 +61,7 @@ public class CarManagerActivity
     protected void onPause() {
         super.onPause();
         //closing transition animations
-        overridePendingTransition(R.anim.activity_open_scale, R.anim.activity_close_translate);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
 

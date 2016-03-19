@@ -30,7 +30,7 @@
                     android:id="@+id/native_ad_icon"
                     android:layout_width="56dp"
                     android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
+                    android:scaleType="fitStart"
                     tools:src="@drawable/ic_favorite_24dp" />
 
             </LinearLayout>

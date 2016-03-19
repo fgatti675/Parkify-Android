@@ -41,10 +41,13 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     CarViewHolder carViewHolder;
     ParkedCarDelegate parkedCarDelegate;
     private Location userLocation;
-    @Nullable
+
+    @NonNull
     private String carId;
-    @Nullable
+
+    @NonNull
     private Car car;
+
     @Nullable
     private OnCarPositionDeletedListener mListener;
     private CarDatabase carDatabase;

@@ -53,7 +53,7 @@
 
         <activity android:name=".MapsActivity"
             android:launchMode="singleInstance"
-            android:theme="@style/CahueTheme.TranslucentBars">
+            android:theme="@style/CahueTheme.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -133,12 +133,12 @@
 
         <provider
             android:name="com.cahue.iweco.cars.database.CarsProvider"
-            android:authorities="com.cahue.iweco.cars"
+            android:authorities="com.whereismycar.cars"
             android:exported="true"
             android:syncable="true" />
 
         <!-- This service implements our SyncAdapter. It needs to be exported, so that the system
-        sync framework can access it. -->
+               sync framework can access it. -->
         <service
             android:name="com.cahue.iweco.cars.sync.SyncService"
             android:exported="true">
@@ -151,6 +151,15 @@
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
+        </service>
+
+        <service android:name="com.cahue.iweco.auth.ParkifyAccountService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
         </service>
 
         <!-- Activity recognition -->
@@ -168,15 +177,6 @@
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.2" />
             </intent-filter>
         </receiver>
-
-        <service android:name=".auth.ParkifyAccountService">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
 
         <service
             android:name="com.cahue.iweco.util.FetchAddressIntentService"

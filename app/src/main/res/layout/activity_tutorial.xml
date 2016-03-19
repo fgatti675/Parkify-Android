@@ -2,8 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     android:orientation="vertical"
     tools:context="com.cahue.iweco.tutorial.TutorialActivity">
 
@@ -11,7 +9,7 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/tutorial_drawable" />
+        android:background="@drawable/tutorial_background" />
 
     <Button
         android:id="@+id/previous"

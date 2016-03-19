@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <sync-adapter
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contentAuthority="com.cahue.iweco.cars"
-    android:accountType="Cahue"
-    android:userVisible="false"
-    android:supportsUploading="false"
+    android:accountType="cahue.com"
     android:allowParallelSyncs="false"
-    android:isAlwaysSyncable="true"/>
+    android:contentAuthority="com.whereismycar.cars"
+    android:isAlwaysSyncable="true"
+    android:supportsUploading="false"
+    android:userVisible="false" />

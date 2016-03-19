@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="content_authority" translatable="false">com.cahue.iweco.cars</string>
-    <string name="account_type" translatable="false">Cahue</string>
+    <string name="content_authority" translatable="false">com.whereismycar.cars</string>
+    <string name="account_type" translatable="false">cahue.com</string>
 
 </resources>

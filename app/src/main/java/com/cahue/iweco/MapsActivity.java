@@ -22,14 +22,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -116,8 +115,6 @@ public class MapsActivity extends AppCompatActivity
 
     private static final int REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION = 10;
 
-    private static final int REQUEST_CODE_START_TUTORIAL = 2345;
-
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
     private static final LocationRequest REQUEST = LocationRequest.create()
@@ -156,9 +153,10 @@ public class MapsActivity extends AppCompatActivity
     private AccountManager mAccountManager;
 
     private CarDatabase carDatabase;
-    private Toolbar mToolbar;
+    private View drawerToggle;
     private FloatingActionButton myLocationButton;
 
+    private Button noCarsButton;
     private CardView cardDetailsContainer;
 
     private DetailsFragment detailsFragment;
@@ -200,6 +198,9 @@ public class MapsActivity extends AppCompatActivity
     private boolean locationPermissionCurrentlyRequested = false;
 
     private int navBarHeight = 0;
+    private int statusBarHeight = 0;
+    private RelativeLayout detailsContainer;
+    private DrawerLayout drawerLayout;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -211,8 +212,11 @@ public class MapsActivity extends AppCompatActivity
 
             clearAccounts();
             Log.d(TAG, "goToLogin");
-            startActivity(new Intent(this, LoginActivity.class));
+            Intent intent = new Intent(this, LoginActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
             finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         }
     }
 
@@ -226,20 +230,9 @@ public class MapsActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
 
-        mSkippedLogin = AuthUtils.isSkippedLogin(this);
-
-        // TODO: remove
-        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
-            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-            PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
-        }
-
-        /**
-         * Bind service used for donations
-         */
-        setUpBillingFragment();
-
         carDatabase = CarDatabase.getInstance(this);
+
+        mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
         mAccountManager = AccountManager.get(this);
         final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
@@ -252,6 +245,11 @@ public class MapsActivity extends AppCompatActivity
         else if (availableAccounts.length > 1) {
             Log.w(TAG, "Multiple accounts found");
         }
+
+        /**
+         * Bind service used for donations
+         */
+        setUpBillingFragment();
 
         loginType = null;
 
@@ -284,13 +282,16 @@ public class MapsActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        if (BuildConfig.DEBUG) {
-            setDebugConfig();
-        }
+        drawerToggle = findViewById(R.id.navigation_drawer_toggle);
+        drawerToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        ViewCompat.setElevation(mToolbar, getResources().getDimension(R.dimen.elevation));
-
+        RelativeLayout mainContainer = (RelativeLayout) findViewById(R.id.main_container);
+        detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
 
         /**
          * If translucent bars, apply the proper margins
@@ -298,21 +299,18 @@ public class MapsActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Resources resources = getResources();
 
-            RelativeLayout detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
+            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
+            statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+
             if (resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 int navBarResId = resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android");
                 int navBarLandscapeHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-                detailsContainer.setPadding(0, 0, navBarLandscapeHeight, 0);
+                mainContainer.setPadding(0, statusBarHeight, navBarLandscapeHeight, 0);
             } else {
                 int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
                 navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-                detailsContainer.setPadding(0, 0, 0, navBarHeight);
+                mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
             }
-
-            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
-            int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
-            ViewGroup mainContainer = (ViewGroup) findViewById(R.id.main_container);
-            mainContainer.setPadding(0, statusBarHeight, 0, 0);
         }
 
         /**
@@ -329,6 +327,16 @@ public class MapsActivity extends AppCompatActivity
                 setCameraFollowing(true);
             }
         });
+
+        if (BuildConfig.DEBUG) {
+            myLocationButton.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    setDebugConfig();
+                    return false;
+                }
+            });
+        }
 
         /**
          * Try to reuse map
@@ -363,11 +371,13 @@ public class MapsActivity extends AppCompatActivity
         // Facebook callback registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
 
-        // show help dialog only on first run of the app
-        if (!PreferencesUtil.isTutorialShown(this)) {
-            goToTutorial();
-            return;
-        }
+        noCarsButton = (Button) findViewById(R.id.no_cars_button);
+        noCarsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToCarManager();
+            }
+        });
 
         checkLocationPermission();
 
@@ -416,21 +426,14 @@ public class MapsActivity extends AppCompatActivity
          */
         ActivityRecognitionService.startIfNoBT(this);
 
-        /**
-         * Set no cars details if database is empty
-         */
-        if (carDatabase.isEmptyOfCars()) {
-            setNoCars();
-        } else {
-            if (detailsFragment instanceof NoCarsFragment) hideDetails();
-        }
-
         // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
 
         setInitialCamera();
 
         showOnLongClickToast();
+
+        noCarsButton.setVisibility(carDatabase.isEmptyOfCars() ? View.VISIBLE : View.GONE);
 
         mapFragment.getMapAsync(this);
 
@@ -479,15 +482,15 @@ public class MapsActivity extends AppCompatActivity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mNavigationDrawerFragment.setUserLocation(getUserLocation());
+        mNavigationDrawerFragment.setTopMargin(statusBarHeight);
         mNavigationDrawerFragment.setBottomMargin(navBarHeight);
 
         // Set up the drawer.
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawerLayout != null) {
             mNavigationDrawerFragment.setUpDrawer(
                     R.id.navigation_drawer,
-                    drawerLayout,
-                    mToolbar);
+                    drawerLayout);
         }
 
     }
@@ -522,6 +525,8 @@ public class MapsActivity extends AppCompatActivity
             delegate.setMap(mMap);
         }
 
+        detailsContainer.setVisibility(View.VISIBLE);
+        drawerToggle.setVisibility(View.VISIBLE);
 
         if (detailsDisplayed) showDetails();
         else hideDetails();
@@ -652,7 +657,7 @@ public class MapsActivity extends AppCompatActivity
 
     private void setMapPadding(int bottomPadding) {
         if (mMap == null) return;
-        mMap.setPadding(0, 0, 0, bottomPadding + navBarHeight);
+        mMap.setPadding(0, statusBarHeight, 0, bottomPadding + navBarHeight);
     }
 
     private void showDetails() {
@@ -684,8 +689,10 @@ public class MapsActivity extends AppCompatActivity
                 translateAnimation.setInterpolator(interpolator);
                 translateAnimation.setDuration(durationMillis);
 
-                AlphaAnimation alphaAnimation = new AlphaAnimation(0F, 1F);
-                animationSet.addAnimation(alphaAnimation);
+                if (!detailsDisplayed) {
+                    AlphaAnimation alphaAnimation = new AlphaAnimation(0F, 1F);
+                    animationSet.addAnimation(alphaAnimation);
+                }
 
                 animationSet.addAnimation(translateAnimation);
                 animationSet.setAnimationListener(new Animation.AnimationListener() {
@@ -725,11 +732,6 @@ public class MapsActivity extends AppCompatActivity
     public void hideDetails() {
 
         if (!detailsDisplayed) return;
-
-        if (carDatabase.isEmptyOfCars()) {
-            setNoCars();
-            return;
-        }
 
         // should the location button be animated toov
         final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
@@ -831,28 +833,19 @@ public class MapsActivity extends AppCompatActivity
                 delegate.setCameraFollowing(false);
             }
 
-            if (detailsFragment instanceof NoCarsFragment) {
-                super.onBackPressed();
-            } else {
-                hideDetails();
-            }
+            hideDetails();
+
         } else {
             super.onBackPressed();
         }
     }
 
 
-    private void setNoCars() {
-        setDetailsFragment(NoCarsFragment.newInstance());
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_START_TUTORIAL) {
-            checkLocationPermission();
-        } else if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
+        if (requestCode == BillingFragment.REQUEST_ON_PURCHASE) {
             BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
             billingFragment.onActivityResult(requestCode, resultCode, data);
         }
@@ -905,7 +898,7 @@ public class MapsActivity extends AppCompatActivity
     /**
      * Sign out the user (so they can switch to another account).
      */
-    public void signOut() {
+    public void signOutAndGoToLoginScreen(boolean resetPreferences) {
 
         // We only want to sign out if we're connected.
         if (mGoogleApiClient.isConnected() && loginType == LoginType.Google) {
@@ -923,7 +916,9 @@ public class MapsActivity extends AppCompatActivity
 
         Tracking.setTrackerUserId(null);
 
-        PreferencesUtil.clear(this);
+        if (resetPreferences)
+            PreferencesUtil.clear(this);
+
         AuthUtils.clearLoggedUserDetails(this);
 
         Log.v(TAG, "Sign out successful!");
@@ -937,9 +932,9 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public void goToTutorial() {
-        startActivityForResult(new Intent(this, TutorialActivity.class), REQUEST_CODE_START_TUTORIAL);
+        startActivity(new Intent(this, TutorialActivity.class));
         // animation
-        overridePendingTransition(R.anim.activity_open_translate, R.anim.activity_close_scale);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         PreferencesUtil.setTutorialShown(this, true);
     }
 
@@ -957,7 +952,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p>
+     * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
@@ -987,6 +982,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void goToCarManager() {
         startActivity(new Intent(MapsActivity.this, CarManagerActivity.class));
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     /**
