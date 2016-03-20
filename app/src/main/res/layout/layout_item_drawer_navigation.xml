@@ -62,7 +62,7 @@
         android:layout_marginLeft="54dp"
         android:layout_marginStart="54dp"
         android:layout_marginTop="@dimen/small_padding"
-        android:background="@color/divider"
+        android:background="@color/translucent_grey"
         android:visibility="gone"
         tools:visibility="visible" />
 

@@ -43,6 +43,16 @@
                     android:padding="@dimen/large_padding"
                     android:src="@drawable/ic_menu_24dp" />
 
+                <include
+                    layout="@layout/native_app_maps_install_ad_view"
+                    android:layout_width="320dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginBottom="@dimen/default_padding"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_marginRight="@dimen/default_padding"
+                    android:layout_marginTop="@dimen/default_padding" />
+
                 <Button
                     android:id="@+id/no_cars_button"
                     style="?android:attr/borderlessButtonStyle"

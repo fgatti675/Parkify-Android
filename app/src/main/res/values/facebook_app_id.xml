@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="facebook_drawer_placement_id" translatable="false">913770068708673_1034655633286782</string>
     <string name="facebook_app_id" translatable="false">913770068708673</string>
     <string name="facebook_app_secret" translatable="false">ef624ae5dc55e6e7f8ddb7931e8517fc</string>
     <string name="facebook_app_link" translatable="false">https://fb.me/1021989394553406</string>
+
+    <string name="facebook_drawer_placement_id" translatable="false">913770068708673_1034655633286782</string>
+    <string name="facebook_maps_placement_id" translatable="false">913770068708673_1046324158786596</string>
+
 </resources>

@@ -19,7 +19,7 @@
         android:height="40dp"
         android:gravity="center">
         <shape android:shape="oval">
-            <solid android:color="@color/divider" />
+            <solid android:color="@color/translucent_grey" />
         </shape>
     </item>
 

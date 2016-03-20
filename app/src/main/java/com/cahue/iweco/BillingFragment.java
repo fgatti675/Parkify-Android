@@ -32,17 +32,13 @@ import java.util.UUID;
 public class BillingFragment extends Fragment {
 
     public static final String FRAGMENT_TAG = "BILLING_DELEGATE";
-
     static final int REQUEST_ON_PURCHASE = 1001;
-
     private static final String TAG = BillingFragment.class.getSimpleName();
-
     private static final String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
     private static final String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
     private static final String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
-
     private IInAppBillingService iInAppBillingService;
-
+    private OnBillingReadyListener onBillingReadyListener;
     private final ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -56,8 +52,10 @@ public class BillingFragment extends Fragment {
             /**
              * Tell everyone the billing service is ready
              */
-            if (getActivity() != null)
+            if (getActivity() != null) {
                 getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
+                onBillingReadyListener.onBillingReady();
+            }
         }
     };
 
@@ -82,6 +80,13 @@ public class BillingFragment extends Fragment {
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         getActivity().bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
+
+        try {
+            this.onBillingReadyListener = (OnBillingReadyListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.getClass().getName()
+                    + " must implement " + OnBillingReadyListener.class.getName());
+        }
     }
 
     @Override
@@ -90,8 +95,8 @@ public class BillingFragment extends Fragment {
         if (mBillingServiceConn != null) {
             getActivity().unbindService(mBillingServiceConn);
         }
+        onBillingReadyListener = null;
     }
-
 
     @Override
     public void onDestroy() {
@@ -199,5 +204,9 @@ public class BillingFragment extends Fragment {
             }
         }
 
+    }
+
+    public interface OnBillingReadyListener {
+        void onBillingReady();
     }
 }

@@ -11,10 +11,12 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,7 +30,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -36,9 +40,15 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageRequest;
 import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityRecognition.PossibleParkedCarDelegate;
 import com.cahue.iweco.activityRecognition.PossibleParkedCarService;
@@ -64,6 +74,11 @@ import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.facebook.CallbackManager;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdChoicesView;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdListener;
+import com.facebook.ads.NativeAd;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
 import com.google.android.gms.auth.api.Auth;
@@ -107,7 +122,9 @@ public class MapsActivity extends AppCompatActivity
         OnMapReadyCallback,
         OnCarClickedListener,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, DetailsViewManager {
+        GoogleApiClient.OnConnectionFailedListener,
+        DetailsViewManager,
+        BillingFragment.OnBillingReadyListener, AdListener {
 
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -201,6 +218,20 @@ public class MapsActivity extends AppCompatActivity
     private int statusBarHeight = 0;
     private RelativeLayout detailsContainer;
     private DrawerLayout drawerLayout;
+
+    private ViewGroup adView;
+    @NonNull
+    private final BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            adView.setVisibility(View.GONE);
+        }
+    };
+    private AdChoicesView adChoicesView;
+    private NativeAd nativeAd;
+    private BillingFragment billingFragment;
+    private BroadcastReceiver billingReadyReceiver;
+    private AsyncTask<Void, Void, Boolean> setUpAdAsyncTask;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -381,7 +412,117 @@ public class MapsActivity extends AppCompatActivity
 
         checkLocationPermission();
 
+
+        adView = (ViewGroup) findViewById(R.id.ad_container);
+
     }
+
+
+    private void setUpAd() {
+
+        if (PreferencesUtil.isAdsRemoved(this)) return;
+
+        if (carDatabase.isEmptyOfCars()) return;
+
+        adView.setVisibility(View.GONE);
+
+        setUpAdAsyncTask = new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                /**
+                 * Check if the user has purchases. If there is an error we don't display just in case
+                 */
+                boolean displayAd = false;
+                Bundle ownedItems = billingFragment.getPurchases();
+                int response = ownedItems.getInt("RESPONSE_CODE");
+                if (response == 0) {
+                    ArrayList<?> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
+                    Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
+                    displayAd = purchaseDataList.isEmpty();
+                }
+
+                return displayAd;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean displayAd) {
+                Log.d(TAG, "Display ads returned " + displayAd);
+
+                if (displayAd) {
+                    nativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
+                    nativeAd.setAdListener(MapsActivity.this);
+                    nativeAd.loadAd();
+                }
+
+            }
+        };
+        setUpAdAsyncTask.execute();
+
+    }
+
+
+    @Override
+    public void onError(Ad ad, AdError adError) {
+        Log.d(TAG, "onAdError: ");
+    }
+
+    @Override
+    public void onAdLoaded(Ad ad) {
+
+        Log.d(TAG, "onAdLoaded: ");
+
+        // Downloading and setting the ad icon.
+        final NativeAd.Image adIcon = nativeAd.getAdIcon();
+
+        // Create native UI using the ad metadata.
+        final ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
+        final Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
+        final ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
+
+        RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
+        ImageRequest profilePicRequest = new ImageRequest(adIcon.getUrl(), new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                nativeAdIcon.setImageBitmap(response);
+
+                adView.setVisibility(View.VISIBLE);
+
+                nativeAd.unregisterView();
+
+                // Setting the Text.
+                nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+                nativeAdTitle.setText(nativeAd.getAdTitle());
+                nativeAdBody.setText(nativeAd.getAdBody());
+
+                nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+
+                // Add adChoices icon
+                if (adChoicesView == null) {
+                    adChoicesView = new AdChoicesView(MapsActivity.this, nativeAd, true);
+                    adChoicesView.setGravity(Gravity.TOP | Gravity.END);
+                    adChoicesWrap.addView(adChoicesView);
+                }
+
+                View adContainer = adView.findViewById(R.id.ad_container);
+                nativeAd.registerViewForInteraction(adContainer);
+            }
+        }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
+
+        Cache.Entry entry = new Cache.Entry();
+        entry.ttl = 24 * 60 * 60 * 1000;
+        profilePicRequest.setCacheEntry(entry);
+
+        requestQueue.add(profilePicRequest);
+
+    }
+
+    @Override
+    public void onAdClicked(Ad ad) {
+        Log.d(TAG, "onAdClicked: ");
+    }
+
 
     @Override
     protected void onStart() {
@@ -392,6 +533,30 @@ public class MapsActivity extends AppCompatActivity
         handleIntent(getIntent());
 
         mGoogleApiClient.connect();
+
+        /**
+         * Set up the ad if the billing service is ready
+         */
+        if (billingFragment.isBillingServiceReady()) {
+            setUpAd();
+        }
+        /**
+         * Wait for it otherwise
+         */
+        else {
+            Log.d(TAG, "Waiting for billing service");
+            billingReadyReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    Log.d(TAG, "Billing ready");
+                    setUpAd();
+                }
+            };
+            registerReceiver(billingReadyReceiver, new IntentFilter(Constants.INTENT_BILLING_READY));
+        }
+
+
+        registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
     }
 
@@ -471,9 +636,9 @@ public class MapsActivity extends AppCompatActivity
     private void setUpBillingFragment() {
         Log.d(TAG, "Creating new BillingFragment");
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        BillingFragment spotsDelegate = BillingFragment.newInstance();
-        spotsDelegate.setRetainInstance(true);
-        transaction.add(spotsDelegate, BillingFragment.FRAGMENT_TAG);
+        billingFragment = BillingFragment.newInstance();
+        billingFragment.setRetainInstance(true);
+        transaction.add(billingFragment, BillingFragment.FRAGMENT_TAG);
         transaction.commit();
     }
 
@@ -796,6 +961,11 @@ public class MapsActivity extends AppCompatActivity
     protected void onStop() {
         unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
+        unregisterReceiver(newPurchaseReceiver);
+
+        if (billingReadyReceiver != null)
+            unregisterReceiver(billingReadyReceiver);
+        billingReadyReceiver = null;
         super.onStop();
     }
 
@@ -952,7 +1122,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p/>
+     * <p>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
@@ -1317,5 +1487,9 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onCarSelected(Car car) {
 
+    }
+
+    @Override
+    public void onBillingReady() {
     }
 }

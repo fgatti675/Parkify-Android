@@ -3,9 +3,15 @@ package com.cahue.iweco;
 import android.app.Application;
 import android.os.StrictMode;
 
+import com.android.volley.Cache;
+import com.android.volley.Network;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 import com.facebook.FacebookSdk;
+import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 
@@ -14,7 +20,6 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class ParkifyApp extends Application {
 
-    private static GoogleAnalytics analytics;
     private static Tracker tracker;
     private static ParkifyApp parkifyApp;
     private RequestQueue mRequestQueue;
@@ -38,17 +43,34 @@ public class ParkifyApp extends Application {
         /**
          * Start Google analytics
          */
-        analytics = GoogleAnalytics.getInstance(this);
+        GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
         analytics.setLocalDispatchPeriod(1800);
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
         tracker.enableAdvertisingIdCollection(true);
-//        tracker.enableAutoActivityTracking(true);
+
+        /**
+         * Start volley queue
+         */
+        // getApplicationContext() is key, it keeps you from leaking the
+        // Activity or BroadcastReceiver if someone passes one in.
+        mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        // Instantiate the cache
+        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
+
+        // Set up the network to use HttpURLConnection as the HTTP client.
+        Network network = new BasicNetwork(new HurlStack());
+
+        // Instantiate the RequestQueue with the cache and network.
+        mRequestQueue = new RequestQueue(cache, network);
+
+        // Start the queue
+        mRequestQueue.start();
 
         // Strict mode
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectAll()   // or .detectAll() for all detectable problems
+                    .detectAll()
                     .penaltyLog()
                     .penaltyFlashScreen()
                     .build());
@@ -57,6 +79,14 @@ public class ParkifyApp extends Application {
                     .penaltyLog()
                     .build());
         }
+
+        AdSettings.addTestDevice("2e398393636c7cca29281dda912adc42");
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        mRequestQueue.stop();
     }
 
     public Tracker getTracker() {
@@ -68,11 +98,6 @@ public class ParkifyApp extends Application {
     }
 
     public RequestQueue getRequestQueue() {
-        if (mRequestQueue == null) {
-            // getApplicationContext() is key, it keeps you from leaking the
-            // Activity or BroadcastReceiver if someone passes one in.
-            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
-        }
         return mRequestQueue;
     }
 }

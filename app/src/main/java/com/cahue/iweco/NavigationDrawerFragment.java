@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,11 +31,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageRequest;
 import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.util.LoadImageTask;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
@@ -56,7 +60,7 @@ import java.util.List;
  */
 public class NavigationDrawerFragment extends Fragment implements AdListener {
 
-    private static final boolean ADS_ENABLED = true;
+    private static final boolean ADS_ENABLED = false;
 
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
 
@@ -94,8 +98,10 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
             setUpUserDetails();
         }
     };
+
     private ViewGroup adView;
     private NativeAd nativeAd;
+    private AdChoicesView adChoicesView;
 
     /**
      * Are ads currently displayed
@@ -131,7 +137,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
 
     @Nullable
     private BroadcastReceiver billingReadyReceiver;
-    private AdChoicesView adChoicesView;
     private RelativeLayout mRootView;
 
     public NavigationDrawerFragment() {
@@ -439,8 +444,21 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
             usernameTextView.setText(loggedUsername);
             emailTextView.setText(AuthUtils.getEmail(getActivity()));
             String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
-            if (profilePicURL != null)
-                new LoadImageTask(userImage).execute(profilePicURL);
+
+
+            if (profilePicURL != null) {
+                RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
+                ImageRequest profilePicRequest = new ImageRequest(profilePicURL, new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        userImage.setImageBitmap(response);
+                    }
+                }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
+                Cache.Entry entry = new Cache.Entry();
+                entry.ttl = 24 * 60 * 60 * 1000;
+                profilePicRequest.setCacheEntry(entry);
+                requestQueue.add(profilePicRequest);
+            }
 
         }
     }
@@ -483,7 +501,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
 
         // Setting the Text.
-//        nativeAdSocialContext.setText(nativeAd.getAdSocialContext());
         nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
         nativeAdTitle.setText(nativeAd.getAdTitle());
         nativeAdBody.setText(nativeAd.getAdBody());
@@ -492,17 +509,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         NativeAd.Image adIcon = nativeAd.getAdIcon();
         if (adIcon != null) {
             NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
-//            LoadImageTask loadImageTask = new LoadImageTask(nativeAdIcon);
-////            loadImageTask.setListener(new LoadImageTask.OnLoadImageFinishedListener() {
-////                @Override
-////                public void onLoadImageFinished(Bitmap result) {
-////                    Palette palette = Palette.from(result).generate();
-////                    Palette.Swatch swatch = palette.getLightVibrantSwatch();
-////                    if (swatch != null)
-////                        leftLayout.setBackgroundColor(swatch.getRgb());
-////                }
-////            });
-//            loadImageTask.execute(adIcon.getUrl());
         }
 
         // Download and setting the cover image.
