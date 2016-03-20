@@ -52,10 +52,6 @@
     <style name="CahueTheme.Dark.TranslucentBars">
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowTranslucentStatus">true</item>
-    </style>
-
-    <!-- Base application theme. -->
-    <style name="CahueTheme.Dark.Tutorial" >
         <item name="android:colorPrimaryDark">@color/black</item>
     </style>
 

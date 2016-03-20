@@ -56,19 +56,25 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/sign_in_button"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="@dimen/large_padding"
-            android:drawableEnd="@drawable/ic_exit_to_app_24dp"
-            android:drawableRight="@drawable/ic_exit_to_app_24dp"
-            android:paddingLeft="@dimen/large_padding"
-            android:paddingRight="@dimen/large_padding"
-            android:text="@string/sign_in"
-            android:textColor="@color/white" />
+            android:layout_height="match_parent">
 
+            <Button
+                android:id="@+id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:layout_marginLeft="@dimen/large_padding"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableLeft="@drawable/ic_exit_to_app_24dp"
+                android:drawablePadding="@dimen/default_padding"
+                android:drawableStart="@drawable/ic_exit_to_app_24dp"
+                android:gravity="center"
+                android:paddingLeft="@dimen/large_padding"
+                android:paddingRight="@dimen/large_padding"
+                android:text="@string/sign_in" />
+        </FrameLayout>
     </LinearLayout>
 
 

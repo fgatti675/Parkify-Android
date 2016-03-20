@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:drawable="@color/theme_primary" />
+
     <item>
         <bitmap
-            android:id="@+id/Idofbg3"
-            android:gravity="fill_vertical"
-            android:src="@drawable/background" />
+            android:id="@+id/Idofbg1"
+            android:gravity="center_vertical"
+            android:src="@drawable/bg_spots" />
     </item>
 
     <item>
@@ -15,14 +17,12 @@
             android:src="@drawable/bg_parking" />
     </item>
 
-    <item >
+    <item>
         <bitmap
-            android:id="@+id/Idofbg1"
-            android:gravity="center_vertical"
-            android:src="@drawable/bg_spots" />
+            android:id="@+id/Idofbg3"
+            android:gravity="fill_vertical"
+            android:src="@drawable/background" />
     </item>
 
-    <item android:drawable="@android:color/transparent">
-    </item>
 
 </layer-list>

@@ -58,7 +58,7 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:1.2.2'
     compile 'com.mcxiaoke.volley:library:1.0.+@aar'
     compile 'com.facebook.android:facebook-android-sdk:4.+'
-    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.10'
+    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.14'
 
     compile ('com.facebook.android:audience-network-sdk:4.+') {
         exclude group: "com.google.android.gms"

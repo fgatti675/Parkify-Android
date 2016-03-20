@@ -3,7 +3,7 @@
     <!-- Strings related to login -->
     <string name="disconnect">Disconnect</string>
 
-    <string name="login_benefits">to enable Cloud support, or…</string>
+    <string name="login_benefits">to keep your cars in sync online, or…</string>
 
     <string name="sign_in">Sign in</string>
     <string name="google_sign_in">Sign in with Google</string>

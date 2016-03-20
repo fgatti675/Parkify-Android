@@ -3,8 +3,10 @@ package com.cahue.iweco.tutorial;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
@@ -94,12 +97,12 @@ public class TutorialActivity extends AppCompatActivity
 
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
-        final LayerDrawable background = (LayerDrawable) mViewPager.getBackground();
+        final LayerDrawable background = (LayerDrawable) getWindow().getDecorView().getBackground();
 
-        background.getDrawable(0).setAlpha(0); // this is the lowest drawable
+        background.getDrawable(0).setAlpha(255);
         background.getDrawable(1).setAlpha(0);
         background.getDrawable(2).setAlpha(0);
-        background.getDrawable(3).setAlpha(255); // this is the upper one
+        background.getDrawable(3).setAlpha(0);
 
         mViewPager.setPageTransformer(true, new ViewPager.PageTransformer() {
             @Override
@@ -107,7 +110,7 @@ public class TutorialActivity extends AppCompatActivity
 
                 int index = (Integer) view.getTag();
                 Drawable currentDrawableInLayerDrawable;
-                currentDrawableInLayerDrawable = background.getDrawable(index);
+                currentDrawableInLayerDrawable = background.getDrawable(3 - index);
 
                 if (position <= -1 || position >= 1) {
                     currentDrawableInLayerDrawable.setAlpha(0);
@@ -120,7 +123,21 @@ public class TutorialActivity extends AppCompatActivity
             }
         });
         mViewPager.setOffscreenPageLimit(TOTAL_NUMBER_PAGES - 1);
-        mViewPager.setOnPageChangeListener(this);
+        mViewPager.addOnPageChangeListener(this);
+
+        /**
+         * If translucent bars, apply the proper margins
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Resources resources = getResources();
+
+            RelativeLayout mainContainer = (RelativeLayout) findViewById(R.id.main_container);
+            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
+            int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+            int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+            int navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
+            mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
+        }
 
     }
 
@@ -187,7 +204,6 @@ public class TutorialActivity extends AppCompatActivity
     @Override
     public void finish() {
         Intent intent = new Intent(TutorialActivity.this, MapsActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         super.finish();
     }
