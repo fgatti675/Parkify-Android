@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,33 +8,38 @@
     tools:background="@drawable/bg_parking"
     tools:context="com.cahue.iweco.tutorial.TutorialInstructionsFragment">
 
-    <LinearLayout
+    <android.support.v7.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="@dimen/default_padding"
-        android:background="@color/theme_primary"
-        android:orientation="vertical"
-        android:padding="@dimen/large_padding">
+        android:elevation="@dimen/elevation"
+        app:cardBackgroundColor="@color/theme_primary"
+        app:cardCornerRadius="@dimen/cardCornerRadius">
 
-        <TextView
-            android:id="@+id/header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:text="@string/info_parking_text_header"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@color/white" />
-
-        <TextView
-            android:id="@+id/textView"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:paddingBottom="@dimen/small_padding"
-            android:paddingTop="@dimen/large_padding"
-            android:text="@string/info_parking_text"
-            android:textColor="@color/white" />
+            android:orientation="vertical"
+            android:padding="@dimen/large_padding">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/info_parking_text_header"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/small_padding"
+                android:paddingTop="@dimen/large_padding"
+                android:text="@string/info_parking_text"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
 </FrameLayout>

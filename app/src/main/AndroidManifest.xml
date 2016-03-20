@@ -86,12 +86,12 @@
             android:name=".login.LoginActivity"
             android:label="@string/common_signin_button_text"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark.TranslucentBars"
+            android:theme="@style/CahueTheme.Dark.TranslucentBars.Login"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".tutorial.TutorialActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark.Tutorial" />
+            android:theme="@style/CahueTheme.Dark.TranslucentBars.Tutorial" />
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"
