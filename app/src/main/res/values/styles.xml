@@ -54,30 +54,13 @@
         <item name="android:windowBackground">@color/theme_primary</item>
         <item name="android:textColor">@color/body_text_1_inverse</item>
         <item name="android:textColorAlertDialogListItem">@color/body_text_1_inverse</item>
-
-
-        <!--<item name="android:textColorHint">@color/body_text_1</item>-->
-        <!--<item name="android:textColorPrimaryInverse">@color/body_text_1</item>-->
-        <!--<item name="android:textColorSecondary">@color/body_text_1</item>-->
-        <!--<item name="android:textColorHighlight">@color/theme_primary</item>-->
-        <!--<item name="android:textColorPrimary">@color/theme_primary</item>-->
-
-        <!--<item name="colorControlNormal">@color/theme_primary</item>-->
-        <!--<item name="colorControlActivated">@color/red</item>-->
-    </style>
-
-
-    <!-- Base application theme. -->
-    <style name="CahueTheme.Dark.Tutorial" parent="Theme.AppCompat">
-
-        <!--<item name="windowActionBar">false</item>-->
-        <!--<item name="windowNoTitle">true</item>-->
-
-        <!--<item name="android:background">@color/light_grey</item>-->
-
     </style>
 
     <style name="CahueTheme.Dark.TranslucentBars" />
+
+    <style name="CahueTheme.Dark.TranslucentBars.Tutorial">
+        <item name="android:windowBackground">@drawable/tutorial_background</item>
+    </style>
 
     <style name="CahueTheme.Main">
         <item name="android:windowBackground">@drawable/parkify_logo</item>

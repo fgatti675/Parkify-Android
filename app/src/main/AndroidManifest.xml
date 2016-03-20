@@ -91,7 +91,7 @@
         <activity
             android:name=".tutorial.TutorialActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark.Tutorial" />
+            android:theme="@style/CahueTheme.Dark.TranslucentBars.Tutorial" />
 
         <receiver
             android:name=".gcm.GcmBroadcastReceiver"
