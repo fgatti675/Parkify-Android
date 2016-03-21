@@ -1,7 +1,6 @@
 package com.cahue.iweco;
 
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -268,50 +267,41 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * @param result
      */
     @Override
-    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull final QueryResult result) {
+    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull QueryResult result) {
 
         Log.v(TAG, "onSpotsUpdate");
+
+        if (isMapReady() && isResumed() && result.moreResults) {
+            maxZoom = getMap().getCameraPosition().zoom;
+            Log.d(TAG, "maxZoom set to " + maxZoom);
+            if (BuildConfig.DEBUG)
+                Toast.makeText(getActivity(), "maxZoom set to " + maxZoom, Toast.LENGTH_SHORT).show();
+        }
+
+        Set<ParkingSpot> parkingSpots = result.spots;
+
+//        if (query == nearbyQuery)
+//            lastNearbyQuery = new Date();
 
         if (resetOnNextUpdate) {
             reset(true);
             resetOnNextUpdate = false;
         }
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                if (isMapReady() && isResumed() && result.moreResults) {
-                    maxZoom = getMap().getCameraPosition().zoom;
-                    Log.d(TAG, "maxZoom set to " + maxZoom);
-                    if (BuildConfig.DEBUG)
-                        Toast.makeText(getActivity(), "maxZoom set to " + maxZoom, Toast.LENGTH_SHORT).show();
-                }
-
-                Set<ParkingSpot> parkingSpots = result.spots;
-
-                /**
-                 * We can consider that after an update, all
-                 */
-                if (!parkingSpots.isEmpty() && !result.moreResults) {
-                    LatLngBounds.Builder builder = LatLngBounds.builder();
-                    for (ParkingSpot spot : parkingSpots) {
-                        builder.include(spot.getLatLng());
-                    }
-                    queriedBounds.add(builder.build());
-                }
-
-                spots.addAll(parkingSpots);
-                return null;
+        /**
+         * We can consider that after an update, all
+         */
+        if (!parkingSpots.isEmpty() && !result.moreResults) {
+            LatLngBounds.Builder builder = LatLngBounds.builder();
+            for (ParkingSpot spot : parkingSpots) {
+                builder.include(spot.getLatLng());
             }
+            queriedBounds.add(builder.build());
+        }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                doDraw();
-            }
-        }.execute();
+        spots.addAll(parkingSpots);
 
-
+        doDraw();
     }
 
     /**
@@ -356,34 +346,30 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 break;
             }
 
-            final LatLng spotPosition = parkingSpot.getLatLng();
-            final Marker marker = spotMarkersMap.get(parkingSpot);
+            LatLng spotPosition = parkingSpot.getLatLng();
+
+            Marker marker = spotMarkersMap.get(parkingSpot);
 
             // if there is no marker we create it
             if (marker == null) {
-
-                Marker newMarker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
-                spotMarkersMap.put(parkingSpot, newMarker);
-                markerSpotsMap.put(newMarker, parkingSpot);
-
+                marker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
+                marker.setVisible(false);
+                spotMarkersMap.put(parkingSpot, marker);
+                markerSpotsMap.put(marker, parkingSpot);
                 if (viewBounds.contains(spotPosition)) {
-                    revealMarker(newMarker);
+                    revealMarker(marker);
                     displayedMarkers++;
-                } else {
-                    newMarker.setVisible(false);
                 }
             }
 
             // else we may need to update it
             else {
-
+                updateMarker(parkingSpot, marker);
                 if (viewBounds.contains(spotPosition)) {
                     marker.setVisible(true);
-                    updateMarker(parkingSpot, marker);
                     displayedMarkers++;
                 } else {
                     marker.setVisible(false);
-                    updateMarker(parkingSpot, marker);
                 }
             }
 
