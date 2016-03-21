@@ -69,11 +69,12 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     /**
      * Device selection
      */
+    @Nullable
     private BluetoothAdapter mBtAdapter;
 
     private Button enableBTButton;
 
-    @Nullable
+    @NonNull
     private Callbacks callbacks;
 
     private RecyclerView recyclerView;
@@ -197,7 +198,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
      */
     private void doDiscovery() {
 
-        if (mBtAdapter.isEnabled() && !mBtAdapter.isDiscovering()) {
+        if (mBtAdapter != null && mBtAdapter.isEnabled() && !mBtAdapter.isDiscovering()) {
             Log.d(TAG, "doDiscovery");
 
             // Indicate scanning in the title
@@ -295,16 +296,18 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         selectedDeviceAddresses = carDatabase.getPairedBTAddresses();
 
         // Get a set of currently paired devices
-        Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
-        for (BluetoothDevice bluetoothDevice : bondedDevices)
-            addDevice(bluetoothDevice);
+        if (mBtAdapter != null) {
+            Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
+            for (BluetoothDevice bluetoothDevice : bondedDevices)
+                addDevice(bluetoothDevice);
+        }
     }
 
     private void updateEnableBTButton() {
 
         if (enableBTButton != null) {
 
-            if (mBtAdapter.isEnabled()) {
+            if (mBtAdapter != null && mBtAdapter.isEnabled()) {
                 enableBTButton.setVisibility(View.GONE);
             } else {
                 enableBTButton.setVisibility(View.VISIBLE);
@@ -489,7 +492,9 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 enableBTButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mBtAdapter.enable();
+                        if (mBtAdapter != null) {
+                            mBtAdapter.enable();
+                        }
                         updateEnableBTButton();
                     }
                 });

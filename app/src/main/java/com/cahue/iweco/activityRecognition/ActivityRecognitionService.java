@@ -46,7 +46,8 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      * @param context
      */
     public static void startIfNoBT(@NonNull Context context) {
-        if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+        BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (defaultAdapter != null && !defaultAdapter.isEnabled()) {
             startIfEnabled(context);
         }
     }

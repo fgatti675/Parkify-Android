@@ -47,7 +47,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
         address = (TextView) itemView.findViewById(R.id.address);
     }
 
-    public void bind(@NonNull Context context, @NonNull final Car car, Location userLastLocation, @NonNull BluetoothAdapter btAdapter) {
+    public void bind(@NonNull Context context, @NonNull final Car car, Location userLastLocation, @Nullable BluetoothAdapter btAdapter) {
 
         if (car.isOther()) {
             name.setText(context.getResources().getText(R.string.other));
@@ -71,7 +71,7 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
             carImage.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_car_white_24dp));
         }
 
-        if (car.btAddress != null && btAdapter.isEnabled()) {
+        if (car.btAddress != null && btAdapter != null && btAdapter.isEnabled()) {
             linkedDevice.setVisibility(View.VISIBLE);
             for (BluetoothDevice device : btAdapter.getBondedDevices()) {
                 if (device.getAddress().equals(car.btAddress)) {
