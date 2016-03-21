@@ -67,7 +67,7 @@
     </style>
 
     <style name="CahueTheme.Main">
-        <item name="android:windowBackground">@drawable/parkify_logo</item>
+        <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
     <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
