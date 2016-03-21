@@ -347,70 +347,48 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         displayedMarkers = 0;
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
+        for (final ParkingSpot parkingSpot : spots) {
 
-                for (final ParkingSpot parkingSpot : spots) {
+            Log.v(TAG, parkingSpot.toString());
 
-                    Log.v(TAG, parkingSpot.toString());
-
-                    if (displayedMarkers > MARKERS_LIMIT) {
-                        Log.v(TAG, "Marker display limit reached");
-                        break;
-                    }
-
-                    final LatLng spotPosition = parkingSpot.getLatLng();
-                    final Marker marker = spotMarkersMap.get(parkingSpot);
-
-                    // if there is no marker we create it
-                    if (marker == null) {
-
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Marker newMarker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
-                                spotMarkersMap.put(parkingSpot, newMarker);
-                                markerSpotsMap.put(newMarker, parkingSpot);
-
-                                if (viewBounds.contains(spotPosition)) {
-                                    revealMarker(newMarker);
-                                    displayedMarkers++;
-                                } else {
-                                    newMarker.setVisible(false);
-                                }
-                            }
-                        });
-                    }
-
-                    // else we may need to update it
-                    else {
-
-                        if (viewBounds.contains(spotPosition)) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    marker.setVisible(true);
-                                    updateMarker(parkingSpot, marker);
-                                }
-                            });
-                            displayedMarkers++;
-                        } else {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    marker.setVisible(false);
-                                    updateMarker(parkingSpot, marker);
-                                }
-                            });
-                        }
-                    }
-
-
-                }
-                return null;
+            if (displayedMarkers > MARKERS_LIMIT) {
+                Log.v(TAG, "Marker display limit reached");
+                break;
             }
-        }.execute();
+
+            final LatLng spotPosition = parkingSpot.getLatLng();
+            final Marker marker = spotMarkersMap.get(parkingSpot);
+
+            // if there is no marker we create it
+            if (marker == null) {
+
+                Marker newMarker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
+                spotMarkersMap.put(parkingSpot, newMarker);
+                markerSpotsMap.put(newMarker, parkingSpot);
+
+                if (viewBounds.contains(spotPosition)) {
+                    revealMarker(newMarker);
+                    displayedMarkers++;
+                } else {
+                    newMarker.setVisible(false);
+                }
+            }
+
+            // else we may need to update it
+            else {
+
+                if (viewBounds.contains(spotPosition)) {
+                    marker.setVisible(true);
+                    updateMarker(parkingSpot, marker);
+                    displayedMarkers++;
+                } else {
+                    marker.setVisible(false);
+                    updateMarker(parkingSpot, marker);
+                }
+            }
+
+
+        }
     }
 
     private void updateMarker(@NonNull ParkingSpot parkingSpot, @NonNull Marker marker) {
