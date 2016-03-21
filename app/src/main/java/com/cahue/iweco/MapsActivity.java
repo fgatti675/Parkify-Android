@@ -232,6 +232,7 @@ public class MapsActivity extends AppCompatActivity
     private BillingFragment billingFragment;
     private BroadcastReceiver billingReadyReceiver;
     private AsyncTask<Void, Void, Boolean> setUpAdAsyncTask;
+    private RelativeLayout mainContainer;
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -321,7 +322,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        RelativeLayout mainContainer = (RelativeLayout) findViewById(R.id.main_container);
+        mainContainer = (RelativeLayout) findViewById(R.id.main_container);
         detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
 
         /**
@@ -507,6 +508,9 @@ public class MapsActivity extends AppCompatActivity
 
                 View adContainer = adView.findViewById(R.id.ad_container);
                 nativeAd.registerViewForInteraction(adContainer);
+
+                setMapPadding();
+
             }
         }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
 
@@ -669,7 +673,7 @@ public class MapsActivity extends AppCompatActivity
 
         setUpMapUserLocation();
         setUpMap();
-        setMapPadding(0);
+        setMapPadding();
 
         /**
          * Initial zoom
@@ -820,9 +824,14 @@ public class MapsActivity extends AppCompatActivity
         return longTapLocationDelegate;
     }
 
-    private void setMapPadding(int bottomPadding) {
+    private void setMapPadding() {
         if (mMap == null) return;
-        mMap.setPadding(0, statusBarHeight, 0, bottomPadding + navBarHeight);
+        mainContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mMap.setPadding(0, statusBarHeight + adView.getMeasuredHeight(), 0, cardDetailsContainer.getMeasuredHeight() + navBarHeight);
+            }
+        });
     }
 
     private void showDetails() {
@@ -838,7 +847,7 @@ public class MapsActivity extends AppCompatActivity
 
                 final int height = cardDetailsContainer.getMeasuredHeight();
 
-                setMapPadding(height);
+                setMapPadding();
                 for (CameraUpdateRequester requester : cameraUpdateRequesterList)
                     requester.onMapResized();
 
@@ -903,7 +912,7 @@ public class MapsActivity extends AppCompatActivity
 
         detailsDisplayed = false;
 
-        setMapPadding(0);
+        setMapPadding();
 
         AnimationSet animationSet = new AnimationSet(true);
 
@@ -923,7 +932,7 @@ public class MapsActivity extends AppCompatActivity
         animationSet.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                setMapPadding(0);
+                setMapPadding();
             }
 
             @Override
