@@ -18,9 +18,11 @@ import com.google.android.gms.maps.model.Marker;
 public abstract class AbstractMarkerDelegate extends Fragment implements CameraUpdateRequester, LocationListener {
 
     protected Location userLocation;
-    @Nullable
+
+    @NonNull
     protected DetailsViewManager detailsViewManager;
-    @Nullable
+
+    @NonNull
     protected DelegateManager delegateManager;
     // too far from the car to calculate directions
     private boolean tooFar = false;

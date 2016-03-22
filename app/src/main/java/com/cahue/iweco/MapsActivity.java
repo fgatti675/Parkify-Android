@@ -315,12 +315,13 @@ public class MapsActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         drawerToggle = findViewById(R.id.navigation_drawer_toggle);
-        drawerToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
-        });
+        if (drawerLayout != null)
+            drawerToggle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            });
 
         mainContainer = (RelativeLayout) findViewById(R.id.main_container);
         detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
@@ -702,7 +703,8 @@ public class MapsActivity extends AppCompatActivity
         }
 
         detailsContainer.setVisibility(View.VISIBLE);
-        drawerToggle.setVisibility(View.VISIBLE);
+        if (drawerLayout != null)
+            drawerToggle.setVisibility(View.VISIBLE);
 
         if (detailsDisplayed) showDetails();
         else hideDetails();
@@ -1138,7 +1140,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p>
+     * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {

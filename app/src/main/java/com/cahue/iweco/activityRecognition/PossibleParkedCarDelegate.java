@@ -158,7 +158,8 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     @Override
     public void onPossibleSpotDeleted(@NonNull ParkingSpot spot) {
         database.removeParkingSpot(spot);
-        marker.remove();
+        if (marker != null)
+            marker.remove();
         detailsViewManager.hideDetails();
     }
 }
