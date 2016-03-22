@@ -227,10 +227,21 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 //            return false;
 //        }
 
+        Location ne = new Location("");
+        ne.setLatitude(viewBounds.northeast.latitude);
+        ne.setLongitude(viewBounds.northeast.longitude);
+
+        Location sw = new Location("");
+        sw.setLatitude(viewBounds.northeast.latitude);
+        sw.setLongitude(viewBounds.northeast.longitude);
+
+        // distance we are adding to the bounds query on each one of the 4 sides to get also results outside the screen
+        float offset = Math.min(ne.distanceTo(sw) / 2, OFFSET_METERS);
+
         // A broader space we want to query so that data is there when we move the camera
         this.extendedViewBounds = LatLngBounds.builder()
-                .include(getOffsetLatLng(viewBounds.northeast, OFFSET_METERS, OFFSET_METERS))
-                .include(getOffsetLatLng(viewBounds.southwest, -OFFSET_METERS, -OFFSET_METERS))
+                .include(getOffsetLatLng(viewBounds.northeast, offset, offset))
+                .include(getOffsetLatLng(viewBounds.southwest, -offset, -offset))
                 .build();
 
         /**
@@ -559,7 +570,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     @NonNull
-    private LatLng getOffsetLatLng(@NonNull LatLng original, double offsetNorth, double offsetEast) {
+    private LatLng getOffsetLatLng(@NonNull LatLng original, float offsetNorth, float offsetEast) {
 
         // Coordinate offsets in radians
         double dLat = offsetNorth / EARTH_RADIUS;
