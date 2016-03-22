@@ -315,7 +315,7 @@ public class MapsActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         drawerToggle = findViewById(R.id.navigation_drawer_toggle);
-        if (drawerLayout != null)
+        if (drawerToggle != null)
             drawerToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
