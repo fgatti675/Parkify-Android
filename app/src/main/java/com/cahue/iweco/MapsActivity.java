@@ -416,6 +416,12 @@ public class MapsActivity extends AppCompatActivity
 
         adView = (ViewGroup) findViewById(R.id.ad_container);
 
+        // TODO: remove
+        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
+            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+            PreferencesUtil.setAdsRemoved(this, true);
+        }
+
     }
 
 
