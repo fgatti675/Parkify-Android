@@ -1,4 +1,4 @@
-package com.cahue.iweco.locationServices;
+package com.cahue.iweco.locationservices;
 
 import android.app.AlarmManager;
 import android.app.Notification;

@@ -1,4 +1,4 @@
-package com.cahue.iweco.setCarLocation;
+package com.cahue.iweco.setcarlocation;
 
 import android.content.Context;
 import android.location.Location;

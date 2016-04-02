@@ -1,4 +1,4 @@
-package com.cahue.iweco.parkedCar;
+package com.cahue.iweco.parkedcar;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

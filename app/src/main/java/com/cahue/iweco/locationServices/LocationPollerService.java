@@ -1,4 +1,4 @@
-package com.cahue.iweco.locationServices;
+package com.cahue.iweco.locationservices;
 
 import android.Manifest;
 import android.app.Service;
