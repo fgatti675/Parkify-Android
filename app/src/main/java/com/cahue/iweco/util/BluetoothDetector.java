@@ -9,11 +9,11 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
-import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
+import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationServices.CarMovedService;
+import com.cahue.iweco.locationservices.CarMovedService;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.parkedCar.ParkedCarService;
+import com.cahue.iweco.parkedcar.ParkedCarService;
 
 import java.util.Set;
 

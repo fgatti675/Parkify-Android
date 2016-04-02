@@ -68,10 +68,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".parkedCar.ParkedCarService" />
-        <service android:name=".locationServices.CarMovedService" />
+        <service android:name=".parkedcar.ParkedCarService" />
+        <service android:name=".locationservices.CarMovedService" />
         <service
-            android:name=".locationServices.GeofenceCarService"
+            android:name=".locationservices.GeofenceCarService"
             android:enabled="true" />
 
         <receiver android:name=".util.BluetoothDetector">
@@ -103,7 +103,7 @@
         </receiver>
 
         <receiver
-            android:name=".parkedCar.CarPositionUpdatedReceiver"
+            android:name=".parkedcar.CarPositionUpdatedReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.INTENT_CAR_UPDATED" />
@@ -163,14 +163,14 @@
         </service>
 
         <!-- Activity recognition -->
-        <service android:name=".activityRecognition.ActivityRecognitionService" />
-        <service android:name=".activityRecognition.PossibleParkedCarService" />
+        <service android:name=".activityrecognition.ActivityRecognitionService" />
+        <service android:name=".activityrecognition.PossibleParkedCarService" />
         <service
-            android:name=".activityRecognition.DetectedActivitiesIntentService"
+            android:name=".activityrecognition.DetectedActivitiesIntentService"
             android:exported="false" />
-        <service android:name=".locationServices.GeofenceTransitionsIntentService" />
+        <service android:name=".locationservices.GeofenceTransitionsIntentService" />
 
-        <receiver android:name=".activityRecognition.SaveCarRequestReceiver">
+        <receiver android:name=".activityrecognition.SaveCarRequestReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.0" />
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.1" />

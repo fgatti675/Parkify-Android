@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
+import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 
 /**
  * Created by f.gatti.gomez on 13/07/15.

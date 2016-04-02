@@ -9,7 +9,7 @@ import android.util.Log;
 
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.parkedCar.CarDetailsFragment;
+import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
 import com.cahue.iweco.util.Tracking;

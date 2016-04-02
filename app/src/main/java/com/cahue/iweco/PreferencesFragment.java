@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
 
-import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
+import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.util.PreferencesUtil;
 
 /**

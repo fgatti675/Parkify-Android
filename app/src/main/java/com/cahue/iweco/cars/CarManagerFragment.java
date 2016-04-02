@@ -30,7 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.cahue.iweco.R;
-import com.cahue.iweco.activityRecognition.ActivityRecognitionService;
+import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.PreferencesUtil;
