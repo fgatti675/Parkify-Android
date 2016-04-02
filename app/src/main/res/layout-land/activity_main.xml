@@ -31,7 +31,8 @@
             <RelativeLayout
                 android:id="@+id/main_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent">
 
                 <ImageButton
                     android:id="@+id/navigation_drawer_toggle"

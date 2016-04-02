@@ -89,7 +89,8 @@
                 android:src="@drawable/crosshairs_gps"
                 cahue:borderWidth="0dp" />
 
-            <include layout="@layout/debug_layout" />
+            <include android:id="@+id/include"
+                layout="@layout/debug_layout" />
 
         </RelativeLayout>
     </RelativeLayout>
