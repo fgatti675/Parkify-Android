@@ -1,4 +1,4 @@
-package com.cahue.iweco.parkedCar;
+package com.cahue.iweco.parkedcar;
 
 
 import android.app.Activity;

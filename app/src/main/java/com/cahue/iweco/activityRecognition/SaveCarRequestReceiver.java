@@ -1,4 +1,4 @@
-package com.cahue.iweco.activityRecognition;
+package com.cahue.iweco.activityrecognition;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

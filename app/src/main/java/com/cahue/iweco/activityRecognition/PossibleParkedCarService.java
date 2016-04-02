@@ -1,4 +1,4 @@
-package com.cahue.iweco.activityRecognition;
+package com.cahue.iweco.activityrecognition;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
@@ -17,7 +17,7 @@ import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationServices.LocationPollerService;
+import com.cahue.iweco.locationservices.LocationPollerService;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.FetchAddressIntentService;

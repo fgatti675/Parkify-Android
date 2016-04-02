@@ -1,4 +1,4 @@
-package com.cahue.iweco.parkedCar;
+package com.cahue.iweco.parkedcar;
 
 import android.content.Context;
 import android.location.Location;
@@ -8,8 +8,8 @@ import android.util.Log;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationServices.GeofenceCarService;
-import com.cahue.iweco.locationServices.LocationPollerService;
+import com.cahue.iweco.locationservices.GeofenceCarService;
+import com.cahue.iweco.locationservices.LocationPollerService;
 import com.cahue.iweco.model.Car;
 import com.google.android.gms.common.api.GoogleApiClient;
 

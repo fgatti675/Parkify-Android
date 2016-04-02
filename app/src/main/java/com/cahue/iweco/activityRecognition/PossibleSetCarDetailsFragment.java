@@ -1,4 +1,4 @@
-package com.cahue.iweco.activityRecognition;
+package com.cahue.iweco.activityrecognition;
 
 import android.app.Activity;
 import android.app.Fragment;
