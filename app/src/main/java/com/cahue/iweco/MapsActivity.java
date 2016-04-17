@@ -320,6 +320,7 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     drawerLayout.openDrawer(GravityCompat.START);
+                    Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_NAVIGATION_TOGGLE);
                 }
             });
 
@@ -490,42 +491,46 @@ public class MapsActivity extends AppCompatActivity
         final ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
 
         RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
-        ImageRequest profilePicRequest = new ImageRequest(adIcon.getUrl(), new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap response) {
-                nativeAdIcon.setImageBitmap(response);
+        if (adIcon != null) {
+            ImageRequest profilePicRequest = new ImageRequest(adIcon.getUrl(), new Response.Listener<Bitmap>() {
+                @Override
+                public void onResponse(Bitmap response) {
+                    nativeAdIcon.setImageBitmap(response);
 
-                adView.setVisibility(View.VISIBLE);
+                    adView.setVisibility(View.VISIBLE);
 
-                nativeAd.unregisterView();
+                    nativeAd.unregisterView();
 
-                // Setting the Text.
-                nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
-                nativeAdTitle.setText(nativeAd.getAdTitle());
-                nativeAdBody.setText(nativeAd.getAdBody());
+                    // Setting the Text.
+                    nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+                    nativeAdTitle.setText(nativeAd.getAdTitle());
+                    nativeAdBody.setText(nativeAd.getAdBody());
 
-                nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+                    nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
 
-                // Add adChoices icon
-                if (adChoicesView == null) {
-                    adChoicesView = new AdChoicesView(MapsActivity.this, nativeAd, true);
-                    adChoicesView.setGravity(Gravity.TOP | Gravity.END);
-                    adChoicesWrap.addView(adChoicesView);
+                    // Add adChoices icon
+                    if (adChoicesView == null) {
+                        adChoicesView = new AdChoicesView(MapsActivity.this, nativeAd, true);
+                        adChoicesView.setGravity(Gravity.TOP | Gravity.END);
+                        adChoicesWrap.addView(adChoicesView);
+                    }
+
+                    View adContainer = adView.findViewById(R.id.ad_container);
+                    nativeAd.registerViewForInteraction(adContainer);
+
+                    setMapPadding();
+
                 }
+            }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
 
-                View adContainer = adView.findViewById(R.id.ad_container);
-                nativeAd.registerViewForInteraction(adContainer);
+            Cache.Entry entry = new Cache.Entry();
+            entry.ttl = 24 * 60 * 60 * 1000;
+            profilePicRequest.setCacheEntry(entry);
 
-                setMapPadding();
-
-            }
-        }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
-
-        Cache.Entry entry = new Cache.Entry();
-        entry.ttl = 24 * 60 * 60 * 1000;
-        profilePicRequest.setCacheEntry(entry);
-
-        requestQueue.add(profilePicRequest);
+            requestQueue.add(profilePicRequest);
+        } else {
+            Log.w(TAG, "adview without adIcon");
+        }
 
     }
 

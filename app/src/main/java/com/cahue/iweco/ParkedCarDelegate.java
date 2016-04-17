@@ -13,6 +13,7 @@ import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.util.ColorUtil;
 import com.cahue.iweco.util.GMapV2Direction;
 import com.cahue.iweco.util.Tracking;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -288,20 +289,25 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         Log.v(TAG, "zoomToSeeBoth");
 
-        LatLng carPosition = getCarLatLng();
-        LatLng userPosition = getUserLatLng();
+        if (car.location == null || userLocation == null) return false;
 
-        if (carPosition == null || userPosition == null) return false;
+        if (car.location.distanceTo(userLocation) < 100) {
+            zoomToCar();
+        } else {
 
-        LatLngBounds.Builder builder = new LatLngBounds.Builder()
-                .include(carPosition)
-                .include(userPosition);
+            LatLng carPosition = getCarLatLng();
+            LatLng userPosition = getUserLatLng();
 
-        for (LatLng latLng : directionsDelegate.getDirectionPoints())
-            builder.include(latLng);
+            LatLngBounds.Builder builder = new LatLngBounds.Builder()
+                    .include(carPosition)
+                    .include(userPosition);
 
-        delegateManager.doCameraUpdate(CameraUpdateFactory.newLatLngBounds(builder.build(), 100), this);
+            for (LatLng latLng : directionsDelegate.getDirectionPoints())
+                builder.include(latLng);
 
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(builder.build(), 120);
+            delegateManager.doCameraUpdate(cameraUpdate, this);
+        }
         return true;
     }
 
@@ -319,7 +325,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         if (loc != null) {
             delegateManager.doCameraUpdate(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                             .target(loc)
-                            .zoom(15.5f)
+                            .zoom(18f)
                             .build()),
                     this);
         }

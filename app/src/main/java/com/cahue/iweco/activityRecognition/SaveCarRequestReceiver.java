@@ -13,6 +13,7 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.util.Tracking;
 
 /**
  * Broadcast receiver in charge of saving a car, after if is requested by a action taken from a
@@ -21,6 +22,8 @@ import com.cahue.iweco.model.ParkingSpot;
 public class SaveCarRequestReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+
+        Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_CAR_SELECTED);
 
         CarDatabase database = CarDatabase.getInstance(context);
 

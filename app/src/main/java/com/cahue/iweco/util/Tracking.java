@@ -26,11 +26,15 @@ public class Tracking {
 
     public static final String CATEGORY_ADVERTISING = "Advertising";
 
+    public static final String CATEGORY_NOTIFICATION_ACT_RECOG = "Notification act. recognition";
+
     public static final String ACTION_DO_LOGIN = "Do login";
 
     public static final String ACTION_SKIP_LOGIN = "Skip login";
 
     public static final String ACTION_CAR_SELECTED = "Car selected";
+
+    public static final String ACTION_REMOVED = "Removed";
 
     public static final String ACTION_FREE_SPOT_SELECTED = "Spot selected";
 
@@ -52,6 +56,7 @@ public class Tracking {
     public static final String ACTION_DONATION_CLICK = "Donation click";
     public static final String ACTION_SIGN_OUT = "Sign out";
     public static final String ACTION_HELP_CLICK = "Help click";
+    public static final String ACTION_NAVIGATION_TOGGLE = "Navigation drawer toggle click";
 
     public static final String ACTION_ACCEPT = "Accepted";
     public static final String ACTION_DISMISS = "Dismissed";
