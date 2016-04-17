@@ -325,7 +325,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
         if (BuildConfig.DEBUG)
             Toast.makeText(getActivity(), "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
-        queryCameraView();
     }
 
     public void doDraw() {

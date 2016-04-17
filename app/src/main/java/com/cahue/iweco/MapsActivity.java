@@ -838,7 +838,8 @@ public class MapsActivity extends AppCompatActivity
         mainContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                mMap.setPadding(0, statusBarHeight + adView.getMeasuredHeight(), 0, cardDetailsContainer.getMeasuredHeight() + navBarHeight);
+                int adHeight = adView == null ? 0 : adView.getMeasuredHeight();
+                mMap.setPadding(0, statusBarHeight + adHeight, 0, cardDetailsContainer.getMeasuredHeight() + navBarHeight);
             }
         });
     }
@@ -1140,7 +1141,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p/>
+     * <p>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
