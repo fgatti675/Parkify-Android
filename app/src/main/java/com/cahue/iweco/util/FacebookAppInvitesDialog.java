@@ -47,16 +47,19 @@ public class FacebookAppInvitesDialog extends DialogFragment {
                             Object o = result.getData().get(s);
                             Log.d(TAG, "onSuccess: " + o);
                         }
+                        Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_INVITE, Tracking.ACTION_SUCCESS);
                     }
 
                     @Override
                     public void onCancel() {
                         Log.d(TAG, "onCancel: ");
+                        Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_INVITE, Tracking.ACTION_CANCELLED);
                     }
 
                     @Override
                     public void onError(FacebookException error) {
                         Log.d(TAG, "onError: ");
+                        Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_INVITE, Tracking.ACTION_ERROR);
                     }
                 });
 

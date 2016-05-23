@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/toast_background"
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/default_padding"
+    android:paddingLeft="@dimen/large_padding"
+    android:paddingRight="@dimen/large_padding"
+    android:paddingTop="@dimen/default_padding">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginRight="@dimen/default_padding"
+        android:src="@drawable/weco_logo_small"/>
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="@dimen/elevation"
+        android:gravity="center"
+        android:lines="2"
+        android:textColor="#FFF"
+        tools:text="Sample toast" />
+
+</LinearLayout>

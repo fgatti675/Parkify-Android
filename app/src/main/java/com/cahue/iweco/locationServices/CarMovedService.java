@@ -4,13 +4,16 @@ import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
+import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -59,6 +62,7 @@ public class CarMovedService extends LocationPollerService {
          */
         if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             ParkingSpotSender.doPostSpotLocation(this, spotLocation, false, car);
+            Util.showBlueToastWithLogo(CarMovedService.this, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
         }
 
         CarsSync.clearLocation(carDatabase, this, car);

@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="cahue.com"
     android:allowParallelSyncs="false"
-    android:contentAuthority="com.whereismycar.cars"
+    android:contentAuthority="com.cahue.iweco.cars"
     android:isAlwaysSyncable="true"
     android:supportsUploading="false"
     android:userVisible="false" />

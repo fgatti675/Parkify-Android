@@ -85,5 +85,7 @@
 
     <string name="and_remove_ads">E toggli la pubblicitá!</string>
     <string name="ad_free_appturbo">Senza pubblicità grazie a App of the Day!</string>
+    <string name="thanks_free_spot">Hai lasciato un posto libero che tutti possono vedere. Grazie! :)</string>
+    <string name="car_location_registered">Posizzione di \"%s\" registrata su Parkify!</string>
 
 </resources>

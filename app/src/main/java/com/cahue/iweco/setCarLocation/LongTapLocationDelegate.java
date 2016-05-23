@@ -85,8 +85,11 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
 
     private void centerCameraOnMarker() {
 
+        if(spot == null)
+            return;
+
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .zoom(15)
+                .zoom(17)
                 .target(spot.getLatLng())
                 .build());
 

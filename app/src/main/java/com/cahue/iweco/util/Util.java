@@ -30,9 +30,10 @@ public class Util {
     }
 
 
-    public static void createUpperToast(@NonNull Context context, int resId, int length) {
-        createUpperToast(context, context.getString(resId), length);
+    public static void showBlueToast(@NonNull Context context, int resId, int length) {
+        showBlueToast(context, context.getString(resId), length);
     }
+
     /**
      * Method for printing our fancy custom Toast
      *
@@ -40,10 +41,28 @@ public class Util {
      * @param string  Content of the toast
      * @param length  One from Toast.LENGTH_LONG or Toast.LENGTH_SHORT
      */
-    public static void createUpperToast(@NonNull Context context, String string, int length) {
+    public static void showBlueToast(@NonNull Context context, String string, int length) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.toast_custom, null);
-        TextView text = (TextView) layout.findViewById(R.id.error_text);
+        View layout = inflater.inflate(R.layout.toast_blue, null);
+        TextView text = (TextView) layout.findViewById(R.id.text);
+        text.setText(string);
+
+        Toast toast = new Toast(context.getApplicationContext());
+
+        toast.setGravity(Gravity.BOTTOM, 0, getActionBarSize(context));
+        toast.setDuration(length);
+        toast.setView(layout);
+        toast.show();
+    }
+
+    public static void showBlueToastWithLogo(@NonNull Context context, int resId, int length) {
+        showBlueToastWithLogo(context, context.getString(resId), length);
+    }
+
+    public static void showBlueToastWithLogo(@NonNull Context context, String string, int length) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.toast_blue_with_logo, null);
+        TextView text = (TextView) layout.findViewById(R.id.text);
         text.setText(string);
 
         Toast toast = new Toast(context.getApplicationContext());

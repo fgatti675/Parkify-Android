@@ -4,13 +4,16 @@ import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationservices.GeofenceCarService;
 import com.cahue.iweco.locationservices.LocationPollerService;
 import com.cahue.iweco.model.Car;
+import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;
@@ -49,6 +52,9 @@ public class ParkedCarService extends LocationPollerService {
         if (car.location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             GeofenceCarService.startDelayedGeofenceService(context, car.id);
         }
+
+
+        Util.showBlueToastWithLogo(ParkedCarService.this, getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
 
     }
 

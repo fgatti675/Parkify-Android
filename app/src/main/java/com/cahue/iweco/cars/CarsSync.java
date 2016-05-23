@@ -33,6 +33,13 @@ public class CarsSync {
 
     private static final String TAG = CarsSync.class.getSimpleName();
 
+    /**
+     * Called from activity recognition possible spots
+     * @param carDatabase
+     * @param context
+     * @param car
+     * @param spot
+     */
     public static void updateCarFromPossibleSpot(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car, @NonNull ParkingSpot spot) {
 
         Log.i(TAG, "Updating car " + car + " " + spot);
@@ -114,7 +121,7 @@ public class CarsSync {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(@NonNull VolleyError error) {
-                            Util.createUpperToast(context, R.string.delete_error, Toast.LENGTH_SHORT);
+                            Util.showBlueToast(context, R.string.delete_error, Toast.LENGTH_SHORT);
                             database.saveCarAndBroadcast(car);
                             error.printStackTrace();
                         }

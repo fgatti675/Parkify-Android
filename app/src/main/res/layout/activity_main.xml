@@ -7,7 +7,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MapsActivity">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -47,10 +47,7 @@
                 layout="@layout/native_app_maps_install_ad_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/default_padding"
                 android:layout_marginLeft="@dimen/small_padding"
-                android:layout_marginRight="@dimen/default_padding"
-                android:layout_marginTop="@dimen/default_padding"
                 android:layout_toRightOf="@id/navigation_drawer_toggle" />
 
             <Button

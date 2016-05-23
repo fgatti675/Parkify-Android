@@ -94,7 +94,7 @@ public class DonateDialog extends DialogFragment {
         });
 
         final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
-        final TextView errorTextView = (TextView) view.findViewById(R.id.error_text);
+        final TextView errorTextView = (TextView) view.findViewById(R.id.text);
 
         /**
          * AsyncTask population the donation options

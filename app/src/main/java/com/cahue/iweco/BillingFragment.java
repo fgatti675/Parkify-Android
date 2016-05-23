@@ -153,7 +153,7 @@ public class BillingFragment extends Fragment {
 
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
             if (pendingIntent == null) {
-                Util.createUpperToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
+                Util.showBlueToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
                 Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_ERROR);
             } else {
                 getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
@@ -196,7 +196,7 @@ public class BillingFragment extends Fragment {
                     Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_SUCCESSFUL);
                 }
 
-                Util.createUpperToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
+                Util.showBlueToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
                 getActivity().sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
 
             } else if (resultCode == Activity.RESULT_CANCELED) {
