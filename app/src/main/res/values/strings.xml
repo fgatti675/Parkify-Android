@@ -84,6 +84,8 @@
     <string name="free_spot">Available parking spot</string>
     <string name="long_click_instructions">Long click to set your car\'s position. Next time it will be automatic!</string>
     <string name="ad_free_appturbo">Ad free version thanks to App of the Day!</string>
+    <string name="thanks_free_spot">You just left a free parking spot that everyone can see in Parkify! Thanks! :)</string>
+    <string name="car_location_registered">\"%s\" location registered at Parkify!</string>
 
 
 </resources>

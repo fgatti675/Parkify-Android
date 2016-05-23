@@ -93,7 +93,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     private void centerCameraOnMarker() {
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
-                .zoom(16)
+                .zoom(17)
                 .target(spot.getLatLng())
                 .build());
 

@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -21,7 +20,6 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Requests;
-import com.cahue.iweco.util.Util;
 
 import org.json.JSONArray;
 
@@ -80,7 +78,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(@NonNull VolleyError error) {
-                        Util.createUpperToast(getContext(), R.string.sync_error, Toast.LENGTH_SHORT);
                         error.printStackTrace();
                     }
                 });

@@ -667,7 +667,7 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
                                 mDrawerLayout.closeDrawers();
 
                         } else {
-                            Util.createUpperToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
+                            Util.showBlueToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
                         }
                     }
                 };

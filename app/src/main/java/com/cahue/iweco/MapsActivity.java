@@ -34,10 +34,11 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -163,20 +164,31 @@ public class MapsActivity extends AppCompatActivity
     @NonNull
     private final Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    /**
+     * Last component to request a camera update
+     */
+    @Nullable
+    private CameraUpdateRequester lastCameraUpdateRequester;
 
-    // This is the helper object that connects to Google Play Services.
+    private MapFragment mapFragment;
+
+    /**
+     * This is the helper object that connects to Google Play Services.
+     */
     private GoogleApiClient mGoogleApiClient;
     private AccountManager mAccountManager;
 
+    private DetailsFragment detailsFragment;
+
     private CarDatabase carDatabase;
+
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
     private View drawerToggle;
     private FloatingActionButton myLocationButton;
 
     private Button noCarsButton;
     private CardView cardDetailsContainer;
-
-    private DetailsFragment detailsFragment;
 
     private boolean detailsDisplayed = false;
 
@@ -204,13 +216,6 @@ public class MapsActivity extends AppCompatActivity
     private boolean mapInitialised = false;
     private boolean initialCameraSet = false;
 
-    /**
-     * Last component to request a camera update
-     */
-    @Nullable
-    private CameraUpdateRequester lastCameraUpdateRequester;
-
-    private MapFragment mapFragment;
 
     private boolean locationPermissionCurrentlyRequested = false;
 
@@ -220,6 +225,7 @@ public class MapsActivity extends AppCompatActivity
     private DrawerLayout drawerLayout;
 
     private ViewGroup adView;
+
     @NonNull
     private final BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
         @Override
@@ -227,6 +233,7 @@ public class MapsActivity extends AppCompatActivity
             adView.setVisibility(View.GONE);
         }
     };
+
     private AdChoicesView adChoicesView;
     private NativeAd nativeAd;
     private BillingFragment billingFragment;
@@ -868,7 +875,7 @@ public class MapsActivity extends AppCompatActivity
 
                 AnimationSet animationSet = new AnimationSet(true);
 
-                AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
+                DecelerateInterpolator interpolator = new DecelerateInterpolator();
                 animationSet.setInterpolator(interpolator);
 
                 int durationMillis = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -931,7 +938,7 @@ public class MapsActivity extends AppCompatActivity
 
         AnimationSet animationSet = new AnimationSet(true);
 
-        AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
+        AccelerateInterpolator interpolator = new AccelerateInterpolator();
         animationSet.setInterpolator(interpolator);
         int mediumAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         animationSet.setDuration(mediumAnimTime);
@@ -975,7 +982,7 @@ public class MapsActivity extends AppCompatActivity
         if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmptyOfCars())
             return;
 
-        Util.createUpperToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
+        Util.showBlueToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
 
         PreferencesUtil.setLongClickToastShown(this, true);
     }
@@ -1488,7 +1495,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
-                List<Car> cars = carDatabase.retrieveCars(true);
+                List<Car> cars = carDatabase.retrieveCars(false);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
@@ -1500,7 +1507,7 @@ public class MapsActivity extends AppCompatActivity
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Car> cars = carDatabase.retrieveCars(true);
+                List<Car> cars = carDatabase.retrieveCars(false);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);

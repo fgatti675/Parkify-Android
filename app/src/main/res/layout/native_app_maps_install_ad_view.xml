@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ad_container"
@@ -81,6 +79,7 @@
             android:id="@+id/native_ad_call_to_action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/default_padding"
             android:textColor="@color/white"
             tools:text="Action" />
 

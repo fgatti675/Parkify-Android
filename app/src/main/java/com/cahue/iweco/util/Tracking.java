@@ -28,6 +28,9 @@ public class Tracking {
 
     public static final String CATEGORY_NOTIFICATION_ACT_RECOG = "Notification act. recognition";
 
+    public static final String CATEGORY_FACEBOOK_INVITE = "Facebook invite";
+
+
     public static final String ACTION_DO_LOGIN = "Do login";
 
     public static final String ACTION_SKIP_LOGIN = "Skip login";
@@ -60,6 +63,9 @@ public class Tracking {
 
     public static final String ACTION_ACCEPT = "Accepted";
     public static final String ACTION_DISMISS = "Dismissed";
+    public static final String ACTION_SUCCESS = "Success";
+    public static final String ACTION_CANCELLED = "Cancelled";
+    public static final String ACTION_ERROR = "Error";
 
     public static final String ACTION_PURCHASE_ERROR = "Purchase error";
     public static final String ACTION_PURCHASE_SUCCESSFUL = "Purchase successful";

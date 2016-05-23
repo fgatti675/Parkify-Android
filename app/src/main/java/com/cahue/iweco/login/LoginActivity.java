@@ -288,7 +288,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         setLoading(false);
         mGoogleApiClient.disconnect();
         clearGoogleToken(authToken);
-        Util.createUpperToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
+        Util.showBlueToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
     private void clearGoogleToken(final String authToken) {
@@ -391,7 +391,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     private void onTokenRetrieveError() {
-        Util.createUpperToast(this, "Error Google auth", Toast.LENGTH_SHORT);
+        Util.showBlueToast(this, "Error Google auth", Toast.LENGTH_SHORT);
         setLoading(false);
         mGoogleApiClient.disconnect();
     }

@@ -11,7 +11,7 @@
     android:paddingTop="@dimen/default_padding">
 
     <TextView
-        android:id="@+id/error_text"
+        android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="@dimen/elevation"

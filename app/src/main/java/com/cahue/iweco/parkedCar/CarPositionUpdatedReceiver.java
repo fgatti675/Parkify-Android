@@ -1,5 +1,6 @@
 package com.cahue.iweco.parkedcar;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -62,6 +63,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
         context.startService(fetchAddressIntent);
     }
 
+    @SuppressLint("ParcelCreator")
     class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver() {
             super(new Handler());
