@@ -269,8 +269,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     private void setUpViewBounds() {
-        this.viewBounds = getMap().getProjection().getVisibleRegion().latLngBounds;
+        this.viewBounds = getViewPortBounds();
     }
+
 
     /**
      * Called when new parking spots are received

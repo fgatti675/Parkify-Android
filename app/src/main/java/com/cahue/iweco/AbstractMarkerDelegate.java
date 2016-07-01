@@ -1,7 +1,7 @@
 package com.cahue.iweco;
 
-import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
 /**
@@ -24,15 +25,17 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     @NonNull
     protected DelegateManager delegateManager;
+
     // too far from the car to calculate directions
     private boolean tooFar = false;
+
     @Nullable
     private GoogleMap mMap;
 
     public abstract void doDraw();
 
     @Override
-    public void onAttach(@NonNull Activity activity) {
+    public void onAttach(@NonNull Context activity) {
         super.onAttach(activity);
 
         try {
@@ -49,6 +52,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
                     + " must implement " + DetailsViewManager.class.getName());
         }
     }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -150,5 +154,9 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     public final void setMap(GoogleMap mMap) {
         this.mMap = mMap;
         onMapReady(mMap);
+    }
+
+    protected LatLngBounds getViewPortBounds() {
+        return getMap().getProjection().getVisibleRegion().latLngBounds;
     }
 }

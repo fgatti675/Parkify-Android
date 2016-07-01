@@ -10,8 +10,8 @@ android {
         targetSdkVersion 23
         generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
         applicationId "com.whereismycar"
-        versionCode 69
-        versionName "3.3.3"
+        versionCode 70
+        versionName "3.3.4"
         signingConfig signingConfigs.wimc
         multiDexEnabled true
     }
@@ -35,7 +35,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     // Google Maps Android API utility library
-    compile('com.google.maps.android:android-maps-utils:0.4') {
+    compile('com.google.maps.android:android-maps-utils:0.4.1') {
         exclude group: "com.google.android.gms"
     }
 

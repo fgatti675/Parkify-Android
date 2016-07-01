@@ -11,18 +11,15 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/light_grey" />
+        android:layout_height="match_parent"
+        android:background="@color/light_grey">
 
         <fragment
             android:id="@+id/map"
             class="com.google.android.gms.maps.MapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            />
 
         <RelativeLayout
             android:id="@+id/main_container"
@@ -40,6 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
                 android:contentDescription="@string/navigation_drawer_open"
+                android:elevation="@dimen/elevation_small"
                 android:padding="@dimen/large_padding"
                 android:src="@drawable/ic_menu_24dp" />
 
