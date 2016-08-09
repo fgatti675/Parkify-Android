@@ -2,7 +2,6 @@ package com.cahue.iweco;
 
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -11,9 +10,8 @@ import android.widget.Toast;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.spots.MarkerFactory;
 import com.cahue.iweco.spots.SpotDetailsFragment;
-import com.cahue.iweco.spots.query.AreaSpotsQuery;
+import com.cahue.iweco.spots.query.ParkingQueryResult;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
-import com.cahue.iweco.spots.query.QueryResult;
 import com.cahue.iweco.util.GMapV2Direction;
 import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -64,15 +62,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     // time after we consider the query is outdated and need to repeat
     private final static long TIMEOUT_MS = 60000;
 
-    // number of spots being retrieved on nearby spots query
-    private final static int CLOSEST_LOCATIONS = 100;
-
     // max number of spots displayed at once.
-    private static final int MARKERS_LIMIT = 50;
+    private static final int MARKERS_LIMIT = 40;
 
     private static final float MAX_DIRECTIONS_DISTANCE = 40000; // 40 km
 
-    private final Handler handler = new Handler();
     private int displayedMarkers;
     private Set<ParkingSpot> spots;
 
@@ -183,23 +177,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     }
 
-
-//    private synchronized boolean queryClosestSpots(LatLng userLocation) {
-//
-//        this.userQueryLocation = userLocation;
-//
-//        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING) {
-//            return false;
-//        }
-//
-//        nearbyQuery = new NearestSpotsQuery(mContext, userLocation, CLOSEST_LOCATIONS, this);
-//
-//        Log.v(QUERY_TAG, "Starting query for closest spots to: " + userLocation);
-//        nearbyQuery.execute();
-//
-//        return true;
-//    }
-
     private void reset(boolean clearSpots) {
         Log.d(TAG, "Reset: " + clearSpots);
         for (Marker marker : markerSpotsMap.keySet()) {
@@ -221,11 +198,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         // What the user is actually seeing right now
         setUpViewBounds();
-
-//        if (nearbyQuery != null && nearbyQuery.getStatus() == AsyncTask.Status.RUNNING && viewBounds.contains(userQueryLocation)) {
-//            Log.d(QUERY_TAG, "Abort camera query because view contains user");
-//            return false;
-//        }
 
         Location ne = new Location("");
         ne.setLatitude(viewBounds.northeast.latitude);
@@ -259,7 +231,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         // we keep a reference of the current query to prevent repeating it
         queriedBounds.add(extendedViewBounds);
 
-        ParkingSpotsQuery areaQuery = new AreaSpotsQuery(getActivity(), extendedViewBounds, this);
+        ParkingSpotsQuery areaQuery = new ParkingSpotsQuery(extendedViewBounds, this);
 
         Log.d(QUERY_TAG, "Starting query for queryBounds: " + extendedViewBounds);
         areaQuery.execute();
@@ -279,7 +251,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * @param result
      */
     @Override
-    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull QueryResult result) {
+    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull ParkingQueryResult result) {
 
         Log.v(TAG, "onSpotsUpdate");
 
@@ -363,7 +335,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
             // if there is no marker we create it
             if (marker == null) {
-                marker = getMap().addMarker(MarkerFactory.getMarker(parkingSpot, getActivity()));
+                marker = getMap().addMarker(MarkerFactory.getSpotMarker(parkingSpot, getActivity()));
                 marker.setVisible(false);
                 spotMarkersMap.put(parkingSpot, marker);
                 markerSpotsMap.put(marker, parkingSpot);
@@ -389,7 +361,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     private void updateMarker(@NonNull ParkingSpot parkingSpot, @NonNull Marker marker) {
-        MarkerOptions markerOptions = MarkerFactory.getMarker(parkingSpot, getActivity());
+        MarkerOptions markerOptions = MarkerFactory.getSpotMarker(parkingSpot, getActivity());
         marker.setIcon(markerOptions.getIcon());
     }
 
@@ -439,12 +411,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         if (selectedSpot != null) {
             Marker spotMarker = spotMarkersMap.get(selectedSpot);
-
+            if(spotMarker != null) spotMarker.remove();
             selectedMarker = getMap().addMarker(MarkerFactory.getSelectedMarker(getActivity(), selectedSpot.getLatLng()));
 
-            if (spotMarker != null) {
-                updateMarker(selectedSpot, spotMarker);
-            }
+            spotMarker = getMap().addMarker(MarkerFactory.getSpotMarker(selectedSpot, getActivity()));
+            spotMarkersMap.put(selectedSpot, spotMarker);
         }
     }
 
@@ -481,26 +452,27 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     private void revealMarker(@NonNull final Marker marker) {
 
         marker.setVisible(true);
-        final float dAlpha = 0.03F;
-        marker.setAlpha(0);
-
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-
-                float alpha = marker.getAlpha() + dAlpha;
-                if (alpha < 1) {
-                    // Post again 12ms later.
-                    marker.setAlpha(alpha);
-                    handler.postDelayed(this, 16);
-                } else {
-                    marker.setAlpha(1);
-                    // animation ended
-                }
-            }
-        });
+//        final float dAlpha = 0.04F;
+//        marker.setAlpha(0);
+//
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                float alpha = marker.getAlpha() + dAlpha;
+//                if (alpha < 1) {
+//                    // Post again 12ms later.
+//                    marker.setAlpha(alpha);
+//                    handler.postDelayed(this, 16);
+//                } else {
+//                    marker.setAlpha(1);
+//                    // animation ended
+//                }
+//            }
+//        }, (long) (Math.random() * 100));
 
     }
+
 
 
     @Override
@@ -510,9 +482,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         float zoom = getMap().getCameraPosition().zoom;
         Log.v(TAG, "zoom: " + zoom);
-
-//        if (requester != this)
-//            following = false;
 
         /**
          * Query for current camera position

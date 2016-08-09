@@ -10,8 +10,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.ParkifyApp;
-import com.cahue.iweco.R;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.Requests;
@@ -42,8 +42,8 @@ public class ParkingSpotSender {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(context.getResources().getString(R.string.baseURL))
-                .appendPath(context.getResources().getString(R.string.spotsPath));
+                .authority(BuildConfig.BACKEND_URL)
+                .appendPath("spots");
 
 
         // Send a JSON spot location.

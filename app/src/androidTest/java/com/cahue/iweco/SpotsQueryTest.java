@@ -6,8 +6,8 @@ import android.test.ActivityTestCase;
 import android.util.Log;
 
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.spots.query.ParkingQueryResult;
 import com.cahue.iweco.spots.query.ParkingSpotsQuery;
-import com.cahue.iweco.spots.query.QueryResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -58,13 +58,12 @@ public class SpotsQueryTest extends ActivityTestCase {
 
         final List<ParkingSpot> spots = new ArrayList<>();
 
-        final ParkingSpotsQuery parkingSpotsQuery = new TestSpotsQuery(
-                getActivity(),
+        final ParkingSpotsQuery parkingSpotsQuery = new ParkingSpotsQuery(
                 latLngBounds,
                 new ParkingSpotsQuery.ParkingSpotsUpdateListener() {
 
                     @Override
-                    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull QueryResult result) {
+                    public void onSpotsUpdate(ParkingSpotsQuery query, @NonNull ParkingQueryResult result) {
                         spots.addAll(result.spots);
                         signal.countDown();
                     }

@@ -67,9 +67,11 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.parkedcar.ParkedCarService;
+import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.AppturboUnlockTools;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
@@ -188,6 +190,7 @@ public class MapsActivity extends AppCompatActivity
     private FloatingActionButton myLocationButton;
 
     private Button noCarsButton;
+
     private CardView cardDetailsContainer;
 
     private boolean detailsDisplayed = false;
@@ -213,9 +216,10 @@ public class MapsActivity extends AppCompatActivity
      * Current logged user
      */
     private Account mAccount;
+
+
     private boolean mapInitialised = false;
     private boolean initialCameraSet = false;
-
 
     private boolean locationPermissionCurrentlyRequested = false;
 
@@ -238,7 +242,6 @@ public class MapsActivity extends AppCompatActivity
     private NativeAd nativeAd;
     private BillingFragment billingFragment;
     private BroadcastReceiver billingReadyReceiver;
-    private AsyncTask<Void, Void, Boolean> setUpAdAsyncTask;
     private RelativeLayout mainContainer;
 
     public void goToLogin() {
@@ -252,7 +255,6 @@ public class MapsActivity extends AppCompatActivity
             clearAccounts();
             Log.d(TAG, "goToLogin");
             Intent intent = new Intent(this, LoginActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             finish();
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -268,6 +270,8 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        long initTime = System.currentTimeMillis();
 
         carDatabase = CarDatabase.getInstance(this);
 
@@ -290,6 +294,9 @@ public class MapsActivity extends AppCompatActivity
          */
         setUpBillingFragment();
 
+
+        Log.d("App speed", "On create init time 1 : " + (System.currentTimeMillis() - initTime));
+
         loginType = null;
 
         if (availableAccounts.length > 0) {
@@ -302,6 +309,7 @@ public class MapsActivity extends AppCompatActivity
             if (typeString != null)
                 loginType = LoginType.valueOf(typeString);
         }
+        Log.d("App speed", "On create init time 2 : " + (System.currentTimeMillis() - initTime));
 
         // Create a GoogleApiClient instance
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
@@ -309,6 +317,7 @@ public class MapsActivity extends AppCompatActivity
                 .addApiIfAvailable(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this);
+
 
         if (!mSkippedLogin && loginType == LoginType.Google) {
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -318,8 +327,11 @@ public class MapsActivity extends AppCompatActivity
         }
 
         mGoogleApiClient = builder.build();
+        Log.d("App speed", "On create init time 3 : " + (System.currentTimeMillis() - initTime));
 
         setContentView(R.layout.activity_main);
+
+        Log.d("App speed", "On create init time 4 : " + (System.currentTimeMillis() - initTime));
 
         drawerToggle = findViewById(R.id.navigation_drawer_toggle);
         if (drawerToggle != null)
@@ -358,6 +370,7 @@ public class MapsActivity extends AppCompatActivity
          * Navigation drawer
          */
         setUpNavigationDrawer();
+
 
         myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
         ViewCompat.setElevation(myLocationButton, getResources().getDimension(R.dimen.elevation));
@@ -401,6 +414,7 @@ public class MapsActivity extends AppCompatActivity
             cameraFollowing = savedInstanceState.getBoolean("cameraFollowing");
         }
 
+
         /**
          * Details
          */
@@ -431,6 +445,8 @@ public class MapsActivity extends AppCompatActivity
             PreferencesUtil.setAdsRemoved(this, true);
         }
 
+        Log.d("App speed", "On create init time : " + (System.currentTimeMillis() - initTime));
+
     }
 
 
@@ -442,7 +458,7 @@ public class MapsActivity extends AppCompatActivity
 
         adView.setVisibility(View.GONE);
 
-        setUpAdAsyncTask = new AsyncTask<Void, Void, Boolean>() {
+        AsyncTask<Void, Void, Boolean> setUpAdAsyncTask = new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
                 /**
@@ -499,7 +515,7 @@ public class MapsActivity extends AppCompatActivity
 
         RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
         if (adIcon != null) {
-            ImageRequest profilePicRequest = new ImageRequest(adIcon.getUrl(), new Response.Listener<Bitmap>() {
+            ImageRequest adPicture = new ImageRequest(adIcon.getUrl(), new Response.Listener<Bitmap>() {
                 @Override
                 public void onResponse(Bitmap response) {
                     nativeAdIcon.setImageBitmap(response);
@@ -532,9 +548,9 @@ public class MapsActivity extends AppCompatActivity
 
             Cache.Entry entry = new Cache.Entry();
             entry.ttl = 24 * 60 * 60 * 1000;
-            profilePicRequest.setCacheEntry(entry);
+            adPicture.setCacheEntry(entry);
 
-            requestQueue.add(profilePicRequest);
+            requestQueue.add(adPicture);
         } else {
             Log.w(TAG, "adview without adIcon");
         }
@@ -551,6 +567,8 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
+
+        long initTime = System.currentTimeMillis();
 
         registerCameraUpdateRequester(this);
 
@@ -582,12 +600,16 @@ public class MapsActivity extends AppCompatActivity
 
         registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
+        Log.d("App speed", "On start init time : " + (System.currentTimeMillis() - initTime));
+
     }
 
     @Override
     protected void onResume() {
 
         super.onResume();
+
+        long initTime = System.currentTimeMillis();
 
         Tracking.sendView(Tracking.CATEGORY_MAP);
 
@@ -597,6 +619,8 @@ public class MapsActivity extends AppCompatActivity
          * Add delegates
          */
         delegates.add(initSpotsDelegate());
+
+        delegates.add(initPlacesDelegate());
 
         for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots())
             delegates.add(initPossibleParkedCarDelegate(spot));
@@ -630,6 +654,8 @@ public class MapsActivity extends AppCompatActivity
         if (targetUrl != null) {
             Log.i("Activity", "App Link Target URL: " + targetUrl.toString());
         }
+
+        Log.d("App speed", "On resume init time : " + (System.currentTimeMillis() - initTime));
     }
 
     @Override
@@ -687,6 +713,8 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
+        long initTime = System.currentTimeMillis();
+
         Log.d(TAG, "onMapReady");
 
         mMap = googleMap;
@@ -720,6 +748,8 @@ public class MapsActivity extends AppCompatActivity
 
         if (detailsDisplayed) showDetails();
         else hideDetails();
+
+        Log.d("App speed", "On map ready init time : " + (System.currentTimeMillis() - initTime));
 
     }
 
@@ -775,11 +805,26 @@ public class MapsActivity extends AppCompatActivity
                 this);
     }
 
+
+    @NonNull
+    private PlacesDelegate initPlacesDelegate() {
+        PlacesDelegate placesDelegate = (PlacesDelegate) getFragmentManager().findFragmentByTag(PlacesDelegate.FRAGMENT_TAG);
+        if (placesDelegate == null) {
+            Log.d(TAG, "Creating new ParkedCarDelegate");
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            placesDelegate = PlacesDelegate.newInstance();
+            placesDelegate.setRetainInstance(true);
+            transaction.add(placesDelegate, PlacesDelegate.FRAGMENT_TAG);
+            transaction.commit();
+        }
+        return placesDelegate;
+    }
+
     @NonNull
     private SpotsDelegate initSpotsDelegate() {
         SpotsDelegate spotsDelegate = (SpotsDelegate) getFragmentManager().findFragmentByTag(SpotsDelegate.FRAGMENT_TAG);
         if (spotsDelegate == null) {
-            Log.d(TAG, "Creating new ParkedCarDelegate");
+            Log.d(TAG, "Creating new SpotsDelegate");
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             spotsDelegate = SpotsDelegate.newInstance();
             spotsDelegate.setRetainInstance(true);
@@ -1256,7 +1301,7 @@ public class MapsActivity extends AppCompatActivity
         location.setLongitude(latLng.longitude);
         location.setAccuracy(10);
 
-        ParkingSpot spot = new ParkingSpot(null, location, null, new Date(), false);
+        ParkingSpot spot = new ParkingSpot(-1, location, null, new Date(), false);
 
         LongTapLocationDelegate longTapLocationDelegate = getLongTapLocationDelegate();
         longTapLocationDelegate.setMap(mMap);

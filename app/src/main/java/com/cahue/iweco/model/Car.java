@@ -89,6 +89,7 @@ public class Car implements Parcelable {
     public static Car fromJSON(@NonNull JSONObject carJSON) {
         try {
             Car car = new Car();
+
             car.id = carJSON.getString("id");
 
             if (carJSON.has("name")) {

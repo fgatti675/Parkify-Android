@@ -2,6 +2,7 @@ package com.cahue.iweco;
 
 import android.app.Application;
 import android.os.StrictMode;
+import android.util.Log;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -31,6 +32,8 @@ public class ParkifyApp extends Application {
     @Override
     public void onCreate() {
 
+        long initTime = System.currentTimeMillis();
+
         super.onCreate();
 
         parkifyApp = this;
@@ -44,7 +47,6 @@ public class ParkifyApp extends Application {
          * Start Google analytics
          */
         GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-        analytics.setLocalDispatchPeriod(1800);
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
         tracker.enableAdvertisingIdCollection(true);
@@ -69,18 +71,22 @@ public class ParkifyApp extends Application {
 
         // Strict mode
         if (BuildConfig.DEBUG) {
+
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
                     .penaltyFlashScreen()
                     .build());
+
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
                     .build());
+
+            AdSettings.addTestDevice("2e398393636c7cca29281dda912adc42");
         }
 
-        AdSettings.addTestDevice("2e398393636c7cca29281dda912adc42");
+        Log.d("App speed", "App init time : " + (System.currentTimeMillis() - initTime));
     }
 
     @Override

@@ -665,6 +665,6 @@ public class CarDatabase {
         Date time = new Date(cursor.getLong(3));
         String address = cursor.isNull(4) ? null : cursor.getString(4);
 
-        return new ParkingSpot(null, location, address, time, false);
+        return new ParkingSpot(-1, location, address, time, false);
     }
 }

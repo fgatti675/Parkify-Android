@@ -1,4 +1,4 @@
-package com.cahue.iweco;
+package com.cahue.iweco.util;
 
 import android.content.Context;
 import android.content.Intent;

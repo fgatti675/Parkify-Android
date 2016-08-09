@@ -1,6 +1,5 @@
 package com.cahue.iweco.spots.query;
 
-import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,8 +10,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.model.ParkingSpot;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,16 +25,16 @@ import java.util.Set;
 /**
  * Created by francesco on 13.11.2014.
  */
-public abstract class ParkingSpotsQuery {
+public class ParkingSpotsQuery {
 
     private static final String TAG = ParkingSpotsQuery.class.getSimpleName();
 
-    protected final Context context;
+    private final LatLngBounds latLngBounds;
     private final ParkingSpotsUpdateListener listener;
 
-    public ParkingSpotsQuery(Context context, ParkingSpotsUpdateListener listener) {
-        this.context = context;
+    public ParkingSpotsQuery( LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         this.listener = listener;
+        this.latLngBounds = latLngBounds;
     }
 
     public void execute() {
@@ -50,8 +51,8 @@ public abstract class ParkingSpotsQuery {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        QueryResult queryResult = parseResult(response);
-                        listener.onSpotsUpdate(ParkingSpotsQuery.this, queryResult);
+                        ParkingQueryResult parkingQueryResult = parseResult(response);
+                        listener.onSpotsUpdate(ParkingSpotsQuery.this, parkingQueryResult);
                     }
                 },
                 new Response.ErrorListener() {
@@ -70,9 +71,9 @@ public abstract class ParkingSpotsQuery {
     }
 
     @NonNull
-    protected QueryResult parseResult(@Nullable JSONObject jsonObject) {
+    protected ParkingQueryResult parseResult(@Nullable JSONObject jsonObject) {
 
-        QueryResult result = new QueryResult();
+        ParkingQueryResult result = new ParkingQueryResult();
 
         Set<ParkingSpot> spots = new HashSet<>();
 
@@ -100,7 +101,17 @@ public abstract class ParkingSpotsQuery {
         return result;
     }
 
-    protected abstract Uri getRequestUri();
+    protected Uri getRequestUri() {
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority(BuildConfig.BACKEND_URL)
+                .appendPath("spots")
+                .appendQueryParameter("swLat", Double.toString(latLngBounds.southwest.latitude))
+                .appendQueryParameter("swLong", Double.toString(latLngBounds.southwest.longitude))
+                .appendQueryParameter("neLat", Double.toString(latLngBounds.northeast.latitude))
+                .appendQueryParameter("neLong", Double.toString(latLngBounds.northeast.longitude));
+        return builder.build();
+    }
 
     /**
      * Components that use this service must implement a listener using this interface to get the
@@ -108,7 +119,7 @@ public abstract class ParkingSpotsQuery {
      */
     public interface ParkingSpotsUpdateListener {
 
-        void onSpotsUpdate(ParkingSpotsQuery query, QueryResult result);
+        void onSpotsUpdate(ParkingSpotsQuery query, ParkingQueryResult result);
 
         void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase);
 

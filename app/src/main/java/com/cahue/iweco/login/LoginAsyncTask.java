@@ -12,8 +12,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.ParkifyApp;
-import com.cahue.iweco.R;
 import com.cahue.iweco.util.Requests;
 
 import org.json.JSONObject;
@@ -50,16 +50,16 @@ public class LoginAsyncTask extends AsyncTask<Void, Void, LoginResultBean> {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(context.getResources().getString(R.string.baseURL))
-                .appendPath(context.getResources().getString(R.string.usersPath));
+                .authority(BuildConfig.BACKEND_URL)
+                .appendPath("users");
 
 
         if (type == LoginType.Google) {
-            builder.appendPath(context.getResources().getString(R.string.googlePath))
+            builder.appendPath("registerGoogle")
                     .appendQueryParameter("deviceRegId", registrationId)
                     .appendQueryParameter("googleAuthToken", authToken);
         } else if (type == LoginType.Facebook) {
-            builder.appendPath(context.getResources().getString(R.string.facebookPath))
+            builder.appendPath("registerFacebook")
                     .appendQueryParameter("deviceRegId", registrationId)
                     .appendQueryParameter("facebookAuthToken", authToken);
         } else {

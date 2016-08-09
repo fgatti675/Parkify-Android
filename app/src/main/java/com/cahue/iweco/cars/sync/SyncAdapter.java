@@ -15,8 +15,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.ParkifyApp;
-import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Requests;
@@ -53,8 +53,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(getContext().getResources().getString(R.string.baseURL))
-                .appendPath(getContext().getResources().getString(R.string.carsPath));
+                .authority(BuildConfig.BACKEND_URL)
+                .appendPath("cars");
 
         /**
          * Retrieve an array of cars

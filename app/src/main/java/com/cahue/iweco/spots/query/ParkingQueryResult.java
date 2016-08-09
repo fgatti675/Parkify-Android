@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Created by Francesco on 30/03/2015.
  */
-public class QueryResult {
+public class ParkingQueryResult {
 
     /**
      * Was there an error retrieving data

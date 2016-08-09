@@ -15,8 +15,8 @@ import android.text.TextUtils;
 
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.ParkifyApp;
-import com.cahue.iweco.R;
 import com.cahue.iweco.login.LoginActivity;
 
 import java.util.concurrent.ExecutionException;
@@ -126,9 +126,9 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(mContext.getResources().getString(R.string.baseURL))
-                .appendPath(mContext.getResources().getString(R.string.usersPath))
-                .appendPath(mContext.getResources().getString(R.string.refreshPath))
+                .authority(BuildConfig.BACKEND_URL)
+                .appendPath("users")
+                .appendPath("refresh")
                 .appendQueryParameter("user", userId)
                 .appendQueryParameter("refreshToken", refreshToken);
 

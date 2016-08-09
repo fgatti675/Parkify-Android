@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text"
+    style="@style/Marker.Parking"
+    android:layout_width="24dp"
+    android:layout_height="34dp"
+    android:background="@drawable/marker_parking"
+    android:gravity="center"
+    android:paddingBottom="4dp"
+    android:text="P" />

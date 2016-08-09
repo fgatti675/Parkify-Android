@@ -18,49 +18,53 @@
             android:id="@+id/map"
             class="com.google.android.gms.maps.MapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
 
         <RelativeLayout
             android:id="@+id/main_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:animateLayoutChanges="true"
-            android:background="@android:color/transparent"
             android:clipChildren="false"
             android:clipToPadding="false">
 
-            <ImageButton
-                android:id="@+id/navigation_drawer_toggle"
-                style="@style/NavigationButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:contentDescription="@string/navigation_drawer_open"
-                android:elevation="@dimen/elevation_small"
-                android:padding="@dimen/large_padding"
-                android:src="@drawable/ic_menu_24dp" />
-
-            <include
-                layout="@layout/native_app_maps_install_ad_view"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/small_padding"
-                android:layout_toRightOf="@id/navigation_drawer_toggle" />
+                android:background="@drawable/black_transparent_gradient">
 
-            <Button
-                android:id="@+id/no_cars_button"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_margin="@dimen/default_padding"
-                android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
-                android:drawableRight="@drawable/ic_keyboard_arrow_right_24dp"
-                android:text="@string/no_cars"
-                android:textColor="@color/white"
-                tools:visibility="gone" />
+                <ImageButton
+                    android:id="@+id/navigation_drawer_toggle"
+                    style="@style/NavigationButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:contentDescription="@string/navigation_drawer_open"
+                    android:elevation="@dimen/elevation_small"
+                    android:padding="@dimen/large_padding"
+                    android:src="@drawable/ic_menu_24dp" />
 
+                <include
+                    layout="@layout/native_app_maps_install_ad_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_toRightOf="@id/navigation_drawer_toggle" />
+
+                <Button
+                    android:id="@+id/no_cars_button"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_margin="@dimen/default_padding"
+                    android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
+                    android:drawableRight="@drawable/ic_keyboard_arrow_right_24dp"
+                    android:text="@string/no_cars"
+                    android:textColor="@color/white"
+                    tools:visibility="gone" />
+
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/details_container"
@@ -82,7 +86,6 @@
                     android:layout_marginBottom="@dimen/default_padding"
                     android:layout_marginLeft="@dimen/default_padding"
                     android:layout_marginRight="@dimen/default_padding"
-                    android:foreground="?android:attr/selectableItemBackground"
                     android:visibility="invisible"
                     app:cardCornerRadius="@dimen/cardCornerRadius"
                     tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
@@ -100,7 +103,7 @@
                     android:src="@drawable/crosshairs_gps"
                     app:borderWidth="0dp" />
 
-                <include layout="@layout/debug_layout" />
+                <!--<include layout="@layout/debug_layout" />-->
 
             </RelativeLayout>
         </RelativeLayout>

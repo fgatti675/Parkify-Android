@@ -96,8 +96,8 @@ public class CarsSync {
 
             Uri.Builder builder = new Uri.Builder();
             builder.scheme("https")
-                    .authority(context.getResources().getString(R.string.baseURL))
-                    .appendPath(context.getResources().getString(R.string.carsPath))
+                    .authority(BuildConfig.BACKEND_URL)
+                    .appendPath("cars")
                     .appendPath(car.id);
 
             /**
@@ -151,8 +151,8 @@ public class CarsSync {
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
-                .authority(context.getResources().getString(R.string.baseURL))
-                .appendPath(context.getResources().getString(R.string.carsPath));
+                .authority(BuildConfig.BACKEND_URL)
+                .appendPath("cars");
 
         /**
          * Send a Json with the cars contained in this phone

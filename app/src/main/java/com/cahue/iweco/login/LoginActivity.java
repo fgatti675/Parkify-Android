@@ -17,7 +17,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.cahue.iweco.AppturboUnlockTools;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
@@ -26,6 +25,7 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.tutorial.TutorialActivity;
+import com.cahue.iweco.util.AppturboUnlockTools;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;

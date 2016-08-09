@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.places.Place;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -23,11 +24,12 @@ public class MarkerFactory {
 
     private static IconGenerator greenIconGenerator;
     private static IconGenerator yellowIconGenerator;
+    private static BitmapDescriptor parkingBitmap;
     private static BitmapDescriptor redBitmap;
     private static BitmapDescriptor futureBitmap;
 
     @NonNull
-    public static MarkerOptions getMarker(@NonNull ParkingSpot spot, @NonNull Context context) {
+    public static MarkerOptions getSpotMarker(@NonNull ParkingSpot spot, @NonNull Context context) {
 
         if (greenIconGenerator == null) {
 
@@ -63,16 +65,31 @@ public class MarkerFactory {
         return new MarkerOptions()
                 .position(position)
                 .icon(BitmapDescriptorFactory.fromBitmap(greenIconGenerator.makeIcon(getMarkerText(timeSinceSpotWasFree))))
-                .anchor(MarkerFactory.greenIconGenerator.getAnchorU(), MarkerFactory.greenIconGenerator.getAnchorV());
+                .anchor(0.5F, 1F);
     }
 
     private static MarkerOptions getYellowMarker(long timeSinceSpotWasFree, LatLng position) {
         return new MarkerOptions()
                 .position(position)
                 .icon(BitmapDescriptorFactory.fromBitmap(yellowIconGenerator.makeIcon(getMarkerText(timeSinceSpotWasFree))))
-                .anchor(MarkerFactory.yellowIconGenerator.getAnchorU(), MarkerFactory.yellowIconGenerator.getAnchorV());
+                .anchor(0.5F, 1F);
     }
 
+    public static MarkerOptions getParkingMarker(Place place, Context context) {
+
+        if (parkingBitmap == null) {
+            LayoutInflater myInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            IconGenerator parkingIconGenerator = new IconGenerator(context.getApplicationContext());
+            parkingIconGenerator.setBackground(null);
+            parkingIconGenerator.setContentView(myInflater.inflate(R.layout.marker_parking_view, null, false));
+            parkingBitmap = BitmapDescriptorFactory.fromBitmap(parkingIconGenerator.makeIcon("P"));
+        }
+
+        return new MarkerOptions()
+                .position(place.getLatLng())
+                .icon(parkingBitmap)
+                .anchor(0.5F, 1F);
+    }
     private static String getMarkerText(long ms) {
         return String.format("%d'", ms / 60000);
     }
@@ -133,6 +150,5 @@ public class MarkerFactory {
 
         return BitmapDescriptorFactory.fromBitmap(mDotMarkerBitmap);
     }
-
 
 }

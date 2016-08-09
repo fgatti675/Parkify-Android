@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,8 +19,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,14 +36,8 @@ import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
-import com.facebook.ads.Ad;
-import com.facebook.ads.AdChoicesView;
-import com.facebook.ads.AdError;
-import com.facebook.ads.AdListener;
-import com.facebook.ads.NativeAd;
 import com.facebook.share.widget.AppInviteDialog;
 
 import java.util.ArrayList;
@@ -58,9 +49,7 @@ import java.util.List;
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment implements AdListener {
-
-    private static final boolean ADS_ENABLED = false;
+public class NavigationDrawerFragment extends Fragment {
 
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
 
@@ -83,41 +72,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
     private DrawerLayout mDrawerLayout;
 
     private RecyclerViewDrawerAdapter adapter;
-    private View mFragmentContainerView;
-
-    private View userDetailsView;
-    private ImageView userImage;
-    private TextView usernameTextView;
-    private TextView emailTextView;
-    private Button signInButton;
-
-    @NonNull
-    private final BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            setUpUserDetails();
-        }
-    };
-
-    private ViewGroup adView;
-    private NativeAd nativeAd;
-    private AdChoicesView adChoicesView;
-
-    /**
-     * Are ads currently displayed
-     */
-    private boolean adsDisplayed = false;
-    @NonNull
-    private final BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (adsDisplayed) {
-                adsDisplayed = false;
-                adapter.setUpElements();
-                adapter.notifyItemRemoved(0);
-            }
-        }
-    };
     @NonNull
     private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
@@ -130,13 +84,22 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         }
 
     };
+    private View mFragmentContainerView;
+    private View userDetailsView;
+    private ImageView userImage;
+    private TextView usernameTextView;
+    private TextView emailTextView;
+    private Button signInButton;
+    @NonNull
+    private final BroadcastReceiver userInfoReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setUpUserDetails();
+        }
+    };
     private int bottomMargin;
     private int topMargin;
 
-    private BillingFragment billingFragment;
-
-    @Nullable
-    private BroadcastReceiver billingReadyReceiver;
     private RelativeLayout mRootView;
 
     public NavigationDrawerFragment() {
@@ -196,9 +159,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        adView = (ViewGroup) inflater.inflate(R.layout.native_app_install_ad_view, container, false);
-        adView.setVisibility(View.GONE);
-
         return mRootView;
     }
 
@@ -211,33 +171,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         adapter.setUpElements();
         adapter.notifyDataSetChanged();
 
-        billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
-        if (billingFragment == null)
-            throw new RuntimeException("The billing fragment must be set");
-
-        /**
-         * Set up the ad if the billing service is ready
-         */
-        if (billingFragment.isBillingServiceReady()) {
-            setUpAd();
-        }
-
-        /**
-         * Wait for it otherwise
-         */
-        else {
-            Log.d(TAG, "Waiting for billing service");
-            billingReadyReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    Log.d(TAG, "Billing ready");
-                    setUpAd();
-                }
-            };
-            getActivity().registerReceiver(billingReadyReceiver, new IntentFilter(Constants.INTENT_BILLING_READY));
-        }
-
-        getActivity().registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
         getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
 
     }
@@ -257,50 +190,7 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
     @Override
     public void onStop() {
         super.onStop();
-        if (billingReadyReceiver != null)
-            getActivity().unregisterReceiver(billingReadyReceiver);
-        billingReadyReceiver = null;
-        getActivity().unregisterReceiver(newPurchaseReceiver);
         getActivity().unregisterReceiver(userInfoReceiver);
-    }
-
-    private void setUpAd() {
-
-        if (!ADS_ENABLED) return;
-
-        if (PreferencesUtil.isAdsRemoved(getActivity())) return;
-
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                /**
-                 * Check if the user has purchases. If there is an error we don't display just in case
-                 */
-                boolean displayAd = false;
-                Bundle ownedItems = billingFragment.getPurchases();
-                int response = ownedItems.getInt("RESPONSE_CODE");
-                if (response == 0) {
-                    ArrayList<?> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-                    Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
-                    displayAd = purchaseDataList.isEmpty();
-                }
-
-                return displayAd;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean displayAd) {
-                Log.d(TAG, "Display ads returned " + displayAd);
-
-                if (displayAd && isAdded()) {
-                    nativeAd = new NativeAd(getActivity(), getString(R.string.facebook_drawer_placement_id));
-                    nativeAd.setAdListener(NavigationDrawerFragment.this);
-                    nativeAd.loadAd();
-                }
-
-            }
-        }.execute();
-
     }
 
     public boolean isDrawerOpen() {
@@ -473,79 +363,8 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         this.bottomMargin = bottomMargin;
     }
 
-
-    @Override
-    public void onError(Ad ad, AdError adError) {
-        Log.d(TAG, "onAdError: ");
-
-        adView.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onAdLoaded(Ad ad) {
-
-        Log.d(TAG, "onAdLoaded: ");
-
-        adView.setVisibility(View.VISIBLE);
-
-        nativeAd.unregisterView();
-
-        final ViewGroup leftLayout = (ViewGroup) adView.findViewById(R.id.ad_left_layout);
-
-        // Create native UI using the ad metadata.
-        ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
-        TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
-        TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
-//        MediaView nativeAdMedia = (MediaView) adView.findViewById(R.id.native_ad_media);
-//        TextView nativeAdSocialContext = (TextView) adView.findViewById(R.id.native_ad_social_context);
-        Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
-
-        // Setting the Text.
-        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
-        nativeAdTitle.setText(nativeAd.getAdTitle());
-        nativeAdBody.setText(nativeAd.getAdBody());
-
-        // Downloading and setting the ad icon.
-        NativeAd.Image adIcon = nativeAd.getAdIcon();
-        if (adIcon != null) {
-            NativeAd.downloadAndDisplayImage(adIcon, nativeAdIcon);
-        }
-
-        // Download and setting the cover image.
-//        NativeAd.Image adCoverImage = nativeAd.getAdCoverImage();
-//        nativeAdMedia.setNativeAd(nativeAd);
-
-        // Add adChoices icon
-        if (adChoicesView == null) {
-            ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
-            adChoicesView = new AdChoicesView(getActivity(), nativeAd, true);
-            adChoicesView.setGravity(Gravity.TOP | Gravity.END);
-            adChoicesWrap.addView(adChoicesView);
-        }
-
-        View adContainer = adView.findViewById(R.id.ad_container);
-        nativeAd.registerViewForInteraction(adContainer);
-
-
-        adContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        adsDisplayed = true;
-        adapter.setUpElements();
-        adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onAdClicked(Ad ad) {
-        Log.d(TAG, "onAdClicked: ");
-    }
-
     public class RecyclerViewDrawerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        public static final int AD_TYPE = -1;
         public static final int CAR_TYPE = 0;
         public static final int CAR_MANAGER_TYPE = 1;
         public static final int SHARE_TYPE = 2;
@@ -561,7 +380,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
 
             int totalElements = cars.size() + 4;
 
-            if (adsDisplayed) totalElements++;
             if (AppInviteDialog.canShow()) totalElements++;
             if (!skippedLogin) totalElements++;
 
@@ -572,9 +390,6 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
             }
 
             itemTypes.add(CAR_MANAGER_TYPE);
-
-            if (adsDisplayed)
-                itemTypes.add(AD_TYPE);
 
             if (AppInviteDialog.canShow())
                 itemTypes.add(SHARE_TYPE);
@@ -595,15 +410,9 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
             /**
-             * Ad
-             */
-            if (viewType == AD_TYPE) {
-                return new AdViewHolder(adView);
-            }
-            /**
              * Car
              */
-            else if (viewType == CAR_TYPE) {
+            if (viewType == CAR_TYPE) {
                 View itemView = LayoutInflater.from(viewGroup.getContext()).
                         inflate(R.layout.layout_car_details,
                                 viewGroup,
@@ -635,15 +444,9 @@ public class NavigationDrawerFragment extends Fragment implements AdListener {
             int viewType = getItemViewType(position);
 
             /**
-             * Ad
-             */
-            if (viewType == AD_TYPE) {
-
-            }
-            /**
              * Car
              */
-            else if (viewType == CAR_TYPE) {
+            if (viewType == CAR_TYPE) {
 
                 CarViewHolder carViewHolder = (CarViewHolder) viewHolder;
 
