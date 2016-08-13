@@ -57,7 +57,7 @@
     <string name="navigation_drawer_open">Apri menu</string>
     <string name="navigation_drawer_close">Chiudi menu</string>
     <string name="edit_cars">Edita le macchine</string>
-    <string name="position_not_set">Posizione sconosciuta</string>
+    <string name="position_not_set">Posizione sconosciuta. Tap lungo nella mappa per stabilire manualmente</string>
     <string name="follow">Segui</string>
     <string name="no_cars">Non hai aggiunto nessuna macchina</string>
     <string name="add_car_instructions">Se lo fai, saprai sempre dov\'è parcheggiata!</string>

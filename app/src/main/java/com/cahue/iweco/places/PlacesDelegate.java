@@ -41,16 +41,20 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     public static final String FRAGMENT_TAG = "PLACES_DELEGATE";
 
     // higher means closer zoom
-    private final static float MAX_ZOOM = 14.5F;
+    private final static float MAX_ZOOM = 13F;
+    // how many markers
+    private final static int MAX_MARKERS_PER_REQUEST = 20;
+    private final static int MAX_DISPLAYED_MARKERS = 40;
+
     private static final String TAG = PlacesDelegate.class.getSimpleName();
-    // location used as a center fos nearby spots query
+
+    // location used as a center fos nearby query
     private LatLng lastUserLatLngQueried;
     private List<LatLngBounds> queriedBounds = new ArrayList<>();
     private JsonRequest currentUserLocationRequest;
 
     private Set<Place> places = new HashSet<>();
     private Set<Marker> markers = new HashSet<>();
-
 
     @NonNull
     public static PlacesDelegate newInstance() {
@@ -91,6 +95,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
                 Marker marker = getMap().addMarker(MarkerFactory.getParkingMarker(place, getActivity()));
                 markers.add(marker);
             }
+            if (markers.size() == MAX_DISPLAYED_MARKERS) return;
         }
     }
 
@@ -160,18 +165,39 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
         for (LatLngBounds latLngBounds : queriedBounds) {
             if (latLngBounds.contains(viewPortBounds.northeast) && latLngBounds.contains(viewPortBounds.southwest)) {
+                Log.d(TAG, "Viewport contained in previous request");
                 return;
             }
         }
 
-        queriedBounds.add(viewPortBounds);
+        LatLng viewPortCenter = viewPortBounds.getCenter();
+        int displayedMarkers = 0;
+
+        if (markers.size() == MAX_DISPLAYED_MARKERS) {
+            Log.d(TAG, "Too many places in viewport");
+            return;
+        }
+
         float distances[] = new float[3];
-        Location.distanceBetween(
-                viewPortBounds.getCenter().latitude,
-                viewPortBounds.getCenter().longitude,
-                viewPortBounds.northeast.latitude,
-                viewPortBounds.northeast.longitude,
-                distances);
+        for (Place place : places) {
+            Location.distanceBetween(
+                    viewPortCenter.latitude,
+                    viewPortCenter.longitude,
+                    place.getLatLng().latitude,
+                    place.getLatLng().longitude,
+                    distances);
+
+            if (distances[0] < getRadiusFromCenter()) {
+                displayedMarkers++;
+                if (displayedMarkers > MAX_MARKERS_PER_REQUEST) {
+                    Log.d(TAG, "Too many places around center");
+                    return;
+                }
+            }
+        }
+
+
+        int distance = getRadiusFromCenter();
 
         RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
 
@@ -180,7 +206,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
                 .appendPath("places")
                 .appendQueryParameter("lat", Double.toString(viewPortBounds.getCenter().latitude))
                 .appendQueryParameter("long", Double.toString(viewPortBounds.getCenter().longitude))
-                .appendQueryParameter("radius", String.valueOf((int) (distances[0] / 1.42)))
+                .appendQueryParameter("radius", String.valueOf(distance))
                 .build().toString();
 
         Log.d(TAG, "Places query: " + url);
@@ -191,6 +217,8 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
                     @Override
                     public void onResponse(JSONObject response) {
                         PlacesQueryResult parkingQueryResult = parseResult(response);
+                        if (!parkingQueryResult.moreResults)
+                            queriedBounds.add(viewPortBounds);
                         onPlacesUpdate(parkingQueryResult);
                     }
                 },
@@ -204,6 +232,23 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
         // Add the request to the RequestQueue.
         queue.add(request);
+    }
+
+    /**
+     * Get radius from center of viewport to one of the sides
+     *
+     * @return
+     */
+    private int getRadiusFromCenter() {
+        LatLngBounds viewPortBounds = getViewPortBounds();
+        float distances[] = new float[3];
+        Location.distanceBetween(
+                viewPortBounds.getCenter().latitude,
+                viewPortBounds.getCenter().longitude,
+                viewPortBounds.northeast.latitude,
+                viewPortBounds.northeast.longitude,
+                distances);
+        return (int) (distances[0] / 1.42);
     }
 
     private void onPlacesUpdate(PlacesQueryResult parkingQueryResult) {

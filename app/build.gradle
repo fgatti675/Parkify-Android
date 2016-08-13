@@ -7,7 +7,7 @@ android {
     buildToolsVersion '24.0.0'
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 24
         generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
         applicationId "com.whereismycar"
         versionCode 70
@@ -62,7 +62,7 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:4.14.0'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.14'
 
-    compile ('com.facebook.android:audience-network-sdk:4.11.0') {
+    compile('com.facebook.android:audience-network-sdk:4.11.0') {
         exclude group: "com.google.android.gms"
     }
 

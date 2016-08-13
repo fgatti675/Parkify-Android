@@ -56,7 +56,7 @@
     <string name="navigation_drawer_open">Abrir menu</string>
     <string name="navigation_drawer_close">Cerrar menu</string>
     <string name="edit_cars">Editar coches</string>
-    <string name="position_not_set">Ubicación desconocida</string>
+    <string name="position_not_set">Ubicación desconocida. Click largo en el mapa para establecer manualmente</string>
     <string name="follow">Seguir</string>
     <string name="no_cars">No has registrado ningún coche</string>
     <string name="add_car_instructions">Si lo haces, ¡siempre sabrás dónde está aparcado y dejarás de dar vueltas a la manzana!</string>

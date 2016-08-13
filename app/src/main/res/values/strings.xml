@@ -58,7 +58,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="edit_cars">Edit cars</string>
-    <string name="position_not_set">Car position is not set</string>
+    <string name="position_not_set">Car position is not set. Long tap in the map to set manually</string>
     <string name="follow">Follow</string>
     <string name="no_cars">You didn\'t add a car yet!</string>
     <string name="add_car_instructions">Add a new car to get automatic parking updates</string>
