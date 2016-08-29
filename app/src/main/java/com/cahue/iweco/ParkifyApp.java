@@ -1,8 +1,9 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.os.Build;
 import android.os.StrictMode;
-import android.util.Log;
+import android.os.Trace;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -10,7 +11,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.Volley;
 import com.facebook.FacebookSdk;
 import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -32,7 +32,9 @@ public class ParkifyApp extends Application {
     @Override
     public void onCreate() {
 
-        long initTime = System.currentTimeMillis();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Trace.beginSection("App create");
+        }
 
         super.onCreate();
 
@@ -54,15 +56,10 @@ public class ParkifyApp extends Application {
         /**
          * Start volley queue
          */
-        // getApplicationContext() is key, it keeps you from leaking the
-        // Activity or BroadcastReceiver if someone passes one in.
-        mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         // Instantiate the cache
         Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
-
         // Set up the network to use HttpURLConnection as the HTTP client.
         Network network = new BasicNetwork(new HurlStack());
-
         // Instantiate the RequestQueue with the cache and network.
         mRequestQueue = new RequestQueue(cache, network);
 
@@ -86,7 +83,9 @@ public class ParkifyApp extends Application {
             AdSettings.addTestDevice("2e398393636c7cca29281dda912adc42");
         }
 
-        Log.d("App speed", "App init time : " + (System.currentTimeMillis() - initTime));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Trace.endSection();
+        }
     }
 
     @Override

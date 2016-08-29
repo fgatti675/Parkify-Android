@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Trace;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -71,7 +72,6 @@ import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.tutorial.TutorialActivity;
-import com.cahue.iweco.util.AppturboUnlockTools;
 import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
@@ -217,7 +217,6 @@ public class MapsActivity extends AppCompatActivity
      */
     private Account mAccount;
 
-
     private boolean mapInitialised = false;
     private boolean initialCameraSet = false;
 
@@ -230,48 +229,31 @@ public class MapsActivity extends AppCompatActivity
 
     private ViewGroup adView;
 
-    @NonNull
-    private final BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            adView.setVisibility(View.GONE);
-        }
-    };
+    @Nullable
+    private BroadcastReceiver newPurchaseReceiver;
 
     private AdChoicesView adChoicesView;
     private NativeAd nativeAd;
-    private BillingFragment billingFragment;
-    private BroadcastReceiver billingReadyReceiver;
     private RelativeLayout mainContainer;
-
-    public void goToLogin() {
-        if (!isFinishing()) {
-
-            if (!mSkippedLogin)
-                carDatabase.clearCars();
-
-            AuthUtils.setSkippedLogin(this, false);
-
-            clearAccounts();
-            Log.d(TAG, "goToLogin");
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        }
-    }
-
-    private void clearAccounts() {
-        for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
-            mAccountManager.removeAccount(account, null, null);
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Trace.beginSection("MapsActivity create");
+        }
+
         super.onCreate(savedInstanceState);
 
-        long initTime = System.currentTimeMillis();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Trace.beginSection("MapsActivity inflate");
+
+        }
+        setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Trace.endSection();
+        }
 
         carDatabase = CarDatabase.getInstance(this);
 
@@ -292,10 +274,7 @@ public class MapsActivity extends AppCompatActivity
         /**
          * Bind service used for donations
          */
-        setUpBillingFragment();
-
-
-        Log.d("App speed", "On create init time 1 : " + (System.currentTimeMillis() - initTime));
+        initBillingFragment();
 
         loginType = null;
 
@@ -309,15 +288,15 @@ public class MapsActivity extends AppCompatActivity
             if (typeString != null)
                 loginType = LoginType.valueOf(typeString);
         }
-        Log.d("App speed", "On create init time 2 : " + (System.currentTimeMillis() - initTime));
 
-        // Create a GoogleApiClient instance
+        /**
+         * Create a GoogleApiClient instance
+         */
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
                 .addApiIfAvailable(LocationServices.API)
                 .addApiIfAvailable(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this);
-
 
         if (!mSkippedLogin && loginType == LoginType.Google) {
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -327,11 +306,6 @@ public class MapsActivity extends AppCompatActivity
         }
 
         mGoogleApiClient = builder.build();
-        Log.d("App speed", "On create init time 3 : " + (System.currentTimeMillis() - initTime));
-
-        setContentView(R.layout.activity_main);
-
-        Log.d("App speed", "On create init time 4 : " + (System.currentTimeMillis() - initTime));
 
         drawerToggle = findViewById(R.id.navigation_drawer_toggle);
         if (drawerToggle != null)
@@ -370,7 +344,6 @@ public class MapsActivity extends AppCompatActivity
          * Navigation drawer
          */
         setUpNavigationDrawer();
-
 
         myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
         ViewCompat.setElevation(myLocationButton, getResources().getDimension(R.dimen.elevation));
@@ -422,10 +395,6 @@ public class MapsActivity extends AppCompatActivity
         cardDetailsContainer = (CardView) findViewById(R.id.card_details_container);
         cardDetailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-
-        // Facebook callback registration
-        mFacebookCallbackManager = CallbackManager.Factory.create();
-
         noCarsButton = (Button) findViewById(R.id.no_cars_button);
         noCarsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -436,29 +405,66 @@ public class MapsActivity extends AppCompatActivity
 
         checkLocationPermission();
 
-
         adView = (ViewGroup) findViewById(R.id.ad_container);
 
-        // TODO: remove
-        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
-            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-            PreferencesUtil.setAdsRemoved(this, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Trace.endSection();
         }
-
-        Log.d("App speed", "On create init time : " + (System.currentTimeMillis() - initTime));
 
     }
 
+    public void goToLogin() {
+        if (!isFinishing()) {
 
-    private void setUpAd() {
+            if (!mSkippedLogin)
+                carDatabase.clearCars();
+
+            AuthUtils.setSkippedLogin(this, false);
+
+            clearAccounts();
+            Log.d(TAG, "goToLogin");
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        }
+    }
+
+    private void clearAccounts() {
+        for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
+            mAccountManager.removeAccount(account, null, null);
+    }
+
+
+    private void setUpAdIfNeeded() {
+
+        adView.setVisibility(View.GONE);
 
         if (PreferencesUtil.isAdsRemoved(this)) return;
 
         if (carDatabase.isEmptyOfCars()) return;
 
-        adView.setVisibility(View.GONE);
+        if (PreferencesUtil.isPurchasesCheked(this)) {
+            setUpAd();
+        } else {
 
-        AsyncTask<Void, Void, Boolean> setUpAdAsyncTask = new AsyncTask<Void, Void, Boolean>() {
+            /**
+             * Bind service used for donations
+             */
+            final BillingFragment billingFragment = initBillingFragment();
+            if (billingFragment.isBillingServiceReady()) {
+                checkforPurchases(billingFragment);
+            }
+        }
+    }
+
+    @Override
+    public void onBillingReady(BillingFragment billingFragment) {
+        checkforPurchases(billingFragment);
+    }
+
+    private void checkforPurchases(final BillingFragment billingFragment) {
+        new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
                 /**
@@ -472,7 +478,7 @@ public class MapsActivity extends AppCompatActivity
                     Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
                     displayAd = purchaseDataList.isEmpty();
                 }
-
+                PreferencesUtil.setPurchasesCheked(MapsActivity.this, true);
                 return displayAd;
             }
 
@@ -481,15 +487,29 @@ public class MapsActivity extends AppCompatActivity
                 Log.d(TAG, "Display ads returned " + displayAd);
 
                 if (displayAd) {
-                    nativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
-                    nativeAd.setAdListener(MapsActivity.this);
-                    nativeAd.loadAd();
+                    setUpAd();
+                } else {
+                    PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
                 }
 
             }
-        };
-        setUpAdAsyncTask.execute();
+        }.execute();
+    }
 
+    private void setUpAd() {
+
+        newPurchaseReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                adView.setVisibility(View.GONE);
+            }
+        };
+        registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
+
+        Log.d(TAG, "setUpAd");
+        nativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
+        nativeAd.setAdListener(MapsActivity.this);
+        nativeAd.loadAd();
     }
 
 
@@ -519,29 +539,7 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onResponse(Bitmap response) {
                     nativeAdIcon.setImageBitmap(response);
-
-                    adView.setVisibility(View.VISIBLE);
-
-                    nativeAd.unregisterView();
-
-                    // Setting the Text.
-                    nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
-                    nativeAdTitle.setText(nativeAd.getAdTitle());
-                    nativeAdBody.setText(nativeAd.getAdBody());
-
-                    nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
-
-                    // Add adChoices icon
-                    if (adChoicesView == null) {
-                        adChoicesView = new AdChoicesView(MapsActivity.this, nativeAd, true);
-                        adChoicesView.setGravity(Gravity.TOP | Gravity.END);
-                        adChoicesWrap.addView(adChoicesView);
-                    }
-
-                    View adContainer = adView.findViewById(R.id.ad_container);
-                    nativeAd.registerViewForInteraction(adContainer);
-
-                    setMapPadding();
+                    bindAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
 
                 }
             }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
@@ -549,12 +547,37 @@ public class MapsActivity extends AppCompatActivity
             Cache.Entry entry = new Cache.Entry();
             entry.ttl = 24 * 60 * 60 * 1000;
             adPicture.setCacheEntry(entry);
-
             requestQueue.add(adPicture);
         } else {
             Log.w(TAG, "adview without adIcon");
+            bindAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
         }
 
+    }
+
+    public void bindAdView(Button nativeAdCallToAction, TextView nativeAdTitle, TextView nativeAdBody, ViewGroup adChoicesWrap) {
+        adView.setVisibility(View.VISIBLE);
+
+        nativeAd.unregisterView();
+
+        // Setting the Text.
+        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
+        nativeAdTitle.setText(nativeAd.getAdTitle());
+        nativeAdBody.setText(nativeAd.getAdBody());
+
+        nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+
+        // Add adChoices icon
+        if (adChoicesView == null) {
+            adChoicesView = new AdChoicesView(MapsActivity.this, nativeAd, true);
+            adChoicesView.setGravity(Gravity.TOP | Gravity.END);
+            adChoicesWrap.addView(adChoicesView);
+        }
+
+        View adContainer = adView.findViewById(R.id.ad_container);
+        nativeAd.registerViewForInteraction(adContainer);
+
+        setMapPadding();
     }
 
     @Override
@@ -576,29 +599,7 @@ public class MapsActivity extends AppCompatActivity
 
         mGoogleApiClient.connect();
 
-        /**
-         * Set up the ad if the billing service is ready
-         */
-        if (billingFragment.isBillingServiceReady()) {
-            setUpAd();
-        }
-        /**
-         * Wait for it otherwise
-         */
-        else {
-            Log.d(TAG, "Waiting for billing service");
-            billingReadyReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    Log.d(TAG, "Billing ready");
-                    setUpAd();
-                }
-            };
-            registerReceiver(billingReadyReceiver, new IntentFilter(Constants.INTENT_BILLING_READY));
-        }
-
-
-        registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
+        setUpAdIfNeeded();
 
         Log.d("App speed", "On start init time : " + (System.currentTimeMillis() - initTime));
 
@@ -683,15 +684,6 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    private void setUpBillingFragment() {
-        Log.d(TAG, "Creating new BillingFragment");
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        billingFragment = BillingFragment.newInstance();
-        billingFragment.setRetainInstance(true);
-        transaction.add(billingFragment, BillingFragment.FRAGMENT_TAG);
-        transaction.commit();
-    }
-
     private void setUpNavigationDrawer() {
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
@@ -732,11 +724,6 @@ public class MapsActivity extends AppCompatActivity
                 mMap.moveCamera(update);
             mapInitialised = true;
         }
-
-        /**
-         * Do everything again
-         */
-        mMap.clear();
 
         for (AbstractMarkerDelegate delegate : delegates) {
             delegate.setMap(mMap);
@@ -803,6 +790,19 @@ public class MapsActivity extends AppCompatActivity
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 REQUEST,
                 this);
+    }
+
+
+    private BillingFragment initBillingFragment() {
+        BillingFragment billingFragment = (BillingFragment) getFragmentManager().findFragmentByTag(BillingFragment.FRAGMENT_TAG);
+        if (billingFragment == null) {
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            billingFragment = BillingFragment.newInstance();
+            billingFragment.setRetainInstance(true);
+            transaction.add(billingFragment, BillingFragment.FRAGMENT_TAG);
+            transaction.commit();
+        }
+        return billingFragment;
     }
 
 
@@ -896,7 +896,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onGlobalLayout() {
                 int adHeight = adView == null ? 0 : adView.getMeasuredHeight();
-                mMap.setPadding(0, statusBarHeight + adHeight, 0, cardDetailsContainer.getMeasuredHeight() + navBarHeight);
+                mMap.setPadding(0, statusBarHeight + adHeight, 0, (detailsDisplayed ? cardDetailsContainer.getMeasuredHeight() : 0) + navBarHeight);
             }
         });
     }
@@ -974,12 +974,10 @@ public class MapsActivity extends AppCompatActivity
 
         if (!detailsDisplayed) return;
 
-        // should the location button be animated toov
+        // should the location button be animated too
         final boolean moveLocationButton = getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE;
 
         detailsDisplayed = false;
-
-        setMapPadding();
 
         AnimationSet animationSet = new AnimationSet(true);
 
@@ -1037,11 +1035,8 @@ public class MapsActivity extends AppCompatActivity
     protected void onStop() {
         unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
-        unregisterReceiver(newPurchaseReceiver);
-
-        if (billingReadyReceiver != null)
-            unregisterReceiver(billingReadyReceiver);
-        billingReadyReceiver = null;
+        if (newPurchaseReceiver != null)
+            unregisterReceiver(newPurchaseReceiver);
         super.onStop();
     }
 
@@ -1075,7 +1070,7 @@ public class MapsActivity extends AppCompatActivity
 
         if (detailsDisplayed) {
             for (AbstractMarkerDelegate delegate : delegates) {
-                delegate.onDetailsClosed();
+                delegate.setActive(false);
                 delegate.setCameraFollowing(false);
             }
 
@@ -1102,8 +1097,8 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    public CallbackManager getFacebookCallbackManager() {
-        return mFacebookCallbackManager;
+    public void setFacebookCallbackManager(CallbackManager facebookCallbackManager) {
+        this.mFacebookCallbackManager = facebookCallbackManager;
     }
 
     @Override
@@ -1198,7 +1193,7 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera.
-     * <p>
+     * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
@@ -1323,7 +1318,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     /**
-     * This is called when the user moves the camera but also when it is triggered programatically.
+     * This is called when the user moves the camera but also when it is triggered programmatically.
      *
      * @param cameraPosition
      */
@@ -1376,9 +1371,14 @@ public class MapsActivity extends AppCompatActivity
      * @param fragment
      */
     @Override
-    public void setDetailsFragment(DetailsFragment fragment) {
+    public void setDetailsFragment(AbstractMarkerDelegate caller, DetailsFragment fragment) {
 
         if (isFinishing()) return;
+
+        for (AbstractMarkerDelegate delegate : delegates) {
+            if (delegate != caller)
+                delegate.setActive(false);
+        }
 
         FragmentTransaction fragTransaction = getFragmentManager().beginTransaction();
 
@@ -1563,9 +1563,5 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onCarSelected(Car car) {
 
-    }
-
-    @Override
-    public void onBillingReady() {
     }
 }

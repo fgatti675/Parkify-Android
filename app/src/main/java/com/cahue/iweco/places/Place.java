@@ -1,6 +1,8 @@
 package com.cahue.iweco.places;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -11,7 +13,22 @@ import org.json.JSONObject;
 /**
  * Created by f.gatti.gomez on 31/07/16.
  */
-public class Place {
+public class Place  implements Parcelable{
+
+    public static final Parcelable.Creator<Place> CREATOR =
+            new Parcelable.Creator<Place>() {
+                @NonNull
+                @Override
+                public Place createFromParcel(@NonNull Parcel parcel) {
+                    return new Place(parcel);
+                }
+
+                @NonNull
+                @Override
+                public Place[] newArray(int size) {
+                    return new Place[size];
+                }
+            };
 
     String id;
 
@@ -28,6 +45,13 @@ public class Place {
         this.location = location;
         this.name = name;
         this.address = address;
+    }
+
+    public Place(Parcel parcel) {
+        id = parcel.readString();
+        location = parcel.readParcelable(Location.class.getClassLoader());
+        name = parcel.readString();
+        address = parcel.readString();
     }
 
     @NonNull
@@ -71,5 +95,18 @@ public class Place {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeParcelable(location, i);
+        parcel.writeString(name);
+        parcel.writeString(address);
     }
 }

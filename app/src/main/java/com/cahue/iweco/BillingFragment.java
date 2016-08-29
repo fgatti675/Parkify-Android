@@ -32,13 +32,20 @@ import java.util.UUID;
 public class BillingFragment extends Fragment {
 
     public static final String FRAGMENT_TAG = "BILLING_DELEGATE";
-    static final int REQUEST_ON_PURCHASE = 1001;
+
+    public static final int REQUEST_ON_PURCHASE = 1001;
+
     private static final String TAG = BillingFragment.class.getSimpleName();
+
     private static final String PRODUCT_DONATION_1_ADMINISTERED = "donate_1_administered";
     private static final String PRODUCT_DONATION_2_ADMINISTERED = "donate_2_administered";
     private static final String PRODUCT_DONATION_5_ADMINISTERED = "donate_5_administered";
+
     private IInAppBillingService iInAppBillingService;
+
+    @Nullable
     private OnBillingReadyListener onBillingReadyListener;
+
     private final ServiceConnection mBillingServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -54,7 +61,7 @@ public class BillingFragment extends Fragment {
              */
             if (getActivity() != null) {
                 getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
-                onBillingReadyListener.onBillingReady();
+                onBillingReadyListener.onBillingReady(BillingFragment.this);
             }
         }
     };
@@ -81,12 +88,8 @@ public class BillingFragment extends Fragment {
         serviceIntent.setPackage("com.android.vending");
         getActivity().bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
 
-        try {
+        if (activity instanceof OnBillingReadyListener)
             this.onBillingReadyListener = (OnBillingReadyListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.getClass().getName()
-                    + " must implement " + OnBillingReadyListener.class.getName());
-        }
     }
 
     @Override
@@ -106,6 +109,7 @@ public class BillingFragment extends Fragment {
 
     @Nullable
     public Bundle queryAvailableItems() {
+
 
         Log.d(TAG, "Querying products");
 
@@ -207,6 +211,6 @@ public class BillingFragment extends Fragment {
     }
 
     public interface OnBillingReadyListener {
-        void onBillingReady();
+        void onBillingReady(BillingFragment billingFragment);
     }
 }

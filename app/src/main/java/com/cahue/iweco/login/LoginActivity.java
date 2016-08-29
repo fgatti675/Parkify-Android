@@ -25,7 +25,6 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.tutorial.TutorialActivity;
-import com.cahue.iweco.util.AppturboUnlockTools;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
@@ -179,13 +178,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 onLoginSkipped();
             }
         });
-
-        // TODO: remove
-        if (AppturboUnlockTools.isAppturboUnlockable(this)) {
-            findViewById(R.id.app_turbo_ads_free).setVisibility(View.VISIBLE);
-            sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
-            PreferencesUtil.setAdsRemoved(this, true);
-        }
 
     }
 

@@ -21,7 +21,6 @@
         android:id="@+id/info_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_weight="1"
         android:orientation="vertical">
 

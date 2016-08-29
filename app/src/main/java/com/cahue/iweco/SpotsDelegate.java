@@ -50,7 +50,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    private final static float MAX_ZOOM = 4F;
+    private final static float MAX_ZOOM = 10F;
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     private static final String TAG = "SpotsDelegate";
@@ -67,17 +67,16 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     private static final float MAX_DIRECTIONS_DISTANCE = 40000; // 40 km
 
-    private int displayedMarkers;
     private Set<ParkingSpot> spots;
 
     private Map<ParkingSpot, Marker> spotMarkersMap;
-    private Map<Marker, ParkingSpot> markerSpotsMap;
 
     @Nullable
     private Marker selectedMarker;
 
     // In the next spots update, clear the previous state
     private boolean resetOnNextUpdate = false;
+
     private List<LatLngBounds> queriedBounds;
 
     private LatLngBounds viewBounds;
@@ -88,15 +87,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     private boolean following = false;
 
-    // location used as a center fos nearby spots query
-//    private LatLng userQueryLocation;
-//    private ParkingSpotsQuery nearbyQuery;
-
-//    private Date lastNearbyQuery;
     /**
      * If markers shouldn't be displayed (like zoom is too far)
      */
-    private boolean markersDisplayed = false;
+    private boolean areMarkersDisplayed = false;
 
     @Nullable
     private ParkingSpot selectedSpot;
@@ -107,6 +101,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * Directions delegate
      */
     private DirectionsDelegate directionsDelegate;
+
+    private List<Marker> displayedMarker = new ArrayList<>();
 
     @NonNull
     public static SpotsDelegate newInstance() {
@@ -129,7 +125,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         lastResetTaskRequestTime = new Date();
 
         spotMarkersMap = new HashMap<>(MARKERS_LIMIT);
-        markerSpotsMap = new HashMap<>(MARKERS_LIMIT);
 
         maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
 
@@ -139,11 +134,15 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     @Override
     public void onResume() {
         super.onResume();
-
-        Log.d(TAG, "onResume");
         setUpResetTask();
-        if (isMapReady())
-            doDraw();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        Log.d(TAG, "onMapReady");
+        directionsDelegate.setMap(map);
+        reset(false);
+        doDraw();
     }
 
     public void setUpResetTask() {
@@ -179,12 +178,11 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
     private void reset(boolean clearSpots) {
         Log.d(TAG, "Reset: " + clearSpots);
-        for (Marker marker : markerSpotsMap.keySet()) {
+        for (Marker marker : spotMarkersMap.values()) {
             marker.remove();
         }
         queriedBounds.clear();
         if (clearSpots) spots.clear();
-        markerSpotsMap.clear();
         spotMarkersMap.clear();
     }
 
@@ -264,9 +262,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         Set<ParkingSpot> parkingSpots = result.spots;
 
-//        if (query == nearbyQuery)
-//            lastNearbyQuery = new Date();
-
         if (resetOnNextUpdate) {
             reset(true);
             resetOnNextUpdate = false;
@@ -308,7 +303,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         setUpViewBounds();
 
-        if (!markersDisplayed) {
+        if (!areMarkersDisplayed) {
             Log.v(TAG, "Abort drawing spots. Markers are hidden");
             return;
         }
@@ -318,7 +313,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             drawSelectedMarker();
         }
 
-        displayedMarkers = 0;
+        int displayedMarkers = 0;
 
         for (final ParkingSpot parkingSpot : spots) {
 
@@ -337,8 +332,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             if (marker == null) {
                 marker = getMap().addMarker(MarkerFactory.getSpotMarker(parkingSpot, getActivity()));
                 marker.setVisible(false);
-                spotMarkersMap.put(parkingSpot, marker);
-                markerSpotsMap.put(marker, parkingSpot);
                 if (viewBounds.contains(spotPosition)) {
                     revealMarker(marker);
                     displayedMarkers++;
@@ -356,9 +349,12 @@ public class SpotsDelegate extends AbstractMarkerDelegate
                 }
             }
 
+            spotMarkersMap.put(parkingSpot, marker);
+            marker.setTag(parkingSpot);
 
         }
     }
+
 
     private void updateMarker(@NonNull ParkingSpot parkingSpot, @NonNull Marker marker) {
         MarkerOptions markerOptions = MarkerFactory.getSpotMarker(parkingSpot, getActivity());
@@ -366,7 +362,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
     private void drawDirections() {
-        if (selectedSpot != null) {
+        if (selectedSpot != null && isActive) {
 
             LatLng userLatLng = getUserLatLng();
             updateTooFar(selectedSpot.getLatLng(), userLatLng);
@@ -379,26 +375,32 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         }
     }
 
-
     @Override
     public boolean onMarkerClick(Marker marker) {
 
         clearSelectedSpot();
 
-        // apply new style and tell listener
-        selectedSpot = markerSpotsMap.get(marker);
+        Object object = marker.getTag();
+        if (object instanceof ParkingSpot) {
 
-        if (selectedSpot != null) {
+            isActive = true;
+
+            // apply new style and tell listener
+            selectedSpot = (ParkingSpot) object;
+
             drawSelectedMarker();
             drawDirections();
 
-            detailsViewManager.setDetailsFragment(SpotDetailsFragment.newInstance(selectedSpot, userLocation));
+            detailsViewManager.setDetailsFragment(this, SpotDetailsFragment.newInstance(selectedSpot, userLocation));
 
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_FREE_SPOT_SELECTED);
+
             return true;
+        } else {
+            selectedSpot = null;
+            return false;
         }
 
-        return false;
     }
 
     private void drawSelectedMarker() {
@@ -411,7 +413,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         if (selectedSpot != null) {
             Marker spotMarker = spotMarkersMap.get(selectedSpot);
-            if(spotMarker != null) spotMarker.remove();
+            if (spotMarker != null) spotMarker.remove();
             selectedMarker = getMap().addMarker(MarkerFactory.getSelectedMarker(getActivity(), selectedSpot.getLatLng()));
 
             spotMarker = getMap().addMarker(MarkerFactory.getSpotMarker(selectedSpot, getActivity()));
@@ -427,26 +429,20 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
 
     @Override
-    public void onMapReady(GoogleMap map) {
-        Log.d(TAG, "onMapReady");
-        directionsDelegate.setMap(map);
-        directionsDelegate.setColor(getResources().getColor(R.color.theme_accent));
-        reset(false);
-        doDraw();
-    }
-
-
-    @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
         Log.v(TAG, "scheduledResetTask canceled");
-        scheduledResetTask.cancel(true);
+//        scheduledResetTask.cancel(true);
     }
 
     @Override
-    public void onDetailsClosed() {
-        clearSelectedSpot();
+    protected void onActiveStatusChanged(boolean active) {
+        if (active) {
+            drawDirections();
+        } else {
+            clearSelectedSpot();
+        }
     }
 
     private void revealMarker(@NonNull final Marker marker) {
@@ -474,7 +470,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     }
 
 
-
     @Override
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
 
@@ -491,14 +486,14 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
             queryCameraView();
 
-            markersDisplayed = true;
+            areMarkersDisplayed = true;
         }
         /**
          * Too far
          */
         else {
             Log.d(TAG, "Too far to query locations");
-            markersDisplayed = false;
+            areMarkersDisplayed = false;
         }
 
         doDraw();

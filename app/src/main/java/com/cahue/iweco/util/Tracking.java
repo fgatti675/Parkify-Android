@@ -41,6 +41,8 @@ public class Tracking {
 
     public static final String ACTION_FREE_SPOT_SELECTED = "Spot selected";
 
+    public static final String ACTION_PARKING_SELECTED = "Parking selected";
+
     public static final String ACTION_CAR_EDIT = "Car edited";
 
     public static final String ACTION_AD_CLICKED = "Ad clicked";

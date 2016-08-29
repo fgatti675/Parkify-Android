@@ -72,12 +72,11 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    protected void onMapReady(GoogleMap mMap) {
-        super.onMapReady(mMap);
+    protected void onMapReady(GoogleMap map) {
+        super.onMapReady(map);
         doDraw();
     }
 
-    @Override
     public void doDraw() {
 
         if (!isMapReady() || !isResumed()) return;
@@ -150,8 +149,9 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     public void activate() {
+        isActive = true;
         centerCameraOnMarker();
-        detailsViewManager.setDetailsFragment(PossibleSetCarDetailsFragment.newInstance(spot, getTag()));
+        detailsViewManager.setDetailsFragment(this, PossibleSetCarDetailsFragment.newInstance(spot, getTag()));
         setCameraFollowing(true);
     }
 

@@ -16,6 +16,7 @@ import android.util.Log;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
+import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.share.model.AppInviteContent;
@@ -28,6 +29,10 @@ public class FacebookAppInvitesDialog extends DialogFragment {
 
     public static void showAppInviteDialog(@NonNull final MapsActivity activity) {
 
+        // Facebook callback registration
+        CallbackManager mFacebookCallbackManager = CallbackManager.Factory.create();
+        activity.setFacebookCallbackManager(mFacebookCallbackManager);
+
         AppInviteDialog appInviteDialog = new AppInviteDialog(activity);
 
         String appLinkUrl = activity.getString(R.string.facebook_app_link);
@@ -36,7 +41,7 @@ public class FacebookAppInvitesDialog extends DialogFragment {
                 .setApplinkUrl(appLinkUrl)
                 .build();
 
-        appInviteDialog.registerCallback(activity.getFacebookCallbackManager(),
+        appInviteDialog.registerCallback(mFacebookCallbackManager,
                 new FacebookCallback<AppInviteDialog.Result>() {
                     @Override
                     public void onSuccess(@NonNull AppInviteDialog.Result result) {
@@ -65,6 +70,8 @@ public class FacebookAppInvitesDialog extends DialogFragment {
 
         appInviteDialog.show(appInviteContent);
     }
+
+
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

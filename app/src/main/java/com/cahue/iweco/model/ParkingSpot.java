@@ -50,11 +50,7 @@ public class ParkingSpot implements Parcelable {
     private LatLng latLng;
 
     public ParkingSpot(@NonNull Parcel parcel) {
-
-        Long parcelid = parcel.readLong();
-        if (parcelid == -1) parcelid = null;
-
-        id = parcelid;
+        id = parcel.readLong();
         location = parcel.readParcelable(Location.class.getClassLoader());
         address = parcel.readString();
         time = (Date) parcel.readSerializable();

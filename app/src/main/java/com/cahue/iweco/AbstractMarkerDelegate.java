@@ -3,7 +3,6 @@ package com.cahue.iweco;
 import android.app.Fragment;
 import android.content.Context;
 import android.location.Location;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -18,6 +17,8 @@ import com.google.android.gms.maps.model.Marker;
  */
 public abstract class AbstractMarkerDelegate extends Fragment implements CameraUpdateRequester, LocationListener {
 
+    protected boolean isActive = false;
+
     protected Location userLocation;
 
     @NonNull
@@ -31,8 +32,6 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     @Nullable
     private GoogleMap mMap;
-
-    public abstract void doDraw();
 
     @Override
     public void onAttach(@NonNull Context activity) {
@@ -53,12 +52,18 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
         }
     }
 
-
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onStart() {
+        super.onStart();
         delegateManager.registerCameraUpdateRequester(this);
         delegateManager.registerDelegate(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        delegateManager.unregisterCameraUpdateRequester(this);
+        delegateManager.unregisterDelegate(this);
     }
 
     @Override
@@ -71,24 +76,15 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     @Override
     public void onDestroy() {
         super.onDestroy();
-        delegateManager.unregisterCameraUpdateRequester(this);
-        delegateManager.unregisterDelegate(this);
         mMap = null;
     }
 
     /**
      * Called when the map is ready to be used
      *
-     * @param mMap
+     * @param map
      */
-    protected void onMapReady(GoogleMap mMap) {
-
-    }
-
-    /**
-     * Called when the details view is closed
-     */
-    public void onDetailsClosed() {
+    protected void onMapReady(GoogleMap map) {
 
     }
 
@@ -158,5 +154,14 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
 
     protected LatLngBounds getViewPortBounds() {
         return getMap().getProjection().getVisibleRegion().latLngBounds;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+        onActiveStatusChanged(active);
+    }
+
+    protected void onActiveStatusChanged(boolean active) {
+
     }
 }

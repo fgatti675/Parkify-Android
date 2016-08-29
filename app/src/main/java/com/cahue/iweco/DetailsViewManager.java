@@ -7,7 +7,7 @@ public interface DetailsViewManager {
 
     DetailsFragment getDetailsFragment();
 
-    void setDetailsFragment(DetailsFragment fragment);
+    void setDetailsFragment(AbstractMarkerDelegate caller, DetailsFragment fragment);
 
     void hideDetails();
 

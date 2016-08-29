@@ -46,6 +46,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     private Integer markerColor;
     private int lightColor;
+
     /**
      * Map components
      */
@@ -111,7 +112,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         setUpColors();
 
-        directionsDelegate.setColor(lightColor);
+        directionsDelegate.setColor(markerColor);
         if (resetDirections)
             directionsDelegate.hide(true);
 
@@ -131,7 +132,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         clear();
         drawCar();
-        drawDirections();
 
         updateCameraIfFollowing();
     }
@@ -217,6 +217,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
 
     private void drawDirections() {
+        if (!isActive) return;
 
         final LatLng carPosition = getCarLatLng();
         final LatLng userPosition = getUserLatLng();
@@ -241,8 +242,16 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     @Override
     protected void onUserLocationChanged(Location userLocation) {
-        drawDirections();
         updateCameraIfFollowing();
+    }
+
+    @Override
+    protected void onActiveStatusChanged(boolean active) {
+        if (active) {
+            drawDirections();
+        } else {
+            directionsDelegate.hide(true);
+        }
     }
 
     @Override
@@ -356,8 +365,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     public void activate() {
+        isActive = true;
+        drawDirections();
         setCameraFollowing(true);
-        detailsViewManager.setDetailsFragment(CarDetailsFragment.newInstance(carId));
+        detailsViewManager.setDetailsFragment(this, CarDetailsFragment.newInstance(carId));
     }
 
     public boolean isFollowing() {

@@ -3,6 +3,7 @@ package com.cahue.iweco.places;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -16,8 +17,12 @@ import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.CameraUpdateRequester;
+import com.cahue.iweco.DirectionsDelegate;
 import com.cahue.iweco.ParkifyApp;
+import com.cahue.iweco.R;
 import com.cahue.iweco.spots.MarkerFactory;
+import com.cahue.iweco.util.GMapV2Direction;
+import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -29,8 +34,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -54,7 +62,24 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     private JsonRequest currentUserLocationRequest;
 
     private Set<Place> places = new HashSet<>();
-    private Set<Marker> markers = new HashSet<>();
+    private Set<Marker> displayedMarker = new HashSet<>();
+
+    private Map<Place, Marker> placeMarkerMap = new HashMap<>();
+
+    @Nullable
+    private Marker selectedMarker;
+
+    /**
+     * Directions delegate
+     */
+    private DirectionsDelegate directionsDelegate;
+
+    @Nullable
+    private Place selectedPlace;
+
+
+    private Handler handler = new Handler();
+    private Random random = new Random();
 
     @NonNull
     public static PlacesDelegate newInstance() {
@@ -65,43 +90,164 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        doDraw();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        directionsDelegate = new DirectionsDelegate();
+        directionsDelegate.setColor(getResources().getColor(R.color.theme_primary));
     }
 
     @Override
-    protected void onMapReady(GoogleMap mMap) {
-        super.onMapReady(mMap);
+    protected void onMapReady(GoogleMap map) {
+        super.onMapReady(map);
+        directionsDelegate.setMap(map);
         doDraw();
     }
 
-    @Override
     public void doDraw() {
 
         if (!isMapReady() || !isResumed()) return;
 
-        for (Marker marker : markers) {
-            marker.remove();
-        }
-        markers.clear();
-
-        if (getMap().getCameraPosition().zoom < MAX_ZOOM)
-            return;
+        displayedMarker.clear();
 
         LatLngBounds viewPortBounds = getViewPortBounds();
         for (Place place : places) {
             if (viewPortBounds.contains(place.getLatLng())) {
-                Marker marker = getMap().addMarker(MarkerFactory.getParkingMarker(place, getActivity()));
-                markers.add(marker);
+                Marker marker = placeMarkerMap.get(place);
+                if (marker == null) {
+                    final Marker newMarker = getMap().addMarker(MarkerFactory.getParkingMarker(place, getActivity()));
+                    placeMarkerMap.put(place, newMarker);
+                    newMarker.setTag(place);
+                    newMarker.setAlpha(0);
+                    handler.postDelayed(new Runnable() {
+                        float alpha = 0;
+
+                        @Override
+                        public void run() {
+                            alpha += 0.04;
+                            newMarker.setAlpha(alpha);
+                            if (alpha < 1) {
+                                handler.postDelayed(this, 16);
+                            }
+                        }
+                    }, random.nextInt(300));
+                    marker = newMarker;
+                } else {
+                    marker.setVisible(true);
+                    marker.setAlpha(1);
+                }
+
+                displayedMarker.add(marker);
+
+                if (displayedMarker.size() == MAX_DISPLAYED_MARKERS) break;
             }
-            if (markers.size() == MAX_DISPLAYED_MARKERS) return;
+        }
+
+        if (selectedPlace != null) {
+            drawDirections();
+            drawSelectedMarker();
+        }
+
+    }
+
+    public void fadeOutMarkers() {
+        float zoom = getMap().getCameraPosition().zoom;
+        if (zoom < MAX_ZOOM) {
+            for (final Marker marker : placeMarkerMap.values()) {
+                handler.postDelayed(new Runnable() {
+                    float alpha = 1;
+
+                    @Override
+                    public void run() {
+                        alpha -= 0.05;
+                        marker.setAlpha(alpha);
+                        if (alpha <= 0) {
+                            marker.setVisible(false);
+                        } else {
+                            handler.postDelayed(this, 16);
+                        }
+                    }
+                }, random.nextInt(200));
+            }
+
+            clearSelectedMarker();
+
+            placeMarkerMap.clear();
+
+        } else {
+            handler.removeCallbacks(null);
+        }
+    }
+
+    private void drawDirections() {
+        if (selectedPlace != null && isActive) {
+            LatLng userLatLng = getUserLatLng();
+            if (userLatLng != null)
+                directionsDelegate.drawDirections(userLatLng, selectedPlace.getLatLng(), GMapV2Direction.MODE_DRIVING);
+        }
+    }
+
+
+    private void drawSelectedMarker() {
+
+        if (!isMapReady() || !isResumed()) return;
+
+        for (Marker otherMarkers : placeMarkerMap.values()) {
+            otherMarkers.setZIndex(0);
+        }
+
+        if (selectedMarker != null) {
+            selectedMarker.remove();
+        }
+
+        if (selectedPlace != null) {
+            Marker spotMarker = placeMarkerMap.get(selectedPlace);
+            if (spotMarker == null) {
+                spotMarker = getMap().addMarker(MarkerFactory.getParkingMarker(selectedPlace, getActivity()));
+                placeMarkerMap.put(selectedPlace, spotMarker);
+            }
+            spotMarker.setZIndex(2);
+
+            selectedMarker = getMap().addMarker(MarkerFactory.getSelectedMarker(getActivity(), selectedPlace.getLatLng()));
+            selectedMarker.setZIndex(1);
+
+        }
+    }
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        selectedPlace = null;
+        clearSelectedMarker();
+
+        // apply new style and tell listener
+        Object tag = marker.getTag();
+        if (tag instanceof Place) {
+
+            isActive = true;
+
+            selectedPlace = (Place) tag;
+
+            drawSelectedMarker();
+            drawDirections();
+
+            detailsViewManager.setDetailsFragment(this, PlaceDetailsFragment.newInstance(selectedPlace, userLocation));
+
+            Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_PARKING_SELECTED);
+            return true;
+        } else {
+            return false;
         }
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
+    protected void onActiveStatusChanged(boolean active) {
+        if (active) {
+            drawDirections();
+        } else {
+            selectedPlace = null;
+            clearSelectedMarker();
+        }
     }
 
     @Override
@@ -158,6 +304,21 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
         queue.add(currentUserLocationRequest);
     }
 
+    /**
+     * Clear previously selected spot
+     */
+    private void clearSelectedMarker() {
+
+        Log.d(TAG, "Clearing selected spot");
+
+        // clear previous selection
+        if (selectedMarker != null) {
+            selectedMarker.remove();
+            selectedMarker = null;
+        }
+
+        directionsDelegate.hide(true);
+    }
 
     private void makePlacesViewPortRequest() {
 
@@ -173,7 +334,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
         LatLng viewPortCenter = viewPortBounds.getCenter();
         int displayedMarkers = 0;
 
-        if (markers.size() == MAX_DISPLAYED_MARKERS) {
+        if (displayedMarker.size() == MAX_DISPLAYED_MARKERS) {
             Log.d(TAG, "Too many places in viewport");
             return;
         }
@@ -260,9 +421,10 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
         if (cameraPosition.zoom > MAX_ZOOM) {
             makePlacesViewPortRequest();
+            doDraw();
+        } else {
+            fadeOutMarkers();
         }
-
-        doDraw();
 
     }
 

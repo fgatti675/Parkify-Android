@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "582791978228",
+    "firebase_url": "https://glossy-radio.firebaseio.com",
+    "project_id": "glossy-radio",
+    "storage_bucket": "glossy-radio.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582791978228:android:07c3471843d111d3",
+        "android_client_info": {
+          "package_name": "com.whereismycar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582791978228-9urc7sdr1514ku9g7sgms4d1thm75q8b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whereismycar",
+            "certificate_hash": "6C19A8E5FA2FDD1A467DA725631A3381C12F31C7"
+          }
+        },
+        {
+          "client_id": "582791978228-p4nb6p692t4pan7rdpabuskbqnegcsta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whereismycar",
+            "certificate_hash": "2885A58F6BDDAD656BD4B028632851BF678DEF9A"
+          }
+        },
+        {
+          "client_id": "582791978228-1djp2v9ot1s14c5rmrm70hc19u916g6r.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "582791978228-jtfii2rptcbmnnrm8uvcrv494kvg6479.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "582791978228-pa6ku34g35hqfjnab8l00eso4s6bhij8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBib6gJ2g34aWFN2bzbzE6SdQbButk_pd4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-64088890-2"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

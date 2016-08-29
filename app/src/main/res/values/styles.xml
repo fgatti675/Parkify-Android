@@ -92,7 +92,7 @@
 
     <style name="Marker.Parking">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Marker.Green">

@@ -36,6 +36,7 @@ public class PreferencesUtil {
     public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
 
     public static final String PREF_REMOVE_ADS = "PREF_REMOVE_ADS";
+    public static final String PREF_PURCHASED_CHECKED = "PREF_PURCHASED_CHECKED";
 
 
 
@@ -113,6 +114,16 @@ public class PreferencesUtil {
     public static void setAdsRemoved(Context context, boolean removed) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putBoolean(PREF_REMOVE_ADS, removed).apply();
+    }
+
+    public static boolean isPurchasesCheked(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_PURCHASED_CHECKED, false);
+    }
+
+    public static void setPurchasesCheked(Context context, boolean checked) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_PURCHASED_CHECKED, checked).apply();
     }
 
     public static void clear(Context context) {

@@ -1,0 +1,67 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/car_image"
+        android:layout_width="56dp"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false"
+        android:background="@color/theme_primary"
+        android:gravity="center|top"
+        android:padding="@dimen/large_padding"
+        android:text="P"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/info_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="@dimen/large_padding">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/large_padding"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/body_text_1"
+            tools:text="Parking name" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/address"
+                style="@style/TextAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Lindwurmstr. 143" />
+
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:paddingEnd="@dimen/default_padding"
+                android:paddingLeft="@dimen/default_padding"
+                android:paddingStart="@dimen/default_padding"
+                android:singleLine="true"
+                android:textColor="@color/body_text_2"
+                tools:text="1477.3 km" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

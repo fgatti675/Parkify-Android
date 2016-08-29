@@ -35,7 +35,6 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     ParkingSpot spot;
 
     Marker marker;
-    boolean activated = false;
     private IconGenerator iconGenerator;
 
     @NonNull
@@ -63,15 +62,14 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     }
 
     @Override
-    protected void onMapReady(GoogleMap mMap) {
-        super.onMapReady(mMap);
+    protected void onMapReady(GoogleMap map) {
+        super.onMapReady(map);
         doDraw();
     }
 
-    @Override
     public void doDraw() {
 
-        if (!isMapReady() || !isResumed() || !activated) return;
+        if (!isMapReady() || !isResumed() || !isActive) return;
 
         clearMarker();
 
@@ -85,7 +83,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
 
     private void centerCameraOnMarker() {
 
-        if(spot == null)
+        if (spot == null)
             return;
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
@@ -137,21 +135,23 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     }
 
     @Override
-    public void onDetailsClosed() {
-        deactivate();
+    protected void onActiveStatusChanged(boolean active) {
+        if (!active) {
+            deactivate();
+        }
     }
 
     private void deactivate() {
-        activated = false;
+        isActive = false;
         clearMarker();
         if (isDisplayed())
             detailsViewManager.hideDetails();
     }
 
     public void activate(ParkingSpot spot) {
-        activated = true;
+        isActive = true;
         this.spot = spot;
-        detailsViewManager.setDetailsFragment(LongTapSetCarDetailsFragment.newInstance(spot));
+        detailsViewManager.setDetailsFragment(this, LongTapSetCarDetailsFragment.newInstance(spot));
         doDraw();
     }
 

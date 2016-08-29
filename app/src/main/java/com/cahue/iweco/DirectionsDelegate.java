@@ -73,7 +73,7 @@ public class DirectionsDelegate {
 
         Log.v(TAG, "Drawing directions");
 
-        PolylineOptions rectLine = new PolylineOptions().width(10).color(color);
+        PolylineOptions rectLine = new PolylineOptions().width(15).color(color);
 
         for (int i = 0; i < directionPoints.size(); i++) {
             rectLine.add(directionPoints.get(i));
