@@ -1,5 +1,5 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="analytics_id" translatable="false">UA-64088890-2</string>
+    <string name="analytics_id" translatable="false" tools:ignore="TypographyDashes">UA-64088890-2</string>
 
 </resources>

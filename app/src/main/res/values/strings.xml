@@ -66,26 +66,19 @@
 
     <string name="and_remove_ads">And remove ads!</string>
 
-    <string name="install">Install</string>
-    <string name="uninstall_WIMC">After installing Parkify you don\'t need Where is my Car? anymore. Would you like to uninstall?</string>
-    <string name="uninstall">Uninstall</string>
-    <string name="parkify_promo">Check now Parkify! Not only it will tell you where you parked, also where there are available parking spots! ;)</string>
-    <string name="new_app" >New app!</string>
-
-
     <string name="rating_message">You would really help us if you gave us a good rating in the Play Store :)</string>
     <string name="like_question" >Do you like this app?</string>
     <string name="rate">Rate</string>
 
     <string name="share">Invite your friends</string>
-    <string name="share_promo">Invite at least 5 Facebook friends and get rid of the ads! :)</string>
+    <string name="share_promo">Invite at least 3 Facebook friends and get rid of ads! :)</string>
 
     <string name="ask_just_parked">Did you just park?</string>
     <string name="free_spot">Available parking spot</string>
     <string name="long_click_instructions">Long click to set your car\'s position. Next time it will be automatic!</string>
-    <string name="ad_free_appturbo">Ad free version thanks to App of the Day!</string>
     <string name="thanks_free_spot">You just left a free parking spot that everyone can see in Parkify! Thanks! :)</string>
     <string name="car_location_registered">\"%s\" location registered at Parkify!</string>
 
+    <string name="public_parking">Public parking</string>
 
 </resources>

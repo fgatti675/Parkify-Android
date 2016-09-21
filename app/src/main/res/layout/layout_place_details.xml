@@ -31,10 +31,18 @@
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/large_padding"
+            android:paddingBottom="@dimen/default_padding"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/body_text_1"
             tools:text="Parking name" />
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/large_padding"
+            android:text="@string/public_parking"
+            android:textColor="@color/theme_primary"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -45,7 +53,8 @@
                 style="@style/TextAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="Lindwurmstr. 143" />
+                android:layout_toLeftOf="@+id/distance"
+                tools:text="Lindwurmstr. 143"/>
 
             <TextView
                 android:id="@+id/distance"

@@ -92,6 +92,7 @@
 
     <style name="Marker.Parking">
         <item name="android:textStyle">bold</item>
+        <item name="android:paddingLeft">1dp</item>
         <item name="android:textSize">14sp</item>
     </style>
 

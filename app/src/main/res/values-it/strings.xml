@@ -63,18 +63,12 @@
     <string name="add_car_instructions">Se lo fai, saprai sempre dov\'è parcheggiata!</string>
     <string name="add">Aggiungi</string>
 
-    <string name="install">Installare</string>
-    <string name="uninstall_WIMC">Se Parkify è installato non è più necessaria Where is my car?. Disinstallare?</string>
-    <string name="uninstall">Disinstallare</string>
-    <string name="parkify_promo">Prova adesso Parkify! Ti dirà pure dove trovare parcheggio!</string>
-    <string name="new_app" >Nuova app!</string>
-
     <string name="rating_message">Una buona review su Play Store ci fa molto bene :)</string>
     <string name="like_question" >Ti piace questa app?</string>
     <string name="rate">Valutare</string>
 
     <string name="share">Invita i tuoi amici</string>
-    <string name="share_promo">Invita al meno 5 amici e toggli via la pubblicità</string>
+    <string name="share_promo">Invita al meno 3 amici e toggli via la pubblicità</string>
     <string name="ask_just_parked">Hai appena parcheggiato?</string>
     <string name="free_spot">Posto libero</string>
     <string name="long_click_instructions">Click lungo per impostare la posizione della macchina!</string>
@@ -84,8 +78,8 @@
     <string name="clear">Elimina</string>
 
     <string name="and_remove_ads">E toggli la pubblicitá!</string>
-    <string name="ad_free_appturbo">Senza pubblicità grazie a App of the Day!</string>
     <string name="thanks_free_spot">Hai lasciato un posto libero che tutti possono vedere. Grazie! :)</string>
     <string name="car_location_registered">Posizzione di \"%s\" registrata su Parkify!</string>
+    <string name="public_parking">Parcheggio pubblico</string>
 
 </resources>
