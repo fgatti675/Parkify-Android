@@ -51,7 +51,7 @@
     <string name="login_error">Errore</string>
     <string name="sync_error">Errore durante la sincronizzazione</string>
 
-    <string name="aboutToLeave">Libero fra poco!</string>
+    <string name="about_to_leave">Libero fra poco!</string>
     <string name="check_internet">Controllare la connessione a Internet</string>
 
     <string name="navigation_drawer_open">Apri menu</string>
@@ -71,6 +71,7 @@
     <string name="share_promo">Invita al meno 3 amici e toggli via la pubblicità</string>
     <string name="ask_just_parked">Hai appena parcheggiato?</string>
     <string name="free_spot">Posto libero</string>
+    <string name="free_spot_info">Qualcuno ha appena lasciato un posto libero</string>
     <string name="long_click_instructions">Click lungo per impostare la posizione della macchina!</string>
     <string name="permission_error">Permesso necessario!</string>
     <string name="based_on_activity_recognition">Sembra che sei sceso da un veicolo qui, basato sul motion recognition</string>
@@ -81,5 +82,6 @@
     <string name="thanks_free_spot">Hai lasciato un posto libero che tutti possono vedere. Grazie! :)</string>
     <string name="car_location_registered">Posizzione di \"%s\" registrata su Parkify!</string>
     <string name="public_parking">Parcheggio pubblico</string>
+    <string name="about_to_leave_info"> Qualcuno sta camminando verso la sua auto</string>
 
 </resources>

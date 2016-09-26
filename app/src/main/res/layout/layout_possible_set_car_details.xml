@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@color/white"
     android:orientation="horizontal">
 
     <ImageView
@@ -15,7 +15,7 @@
         android:cropToPadding="false"
         android:padding="@dimen/large_padding"
         android:scaleType="fitStart"
-        android:src="@drawable/car_interrogation_24" />
+        android:src="@drawable/car_interrogation_24" />F
 
 
     <LinearLayout
@@ -43,7 +43,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/default_padding"
             android:paddingLeft="@dimen/large_padding"
             android:paddingRight="@dimen/large_padding">
 
@@ -86,21 +85,27 @@
                 android:layout_height="wrap_content"
                 tools:text="Lindwurmstr. 143" />
 
-            <GridView
-                android:id="@+id/car_buttons"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:horizontalSpacing="10dp"
-                android:paddingTop="@dimen/default_padding"
-                android:stretchMode="columnWidth"
-                android:verticalSpacing="10dp"
-                tools:listitem="@layout/button_car"
-                tools:numColumns="3"
-                tools:rowCount="2" />
-
-
         </LinearLayout>
+
+        <GridView
+            android:id="@+id/car_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/large_padding"
+            android:background="@color/light_grey"
+            android:gravity="center"
+            android:horizontalSpacing="8dp"
+            android:numColumns="auto_fit"
+            android:paddingBottom="@dimen/default_padding"
+            android:paddingLeft="@dimen/large_padding"
+            android:paddingRight="@dimen/large_padding"
+            android:paddingTop="@dimen/default_padding"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="8dp"
+            tools:listitem="@layout/button_car"
+            tools:numColumns="3"
+            tools:rowCount="2" />
+
     </LinearLayout>
 
 </LinearLayout>

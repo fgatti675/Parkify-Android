@@ -40,14 +40,14 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
                     android:contentDescription="@string/navigation_drawer_open"
-                    android:elevation="@dimen/elevation_small"
+                    android:elevation="@dimen/elevation"
                     android:padding="@dimen/large_padding"
                     android:src="@drawable/ic_menu_24dp" />
 
                 <include
                     layout="@layout/native_app_maps_install_ad_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="56dp"
                     android:layout_marginLeft="@dimen/small_padding"
                     android:layout_toRightOf="@id/navigation_drawer_toggle" />
 
@@ -88,6 +88,7 @@
                     android:layout_marginRight="@dimen/default_padding"
                     android:visibility="invisible"
                     app:cardCornerRadius="@dimen/cardCornerRadius"
+                    app:cardElevation="@dimen/elevation"
                     tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
 
                 <android.support.design.widget.FloatingActionButton

@@ -41,7 +41,7 @@ import com.google.android.gms.location.DetectedActivity;
  */
 public class DetectedActivitiesIntentService extends IntentService {
 
-    protected static final String TAG = DetectedActivitiesIntentService.class.getSimpleName();
+    private static final String TAG = "Activity recognition";
 
     private static final String PREF_PREVIOUS_ACTIVITY_TYPE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
     private static final String PREF_PREVIOUS_ACTIVITY_CONFIDENCE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
@@ -74,6 +74,7 @@ public class DetectedActivitiesIntentService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.v(TAG, "Activity recognition intent");
 
         if (ActivityRecognitionResult.hasResult(intent)) {
 
@@ -115,7 +116,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
 
             if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                    && mostProbableActivity.getConfidence() == 100) {
+//                    && mostProbableActivity.getConfidence() > 90
+                    ) {
 
                 if (BuildConfig.DEBUG) {
                     showDebugNotification(result, mostProbableActivity);

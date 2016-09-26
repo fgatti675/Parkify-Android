@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +40,6 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
     private CarDatabase carDatabase;
 
     private TextView distanceView;
-    private TextView timeAgoView;
     private TextView addressView;
 
     private Location userLocation;
@@ -88,10 +86,6 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_long_tap_set_car_details, container, false);
         if (spot != null) {
-
-            // Set time ago
-            timeAgoView = (TextView) view.findViewById(R.id.time);
-            updateTimeAgo();
 
             // Update distance
             distanceView = (TextView) view.findViewById(R.id.distance);
@@ -140,10 +134,6 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
                 distanceView.setText(String.format("%.1f km", distanceM / 1000));
             }
         }
-    }
-
-    private void updateTimeAgo() {
-        timeAgoView.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
     }
 
     private void updateAddress() {

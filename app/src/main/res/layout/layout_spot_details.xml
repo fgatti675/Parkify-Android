@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@color/white"
     android:orientation="horizontal">
 
     <ImageView
@@ -37,8 +37,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/free_spot"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/body_text_1"
-                tools:text="Free parking spot" />
+                android:textColor="@color/body_text_1" />
 
         </android.support.v7.widget.Toolbar>
 
@@ -49,19 +48,28 @@
             android:paddingBottom="@dimen/large_padding"
             android:paddingLeft="@dimen/large_padding"
             android:paddingRight="@dimen/large_padding">
-        <TextView
-            android:id="@+id/time"
-            style="@style/TextTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="12 minutes ago" />
 
-        <TextView
-            android:id="@+id/distance_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/body_text_2"
-            tools:text="1.3 km" />
+            <TextView
+                android:id="@+id/spot_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/default_padding"
+                android:text="@string/free_spot_info"
+                android:textColor="@color/theme_primary" />
+
+            <TextView
+                android:id="@+id/time"
+                style="@style/TextTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="12 minutes ago" />
+
+            <TextView
+                android:id="@+id/distance_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/body_text_2"
+                tools:text="1.3 km" />
 
         </LinearLayout>
     </LinearLayout>

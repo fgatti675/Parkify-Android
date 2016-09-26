@@ -101,6 +101,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
@@ -431,6 +432,9 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void clearAccounts() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
             mAccountManager.removeAccount(account, null, null);
     }
@@ -530,6 +534,7 @@ public class MapsActivity extends AppCompatActivity
         final ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
         final TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
         final TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
+        nativeAdBody.setSelected(true);
         final Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
         final ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
 
@@ -710,6 +715,8 @@ public class MapsActivity extends AppCompatActivity
         Log.d(TAG, "onMapReady");
 
         mMap = googleMap;
+
+        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
 
         setUpMapUserLocation();
         setUpMap();

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Delegate in charge of querying and drawing parking spots in the map.
- * <p/>
+ * <p>
  * Created by Francesco on 21/10/2014.
  */
 public class SpotsDelegate extends AbstractMarkerDelegate
@@ -370,8 +370,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             // don't set if they are too far
             if (isTooFar()) return;
 
-            if (userLatLng != null)
+            if (userLatLng != null) {
+                directionsDelegate.setColor(getResources().getColor(selectedSpot.getMarkerType().colorId));
                 directionsDelegate.drawDirections(userLatLng, selectedSpot.getLatLng(), GMapV2Direction.MODE_DRIVING);
+            }
         }
     }
 
@@ -559,9 +561,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * This method zooms to see both user and the car.
      */
     private boolean zoomToSeeBoth() {
-
-        if (delegateManager == null)
-            return false;
 
         if (!isAdded()) return false;
 

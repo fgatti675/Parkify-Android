@@ -51,7 +51,7 @@
                     <include
                         layout="@layout/native_app_maps_install_ad_view"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="48dp"
                         android:layout_alignParentRight="true"
                         android:layout_marginBottom="@dimen/default_padding"
                         android:layout_marginLeft="@dimen/small_padding"

@@ -51,7 +51,8 @@
     <string name="login_error">Login error</string>
     <string name="permission_error">Permission needed!</string>
     <string name="sync_error">Error synchronizing</string>
-    <string name="aboutToLeave">About to be free!</string>
+    <string name="about_to_leave">About to be free!</string>
+    <string name="about_to_leave_info">Someone is walking towards their car</string>
     <string name="check_internet">Check internet connection</string>
 
 
@@ -75,6 +76,7 @@
 
     <string name="ask_just_parked">Did you just park?</string>
     <string name="free_spot">Available parking spot</string>
+    <string name="free_spot_info">Somebody just left a free parking spot</string>
     <string name="long_click_instructions">Long click to set your car\'s position. Next time it will be automatic!</string>
     <string name="thanks_free_spot">You just left a free parking spot that everyone can see in Parkify! Thanks! :)</string>
     <string name="car_location_registered">\"%s\" location registered at Parkify!</string>

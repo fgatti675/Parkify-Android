@@ -42,6 +42,7 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
     private ParkingSpot spot;
 
     private TextView title;
+    private TextView titleInfo;
     private TextView timeAgo;
     private TextView distance;
     private ImageView rectangleImage;
@@ -96,8 +97,10 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
             toolbar.inflateMenu(R.menu.spot_menu);
             toolbar.setOnMenuItemClickListener(this);
 
-            // Set time ago
             title = (TextView) view.findViewById(R.id.spot_title);
+            titleInfo = (TextView) view.findViewById(R.id.spot_info);
+
+            // Set time ago
             timeAgo = (TextView) view.findViewById(R.id.time);
             updateTimeAgo();
 
@@ -168,10 +171,12 @@ public class SpotDetailsFragment extends DetailsFragment implements Toolbar.OnMe
 
     private void updateTimeAgo() {
         if (spot.future) {
-            title.setText(R.string.aboutToLeave);
+            title.setText(R.string.about_to_leave);
+            titleInfo.setText(R.string.about_to_leave_info);
             timeAgo.setVisibility(View.GONE);
         } else {
             title.setText(R.string.free_spot);
+            titleInfo.setText(R.string.free_spot_info);
             timeAgo.setText(DateUtils.getRelativeTimeSpanString(spot.time.getTime()));
             timeAgo.setVisibility(View.VISIBLE);
         }

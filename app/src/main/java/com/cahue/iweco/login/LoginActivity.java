@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -403,7 +404,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         database.clearSaveAndBroadcast(loginResult.cars);
 
         final Intent resultIntent = new Intent();
-        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, loginResult.email != null ? loginResult.email : loginResult.userId);
+        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, TextUtils.isEmpty(loginResult.email) ? loginResult.email : loginResult.userId);
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.account_type));
         resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
