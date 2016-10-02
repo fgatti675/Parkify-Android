@@ -50,25 +50,16 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
             throw new ClassCastException(activity.toString()
                     + " must implement " + DetailsViewManager.class.getName());
         }
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
         delegateManager.registerCameraUpdateRequester(this);
         delegateManager.registerDelegate(this);
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        delegateManager.unregisterCameraUpdateRequester(this);
-        delegateManager.unregisterDelegate(this);
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
+        delegateManager.unregisterCameraUpdateRequester(this);
+        delegateManager.unregisterDelegate(this);
         delegateManager = null;
         detailsViewManager = null;
     }

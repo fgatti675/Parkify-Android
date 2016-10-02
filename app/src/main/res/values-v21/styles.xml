@@ -54,6 +54,12 @@
         <item name="android:colorPrimaryDark">@color/black</item>
     </style>
 
+    <style name="CahueTheme.Dark.Login">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@drawable/gradient_background</item>
+    </style>
+
     <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
         <item name="android:colorButtonNormal">@color/theme_accent</item>
     </style>

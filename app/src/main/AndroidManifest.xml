@@ -78,7 +78,7 @@
             android:name=".login.LoginActivity"
             android:label="@string/common_signin_button_text"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark.TranslucentBars.Login"
+            android:theme="@style/CahueTheme.Dark.Login"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".tutorial.TutorialActivity"

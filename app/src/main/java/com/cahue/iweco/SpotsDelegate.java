@@ -194,6 +194,8 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     public boolean queryCameraView() {
 
+        if(getMap() == null) return false;
+
         // What the user is actually seeing right now
         setUpViewBounds();
 
@@ -292,7 +294,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     @Override
     public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
         if (BuildConfig.DEBUG)
-            Toast.makeText(getActivity(), "Error: " + reasonPhrase, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Error: " + statusCode, Toast.LENGTH_SHORT).show();
     }
 
     public void doDraw() {
@@ -435,7 +437,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         super.onPause();
         Log.d(TAG, "onPause");
         Log.v(TAG, "scheduledResetTask canceled");
-//        scheduledResetTask.cancel(true);
+        scheduledResetTask.cancel(true);
     }
 
     @Override

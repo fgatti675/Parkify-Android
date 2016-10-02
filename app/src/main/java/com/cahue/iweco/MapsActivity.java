@@ -464,7 +464,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onBillingReady(BillingFragment billingFragment) {
-        checkforPurchases(billingFragment);
+        setUpAdIfNeeded();
     }
 
     private void checkforPurchases(final BillingFragment billingFragment) {
@@ -506,6 +506,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 adView.setVisibility(View.GONE);
+                nativeAd.destroy();
             }
         };
         registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
@@ -1042,8 +1043,10 @@ public class MapsActivity extends AppCompatActivity
     protected void onStop() {
         unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
-        if (newPurchaseReceiver != null)
+        if (newPurchaseReceiver != null) {
             unregisterReceiver(newPurchaseReceiver);
+            newPurchaseReceiver = null;
+        }
         super.onStop();
     }
 
