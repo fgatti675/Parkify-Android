@@ -227,9 +227,9 @@ public class TutorialActivity extends AppCompatActivity
                 case 0:
                     return TutorialWelcomeFragment.newInstance();
                 case 1:
-                    return TutorialInstructionsFragment.newInstance(R.string.info_parking_text_header, R.string.info_parking_text, TutorialInstructionsFragment.TYPE_PARKING);
+                    return TutorialInstructionsFragment.newInstance(R.layout.fragment_tutorial_instructions_find, TutorialInstructionsFragment.TYPE_PARKING);
                 case 2:
-                    return TutorialInstructionsFragment.newInstance(R.string.info_spots_text_header, R.string.info_spots_text, TutorialInstructionsFragment.TYPE_SPOTS);
+                    return TutorialInstructionsFragment.newInstance(R.layout.fragment_tutorial_instructions_spots, TutorialInstructionsFragment.TYPE_SPOTS);
                 case 3:
                     if (carManagerFragment == null)
                         carManagerFragment = CarManagerFragment.newInstance();

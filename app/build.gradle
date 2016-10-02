@@ -4,13 +4,13 @@ apply from: project.property("cahue.signing") + "/cahue.gradle";
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.0'
+    buildToolsVersion '24.0.2'
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 24
         applicationId "com.whereismycar"
-        versionCode 70
-        versionName "3.3.4"
+        versionCode 71
+        versionName "3.4.0"
         signingConfig signingConfigs.wimc
         multiDexEnabled true
 

@@ -13,9 +13,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="@dimen/default_padding"
-        android:elevation="@dimen/elevation"
         app:cardBackgroundColor="@color/theme_primary"
-        app:cardCornerRadius="@dimen/cardCornerRadius">
+        app:cardCornerRadius="@dimen/cardCornerRadius"
+        app:cardElevation="@dimen/elevation">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -32,12 +32,18 @@
                 android:textColor="@color/white" />
 
             <TextView
-                android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/small_padding"
+                android:paddingBottom="@dimen/default_padding"
                 android:paddingTop="@dimen/large_padding"
                 android:text="@string/info_parking_text"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/default_padding"
+                android:text="@string/info_parking_text_2"
                 android:textColor="@color/white" />
 
         </LinearLayout>
