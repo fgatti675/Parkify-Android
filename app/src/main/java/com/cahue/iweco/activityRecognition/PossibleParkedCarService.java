@@ -86,7 +86,7 @@ public class PossibleParkedCarService extends LocationPollerService {
      */
     private void onAddressFetched(String address) {
 
-        ParkingSpot possibleParkingSpot = new ParkingSpot(-1, location, address, time, false);
+        ParkingSpot possibleParkingSpot = new ParkingSpot(null, location, address, time, false);
         carDatabase.addPossibleParkingSpot(possibleParkingSpot);
 
         if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(this))

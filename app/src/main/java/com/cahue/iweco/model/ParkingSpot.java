@@ -39,7 +39,7 @@ public class ParkingSpot implements Parcelable {
     private static final long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
 
     @Nullable
-    public final long id;
+    public final Long id;
     public final Location location;
     public final Date time;
 
@@ -50,14 +50,18 @@ public class ParkingSpot implements Parcelable {
     private LatLng latLng;
 
     public ParkingSpot(@NonNull Parcel parcel) {
-        id = parcel.readLong();
+
+        Long parcelid = parcel.readLong();
+        if (parcelid == -1) parcelid = null;
+
+        id = parcelid;
         location = parcel.readParcelable(Location.class.getClassLoader());
         address = parcel.readString();
         time = (Date) parcel.readSerializable();
         future = parcel.readByte() != 0;
     }
 
-    public ParkingSpot(@Nullable long id, Location location, @Nullable String address, Date time, boolean future) {
+    public ParkingSpot(@Nullable Long id, Location location, @Nullable String address, Date time, boolean future) {
         this.id = id;
         this.location = location;
         this.address = address;
@@ -91,7 +95,7 @@ public class ParkingSpot implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeLong(id);
+        parcel.writeLong(id == null ? -1 : id);
         parcel.writeParcelable(location, i);
         parcel.writeString(address);
         parcel.writeSerializable(time);
@@ -127,6 +131,27 @@ public class ParkingSpot implements Parcelable {
                 '}';
     }
 
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParkingSpot that = (ParkingSpot) o;
+
+        if (!id.equals(that.id)) return false;
+        if (!location.equals(that.location)) return false;
+        return time.equals(that.time);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + location.hashCode();
+        result = 31 * result + time.hashCode();
+        return result;
+    }
+
     /**
      * Get the marker time based on the time it was created
      *
@@ -147,23 +172,6 @@ public class ParkingSpot implements Parcelable {
         if (latLng == null) latLng = new LatLng(location.getLatitude(), location.getLongitude());
         return latLng;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ParkingSpot that = (ParkingSpot) o;
-
-        return id == that.id;
-
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (id ^ (id >>> 32));
-    }
-
     /**
      * Created by Francesco on 19.11.2014.
      */

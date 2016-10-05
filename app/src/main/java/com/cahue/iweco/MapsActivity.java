@@ -1306,7 +1306,7 @@ public class MapsActivity extends AppCompatActivity
         location.setLongitude(latLng.longitude);
         location.setAccuracy(10);
 
-        ParkingSpot spot = new ParkingSpot(-1, location, null, new Date(), false);
+        ParkingSpot spot = new ParkingSpot(null, location, null, new Date(), false);
 
         LongTapLocationDelegate longTapLocationDelegate = getLongTapLocationDelegate();
         longTapLocationDelegate.setMap(mMap);
