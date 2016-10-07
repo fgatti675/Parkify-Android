@@ -1,7 +1,7 @@
 package com.cahue.iweco;
 
+import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,32 +34,30 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     private GoogleMap mMap;
 
     @Override
-    public void onAttach(@NonNull Context activity) {
-        super.onAttach(activity);
+    public void onAttach(@NonNull Activity context) {
+        super.onAttach(context);
 
         try {
-            this.delegateManager = (DelegateManager) activity;
+            this.delegateManager = (DelegateManager) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement " + DelegateManager.class.getName());
         }
 
         try {
-            this.detailsViewManager = (DetailsViewManager) activity;
+            this.detailsViewManager = (DetailsViewManager) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement " + DetailsViewManager.class.getName());
         }
-
         delegateManager.registerCameraUpdateRequester(this);
         delegateManager.registerDelegate(this);
     }
 
+
     @Override
     public void onDetach() {
         super.onDetach();
-        delegateManager.unregisterCameraUpdateRequester(this);
-        delegateManager.unregisterDelegate(this);
         delegateManager = null;
         detailsViewManager = null;
     }
@@ -67,15 +65,24 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     @Override
     public void onDestroy() {
         super.onDestroy();
+        delegateManager.unregisterCameraUpdateRequester(this);
+        delegateManager.unregisterDelegate(this);
         mMap = null;
     }
 
     /**
      * Called when the map is ready to be used
      *
-     * @param map
+     * @param mMap
      */
-    protected void onMapReady(GoogleMap map) {
+    protected void onMapReady(GoogleMap mMap) {
+
+    }
+
+    /**
+     * Called when the details view is closed
+     */
+    public void onDetailsClosed() {
 
     }
 

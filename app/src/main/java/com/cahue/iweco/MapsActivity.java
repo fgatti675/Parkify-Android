@@ -884,7 +884,7 @@ public class MapsActivity extends AppCompatActivity
      * @return
      */
     @NonNull
-    private LongTapLocationDelegate getLongTapLocationDelegate() {
+    private LongTapLocationDelegate initLongTapLocationDelegate() {
         LongTapLocationDelegate longTapLocationDelegate = (LongTapLocationDelegate) getFragmentManager().findFragmentByTag(LongTapLocationDelegate.FRAGMENT_TAG);
         if (longTapLocationDelegate == null) {
             Log.d(TAG, "Creating new PossibleParkedCarDelegate: ");
@@ -1308,7 +1308,7 @@ public class MapsActivity extends AppCompatActivity
 
         ParkingSpot spot = new ParkingSpot(null, location, null, new Date(), false);
 
-        LongTapLocationDelegate longTapLocationDelegate = getLongTapLocationDelegate();
+        LongTapLocationDelegate longTapLocationDelegate = initLongTapLocationDelegate();
         longTapLocationDelegate.setMap(mMap);
         longTapLocationDelegate.activate(spot);
 
