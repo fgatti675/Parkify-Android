@@ -1,9 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Application;
-import android.os.Build;
 import android.os.StrictMode;
-import android.os.Trace;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -31,10 +29,6 @@ public class ParkifyApp extends Application {
 
     @Override
     public void onCreate() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Trace.beginSection("App create");
-        }
 
         super.onCreate();
 
@@ -81,10 +75,6 @@ public class ParkifyApp extends Application {
                     .build());
 
             AdSettings.addTestDevice("2e398393636c7cca29281dda912adc42");
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Trace.endSection();
         }
     }
 

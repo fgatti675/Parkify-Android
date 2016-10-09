@@ -17,6 +17,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 
@@ -202,6 +203,7 @@ public class BillingFragment extends Fragment {
 
                 Util.showBlueToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
                 getActivity().sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+                PreferencesUtil.setAdsRemoved(getActivity(), true);
 
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_CANCELLED);

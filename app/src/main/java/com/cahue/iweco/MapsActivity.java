@@ -19,7 +19,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Trace;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -240,21 +239,9 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Trace.beginSection("MapsActivity create");
-        }
-
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Trace.beginSection("MapsActivity inflate");
-
-        }
         setContentView(R.layout.activity_main);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Trace.endSection();
-        }
 
         carDatabase = CarDatabase.getInstance(this);
 
@@ -388,7 +375,6 @@ public class MapsActivity extends AppCompatActivity
             cameraFollowing = savedInstanceState.getBoolean("cameraFollowing");
         }
 
-
         /**
          * Details
          */
@@ -407,10 +393,7 @@ public class MapsActivity extends AppCompatActivity
         checkLocationPermission();
 
         adView = (ViewGroup) findViewById(R.id.ad_container);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Trace.endSection();
-        }
+        adView.setVisibility(View.GONE);
 
     }
 
@@ -440,31 +423,13 @@ public class MapsActivity extends AppCompatActivity
     }
 
 
-    private void setUpAdIfNeeded() {
-
-        adView.setVisibility(View.GONE);
-
+    @Override
+    public void onBillingReady(BillingFragment billingFragment) {
         if (PreferencesUtil.isAdsRemoved(this)) return;
 
         if (carDatabase.isEmptyOfCars()) return;
 
-        if (PreferencesUtil.isPurchasesCheked(this)) {
-            setUpAd();
-        } else {
-
-            /**
-             * Bind service used for donations
-             */
-            final BillingFragment billingFragment = initBillingFragment();
-            if (billingFragment.isBillingServiceReady()) {
-                checkforPurchases(billingFragment);
-            }
-        }
-    }
-
-    @Override
-    public void onBillingReady(BillingFragment billingFragment) {
-        setUpAdIfNeeded();
+        checkforPurchases(billingFragment);
     }
 
     private void checkforPurchases(final BillingFragment billingFragment) {
@@ -604,8 +569,6 @@ public class MapsActivity extends AppCompatActivity
         handleIntent(getIntent());
 
         mGoogleApiClient.connect();
-
-        setUpAdIfNeeded();
 
         Log.d("App speed", "On start init time : " + (System.currentTimeMillis() - initTime));
 
