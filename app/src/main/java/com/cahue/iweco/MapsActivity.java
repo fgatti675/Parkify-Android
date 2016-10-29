@@ -83,6 +83,11 @@ import com.facebook.ads.AdListener;
 import com.facebook.ads.NativeAd;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.formats.NativeAdOptions;
+import com.google.android.gms.ads.formats.NativeAppInstallAd;
+import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -240,6 +245,8 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        PreferencesUtil.setAdsRemoved(this, false);
 
         setContentView(R.layout.activity_main);
 
@@ -456,7 +463,7 @@ public class MapsActivity extends AppCompatActivity
                 Log.d(TAG, "Display ads returned " + displayAd);
 
                 if (displayAd) {
-                    setUpAd();
+                    setUpFacebookAd();
                 } else {
                     PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
                 }
@@ -465,7 +472,7 @@ public class MapsActivity extends AppCompatActivity
         }.execute();
     }
 
-    private void setUpAd() {
+    private void setUpFacebookAd() {
 
         newPurchaseReceiver = new BroadcastReceiver() {
             @Override
@@ -476,7 +483,7 @@ public class MapsActivity extends AppCompatActivity
         };
         registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
-        Log.d(TAG, "setUpAd");
+        Log.d(TAG, "setUpFacebookAd");
         nativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
         nativeAd.setAdListener(MapsActivity.this);
         nativeAd.loadAd();
@@ -486,6 +493,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onError(Ad ad, AdError adError) {
         Log.d(TAG, "onAdError: ");
+//        setUpAdMobAd();
     }
 
     @Override
@@ -524,6 +532,54 @@ public class MapsActivity extends AppCompatActivity
             bindAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
         }
 
+    }
+
+    private void setUpAdMobAd() {
+
+        // Create native UI using the ad metadata.
+        final ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
+        nativeAdBody.setSelected(true);
+        final Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
+        final ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
+        adView.setVisibility(View.VISIBLE);
+
+        AdLoader adLoader = new AdLoader.Builder(MapsActivity.this, "ca-app-pub-3940256099942544/3986624511")
+                .forAppInstallAd(new NativeAppInstallAd.OnAppInstallAdLoadedListener() {
+                    @Override
+                    public void onAppInstallAdLoaded(NativeAppInstallAd appInstallAd) {
+                        nativeAdIcon.setImageDrawable(appInstallAd.getIcon().getDrawable());
+                        nativeAdTitle.setText(appInstallAd.getHeadline());
+                        nativeAdBody.setText(appInstallAd.getBody());
+                        nativeAdCallToAction.setText(appInstallAd.getCallToAction());
+                        nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+                    }
+                })
+                .forContentAd(new NativeContentAd.OnContentAdLoadedListener() {
+                    @Override
+                    public void onContentAdLoaded(NativeContentAd contentAd) {
+                        nativeAdIcon.setImageDrawable(contentAd.getLogo().getDrawable());
+                        nativeAdTitle.setText(contentAd.getHeadline());
+                        nativeAdBody.setText(contentAd.getBody());
+                        nativeAdCallToAction.setText(contentAd.getCallToAction());
+                        nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+                    }
+                })
+                .withAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(int errorCode) {
+                        // Handle the failure by logging, altering the UI, etc.
+                        Log.d(TAG, "onAdFailedToLoad: " + errorCode);
+                    }
+                })
+                .withNativeAdOptions(new NativeAdOptions.Builder()
+                        // Methods in the NativeAdOptions.Builder class can be
+                        // used here to specify individual options settings.
+                        .build())
+                .build();
+
+        adLoader.loadAd(new AdRequest.Builder().build());
     }
 
     public void bindAdView(Button nativeAdCallToAction, TextView nativeAdTitle, TextView nativeAdBody, ViewGroup adChoicesWrap) {
