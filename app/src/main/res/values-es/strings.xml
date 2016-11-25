@@ -78,7 +78,7 @@
     <string name="clear">Borrar</string>
 
     <string name="and_remove_ads">¡Y elimina los anuncios!</string>
-    <string name="thanks_free_spot">Acabas de dejar un hueco libre, que todo el mundo puede ver. ¡Gracias! :)</string>
+    <string name="thanks_free_spot">Acabas de dejar un hueco libre ¡Gracias! :)</string>
     <string name="car_location_registered">Posición de \"%s\" registrada en Parkify!</string>
     <string name="public_parking">Parking público</string>
     <string name="about_to_leave_info">Alguien está caminando hacia su vehiculo</string>

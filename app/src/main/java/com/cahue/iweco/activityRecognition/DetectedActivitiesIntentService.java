@@ -116,7 +116,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
 
             if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                    && mostProbableActivity.getConfidence() > 100) {
+                    && mostProbableActivity.getConfidence() >= 90) {
 
                 if (BuildConfig.DEBUG) {
                     showDebugNotification(result, mostProbableActivity);

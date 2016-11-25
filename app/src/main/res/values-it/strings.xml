@@ -79,7 +79,7 @@
     <string name="clear">Elimina</string>
 
     <string name="and_remove_ads">E toggli la pubblicitá!</string>
-    <string name="thanks_free_spot">Hai lasciato un posto libero che tutti possono vedere. Grazie! :)</string>
+    <string name="thanks_free_spot">Hai lasciato un posto libero. Grazie! :)</string>
     <string name="car_location_registered">Posizzione di \"%s\" registrata su Parkify!</string>
     <string name="public_parking">Parcheggio pubblico</string>
     <string name="about_to_leave_info"> Qualcuno sta camminando verso la sua auto</string>
