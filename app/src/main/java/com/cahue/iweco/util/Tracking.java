@@ -37,7 +37,7 @@ public class Tracking {
 
     public static final String ACTION_CAR_SELECTED = "Car selected";
 
-    public static final String ACTION_REMOVED = "Removed";
+    public static final String ACTION_NOTIFICATION_REMOVED = "Notification removed";
 
     public static final String ACTION_FREE_SPOT_SELECTED = "Spot selected";
 

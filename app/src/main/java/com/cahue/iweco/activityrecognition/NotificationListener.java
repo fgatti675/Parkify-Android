@@ -1,9 +1,10 @@
-package com.cahue.iweco;
+package com.cahue.iweco.activityrecognition;
 
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 
 import com.cahue.iweco.util.Tracking;
 
@@ -12,6 +13,9 @@ import com.cahue.iweco.util.Tracking;
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class NotificationListener extends NotificationListenerService {
+
+    private static final String TAG = NotificationListener.class.getSimpleName();
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
@@ -20,7 +24,10 @@ public class NotificationListener extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
-        Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_REMOVED);
+        Log.i(TAG, "onNotificationRemoved: " + sbn.toString());
+        if (sbn.getId() == PossibleParkedCarService.NOTIFICATION_ID) {
+            Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_NOTIFICATION_REMOVED);
+        }
     }
 }
 

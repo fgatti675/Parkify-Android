@@ -2,6 +2,8 @@ package com.cahue.iweco.parkedcar;
 
 import android.content.Context;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -52,7 +54,6 @@ public class ParkedCarService extends LocationPollerService {
         if (car.location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             GeofenceCarService.startDelayedGeofenceService(context, car.id);
         }
-
 
         Util.showBlueToastWithLogo(ParkedCarService.this, getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
 
