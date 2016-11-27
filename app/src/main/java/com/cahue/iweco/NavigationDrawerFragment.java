@@ -512,7 +512,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         private void bindShare(@NonNull MenuViewHolder menuViewHolder) {
-            menuViewHolder.title.setText(R.string.share);
+            menuViewHolder.title.setText(R.string.invite_title);
             menuViewHolder.subtitle.setText(R.string.and_remove_ads);
             menuViewHolder.subtitle.setVisibility(View.VISIBLE);
             menuViewHolder.icon.setImageResource(R.drawable.ic_facebook);

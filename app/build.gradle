@@ -9,8 +9,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         applicationId "com.whereismycar"
-        versionCode 77
-        versionName "3.4.6"
+        versionCode 78
+        versionName "3.4.7"
         signingConfig signingConfigs.wimc
         multiDexEnabled true
 

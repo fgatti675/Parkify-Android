@@ -22,7 +22,7 @@
     <string name="car_not_found">La posizione della macchina non è stata stabilita</string>
     <string name="bt_not_available">Bluetooth non è disponibile</string>
     <string name="bt_linked_to">La posizione della macchina verrà registrata in disconnessione da %1$s</string>
-    <string name="car_was_here">La macchina era qui %s</string>
+    <string name="car_was_here">La macchina era qui %1$s</string>
     <string name="what_car_is_parked">Quale macchina e parcheggiata qui?</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancella</string>
@@ -67,8 +67,8 @@
     <string name="like_question" >Ti piace questa app?</string>
     <string name="rate">Valutare</string>
 
-    <string name="share">Invita i tuoi amici</string>
-    <string name="share_promo">Invita al meno 3 amici e toggli via la pubblicità</string>
+    <string name="invite_title">Invita i tuoi amici</string>
+    <string name="invite_promo">Invita al meno 3 amici e toggli via la pubblicità</string>
     <string name="ask_just_parked">Hai appena parcheggiato?</string>
     <string name="free_spot">Posto libero</string>
     <string name="free_spot_info">Qualcuno ha appena lasciato un posto libero</string>
@@ -83,5 +83,7 @@
     <string name="car_location_registered">Posizzione di \"%s\" registrata su Parkify!</string>
     <string name="public_parking">Parcheggio pubblico</string>
     <string name="about_to_leave_info"> Qualcuno sta camminando verso la sua auto</string>
+    <string name="share">Condividi posizione</string>
+    <string name="car_was_here_share">%1$s era qui (%2$s)</string>
 
 </resources>

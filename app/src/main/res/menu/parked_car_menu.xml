@@ -9,6 +9,12 @@
         cahue:showAsAction="always" />
 
     <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share_black_24dp"
+        android:title="@string/share"
+        cahue:showAsAction="always" />
+
+    <item
         android:id="@+id/action_clear"
         android:title="@string/remove_location"
         cahue:showAsAction="never" />

@@ -8,10 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -207,12 +209,34 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
                 parkedCarDelegate.setCameraFollowing(true);
                 updateFollowButtonState();
                 return true;
+            case R.id.action_share:
+                shareCarLocation();
+                return true;
             case R.id.action_clear:
                 removeCarLocation();
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
+    }
+
+    private void shareCarLocation() {
+        Double latitude = car.location.getLatitude();
+        Double longitude = car.location.getLongitude();
+
+        String uri = String.format("http://maps.google.com/maps?q=loc:%s,%s(%s)", latitude, longitude, Uri.encode(car.name));
+
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        CharSequence relativeTimeSpanString = DateUtils.getRelativeTimeSpanString(car.time.getTime());
+        String shareString = car.name != null ?
+                getResources().getString(R.string.car_was_here_share, car.name, relativeTimeSpanString) :
+                getResources().getString(R.string.car_was_here, relativeTimeSpanString);
+        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, shareString);
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareString + "\n" + uri);
+
+        startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share)));
+
     }
 
     /**

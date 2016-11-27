@@ -77,10 +77,10 @@ public class FacebookAppInvitesDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.share_promo)
-                .setTitle(R.string.share)
+        builder.setMessage(R.string.invite_promo)
+                .setTitle(R.string.invite_title)
                 .setIcon(R.drawable.weco_logo_small)
-                .setPositiveButton(R.string.share, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.invite_title, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         showAppInviteDialog((MapsActivity) getActivity());
                     }
