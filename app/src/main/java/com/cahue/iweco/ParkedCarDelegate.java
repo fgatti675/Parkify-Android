@@ -96,14 +96,17 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         directionsDelegate = new DirectionsDelegate();
 
         this.carId = getArguments().getString(ARG_CAR_ID);
+
+        this.car = CarDatabase.getInstance().findCar(getActivity(), carId);
+
         Log.i(TAG, "onCreate " + carId);
     }
 
     public void update(boolean resetDirections) {
 
-        this.car = CarDatabase.getInstance(getActivity()).findCar(carId);
-
         if (!isMapReady() || !isResumed()) return;
+
+        this.car = CarDatabase.getInstance().findCar(getActivity(), carId);
 
         if (car == null || car.location == null) {
             clear();

@@ -46,7 +46,7 @@ public class CarMovedService extends LocationPollerService {
     @Override
     public void onPreciseFixPolled(@NonNull Context context, @NonNull Location spotLocation, @NonNull Car car, Date startTime, GoogleApiClient googleApiClient) {
 
-        CarDatabase carDatabase = CarDatabase.getInstance(context);
+        CarDatabase carDatabase = CarDatabase.getInstance();
 
         /**
          * If the accuracy is not good enough, we can check the previous location of the car

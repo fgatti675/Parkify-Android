@@ -109,7 +109,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        database = CarDatabase.getInstance(this);
+        database = CarDatabase.getInstance();
         mAccountManager = AccountManager.get(this);
 
         mButtonsLayout = findViewById(R.id.buttons);
@@ -189,7 +189,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     public void onLoginSkipped() {
-        database.saveCarAndBroadcast(database.generateOtherCar());
+        database.saveCarAndBroadcast(this, database.generateOtherCar());
         AuthUtils.setSkippedLogin(LoginActivity.this, true);
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
         goToNextActivity();
@@ -397,11 +397,11 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
          * Maybe there was some data there already due to that the app was being used
          * without signing in
          */
-        List<Car> cars = database.retrieveCars(false);
+        List<Car> cars = database.retrieveCars(this, false);
         for (Car car : cars)
-            CarsSync.postCar(car, this, CarDatabase.getInstance(this));
+            CarsSync.postCar(car, this, CarDatabase.getInstance());
 
-        database.clearSaveAndBroadcast(loginResult.cars);
+        database.clearSaveAndBroadcast(this, loginResult.cars);
 
         final Intent resultIntent = new Intent();
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, TextUtils.isEmpty(loginResult.email) ? loginResult.email : loginResult.userId);

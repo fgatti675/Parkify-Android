@@ -41,6 +41,7 @@ public class Constants {
     // action telling the main activity that activity recognition has a possible spot
     public static final String ACTION_POSSIBLE_PARKED_CAR = BuildConfig.APPLICATION_ID + ".ACTION_POSSIBLE_PARKED_CAR";
 
+
     // extra fields
     public static final String EXTRA_CAR_ID = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_ID";
     public static final String EXTRA_CAR_ADDRESS = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_ADDRESS";

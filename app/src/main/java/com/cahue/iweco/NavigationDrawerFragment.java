@@ -176,7 +176,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void retrieveCarsFromDB() {
-        cars = CarDatabase.getInstance(getActivity()).retrieveCars(true);
+        cars = CarDatabase.getInstance().retrieveCars(getActivity(), true);
 
         // hide 'Other' car if not parked
         Iterator<Car> iterator = cars.iterator();

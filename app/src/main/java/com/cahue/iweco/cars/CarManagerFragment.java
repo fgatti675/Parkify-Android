@@ -168,13 +168,13 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        carDatabase = CarDatabase.getInstance(getActivity());
+        carDatabase = CarDatabase.getInstance();
 
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         devices = new ArrayList<>();
-        cars = carDatabase.retrieveCars(false);
+        cars = carDatabase.retrieveCars(getActivity(), false);
 
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
@@ -271,7 +271,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
     public void onCarRemoved(@NonNull Car car) {
 
-        CarsSync.remove(getActivity(), car, CarDatabase.getInstance(getActivity()));
+        CarsSync.remove(getActivity(), car, CarDatabase.getInstance());
 
         int i = 0;
         for (Car c : cars) {
@@ -293,7 +293,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             adapter.notifyDataSetChanged();
         }
 
-        selectedDeviceAddresses = carDatabase.getPairedBTAddresses();
+        selectedDeviceAddresses = carDatabase.getPairedBTAddresses(getActivity());
 
         // Get a set of currently paired devices
         if (mBtAdapter != null) {

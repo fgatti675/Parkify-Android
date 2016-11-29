@@ -116,6 +116,8 @@ import java.util.Set;
 
 import bolts.AppLinks;
 
+import static android.content.Intent.ACTION_VIEW;
+
 public class MapsActivity extends AppCompatActivity
         implements
         LocationListener,
@@ -132,7 +134,8 @@ public class MapsActivity extends AppCompatActivity
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         DetailsViewManager,
-        BillingFragment.OnBillingReadyListener, AdListener {
+        BillingFragment.OnBillingReadyListener,
+        AdListener {
 
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -250,7 +253,7 @@ public class MapsActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        carDatabase = CarDatabase.getInstance(this);
+        carDatabase = CarDatabase.getInstance();
 
         mSkippedLogin = AuthUtils.isSkippedLogin(this);
 
@@ -408,7 +411,7 @@ public class MapsActivity extends AppCompatActivity
         if (!isFinishing()) {
 
             if (!mSkippedLogin)
-                carDatabase.clearCars();
+                carDatabase.clearCars(this);
 
             AuthUtils.setSkippedLogin(this, false);
 
@@ -422,11 +425,10 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void clearAccounts() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
-            return;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
+            for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
+                mAccountManager.removeAccount(account, null, null);
         }
-        for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
-            mAccountManager.removeAccount(account, null, null);
     }
 
 
@@ -434,7 +436,7 @@ public class MapsActivity extends AppCompatActivity
     public void onBillingReady(BillingFragment billingFragment) {
         if (PreferencesUtil.isAdsRemoved(this)) return;
 
-        if (carDatabase.isEmptyOfCars()) return;
+        if (carDatabase.isEmptyOfCars(this)) return;
 
         checkforPurchases(billingFragment);
     }
@@ -463,7 +465,18 @@ public class MapsActivity extends AppCompatActivity
                 Log.d(TAG, "Display ads returned " + displayAd);
 
                 if (displayAd) {
+
+                    newPurchaseReceiver = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            adView.setVisibility(View.GONE);
+                            nativeAd.destroy();
+                        }
+                    };
+                    registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
+
                     setUpFacebookAd();
+
                 } else {
                     PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
                 }
@@ -473,15 +486,6 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void setUpFacebookAd() {
-
-        newPurchaseReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                adView.setVisibility(View.GONE);
-                nativeAd.destroy();
-            }
-        };
-        registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
         Log.d(TAG, "setUpFacebookAd");
         nativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
@@ -582,7 +586,7 @@ public class MapsActivity extends AppCompatActivity
         adLoader.loadAd(new AdRequest.Builder().build());
     }
 
-    public void bindAdView(Button nativeAdCallToAction, TextView nativeAdTitle, TextView nativeAdBody, ViewGroup adChoicesWrap) {
+    public void bindAdView(Button nativeAdCallToAction, final TextView nativeAdTitle, final TextView nativeAdBody, ViewGroup adChoicesWrap) {
         adView.setVisibility(View.VISIBLE);
 
         nativeAd.unregisterView();
@@ -592,7 +596,13 @@ public class MapsActivity extends AppCompatActivity
         nativeAdTitle.setText(nativeAd.getAdTitle());
         nativeAdBody.setText(nativeAd.getAdBody());
 
-        nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+        nativeAdTitle.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                nativeAdTitle.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
+            }
+        });
 
         // Add adChoices icon
         if (adChoicesView == null) {
@@ -648,10 +658,10 @@ public class MapsActivity extends AppCompatActivity
 
         delegates.add(initPlacesDelegate());
 
-        for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots())
+        for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots(this))
             delegates.add(initPossibleParkedCarDelegate(spot));
 
-        for (String id : carDatabase.getCarIds(true))
+        for (String id : carDatabase.getCarIds(this, true))
             delegates.add(initParkedCarDelegate(id));
 
         /**
@@ -672,7 +682,7 @@ public class MapsActivity extends AppCompatActivity
 
         showOnLongClickToast();
 
-        noCarsButton.setVisibility(carDatabase.isEmptyOfCars() ? View.VISIBLE : View.GONE);
+        noCarsButton.setVisibility(carDatabase.isEmptyOfCars(this) ? View.VISIBLE : View.GONE);
 
         mapFragment.getMapAsync(this);
 
@@ -690,15 +700,26 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void handleIntent(@Nullable Intent intent) {
-        if (intent != null && intent.getAction() != null && intent.getAction().equals(Constants.ACTION_POSSIBLE_PARKED_CAR)) {
+        if (intent != null && intent.getAction() != null) {
             initialCameraSet = true;
+            if (intent.getAction().equals(Constants.ACTION_POSSIBLE_PARKED_CAR)) {
 
-            ParkingSpot possibleSpot = intent.getParcelableExtra(Constants.EXTRA_SPOT);
-            initPossibleParkedCarDelegate(possibleSpot).activate();
+                ParkingSpot possibleSpot = intent.getParcelableExtra(Constants.EXTRA_SPOT);
+                initPossibleParkedCarDelegate(possibleSpot).activate();
 
-            NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-            mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
-            intent.setAction(null);
+                NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
+                mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
+                intent.setAction(null);
+            } else if (intent.getAction().equals(ACTION_VIEW)) {
+
+                String carId = intent.getStringExtra(Constants.EXTRA_CAR_ID);
+                ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(carId);
+                parkedCarDelegate.activate();
+
+                NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
+                mNotifyMgr.cancel(carId, ParkedCarService.NOTIFICATION_ID);
+                intent.setAction(null);
+            }
         }
     }
 
@@ -875,6 +896,7 @@ public class MapsActivity extends AppCompatActivity
             parkedCarDelegate.setRetainInstance(true);
             transaction.add(parkedCarDelegate, ParkedCarDelegate.getFragmentTag(carId));
             transaction.commit();
+            getFragmentManager().executePendingTransactions();
         }
         return parkedCarDelegate;
     }
@@ -1049,7 +1071,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void showOnLongClickToast() {
-        if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmptyOfCars())
+        if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmptyOfCars(this))
             return;
 
         Util.showBlueToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
@@ -1290,7 +1312,7 @@ public class MapsActivity extends AppCompatActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {
 
-            final List<Car> parkedCars = carDatabase.retrieveParkedCars();
+            final List<Car> parkedCars = carDatabase.retrieveParkedCars(this);
 
             List<Car> closeCars = new ArrayList<>();
             for (Car car : parkedCars) {
@@ -1559,7 +1581,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(Constants.EXTRA_CAR_ID, carDatabase.retrieveCars(true).iterator().next().id);
+                intent.putExtra(Constants.EXTRA_CAR_ID, carDatabase.retrieveCars(MapsActivity.this, true).iterator().next().id);
                 startService(intent);
             }
         });
@@ -1569,7 +1591,7 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
-                List<Car> cars = carDatabase.retrieveCars(false);
+                List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
@@ -1581,7 +1603,7 @@ public class MapsActivity extends AppCompatActivity
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Car> cars = carDatabase.retrieveCars(false);
+                List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
                 if (cars.isEmpty()) return;
                 Car car = cars.iterator().next();
                 ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);

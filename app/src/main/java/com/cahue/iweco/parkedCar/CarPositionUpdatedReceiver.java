@@ -37,10 +37,10 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             return;
         }
 
-        database = CarDatabase.getInstance(context);
+        database = CarDatabase.getInstance();
 
         String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
-        car = database.findCar(carId);
+        car = database.findCar(context, carId);
 
         // this should happen only if the user was logged out at that particular moment...
         if (car == null)
@@ -78,7 +78,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
             // Display the address string
             // or an error message sent from the intent service.
             car.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-            database.updateAddress(car);
+            database.updateAddress(context, car);
 
             Log.d(TAG, "Sending car update broadcast");
 

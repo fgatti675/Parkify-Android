@@ -38,6 +38,7 @@ public class PreferencesUtil {
     public static final String PREF_REMOVE_ADS = "PREF_REMOVE_ADS";
     public static final String PREF_PURCHASED_CHECKED = "PREF_PURCHASED_CHECKED";
 
+    public static final String PREF_DISPLAY_PARKED_NOTIFICATION = "PREF_DISPLAY_PARKED_NOTIFICATION";
 
 
     public static boolean isLongClickToastShown(Context context) {
@@ -162,5 +163,15 @@ public class PreferencesUtil {
     public static boolean isBtOnEnteringVehicleEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_BT_ON_ENTER_VEHICLE, false);
+    }
+
+    public static boolean isDisplayParkedNotificationEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_DISPLAY_PARKED_NOTIFICATION, false);
+    }
+
+    public static void setDisplayParkedNotificationEnabled(Context context, boolean checked) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_DISPLAY_PARKED_NOTIFICATION, checked).apply();
     }
 }

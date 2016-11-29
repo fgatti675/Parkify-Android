@@ -35,7 +35,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-        database = CarDatabase.getInstance(context);
+        database = CarDatabase.getInstance();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     @Override
                     public void onResponse(JSONArray response) {
                         Set<Car> cars = Car.fromJSONArray(response);
-                        database.clearSaveAndBroadcast(cars);
+                        database.clearSaveAndBroadcast(getContext(), cars);
                     }
                 },
                 new Response.ErrorListener() {

@@ -65,7 +65,7 @@ public class PossibleParkedCarService extends LocationPollerService {
 
         Log.i(TAG, "Received : " + location);
 
-        carDatabase = CarDatabase.getInstance(context);
+        carDatabase = CarDatabase.getInstance();
 
         /**
          * Fetch address
@@ -87,7 +87,7 @@ public class PossibleParkedCarService extends LocationPollerService {
     private void onAddressFetched(String address) {
 
         ParkingSpot possibleParkingSpot = new ParkingSpot(null, location, address, time, false);
-        carDatabase.addPossibleParkingSpot(possibleParkingSpot);
+        carDatabase.addPossibleParkingSpot(this, possibleParkingSpot);
 
         if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(this))
             return;
@@ -112,7 +112,7 @@ public class PossibleParkedCarService extends LocationPollerService {
                         .setContentTitle(getString(R.string.ask_just_parked))
                         .setContentText(address);
 
-        List<Car> cars = carDatabase.retrieveCars(true);
+        List<Car> cars = carDatabase.retrieveCars(this, true);
         int numberActions = Math.min(cars.size(), 3);
         for (int i = 0; i < numberActions; i++) {
             Car car = cars.get(i);

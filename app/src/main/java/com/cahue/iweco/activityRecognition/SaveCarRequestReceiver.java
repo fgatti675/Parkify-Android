@@ -25,10 +25,10 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
 
         Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_CAR_SELECTED);
 
-        CarDatabase database = CarDatabase.getInstance(context);
+        CarDatabase database = CarDatabase.getInstance();
 
         String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
-        Car car = database.findCar(carId);
+        Car car = database.findCar(context, carId);
 
         // this should happen only if the user was logged out at that particular moment...
         if (car == null){

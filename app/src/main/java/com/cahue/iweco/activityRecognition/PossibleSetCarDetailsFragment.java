@@ -101,7 +101,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        carDatabase = CarDatabase.getInstance(getActivity());
+        carDatabase = CarDatabase.getInstance();
 
         spot = getArguments().getParcelable(ARG_SPOT);
         if (spot.address == null)
@@ -141,7 +141,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
             updateAddress();
 
             GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
-            List<Car> cars = carDatabase.retrieveCars(true);
+            List<Car> cars = carDatabase.retrieveCars(getActivity(), true);
             int numCars = cars.size();
             int numColumns;
             if (numCars < 4) numColumns = numCars;

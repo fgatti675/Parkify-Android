@@ -62,7 +62,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        database = CarDatabase.getInstance(getActivity());
+        database = CarDatabase.getInstance();
         this.spot = getArguments().getParcelable(ARG_SPOT);
         iconGenerator = new IconGenerator(getActivity());
         LayoutInflater myInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -157,7 +157,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
     @Override
     public void onPossibleSpotDeleted(@NonNull ParkingSpot spot) {
-        database.removeParkingSpot(spot);
+        database.removeParkingSpot(getActivity(), spot);
         if (marker != null)
             marker.remove();
         detailsViewManager.hideDetails();

@@ -62,21 +62,10 @@ public class CarDatabase {
     private static final int MAX_POSSIBLE_SPOTS = 5;
     private static final String TAG = CarDatabase.class.getSimpleName();
     private static CarDatabase mInstance;
-    private final Context context;
 
-    private CarDatabase(Context context) {
-        this.context = context;
-    }
-
-    public static CarDatabase getInstance(@NonNull Context ctx) {
-        /**
-         * use the application context as suggested by CommonsWare.
-         * this will ensure that you dont accidentally leak an Activitys
-         * context (see this article for more information:
-         * http://android-developers.blogspot.nl/2009/01/avoiding-memory-leaks.html)
-         */
+    public static CarDatabase getInstance() {
         if (mInstance == null) {
-            mInstance = new CarDatabase(ctx.getApplicationContext());
+            mInstance = new CarDatabase();
         }
         return mInstance;
     }
@@ -96,7 +85,7 @@ public class CarDatabase {
      *
      * @param cars
      */
-    public void clearSaveAndBroadcast(@NonNull Collection<Car> cars) {
+    public void clearSaveAndBroadcast(Context context, @NonNull Collection<Car> cars) {
 
         cars.add(generateOtherCar());
 
@@ -114,7 +103,7 @@ public class CarDatabase {
                 ContentValues values = createCarContentValues(car);
                 database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
 
-                broadCastCarUpdate(car);
+                broadCastCarUpdate(context, car);
             }
         } finally {
             database.close();
@@ -127,7 +116,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateSpotId(@NonNull Car car) {
+    public void updateSpotId(Context context, @NonNull Car car) {
 
         Log.i(TAG, "Updating spot: " + car);
 
@@ -154,7 +143,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateAddress(@NonNull Car car) {
+    public void updateAddress(Context context, @NonNull Car car) {
 
         Log.i(TAG, "Updating address: " + car);
 
@@ -181,7 +170,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void saveCarAndBroadcast(@NonNull Car car) {
+    public void saveCarAndBroadcast(Context context, @NonNull Car car) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -189,6 +178,9 @@ public class CarDatabase {
         try {
             if (car.id == null)
                 throw new NullPointerException("Car without an ID");
+
+            // check the parked value has not an earlier date than the saved one
+            if (checkDatePrevious(car, database)) return;
 
             ContentValues values = createCarContentValues(car);
             database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
@@ -198,7 +190,7 @@ public class CarDatabase {
             carDatabaseHelper.close();
         }
 
-        broadCastCarUpdate(car);
+        broadCastCarUpdate(context, car);
 
     }
 
@@ -207,7 +199,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateCarRemoveSpotAndBroadcast(@NonNull Car car, @NonNull ParkingSpot spot) {
+    public void updateCarRemoveSpotAndBroadcast(Context context, @NonNull Car car, @NonNull ParkingSpot spot) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -215,6 +207,9 @@ public class CarDatabase {
         try {
             if (car.id == null)
                 throw new NullPointerException("Car without an ID");
+
+            // check the parked value has not an earlier date than the saved one
+            if (checkDatePrevious(car, database)) return;
 
             ContentValues values = createCarContentValues(car);
             database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
@@ -224,14 +219,40 @@ public class CarDatabase {
             carDatabaseHelper.close();
         }
 
-        broadCastCarUpdate(car);
+        broadCastCarUpdate(context, car);
 
+    }
+
+    /**
+     * Check the parked value has not an earlier date than the saved one
+     *
+     * @param car
+     * @param database
+     * @return
+     */
+    private boolean checkDatePrevious(@NonNull Car car, SQLiteDatabase database) {
+
+        if (car.time == null) return false;
+
+        Cursor cursor = database.query(TABLE_CARS, new String[]{COLUMN_TIME,},
+                COLUMN_ID + " = '" + car.id + "'",
+                null, null, null, null);
+        if (cursor.getCount() != 0) {
+            try {
+                cursor.moveToFirst();
+                Date storedDate = new Date(cursor.getLong(0));
+                if (storedDate.after(car.time)) return true;
+            } finally {
+                cursor.close();
+            }
+        }
+        return false;
     }
 
     /**
      * Tell everyone interested that this car was updated
      */
-    private void broadCastCarUpdate(@NonNull Car car) {
+    private void broadCastCarUpdate(Context context, @NonNull Car car) {
 
         Log.d(TAG, "Sending car update broadcast");
 
@@ -268,7 +289,7 @@ public class CarDatabase {
 
 
     @NonNull
-    public Set<String> getPairedBTAddresses() {
+    public Set<String> getPairedBTAddresses(Context context) {
         Set<String> addresses = new HashSet<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -302,7 +323,7 @@ public class CarDatabase {
      * @return
      */
     @NonNull
-    public List<String> getCarIds(boolean includeOther) {
+    public List<String> getCarIds(Context context, boolean includeOther) {
         List<String> ids = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -339,7 +360,7 @@ public class CarDatabase {
      * @return
      */
     @NonNull
-    public List<Car> retrieveCars(boolean includeOther) {
+    public List<Car> retrieveCars(Context context, boolean includeOther) {
         List<Car> cars = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -373,7 +394,7 @@ public class CarDatabase {
      * @return
      */
     @NonNull
-    public List<Car> retrieveParkedCars() {
+    public List<Car> retrieveParkedCars(Context context) {
         List<Car> cars = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -403,7 +424,7 @@ public class CarDatabase {
 
 
     @Nullable
-    public Car findCar(String id) {
+    public Car findCar(Context context, String id) {
 
         Log.d(TAG, "Querying car by ID: " + id);
         Car car;
@@ -433,7 +454,7 @@ public class CarDatabase {
     }
 
     @Nullable
-    public Car findCarByBTAddress(String btAddress) {
+    public Car findCarByBTAddress(Context context, String btAddress) {
         Car car;
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
@@ -492,7 +513,7 @@ public class CarDatabase {
     /**
      * Remove all the cars in the database
      */
-    public void clearCars() {
+    public void clearCars(Context context) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
@@ -503,7 +524,7 @@ public class CarDatabase {
         }
     }
 
-    public void deleteCar(@NonNull Car car) {
+    public void deleteCar(Context context, @NonNull Car car) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
@@ -514,7 +535,7 @@ public class CarDatabase {
         }
     }
 
-    public void deleteCar(String carId) {
+    public void deleteCar(Context context, String carId) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
@@ -530,7 +551,7 @@ public class CarDatabase {
      *
      * @return
      */
-    public boolean isEmptyOfCars() {
+    public boolean isEmptyOfCars(Context context) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
         try {
@@ -548,7 +569,7 @@ public class CarDatabase {
         }
     }
 
-    public void addPossibleParkingSpot(@NonNull ParkingSpot spot) {
+    public void addPossibleParkingSpot(Context context, @NonNull ParkingSpot spot) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
 
@@ -605,7 +626,7 @@ public class CarDatabase {
      * @return
      */
     @NonNull
-    public List<ParkingSpot> retrievePossibleParkingSpots() {
+    public List<ParkingSpot> retrievePossibleParkingSpots(Context context) {
         List<ParkingSpot> spots = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
@@ -638,7 +659,7 @@ public class CarDatabase {
      *
      * @param spot
      */
-    public void removeParkingSpot(@NonNull ParkingSpot spot) {
+    public void removeParkingSpot(Context context, @NonNull ParkingSpot spot) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();

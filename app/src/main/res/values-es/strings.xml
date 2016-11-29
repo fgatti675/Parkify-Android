@@ -84,5 +84,6 @@
     <string name="about_to_leave_info">Alguien está caminando hacia su vehiculo</string>
     <string name="share">Compartir position</string>
     <string name="car_was_here_share">%1$s esta aquí (%2$s)</string>
+    <string name="just_parked">Acabas de aparcar</string>
 
 </resources>

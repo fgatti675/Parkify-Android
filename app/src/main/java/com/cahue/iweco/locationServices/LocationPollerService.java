@@ -103,7 +103,7 @@ public abstract class LocationPollerService extends Service implements
             if (intent.getExtras() != null) {
                 String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
                 if (carId != null) {
-                    car = CarDatabase.getInstance(this).findCar(carId);
+                    car = CarDatabase.getInstance().findCar(this, carId);
                     if (car == null) {
                         Log.e(TAG, "Car not found");
                     }

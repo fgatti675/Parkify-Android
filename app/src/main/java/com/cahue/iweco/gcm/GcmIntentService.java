@@ -95,12 +95,12 @@ public class GcmIntentService extends IntentService {
         Car car = Car.fromJSON(new JSONObject(carJson));
         if (BuildConfig.DEBUG)
             sendNotification(car.toString());
-        CarDatabase.getInstance(this).saveCarAndBroadcast(car);
+        CarDatabase.getInstance().saveCarAndBroadcast(this, car);
     }
 
     private void deleteCar(String carId) {
-        CarDatabase database = CarDatabase.getInstance(this);
-        database.deleteCar(carId);
+        CarDatabase database = CarDatabase.getInstance();
+        database.deleteCar(this, carId);
     }
 
     // Put the message into a notification and post it.

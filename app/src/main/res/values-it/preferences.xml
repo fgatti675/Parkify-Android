@@ -11,7 +11,7 @@
     <string name="motion_recognition">Motion detection</string>
     <string name="motion_recognition_description">Rileva quando parcheggi l\'auto, pure quando il Bluetooth è spento. Non spende batteria extra.</string>
 
-    <string name="motion_recognition_notification">Mostra notificazione</string>
+    <string name="show_notification">Mostra notificazione</string>
     <string name="motion_recognition_notification_description">Conferma che hai parcheggiato con una notificazione. Non si usa quando collegato al BT</string>
 
     <string name="bt_on_vehicle">Auto BlueTooth on</string>
@@ -19,5 +19,8 @@
 
     <string name="bt_off_vehicle">Auto BlueTooth off</string>
     <string name="bt_off_vehicle_description">Bluetooth si spegne automaticamente quando si esce dalla macchina</string>
+
+    <string name="bt_parking">Parcheggio Bluetooth</string>
+    <string name="bt_parking_notification_description">Mostra una notifica quando si parcheggia la macchina, basato su Bluetooth</string>
 
 </resources>

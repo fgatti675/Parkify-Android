@@ -47,7 +47,6 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     @NonNull
     private String carId;
 
-    @NonNull
     private Car car;
 
     @Nullable
@@ -62,7 +61,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
             String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
             if (carId.equals(CarDetailsFragment.this.carId)) {
                 Log.d(TAG, "Received car update request" + carId);
-                car = carDatabase.findCar(carId);
+                car = carDatabase.findCar(getActivity(), carId);
                 updateLayout();
             }
         }
@@ -93,14 +92,14 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        carDatabase = CarDatabase.getInstance(getActivity());
+        carDatabase = CarDatabase.getInstance();
 
         if (getArguments() != null) {
             carId = getArguments().getString(ARG_CAR_ID);
         }
         parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(carId));
 
-        car = carDatabase.findCar(carId);
+        car = carDatabase.findCar(getActivity(), carId);
     }
 
     @Override

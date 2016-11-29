@@ -26,6 +26,8 @@ import com.cahue.iweco.util.Util;
 
 import org.json.JSONObject;
 
+import java.util.Date;
+
 /**
  * Created by Francesco on 04/02/2015.
  */
@@ -52,7 +54,7 @@ public class CarsSync {
         if (BuildConfig.DEBUG)
             Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
 
-        carDatabase.updateCarRemoveSpotAndBroadcast(car, spot);
+        carDatabase.updateCarRemoveSpotAndBroadcast(context, car, spot);
 
         if (!AuthUtils.isSkippedLogin(context))
             postCar(car, context, carDatabase);
@@ -64,7 +66,7 @@ public class CarsSync {
         if (BuildConfig.DEBUG)
             Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
 
-        carDatabase.saveCarAndBroadcast(car);
+        carDatabase.saveCarAndBroadcast(context, car);
 
         if (!AuthUtils.isSkippedLogin(context))
             postCar(car, context, carDatabase);
@@ -77,8 +79,8 @@ public class CarsSync {
      */
     public static void clearLocation(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car) {
 
+        car.time = new Date();
         car.spotId = null;
-        car.time = null;
         car.location = null;
         car.address = null;
 
@@ -122,7 +124,7 @@ public class CarsSync {
                         @Override
                         public void onErrorResponse(@NonNull VolleyError error) {
                             Util.showBlueToast(context, R.string.delete_error, Toast.LENGTH_SHORT);
-                            database.saveCarAndBroadcast(car);
+                            database.saveCarAndBroadcast(context, car);
                             error.printStackTrace();
                         }
                     });
@@ -131,7 +133,7 @@ public class CarsSync {
             queue.add(removeRequest);
         }
 
-        database.deleteCar(car);
+        database.deleteCar(context, car);
 
     }
 
@@ -168,7 +170,7 @@ public class CarsSync {
                     public void onResponse(@NonNull JSONObject response) {
                         Log.d(TAG, response.toString());
                         Car car = Car.fromJSON(response);
-                        carDatabase.updateSpotId(car);
+                        carDatabase.updateSpotId(context, car);
                     }
                 },
                 new Response.ErrorListener() {

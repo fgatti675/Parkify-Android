@@ -44,15 +44,15 @@ public class BluetoothDetector extends BroadcastReceiver {
 
             // we need to get which BT device the user chose as the one of his car
 
-            CarDatabase carDatabase = CarDatabase.getInstance(context);
-            Set<String> storedAddress = carDatabase.getPairedBTAddresses();
+            CarDatabase carDatabase = CarDatabase.getInstance();
+            Set<String> storedAddress = carDatabase.getPairedBTAddresses(context);
 
             // If the device we just disconnected from is our chosen one
             if (storedAddress.contains(address)) {
 
                 Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
-                Car car = carDatabase.findCarByBTAddress(address);
+                Car car = carDatabase.findCarByBTAddress(context, address);
 
                 if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                     onBtDisconnectedFromCar(context, car);
