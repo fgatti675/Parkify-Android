@@ -16,7 +16,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DirectionsDelegate;
 import com.cahue.iweco.ParkifyApp;
 import com.cahue.iweco.R;
@@ -92,7 +91,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        directionsDelegate = new DirectionsDelegate();
+        directionsDelegate = new DirectionsDelegate(this);
         directionsDelegate.setColor(getResources().getColor(R.color.theme_primary));
     }
 
@@ -149,8 +148,8 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
     }
 
-    public void fadeOutMarkers() {
-        float zoom = getMap().getCameraPosition().zoom;
+    public void fadeOutMarkers(CameraPosition cameraPosition) {
+        float zoom = cameraPosition.zoom;
         if (zoom < MAX_ZOOM) {
             for (final Marker marker : placeMarkerMap.values()) {
                 handler.postDelayed(new Runnable() {
@@ -418,12 +417,12 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     }
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+    public void onCameraChange(CameraPosition cameraPosition) {
         if (cameraPosition.zoom > MAX_ZOOM) {
             makePlacesViewPortRequest();
             doDraw();
         } else {
-            fadeOutMarkers();
+            fadeOutMarkers(cameraPosition);
         }
 
     }

@@ -93,7 +93,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         super.onCreate(savedInstanceState);
 
         iconGenerator = new IconGenerator(getActivity());
-        directionsDelegate = new DirectionsDelegate();
+        directionsDelegate = new DirectionsDelegate(this);
 
         this.carId = getArguments().getString(ARG_CAR_ID);
 
@@ -109,6 +109,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         this.car = CarDatabase.getInstance().findCar(getActivity(), carId);
 
         if (car == null || car.location == null) {
+            isActive = false;
             clear();
             return;
         }
@@ -142,7 +143,6 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     private void clear() {
-        isActive = false;
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
         directionsDelegate.hide(false);
@@ -218,6 +218,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
 
     public void removeCar() {
+        isActive = false;
         clear();
     }
 
@@ -346,11 +347,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         }
     }
 
-
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
-        if (requester != this)
-            following = false;
+    public void onCameraChange(CameraPosition cameraPosition) {
     }
 
     @Override

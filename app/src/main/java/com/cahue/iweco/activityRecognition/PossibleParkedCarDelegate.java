@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
-import com.cahue.iweco.CameraUpdateRequester;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
@@ -113,7 +112,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+    public void onCameraChange(CameraPosition cameraPosition) {
     }
 
     private boolean isDisplayed() {

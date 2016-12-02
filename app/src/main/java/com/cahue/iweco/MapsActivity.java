@@ -122,7 +122,7 @@ public class MapsActivity extends AppCompatActivity
         implements
         LocationListener,
         GoogleMap.OnMapLongClickListener,
-        GoogleMap.OnCameraChangeListener,
+        GoogleMap.OnCameraMoveStartedListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
@@ -173,12 +173,6 @@ public class MapsActivity extends AppCompatActivity
      */
     @NonNull
     private final Set<CameraUpdateRequester> cameraUpdateRequesterList = new HashSet<>();
-
-    /**
-     * Last component to request a camera update
-     */
-    @Nullable
-    private CameraUpdateRequester lastCameraUpdateRequester;
 
     private MapFragment mapFragment;
 
@@ -632,8 +626,6 @@ public class MapsActivity extends AppCompatActivity
 
         registerCameraUpdateRequester(this);
 
-        handleIntent(getIntent());
-
         mGoogleApiClient.connect();
 
         Log.d("App speed", "On start init time : " + (System.currentTimeMillis() - initTime));
@@ -785,6 +777,8 @@ public class MapsActivity extends AppCompatActivity
         else hideDetails();
 
         Log.d("App speed", "On map ready init time : " + (System.currentTimeMillis() - initTime));
+
+        handleIntent(getIntent());
 
     }
 
@@ -1255,7 +1249,7 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMarkerClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
-        mMap.setOnCameraChangeListener(this);
+        mMap.setOnCameraMoveStartedListener(this);
     }
 
 
@@ -1370,31 +1364,26 @@ public class MapsActivity extends AppCompatActivity
 
     /**
      * This is called when the user moves the camera but also when it is triggered programmatically.
-     *
-     * @param cameraPosition
      */
     @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
+    public void onCameraMoveStarted(int reason) {
 
         if (mMap == null) return;
 
-        if (lastCameraUpdateRequester != this)
-            setCameraFollowing(false);
-
         for (CameraUpdateRequester requester : cameraUpdateRequesterList) {
-            if (lastCameraUpdateRequester != requester) {
+
+            if (reason == REASON_GESTURE)
                 requester.setCameraFollowing(false);
-                requester.onCameraChange(cameraPosition, lastCameraUpdateRequester);
-            }
+
+            requester.onCameraChange(mMap.getCameraPosition());
+
         }
 
         if (detailsFragment != null && detailsFragment.isResumed())
             detailsFragment.onCameraUpdate();
 
-        lastCameraUpdateRequester = null;
 
         Log.v(TAG, "onCameraChange");
-
     }
 
     @Override
@@ -1484,17 +1473,15 @@ public class MapsActivity extends AppCompatActivity
             if (requester != cameraUpdateRequester) requester.setCameraFollowing(false);
 
         // perform animation
-        mMap.animateCamera(cameraUpdate,
-                new GoogleMap.CancelableCallback() {
-                    @Override
-                    public void onFinish() {
-                        MapsActivity.this.lastCameraUpdateRequester = cameraUpdateRequester;
-                    }
+        mMap.animateCamera(cameraUpdate);
 
-                    @Override
-                    public void onCancel() {
-                    }
-                });
+        for (CameraUpdateRequester registered : cameraUpdateRequesterList) {
+
+            if (cameraUpdateRequester != registered) {
+                registered.setCameraFollowing(false);
+                registered.onCameraChange(mMap.getCameraPosition());
+            }
+        }
     }
 
     public void setCameraFollowing(boolean cameraFollowing) {
@@ -1531,7 +1518,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+    public void onCameraChange(CameraPosition cameraPosition) {
     }
 
     private void showFacebookAppInvite() {
@@ -1615,4 +1602,5 @@ public class MapsActivity extends AppCompatActivity
     public void onCarSelected(Car car) {
 
     }
+
 }

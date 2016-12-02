@@ -13,9 +13,8 @@ public interface CameraUpdateRequester {
      * This method need to implement the logic to load any new data if necessary (asynchronously).
      *
      * @param cameraPosition new position of the camera
-     * @param requester the requester of the camera update, null if the camera was moved by the user.
      */
-    void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester);
+    void onCameraChange(CameraPosition cameraPosition);
 
     /**
      * Tell this camera updater to follow or not

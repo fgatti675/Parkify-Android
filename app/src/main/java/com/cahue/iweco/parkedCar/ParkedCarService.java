@@ -2,7 +2,6 @@ package com.cahue.iweco.parkedcar;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -100,13 +99,13 @@ public class ParkedCarService extends LocationPollerService {
 
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 79243, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            CharSequence contentText;
+            CharSequence title;
             if (car.name != null) {
-                Spannable sb = new SpannableString(car.name + " - " + car.address);
+                Spannable sb = new SpannableString(car.name + " - " + getString(R.string.just_parked));
                 sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, car.name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                contentText = sb;
+                title = sb;
             } else {
-                contentText = car.address;
+                title = getString(R.string.just_parked);
             }
 
             NotificationCompat.Builder mBuilder =
@@ -114,8 +113,8 @@ public class ParkedCarService extends LocationPollerService {
                             .setContentIntent(pendingIntent)
                             .setColor(getResources().getColor(R.color.theme_primary))
                             .setSmallIcon(R.drawable.ic_car_white_48dp)
-                            .setContentTitle(getString(R.string.just_parked))
-                            .setContentText(contentText);
+                            .setContentTitle(title)
+                            .setContentText(car.address);
 
             if (PreferencesUtil.isDisplayParkedSoundEnabled(this)) {
 

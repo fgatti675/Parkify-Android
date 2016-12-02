@@ -128,7 +128,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
 
-        directionsDelegate = new DirectionsDelegate();
+        directionsDelegate = new DirectionsDelegate(this);
     }
 
     @Override
@@ -475,7 +475,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition, CameraUpdateRequester requester) {
+    public void onCameraChange(CameraPosition cameraPosition) {
 
         if (!isMapReady() || !isResumed()) return;
 
