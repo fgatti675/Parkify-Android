@@ -2,9 +2,11 @@ package com.cahue.iweco.parkedcar;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -33,7 +35,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.Date;
 
 import static android.content.Intent.ACTION_VIEW;
-import static android.support.v4.app.NotificationCompat.CATEGORY_SERVICE;
 import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
 
 /**
@@ -108,18 +109,29 @@ public class ParkedCarService extends LocationPollerService {
                 contentText = car.address;
             }
 
-            long[] pattern = {0, 100, 1000};
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
-                            .setVibrate(pattern)
                             .setContentIntent(pendingIntent)
                             .setColor(getResources().getColor(R.color.theme_primary))
                             .setSmallIcon(R.drawable.ic_car_white_48dp)
                             .setContentTitle(getString(R.string.just_parked))
-                            .setCategory(CATEGORY_SERVICE)
-                            .setPriority(PRIORITY_MIN)
                             .setContentText(contentText);
 
+            if (PreferencesUtil.isDisplayParkedSoundEnabled(this)) {
+
+                long[] pattern = {0, 100, 1000, 100, 1000};
+                mBuilder
+                        .setVibrate(pattern)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+
+            } else {
+
+                mBuilder.setPriority(PRIORITY_MIN);
+
+                Intent enableSoundIntent = new Intent(Constants.INTENT_ENABLE_NOTIFICATION_SOUND);
+                PendingIntent pIntent = PendingIntent.getBroadcast(this, 79401, enableSoundIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                mBuilder.addAction(new NotificationCompat.Action(R.drawable.ic_volume_up_24dp, getString(R.string.enable_sound), pIntent));
+            }
 
             mNotifyMgr.notify(car.id, NOTIFICATION_ID, mBuilder.build());
 

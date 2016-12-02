@@ -66,6 +66,9 @@ public class Constants {
     public static final String ACTION_VEHICLE_TO_FOOT = BuildConfig.APPLICATION_ID + ".ACTION_VEHICLE_TO_FOOT";
     public static final String ACTION_FOOT_TO_VEHICLE = BuildConfig.APPLICATION_ID + ".ACTION_FOOT_TO_VEHICLE";
 
+    // request to save a car
+    public static final String INTENT_ENABLE_NOTIFICATION_SOUND = BuildConfig.APPLICATION_ID + ".INTENT_ENABLE_NOTIFICATION_SOUND";
+
     /**
      * Average walking speed
      */

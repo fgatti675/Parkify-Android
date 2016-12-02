@@ -126,6 +126,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     public void onMapReady(GoogleMap map) {
         directionsDelegate.setMap(map);
         update(true);
+        if (isActive)
+            activate();
     }
 
 
@@ -140,6 +142,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     }
 
     private void clear() {
+        isActive = false;
         if (carMarker != null) carMarker.remove();
         if (accuracyCircle != null) accuracyCircle.remove();
         directionsDelegate.hide(false);

@@ -8,18 +8,21 @@
     <string name="use_miles_description">Use miles instead of kilometers</string>
 
     <string name="motion_recognition">Motion recognition</string>
-    <string name="motion_recognition_description">Detect when you park your car even when BlueTooth is off. This feature consumes little additional battery. Please note that while your Bluetooth connection is on, motion recognition is not enabled.</string>
+    <string name="motion_recognition_description">Detect when you park your car even when Bluetooth is off. This feature consumes little additional battery. Please note that while your Bluetooth connection is on, motion recognition is not enabled.</string>
 
     <string name="show_notification">Show notification</string>
+    <string name="enable_sound">Enable sound</string>
+
     <string name="motion_recognition_notification_description">Display a notification when stepping out of a vehicle. This applies only to parking events based on motion recognition, not based in Bluetooth.</string>
 
-    <string name="bt_on_vehicle">Auto BlueTooth on</string>
-    <string name="bt_on_vehicle_description">Turn BlueTooth on when getting in a car</string>
+    <string name="bt_on_vehicle">Auto Bluetooth on</string>
+    <string name="bt_on_vehicle_description">Turn Bluetooth on when getting in a car</string>
 
-    <string name="bt_off_vehicle">Auto BlueTooth off</string>
-    <string name="bt_off_vehicle_description">Turn BlueTooth on when getting in a car</string>
+    <string name="bt_off_vehicle">Auto Bluetooth off</string>
+    <string name="bt_off_vehicle_description">Turn Bluetooth on when getting in a car</string>
 
     <string name="bt_parking">Bluetooth Parking</string>
     <string name="bt_parking_notification_description">Display a notification when the car location is set based on Bluetooth detection</string>
+    <string name="bt_parking_notification_low_priority">Enable sound and vibration when the notification is displayed</string>
 
 </resources>

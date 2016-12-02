@@ -11,14 +11,18 @@
     <string name="motion_recognition_description">Detectar cuando aparcas coche aunque el Bluetooth esté desactivado, basado en el movimiento del teléfono. ¡No consume bateria adicional!</string>
 
     <string name="show_notification">Mostrar notificación</string>
+    <string name="enable_sound">Habilitar sonido</string>
+
     <string name="motion_recognition_notification_description">Mostrar una notificacion al bajar del vehiculo para confirmar. No se muestra cuando te bajas de un coche vinculado por BT.</string>
 
-    <string name="bt_on_vehicle">Auto BlueTooth encendido</string>
+    <string name="bt_on_vehicle">Auto Bluetooth encendido</string>
     <string name="bt_on_vehicle_description">Conectar el Bluetooth automaticamente al entrar en un coche</string>
 
-    <string name="bt_off_vehicle">Auto BlueTooth apagado</string>
+    <string name="bt_off_vehicle">Auto Bluetooth apagado</string>
     <string name="bt_off_vehicle_description">Desactivar el Bluetooth automaticamente al bajar de un coche</string>
 
     <string name="bt_parking">Aparcamiento Bluetooth</string>
     <string name="bt_parking_notification_description">Mostrar una notificacion cuando se aparque el coche, basado en Bluetooth</string>
+    <string name="bt_parking_notification_low_priority">Habilitar sonido y vibracion al mostrar notificacion al aparcar</string>
+
 </resources>

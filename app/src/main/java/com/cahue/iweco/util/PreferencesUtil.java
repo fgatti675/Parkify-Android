@@ -39,6 +39,7 @@ public class PreferencesUtil {
     public static final String PREF_PURCHASED_CHECKED = "PREF_PURCHASED_CHECKED";
 
     public static final String PREF_DISPLAY_PARKED_NOTIFICATION = "PREF_DISPLAY_PARKED_NOTIFICATION";
+    public static final String PREF_PARKED_NOTIFICATION_ENABLE_SOUND = "PREF_PARKED_NOTIFICATION_ENABLE_SOUND";
 
 
     public static boolean isLongClickToastShown(Context context) {
@@ -138,8 +139,6 @@ public class PreferencesUtil {
                 .apply();
     }
 
-
-
     public static boolean isUseMiles(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_USE_MILES, false);
@@ -167,11 +166,17 @@ public class PreferencesUtil {
 
     public static boolean isDisplayParkedNotificationEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PREF_DISPLAY_PARKED_NOTIFICATION, false);
+        return prefs.getBoolean(PREF_DISPLAY_PARKED_NOTIFICATION, true);
     }
 
-    public static void setDisplayParkedNotificationEnabled(Context context, boolean checked) {
+    public static boolean isDisplayParkedSoundEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PREF_DISPLAY_PARKED_NOTIFICATION, checked).apply();
+        return prefs.getBoolean(PREF_PARKED_NOTIFICATION_ENABLE_SOUND, false);
     }
+
+    public static void setDisplayParkedSoundEnabled(Context context, boolean checked) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_PARKED_NOTIFICATION_ENABLE_SOUND, checked).apply();
+    }
+
 }

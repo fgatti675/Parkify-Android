@@ -37,10 +37,16 @@
     <PreferenceCategory android:title="@string/bt_parking">
 
         <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="PREF_DISPLAY_PARKED_NOTIFICATION"
             android:summary="@string/bt_parking_notification_description"
             android:title="@string/show_notification" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="PREF_PARKED_NOTIFICATION_ENABLE_SOUND"
+            android:summary="@string/bt_parking_notification_low_priority"
+            android:title="@string/enable_sound" />
 
     </PreferenceCategory>
 

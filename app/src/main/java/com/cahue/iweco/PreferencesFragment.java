@@ -32,7 +32,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
         if (key.equals(PreferencesUtil.PREF_MOVEMENT_RECOGNITION)) {
             boolean enableBtPreferences = sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true);
-            updateBtPreferencesState(enableBtPreferences);
+            updateActRecPreferencesState(enableBtPreferences);
 
             if (enableBtPreferences) {
                 ActivityRecognitionService.startIfNoBT(getActivity());
@@ -40,12 +40,22 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                 ActivityRecognitionService.stop(getActivity());
             }
         }
+
+        if (key.equals(PreferencesUtil.PREF_DISPLAY_PARKED_NOTIFICATION)) {
+            boolean enableBtPreferences = sharedPreferences.getBoolean(PreferencesUtil.PREF_DISPLAY_PARKED_NOTIFICATION, true);
+            updateBtPreferencesState(enableBtPreferences);
+        }
+    }
+
+    private void updateActRecPreferencesState(boolean enableARPreferences) {
+        getPreferenceManager().findPreference(PreferencesUtil.PREF_MOVEMENT_RECOGNITION_NOTIFICATION).setEnabled(enableARPreferences);
+        getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableARPreferences);
     }
 
     private void updateBtPreferencesState(boolean enableBtPreferences) {
-        getPreferenceManager().findPreference(PreferencesUtil.PREF_MOVEMENT_RECOGNITION_NOTIFICATION).setEnabled(enableBtPreferences);
-        getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableBtPreferences);
+        getPreferenceManager().findPreference(PreferencesUtil.PREF_PARKED_NOTIFICATION_ENABLE_SOUND).setEnabled(enableBtPreferences);
     }
+
 
     @Override
     public void onResume() {
@@ -54,7 +64,8 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
 
-        updateBtPreferencesState(sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true));
+        updateActRecPreferencesState(sharedPreferences.getBoolean(PreferencesUtil.PREF_MOVEMENT_RECOGNITION, true));
+        updateBtPreferencesState(sharedPreferences.getBoolean(PreferencesUtil.PREF_DISPLAY_PARKED_NOTIFICATION, true));
     }
 
     @Override
