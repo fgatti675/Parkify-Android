@@ -100,7 +100,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             // check if really in a vehicle
             if (isVehicleRelated(mostProbableActivity)) {
                 vehicleCounter++;
-                if (vehicleCounter > 5) definitelyInAVehicle = true;
+                if (vehicleCounter > 3) definitelyInAVehicle = true;
             } else {
                 vehicleCounter = 0;
             }
@@ -116,7 +116,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
 
             if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                    && mostProbableActivity.getConfidence() >= 80) {
+                    && mostProbableActivity.getConfidence() >= 90) {
 
                 if (BuildConfig.DEBUG) {
                     showDebugNotification(result, mostProbableActivity);
@@ -237,10 +237,16 @@ public class DetectedActivitiesIntentService extends IntentService {
 
 
     private void savePreviousActivity(@Nullable DetectedActivity previousActivity) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (previousActivity != null) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit()
+            prefs.edit()
                     .putInt(PREF_PREVIOUS_ACTIVITY_TYPE, previousActivity.getType())
                     .putInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, previousActivity.getConfidence())
+                    .apply();
+        } else {
+            prefs.edit()
+                    .remove(PREF_PREVIOUS_ACTIVITY_TYPE)
+                    .remove(PREF_PREVIOUS_ACTIVITY_CONFIDENCE)
                     .apply();
         }
     }
