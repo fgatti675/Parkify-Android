@@ -118,7 +118,7 @@ public class ParkedCarService extends LocationPollerService {
 
             if (PreferencesUtil.isDisplayParkedSoundEnabled(this)) {
 
-                long[] pattern = {0, 100, 1000, 100, 1000};
+                long[] pattern = {0, 100, 200, 200};
                 mBuilder
                         .setVibrate(pattern)
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -126,10 +126,6 @@ public class ParkedCarService extends LocationPollerService {
             } else {
 
                 mBuilder.setPriority(PRIORITY_MIN);
-
-                Intent enableSoundIntent = new Intent(Constants.INTENT_ENABLE_NOTIFICATION_SOUND);
-                PendingIntent pIntent = PendingIntent.getBroadcast(this, 79401, enableSoundIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                mBuilder.addAction(new NotificationCompat.Action(R.drawable.ic_volume_up_24dp, getString(R.string.enable_sound), pIntent));
             }
 
             mNotifyMgr.notify(car.id, NOTIFICATION_ID, mBuilder.build());
