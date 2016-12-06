@@ -25,6 +25,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -43,7 +44,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     private static final String TAG = "Activity recognition";
 
-    private static final String PREF_PREVIOUS_ACTIVITY_TYPE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
+    private static final String PREF_PREVIOUS_ACTIVITY_TYPE = "PREF_PREVIOUS_ACTIVITY_TYPE";
     private static final String PREF_PREVIOUS_ACTIVITY_CONFIDENCE = "PREF_PREVIOUS_ACTIVITY_CONFIDENCE";
 
 
@@ -80,10 +81,14 @@ public class DetectedActivitiesIntentService extends IntentService {
 
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
+            DetectedActivity mostProbableActivity = result.getMostProbableActivity();
+
+            // If not on foot or in vehicle we are not interested
+            if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
+                return;
+
             if (previousActivity == null)
                 previousActivity = getStoredDetectedActivity();
-
-            DetectedActivity mostProbableActivity = result.getMostProbableActivity();
 
             // Check if still
 //        if (isStill(mostProbableActivity)) {
@@ -105,29 +110,27 @@ public class DetectedActivitiesIntentService extends IntentService {
                 vehicleCounter = 0;
             }
 
-            // If not on foot or in vehicle we are not interested
-            if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
-                return;
-
             // Log each activity.
-            Log.d(TAG, "Activities detected");
+            Log.d(TAG, "Activities detected: " + mostProbableActivity.toString());
             for (DetectedActivity da : result.getProbableActivities()) {
                 Log.v(TAG, da.toString());
             }
 
-            if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                    && mostProbableActivity.getConfidence() >= 90) {
+            if (BuildConfig.DEBUG) {
+                showDebugNotification(mostProbableActivity);
+            }
 
-                if (BuildConfig.DEBUG) {
-                    showDebugNotification(result, mostProbableActivity);
-                }
+            if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
+                    && mostProbableActivity.getConfidence() >= 80) {
 
                 if (previousActivity != null) {
 
-                    // If switched to on foot, previously in vehicle
-                    if (isOnFoot(mostProbableActivity) && isVehicleRelated(previousActivity) && definitelyInAVehicle) {
+                    // Vehicle --> Foot
+                    if (isVehicleRelated(previousActivity)  && isOnFoot(mostProbableActivity) && definitelyInAVehicle) {
                         handleVehicleToFoot();
-                    } else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
+                    }
+                    // Foot --> Vehicle
+                    else if (isOnFoot(previousActivity) && isVehicleRelated(mostProbableActivity)) {
                         handleFootToVehicle();
                     }
 
@@ -157,8 +160,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            Notification.Builder mBuilder =
-                    new Notification.Builder(this)
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_access_time_black_18px)
                             .setColor(getResources().getColor(R.color.theme_primary))
@@ -186,8 +189,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            Notification.Builder mBuilder =
-                    new Notification.Builder(this)
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_access_time_black_18px)
                             .setColor(getResources().getColor(R.color.theme_primary))
@@ -198,15 +201,10 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
 
-    private void showDebugNotification(@NonNull ActivityRecognitionResult result, @NonNull DetectedActivity mostProbableActivity) {
+    private void showDebugNotification(@NonNull DetectedActivity mostProbableActivity) {
         String previousText = previousActivity != null ?
                 "Previous: " + previousActivity.toString() + "\n" :
                 "Previous unknown\n";
-
-        StringBuilder stringBuilder = new StringBuilder(previousText);
-        for (DetectedActivity detectedActivity : result.getProbableActivities()) {
-            stringBuilder.append(detectedActivity.toString()).append("\n");
-        }
 
         long[] pattern = {0, 100, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -215,7 +213,6 @@ public class DetectedActivitiesIntentService extends IntentService {
                         .setVibrate(pattern)
                         .setSmallIcon(R.drawable.ic_navigation_cancel)
                         .setContentTitle(mostProbableActivity.toString())
-                        .setStyle(new Notification.BigTextStyle().bigText(stringBuilder.toString()))
                         .setContentText(previousText);
 
         mNotifyMgr.notify(null, 7908772, mBuilder.build());
@@ -254,7 +251,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private DetectedActivity getStoredDetectedActivity() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (!prefs.contains(PREF_PREVIOUS_ACTIVITY_TYPE)) return null;
-        int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, DetectedActivity.UNKNOWN);
+        int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, -1);
         int confidence = prefs.getInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, 0);
         return new DetectedActivity(type, confidence);
     }
