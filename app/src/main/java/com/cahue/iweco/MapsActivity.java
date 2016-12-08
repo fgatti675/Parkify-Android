@@ -470,8 +470,7 @@ public class MapsActivity extends AppCompatActivity
                     };
                     registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
-                    displayFacebookPromo();
-//                    setUpFacebookAd();
+                    setUpFacebookAd();
 
                 } else {
                     PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
