@@ -85,5 +85,6 @@
     <string name="share">Compartir position</string>
     <string name="car_was_here_share">%1$s esta aquí (%2$s)</string>
     <string name="just_parked">Acabas de aparcar</string>
+    <string name="support_like_fb">Puedes ayudarnos mucho si haces like en nuestra pagina de Facebook</string>
 
 </resources>

@@ -51,6 +51,14 @@
                     android:layout_marginLeft="@dimen/small_padding"
                     android:layout_toRightOf="@id/navigation_drawer_toggle" />
 
+                <include
+                    layout="@layout/facebook_like_view"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="@dimen/small_padding"
+                    android:layout_toRightOf="@id/navigation_drawer_toggle" />
+
                 <Button
                     android:id="@+id/no_cars_button"
                     style="?android:attr/borderlessButtonStyle"

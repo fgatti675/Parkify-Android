@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/facebook_promo_container"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="horizontal"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:maxLines="2"
+        android:paddingEnd="@dimen/default_padding"
+        android:paddingStart="@dimen/default_padding"
+        android:text="@string/support_like_fb"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/body_text_1_inverse"
+        android:textStyle="bold" />
+
+    <com.facebook.share.widget.LikeView
+        android:id="@+id/like_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginEnd="@dimen/default_padding"
+        android:layout_marginStart="@dimen/default_padding" />
+
+
+</LinearLayout>
+

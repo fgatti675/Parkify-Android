@@ -83,6 +83,7 @@ import com.facebook.ads.AdListener;
 import com.facebook.ads.NativeAd;
 import com.facebook.login.LoginManager;
 import com.facebook.share.widget.AppInviteDialog;
+import com.facebook.share.widget.LikeView;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.formats.NativeAdOptions;
@@ -432,10 +433,10 @@ public class MapsActivity extends AppCompatActivity
 
         if (carDatabase.isEmptyOfCars(this)) return;
 
-        checkforPurchases(billingFragment);
+        checkForPurchases(billingFragment);
     }
 
-    private void checkforPurchases(final BillingFragment billingFragment) {
+    private void checkForPurchases(final BillingFragment billingFragment) {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -469,7 +470,8 @@ public class MapsActivity extends AppCompatActivity
                     };
                     registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
-                    setUpFacebookAd();
+                    displayFacebookPromo();
+//                    setUpFacebookAd();
 
                 } else {
                     PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
@@ -488,12 +490,11 @@ public class MapsActivity extends AppCompatActivity
     }
 
 
-    @Override
-    public void onError(Ad ad, AdError adError) {
-        Log.d(TAG, "onAdError: ");
-//        setUpAdMobAd();
-    }
-
+    /**
+     * On FB ad loaded
+     *
+     * @param ad
+     */
     @Override
     public void onAdLoaded(Ad ad) {
 
@@ -532,8 +533,42 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    private void setUpAdMobAd() {
+    /**
+     * On FB ad error
+     *
+     * @param ad
+     */
+    @Override
+    public void onError(Ad ad, AdError adError) {
+        Log.d(TAG, "onAdError: ");
+//        setUpAdMobAd();
+        displayFacebookPromo();
+    }
 
+    private void displayFacebookPromo() {
+
+        ViewGroup facebookPromoView = (ViewGroup) findViewById(R.id.facebook_promo_container);
+        if (facebookPromoView != null) {
+
+            Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_LIKE, Tracking.ACTION_VIEW_DISPLAYED);
+
+            facebookPromoView.setVisibility(View.VISIBLE);
+            LikeView likeView = (LikeView) facebookPromoView.findViewById(R.id.like_button);
+            likeView.setObjectIdAndType(
+                    "https://www.facebook.com/parkifyapplication/",
+                    LikeView.ObjectType.PAGE);
+            likeView.setLikeViewStyle(LikeView.Style.BUTTON);
+            likeView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_LIKE, Tracking.ACTION_LIKE_CLICKED);
+                }
+            });
+
+        }
+    }
+
+    private void setUpAdMobAd() {
         // Create native UI using the ad metadata.
         final ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
         final TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
