@@ -30,12 +30,16 @@ public class Tracking {
 
     public static final String CATEGORY_FACEBOOK_INVITE = "Facebook invite";
 
+    public static final String CATEGORY_FACEBOOK_LIKE = "Facebook like promo";
+
 
     public static final String ACTION_DO_LOGIN = "Do login";
 
     public static final String ACTION_SKIP_LOGIN = "Skip login";
 
     public static final String ACTION_CAR_SELECTED = "Car selected";
+
+    public static final String ACTION_CAR_LOCATION_SHARED = "Car location shared";
 
     public static final String ACTION_NOTIFICATION_REMOVED = "Notification removed";
 
@@ -46,6 +50,11 @@ public class Tracking {
     public static final String ACTION_CAR_EDIT = "Car edited";
 
     public static final String ACTION_AD_CLICKED = "Ad clicked";
+
+    public static final String ACTION_VIEW_DISPLAYED = "View displayed";
+
+    public static final String ACTION_LIKE_CLICKED = "Like clicked";
+
 
     public static final String LABEL_FACEBOOK_LOGIN = "Facebook login";
 
@@ -96,7 +105,7 @@ public class Tracking {
 
     public static void sendEvent(String category, String action, @Nullable String label, @Nullable Long value) {
 
-        Log.i("Tracking", "Event: " + action + " " + category + " " + label + " " + value);
+        Log.i("Tracking", "Event: " + category + " / " + action + " / " + label + " / " + value);
 
         if (BuildConfig.DEBUG) return;
 

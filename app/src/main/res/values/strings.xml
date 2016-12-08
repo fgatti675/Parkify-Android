@@ -85,5 +85,6 @@
 
     <string name="public_parking">Public parking</string>
     <string name="car_was_here_share" >%1$s is here (%2$s)</string>
+    <string name="support_like_fb">You can really help us by liking us on Facebook</string>
 
 </resources>

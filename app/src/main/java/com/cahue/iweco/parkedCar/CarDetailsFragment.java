@@ -28,7 +28,7 @@ import com.cahue.iweco.cars.CarViewHolder;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
-
+import com.cahue.iweco.util.Tracking;
 
 /**
  * Use the {@link CarDetailsFragment#newInstance} factory method to
@@ -235,6 +235,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareString + "\n" + uri);
 
         startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share)));
+
+        Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_CAR_LOCATION_SHARED);
 
     }
 
