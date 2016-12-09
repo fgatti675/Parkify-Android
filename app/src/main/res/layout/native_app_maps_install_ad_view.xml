@@ -53,6 +53,7 @@
                         android:textStyle="bold"
                         tools:text="Title" />
 
+                    <!-- Do not switch to lines="1" or marquee breaks-->
                     <TextView
                         android:id="@+id/native_ad_body"
                         android:layout_width="fill_parent"
@@ -63,7 +64,7 @@
                         android:freezesText="true"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:scrollHorizontally="true"
-                        android:lines="1"
+                        android:singleLine="true"
                         android:visibility="gone"
                         tools:text="Subtitle"
                         tools:visibility="visible" />
