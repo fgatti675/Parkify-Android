@@ -21,8 +21,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -87,8 +85,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             if (!isOnFoot(mostProbableActivity) && !isVehicleRelated(mostProbableActivity))
                 return;
 
-            if (previousActivity == null)
-                previousActivity = getStoredDetectedActivity();
+//            if (previousActivity == null)
+//                previousActivity = getStoredDetectedActivity();
 
             // Check if still
 //        if (isStill(mostProbableActivity)) {
@@ -105,9 +103,11 @@ public class DetectedActivitiesIntentService extends IntentService {
             // check if really in a vehicle
             if (isVehicleRelated(mostProbableActivity)) {
                 vehicleCounter++;
-                if (vehicleCounter > 3) definitelyInAVehicle = true;
+                if (vehicleCounter > 5) definitelyInAVehicle = true;
+                ActivityRecognitionService.startIfEnabledFastRecognition(this);
             } else {
                 vehicleCounter = 0;
+                ActivityRecognitionService.startIfEnabled(this);
             }
 
             // Log each activity.
@@ -121,7 +121,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
 
             if ((previousActivity == null || mostProbableActivity.getType() != previousActivity.getType())
-                    && mostProbableActivity.getConfidence() >= 80) {
+                    && mostProbableActivity.getConfidence() >= 75) {
 
                 if (previousActivity != null) {
 
@@ -140,7 +140,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
                 previousActivity = mostProbableActivity;
 
-                savePreviousActivity(previousActivity);
+//                savePreviousActivity(previousActivity);
             }
 
         }
@@ -233,28 +233,28 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
 
-    private void savePreviousActivity(@Nullable DetectedActivity previousActivity) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (previousActivity != null) {
-            prefs.edit()
-                    .putInt(PREF_PREVIOUS_ACTIVITY_TYPE, previousActivity.getType())
-                    .putInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, previousActivity.getConfidence())
-                    .apply();
-        } else {
-            prefs.edit()
-                    .remove(PREF_PREVIOUS_ACTIVITY_TYPE)
-                    .remove(PREF_PREVIOUS_ACTIVITY_CONFIDENCE)
-                    .apply();
-        }
-    }
-
-    private DetectedActivity getStoredDetectedActivity() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (!prefs.contains(PREF_PREVIOUS_ACTIVITY_TYPE)) return null;
-        int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, -1);
-        int confidence = prefs.getInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, 0);
-        return new DetectedActivity(type, confidence);
-    }
+//    private void savePreviousActivity(@Nullable DetectedActivity previousActivity) {
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        if (previousActivity != null) {
+//            prefs.edit()
+//                    .putInt(PREF_PREVIOUS_ACTIVITY_TYPE, previousActivity.getType())
+//                    .putInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, previousActivity.getConfidence())
+//                    .apply();
+//        } else {
+//            prefs.edit()
+//                    .remove(PREF_PREVIOUS_ACTIVITY_TYPE)
+//                    .remove(PREF_PREVIOUS_ACTIVITY_CONFIDENCE)
+//                    .apply();
+//        }
+//    }
+//
+//    private DetectedActivity getStoredDetectedActivity() {
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        if (!prefs.contains(PREF_PREVIOUS_ACTIVITY_TYPE)) return null;
+//        int type = prefs.getInt(PREF_PREVIOUS_ACTIVITY_TYPE, -1);
+//        int confidence = prefs.getInt(PREF_PREVIOUS_ACTIVITY_CONFIDENCE, 0);
+//        return new DetectedActivity(type, confidence);
+//    }
 
 
 }
