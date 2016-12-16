@@ -51,7 +51,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     private final static float MAX_ZOOM = 13F;
     // how many markers
     private final static int MAX_MARKERS_PER_REQUEST = 20;
-    private final static int MAX_DISPLAYED_MARKERS = 40;
+    private final static int MAX_DISPLAYED_MARKERS = 30;
 
     private static final String TAG = PlacesDelegate.class.getSimpleName();
 
