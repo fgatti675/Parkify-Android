@@ -50,7 +50,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    private final static float MAX_ZOOM = 10F;
+    private final static float MAX_ZOOM = 13F;
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     private static final String TAG = "SpotsDelegate";
@@ -101,8 +101,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      * Directions delegate
      */
     private DirectionsDelegate directionsDelegate;
-
-    private List<Marker> displayedMarker = new ArrayList<>();
 
     @NonNull
     public static SpotsDelegate newInstance() {
@@ -194,7 +192,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     public boolean queryCameraView() {
 
-        if(getMap() == null) return false;
+        if (getMap() == null) return false;
 
         // What the user is actually seeing right now
         setUpViewBounds();
@@ -307,6 +305,9 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         if (!areMarkersDisplayed) {
             Log.v(TAG, "Abort drawing spots. Markers are hidden");
+            for (Marker marker : spotMarkersMap.values()) {
+                marker.setVisible(false);
+            }
             return;
         }
 
@@ -319,40 +320,37 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         for (final ParkingSpot parkingSpot : spots) {
 
-            Log.v(TAG, parkingSpot.toString());
-
-            if (displayedMarkers > MARKERS_LIMIT) {
-                Log.v(TAG, "Marker display limit reached");
-                break;
-            }
-
             LatLng spotPosition = parkingSpot.getLatLng();
 
             Marker marker = spotMarkersMap.get(parkingSpot);
+            if (viewBounds.contains(spotPosition)) {
 
-            // if there is no marker we create it
-            if (marker == null) {
-                marker = getMap().addMarker(MarkerFactory.getSpotMarker(parkingSpot, getActivity()));
-                marker.setVisible(false);
-                if (viewBounds.contains(spotPosition)) {
+                Log.v(TAG, parkingSpot.toString());
+
+                if (displayedMarkers > MARKERS_LIMIT) {
+                    Log.v(TAG, "Marker display limit reached");
+                    break;
+                }
+
+                // if there is no marker we create it
+                if (marker == null) {
+                    marker = getMap().addMarker(MarkerFactory.getSpotMarker(parkingSpot, getActivity()));
                     revealMarker(marker);
-                    displayedMarkers++;
+                    spotMarkersMap.put(parkingSpot, marker);
                 }
-            }
 
-            // else we may need to update it
-            else {
-                updateMarker(parkingSpot, marker);
-                if (viewBounds.contains(spotPosition)) {
+                // else we may need to update it
+                else {
+                    updateMarker(parkingSpot, marker);
                     marker.setVisible(true);
-                    displayedMarkers++;
-                } else {
-                    marker.setVisible(false);
                 }
-            }
+                displayedMarkers++;
 
-            spotMarkersMap.put(parkingSpot, marker);
-            marker.setTag(parkingSpot);
+                marker.setTag(parkingSpot);
+
+            } else {
+                if (marker != null) marker.setVisible(false);
+            }
 
         }
     }
