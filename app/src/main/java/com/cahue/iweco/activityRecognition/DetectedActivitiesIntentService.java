@@ -218,7 +218,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                         .setPriority(PRIORITY_MIN)
                         .setSmallIcon(R.drawable.ic_navigation_cancel)
                         .setContentTitle(mostProbableActivity.toString())
-                        .setContentText("V: " + vehicleCounter + " Curr:" + new DetectedActivity(currentActivity, 100));
+                        .setContentText("V: " + vehicleCounter + " S: " + stillCounter +" Curr:" + new DetectedActivity(currentActivity, 100));
 
         mNotifyMgr.notify(null, 7908772, mBuilder.build());
     }
