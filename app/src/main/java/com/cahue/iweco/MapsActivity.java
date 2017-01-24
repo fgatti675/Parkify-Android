@@ -244,8 +244,6 @@ public class MapsActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
 
-        PreferencesUtil.setAdsRemoved(this, false);
-
         setContentView(R.layout.activity_main);
 
         carDatabase = CarDatabase.getInstance();

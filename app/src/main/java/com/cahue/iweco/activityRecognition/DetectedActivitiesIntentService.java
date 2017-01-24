@@ -108,7 +108,8 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         if (isStill(detectedActivity)) {
             stillCounter++;
-            if (stillCounter > 10) {
+            if (stillCounter > 5) {
+                currentActivity = DetectedActivity.ON_FOOT;
                 vehicleCounter = 0;
             }
             ActivityRecognitionService.startIfEnabled(this);
