@@ -6,6 +6,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -177,6 +178,14 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             @Override
             public void onClick(View v) {
                 onLoginSkipped();
+            }
+        });
+
+        findViewById(R.id.terms_of_use).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://glossy-radio.appspot.com/terms_of_use.txt"));
+                startActivity(myIntent);
             }
         });
 

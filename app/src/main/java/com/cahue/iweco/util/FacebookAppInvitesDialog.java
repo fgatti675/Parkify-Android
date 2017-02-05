@@ -4,12 +4,7 @@ package com.cahue.iweco.util;
  * Created by Francesco on 07/06/2015.
  */
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -22,10 +17,10 @@ import com.facebook.FacebookException;
 import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
 
+import static com.facebook.GraphRequest.TAG;
 
-public class FacebookAppInvitesDialog extends DialogFragment {
 
-    private static final String TAG = FacebookAppInvitesDialog.class.getSimpleName();
+public class FacebookAppInvitesDialog  {
 
     public static void showAppInviteDialog(@NonNull final MapsActivity activity) {
 
@@ -71,27 +66,5 @@ public class FacebookAppInvitesDialog extends DialogFragment {
         appInviteDialog.show(appInviteContent);
     }
 
-
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.invite_promo)
-                .setTitle(R.string.invite_title)
-                .setIcon(R.drawable.weco_logo_small)
-                .setPositiveButton(R.string.invite_title, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        showAppInviteDialog((MapsActivity) getActivity());
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-
-        // Create the AlertDialog object and return it
-        return builder.create();
-    }
 
 }

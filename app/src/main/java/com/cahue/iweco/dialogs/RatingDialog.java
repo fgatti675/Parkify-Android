@@ -76,7 +76,7 @@ public class RatingDialog extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.rating_message)
-                .setIcon(R.drawable.weco_logo_small)
+                .setIcon(R.drawable.ic_logo_heart)
                 .setTitle(R.string.like_question)
                 .setPositiveButton(R.string.rate, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {

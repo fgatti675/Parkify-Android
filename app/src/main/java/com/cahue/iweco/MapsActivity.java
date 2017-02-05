@@ -82,7 +82,6 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.AdListener;
 import com.facebook.ads.NativeAd;
 import com.facebook.login.LoginManager;
-import com.facebook.share.widget.AppInviteDialog;
 import com.facebook.share.widget.LikeView;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
@@ -692,7 +691,6 @@ public class MapsActivity extends AppCompatActivity
          * Show some dialogs in case the user is bored
          */
         checkRatingDialogShown();
-        showFacebookAppInvite();
 
         /**
          * If BT is not enabled, start activity recognition service (if enabled)
@@ -1551,17 +1549,6 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-    }
-
-    private void showFacebookAppInvite() {
-
-        if (!PreferencesUtil.isFacebookInvitesShown(this)
-                && System.currentTimeMillis() - AuthUtils.getLoginDate(this) > 24 * 60 * 60 * 1000
-                && AppInviteDialog.canShow()) {
-            FacebookAppInvitesDialog dialog = new FacebookAppInvitesDialog();
-            dialog.show(getFragmentManager(), "FacebookAppInvitesDialog");
-            PreferencesUtil.setFacebookInvitesShown(this, true);
-        }
     }
 
     /**

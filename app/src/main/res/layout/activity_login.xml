@@ -9,29 +9,14 @@
     tools:context="com.cahue.iweco.login.LoginActivity">
 
 
-    <pl.droidsonroids.gif.GifImageView
-        android:id="@+id/weco_anim"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:adjustViewBounds="true"
-        android:src="@drawable/weco_anim"
-        tools:showIn="@layout/activity_login" />
-
     <ImageView
         android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:paddingBottom="@dimen/large_padding"
-        android:paddingTop="@dimen/large_padding"
+        android:paddingBottom="40dp"
+        android:paddingTop="40dp"
         android:src="@drawable/parkify_logo" />
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
 
 
         <RelativeLayout
@@ -62,14 +47,14 @@
                 <Button
                     android:id="@+id/facebook_login_button"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="60dp"
                     android:text="@string/facebook_sign_in"
                     android:theme="@style/CahueTheme.Button.Facebook" />
 
                 <Button
                     android:id="@+id/plus_sign_in_button"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="60dp"
                     android:text="@string/google_sign_in"
                     android:theme="@style/CahueTheme.Button.Google" />
 
@@ -77,8 +62,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:textSize="18sp"
                     android:gravity="center"
-                    android:padding="@dimen/default_padding"
+                    android:padding="@dimen/large_padding"
                     android:text="@string/login_benefits" />
 
                 <Button
@@ -87,9 +73,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/no_sign_in" />
+
+                <TextView
+                    android:id="@+id/terms_of_use"
+                    android:layout_marginTop="40dp"
+                    android:alpha=".75"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/terms_of_use"/>
             </LinearLayout>
 
         </RelativeLayout>
 
-    </LinearLayout>
 </LinearLayout>
