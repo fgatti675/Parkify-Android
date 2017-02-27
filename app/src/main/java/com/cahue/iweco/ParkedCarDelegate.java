@@ -157,7 +157,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         lightColor = ColorUtil.getSemiTransparent(getResources().getColor(R.color.silver));
 
         if (car.color == null) {
-            iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+            iconGenerator.setTextAppearance(getActivity(), com.google.maps.android.R.style.amu_Bubble_TextAppearance_Light);
             iconGenerator.setColor(markerColor);
             lightColor = ColorUtil.getSemiTransparent(markerColor);
         } else {
@@ -165,8 +165,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
             boolean brightColor = ColorUtil.isBrightColor(markerColor);
             iconGenerator.setTextAppearance(getActivity(),
                     brightColor ?
-                            com.google.maps.android.R.style.Bubble_TextAppearance_Dark :
-                            com.google.maps.android.R.style.Bubble_TextAppearance_Light);
+                            com.google.maps.android.R.style.amu_Bubble_TextAppearance_Dark :
+                            com.google.maps.android.R.style.amu_Bubble_TextAppearance_Light);
 
             if (markerColor != getResources().getColor(R.color.white))
                 lightColor = brightColor ? markerColor : ColorUtil.getSemiTransparent(markerColor);

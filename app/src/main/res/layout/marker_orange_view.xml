@@ -2,7 +2,7 @@
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/text"
+    android:id="@+id/amu_text"
     style="@style/Marker.Orange"
     android:layout_width="20dp"
     android:layout_height="28dp"
