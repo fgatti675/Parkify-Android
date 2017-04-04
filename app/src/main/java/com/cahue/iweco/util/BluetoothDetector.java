@@ -1,7 +1,9 @@
 package com.cahue.iweco.util;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +34,7 @@ public class BluetoothDetector extends BroadcastReceiver {
             } else if(state == BluetoothAdapter.STATE_OFF) {
                 onBtTurnedOff(context);
             }
-        } else {
+        } else if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
 
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
@@ -53,10 +55,10 @@ public class BluetoothDetector extends BroadcastReceiver {
                 Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
                 Car car = carDatabase.findCarByBTAddress(context, address);
-
-                if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                int state = intent.getExtras().getInt(BluetoothProfile.EXTRA_STATE);
+                if (state == BluetoothProfile.STATE_DISCONNECTED) {
                     onBtDisconnectedFromCar(context, car);
-                } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
+                } else if (state == BluetoothProfile.STATE_CONNECTED) {
                     onBtConnectedToCar(context, car);
                 }
             }
