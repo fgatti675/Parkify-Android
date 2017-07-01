@@ -172,6 +172,11 @@ public class ParkingSpot implements Parcelable {
         if (latLng == null) latLng = new LatLng(location.getLatitude(), location.getLongitude());
         return latLng;
     }
+
+    public Date getTime() {
+        return time;
+    }
+
     /**
      * Created by Francesco on 19.11.2014.
      */

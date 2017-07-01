@@ -3,11 +3,11 @@ apply plugin: 'com.android.application'
 apply from: project.property("cahue.signing") + "/cahue.gradle";
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion "android-O"
+    buildToolsVersion "25.0.3"
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion "O"
         applicationId "com.whereismycar"
         versionCode 81
         versionName "3.6.1"
@@ -42,20 +42,20 @@ dependencies {
         exclude group: "com.google.android.gms"
     }
 
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.android.support:support-v13:25.2.0'
-    compile 'com.android.support:cardview-v7:25.2.0'
-    compile 'com.android.support:recyclerview-v7:25.2.0'
-    compile 'com.android.support:design:25.2.0'
-    compile 'com.google.android.gms:play-services-auth:10.2.0'
-    compile 'com.google.android.gms:play-services-plus:10.2.0'
-    compile 'com.google.android.gms:play-services-maps:10.2.0'
-    compile 'com.google.android.gms:play-services-location:10.2.0'
-    compile 'com.google.android.gms:play-services-wallet:10.2.0'
-    compile 'com.google.android.gms:play-services-gcm:10.2.0'
-    compile 'com.google.android.gms:play-services-analytics:10.2.0'
-    compile 'com.google.android.gms:play-services-ads:10.2.0'
-    compile 'de.hdodenhof:circleimageview:1.2.2'
+    compile 'com.android.support:appcompat-v7:26.0.0-beta2'
+    compile 'com.android.support:support-v13:26.0.0-beta2'
+    compile 'com.android.support:cardview-v7:26.0.0-beta2'
+    compile 'com.android.support:recyclerview-v7:26.0.0-beta2'
+    compile 'com.android.support:design:26.0.0-beta2'
+    compile 'com.google.android.gms:play-services-auth:11.0.1'
+    compile 'com.google.android.gms:play-services-plus:11.0.1'
+    compile 'com.google.android.gms:play-services-maps:11.0.1'
+    compile 'com.google.android.gms:play-services-location:11.0.1'
+    compile 'com.google.android.gms:play-services-wallet:11.0.1'
+    compile 'com.google.android.gms:play-services-gcm:11.0.1'
+    compile 'com.google.android.gms:play-services-analytics:11.0.1'
+    compile 'com.google.android.gms:play-services-ads:11.0.1'
+    compile 'de.hdodenhof:circleimageview:1.3.0'
     compile 'com.mcxiaoke.volley:library:1.0.19@aar'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.3'
 

@@ -113,6 +113,22 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="Marker.PossibleCar12">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Marker.PossibleCar10">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="Marker.PossibleCar9">
+        <item name="android:textSize">9sp</item>
+    </style>
+
+    <style name="Marker.PossibleCar8">
+        <item name="android:textSize">8sp</item>
+    </style>
+
     <style name="Marker.Selected">
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>

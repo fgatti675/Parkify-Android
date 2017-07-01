@@ -60,13 +60,15 @@
                         android:layout_toRightOf="@id/navigation_drawer_toggle"
                         android:maxWidth="320dp" />
 
-                    <include
-                        layout="@layout/facebook_like_view"
-                        android:visibility="gone"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:layout_marginLeft="@dimen/small_padding"
-                        android:layout_toRightOf="@id/navigation_drawer_toggle" />
+                    <com.google.android.gms.ads.NativeExpressAdView
+                        android:id="@+id/cssAdView"
+                        android:layout_width="320dp"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="-24dp"
+                        cahue:adSize="320x80"
+                        cahue:adUnitId="ca-app-pub-7749631063131885/9014982450" />
 
                     <Button
                         android:id="@+id/no_cars_button"
@@ -74,6 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_margin="@dimen/default_padding"
                         android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
                         android:drawableRight="@drawable/ic_keyboard_arrow_right_24dp"

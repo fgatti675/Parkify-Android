@@ -579,20 +579,35 @@ public class CarDatabase {
             database.insertWithOnConflict(TABLE_POSSIBLE_SPOTS, COLUMN_TIME, values, SQLiteDatabase.CONFLICT_REPLACE);
 
             Cursor cursor = database.query(TABLE_POSSIBLE_SPOTS,
-                    new String[]{COLUMN_TIME},
+                    SPOT_PROJECTION,
                     null,
                     null, null, null,
                     COLUMN_TIME + " DESC");
 
-            List<Long> parkingTimes = new ArrayList<>();
+            List<ParkingSpot> previousSpots = new ArrayList<>();
             while (cursor.moveToNext()) {
-                parkingTimes.add(cursor.getLong(0));
+                previousSpots.add(cursorToSpot(cursor));
             }
             cursor.close();
 
-            if (parkingTimes.size() > MAX_POSSIBLE_SPOTS) {
-                for (Long time : parkingTimes.subList(MAX_POSSIBLE_SPOTS, parkingTimes.size())) {
-                    database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + time.toString() + "'", null);
+            // remove spots that are too close
+            for (ParkingSpot prevSpot : previousSpots) {
+                float distances[] = new float[3];
+                Location.distanceBetween(
+                        spot.getLatLng().latitude,
+                        spot.getLatLng().longitude,
+                        prevSpot.getLatLng().latitude,
+                        prevSpot.getLatLng().longitude,
+                        distances);
+
+                if (distances[0] < 25)
+                    database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + prevSpot.getTime().getTime() + "'", null);
+            }
+
+            // remove stale spots
+            if (previousSpots.size() > MAX_POSSIBLE_SPOTS) {
+                for (ParkingSpot prevSpot : previousSpots.subList(MAX_POSSIBLE_SPOTS, previousSpots.size())) {
+                    database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + prevSpot.getTime().getTime() + "'", null);
                 }
             }
 
