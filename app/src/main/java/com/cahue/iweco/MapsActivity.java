@@ -52,21 +52,22 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.ImageRequest;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityrecognition.PossibleParkedCarDelegate;
-import com.cahue.iweco.activityrecognition.PossibleParkedCarService;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
-import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.CarMovedReceiver;
+import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.ParkedCarReceiver;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.parkedcar.CarDetailsFragment;
-import com.cahue.iweco.parkedcar.ParkedCarService;
 import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
@@ -544,7 +545,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onError(Ad ad, AdError adError) {
         Log.d(TAG, "onAdError: ");
-        setUpAdMobAdNative();
+        setUpAdMobAdNativeExpress();
     }
 
 
@@ -745,6 +746,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        Log.d(TAG, "onNewIntent: ");
         handleIntent(intent);
     }
 
@@ -757,7 +759,7 @@ public class MapsActivity extends AppCompatActivity
                 getPossibleParkingDelegate(possibleSpot).activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-                mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
+                mNotifyMgr.cancel(PossibleParkedCarReceiver.NOTIFICATION_ID);
                 intent.setAction(null);
             } else if (intent.getAction().equals(ACTION_VIEW)) {
 
@@ -766,12 +768,12 @@ public class MapsActivity extends AppCompatActivity
                 parkedCarDelegate.activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-                mNotifyMgr.cancel(carId, ParkedCarService.NOTIFICATION_ID);
+                mNotifyMgr.cancel(carId, ParkedCarReceiver.NOTIFICATION_ID);
                 intent.setAction(null);
             }
         }
     }
-
+    
     public void checkRatingDialogShown() {
         if (RatingDialog.shouldBeShown(this)) {
             RatingDialog dialog = new RatingDialog();
@@ -1603,39 +1605,47 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        Button actRecog = (Button) findViewById(R.id.act_recog);
+        Button actRecog = findViewById(R.id.act_recog);
         actRecog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, PossibleParkedCarService.class);
-                startService(intent);
+                List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
+                if (cars.isEmpty()) return;
+                // start the CarMovedReceiver
+                LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, PossibleParkedCarReceiver.ACTION);
+                helper.startLocationUpdates(null);
             }
         });
 
-        Button carParked = (Button) findViewById(R.id.park);
+        Button carParked = findViewById(R.id.park);
         carParked.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(Constants.EXTRA_CAR_ID, carDatabase.retrieveCars(MapsActivity.this, true).iterator().next().id);
-                startService(intent);
+                List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
+                if (cars.isEmpty()) return;
+                // start the CarMovedReceiver
+                LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, ParkedCarReceiver.ACTION);
+                Bundle extras = new Bundle();
+                extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
+                helper.startLocationUpdates(extras);
             }
         });
 
-        Button carMoved = (Button) findViewById(R.id.driveOff);
+        Button carMoved = findViewById(R.id.driveOff);
         carMoved.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
                 List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
                 if (cars.isEmpty()) return;
-                Car car = cars.iterator().next();
-                intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-                startService(intent);
+                // start the CarMovedReceiver
+                LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, CarMovedReceiver.ACTION);
+                Bundle extras = new Bundle();
+                extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
+                helper.startLocationUpdates(extras);
             }
         });
 
-        Button approachingCar = (Button) findViewById(R.id.approaching);
+        Button approachingCar = findViewById(R.id.approaching);
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

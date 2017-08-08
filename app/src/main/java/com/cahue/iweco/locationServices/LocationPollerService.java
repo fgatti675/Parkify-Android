@@ -20,7 +20,6 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
@@ -31,8 +30,33 @@ import java.util.Date;
  */
 public abstract class LocationPollerService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        GoogleApiClient.OnConnectionFailedListener {
+
+
+    public static final int FAILURE_RESULT = 0;
+    public static final int SUCCESS_RESULT = 1;
+
+    /**
+     * Stores parameters for requests to the FusedLocationProviderApi.
+     */
+    private LocationRequest mLocationRequest;
+
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    private static final long UPDATE_INTERVAL = 2000;
+
+    /**
+     * The fastest rate for active location updates. Updates will never be more frequent
+     * than this value, but they may be less frequent.
+     */
+    private static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
+
+    /**
+     * The max time before batched results are delivered by location services. Results may be
+     * delivered sooner than this interval.
+     */
+    private static final long MAX_WAIT_TIME = UPDATE_INTERVAL * 3;
 
     /**
      * Do nothing before this time has passed. Useful to avoid stale locations
@@ -71,14 +95,13 @@ public abstract class LocationPollerService extends Service implements
      */
     private Location bestAccuracyLocation;
 
-
     @Nullable
     private final Runnable finishTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "Handler finished " + LocationPollerService.this.getClass().getSimpleName() + " service");
             if (bestAccuracyLocation != null)
-                notifyFixLocation(bestAccuracyLocation);
+                notifyFixLocationAndStop(bestAccuracyLocation);
             else
                 stopSelf();
         }
@@ -146,11 +169,6 @@ public abstract class LocationPollerService extends Service implements
 
         Log.i(TAG, "onConnected");
 
-        LocationRequest mLocationRequest = LocationRequest.create();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(1500);
-        mLocationRequest.setFastestInterval(500);
-
         /**
          * Start location updates request
          */
@@ -160,49 +178,15 @@ public abstract class LocationPollerService extends Service implements
             return;
         }
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
     }
-
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, getClass().getSimpleName() + " onDestroy");
-        if (mGoogleApiClient.isConnected())
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
         handler.removeCallbacks(finishTimeoutRunnable);
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-
-        Log.d(TAG, "onLocationChanged: " + location);
-
-        Date now = new Date();
-
-        // do nothing before a few seconds
-        if (now.getTime() - startTime.getTime() < MINIMUM_TIME_MS) {
-            Log.d(TAG, "Doing nothing because not enough time passed");
-            return;
-        }
-
-        Log.v(TAG, location.toString());
-
-        if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
-            notifyFixLocation(location);
-            return;
-        }
-
-        if (bestAccuracyLocation == null || location.getAccuracy() < bestAccuracyLocation.getAccuracy()) {
-            bestAccuracyLocation = location;
-        }
-
-        if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
-            notifyFixLocation(bestAccuracyLocation);
-        }
-
     }
 
     /**
@@ -210,13 +194,13 @@ public abstract class LocationPollerService extends Service implements
      *
      * @param location
      */
-    private void notifyFixLocation(@NonNull Location location) {
+    private void notifyFixLocationAndStop(@NonNull Location location) {
         Bundle extras = new Bundle();
         extras.putSerializable(Constants.EXTRA_START_TIME, startTime);
         location.setExtras(extras);
         Log.i(TAG, "Notifying location polled: " + location);
         Log.i(TAG, "\tafter " + (System.currentTimeMillis() - startTime.getTime()) + " ms");
-        onPreciseFixPolled(this, location, car, startTime, mGoogleApiClient);
+        onPreciseFixPolled(this, location, car, startTime);
         stopSelf();
     }
 
@@ -226,16 +210,14 @@ public abstract class LocationPollerService extends Service implements
      * is reached.
      *
      * @param context
-     * @param location        The location fetched as a result
-     * @param car             The car associated with this request (can be null)
-     * @param startTime       The time this request startes
-     * @param googleApiClient A connected GoogleApiClient
+     * @param location  The location fetched as a result
+     * @param car       The car associated with this request (can be null)
+     * @param startTime The time this request startes
      */
     public abstract void onPreciseFixPolled(Context context,
                                             Location location,
                                             Car car,
-                                            Date startTime,
-                                            GoogleApiClient googleApiClient);
+                                            Date startTime);
 
     @Override
     public void onConnectionSuspended(int i) {

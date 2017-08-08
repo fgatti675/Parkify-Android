@@ -3,7 +3,6 @@
     <!-- Base application theme. -->
     <style name="CahueTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
-        <!-- Both of these are needed -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
@@ -18,20 +17,13 @@
 
         <item name="cardCornerRadius">@dimen/cardCornerRadius</item>
 
+        <item name="android:colorButtonNormal">@color/theme_primary</item>
+
+        <item name="colorButtonNormal">@color/theme_primary</item>
+
     </style>
-
-
-    <style name="ActionBarThemeOverlay" parent="CahueTheme">
-        <item name="android:background">@color/theme_primary</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/white</item>
-        <!--<item name="colorControlNormal">?actionBarIconColor</item>-->
-        <!--<item name="colorControlHighlight">@color/white</item>-->
-    </style>
-
     <!-- Base application theme. -->
     <style name="CahueTheme.Dark">
-
         <item name="android:colorBackground">@color/theme_primary</item>
 
         <item name="android:textColor">@color/body_text_1_inverse</item>
@@ -43,9 +35,51 @@
         <item name="colorButtonNormal">@color/theme_primary</item>
 
         <item name="cardBackgroundColor">@color/white</item>
+        <item name="android:colorButtonNormal">@color/theme_primary</item>
+
         <item name="android:alertDialogTheme">@style/Dialog.Dark</item>
         <item name="alertDialogTheme">@style/Dialog.Dark</item>
     </style>
+
+    <style name="CahueTheme.Main">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="CahueTheme.Dark.TranslucentBars">
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:colorPrimaryDark">@color/black</item>
+    </style>
+
+    <style name="CahueTheme.Dark.Login">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@drawable/gradient_background</item>
+    </style>
+
+    <style name="CahueTheme.Button.Accent" parent="CahueTheme.Dark">
+        <item name="android:colorButtonNormal">@color/theme_accent</item>
+    </style>
+
+    <style name="CahueTheme.Button.Google" parent="CahueTheme.Dark">
+        <item name="android:colorButtonNormal">@color/google_red</item>
+    </style>
+
+    <style name="CahueTheme.Button.Facebook" parent="CahueTheme.Dark">
+        <item name="android:colorButtonNormal">@color/facebook_blue</item>
+    </style>
+
+
+    <style name="ActionBarThemeOverlay" parent="CahueTheme">
+        <item name="android:background">@color/theme_primary</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <!--<item name="colorControlNormal">?actionBarIconColor</item>-->
+        <!--<item name="colorControlHighlight">@color/white</item>-->
+    </style>
+
 
     <style name="Dialog.Dark" parent="Theme.AppCompat.Dialog.Alert">
         <item name="colorPrimary">@color/theme_primary</item>
@@ -56,33 +90,8 @@
         <item name="android:textColorAlertDialogListItem">@color/body_text_1_inverse</item>
     </style>
 
-    <style name="CahueTheme.Dark.TranslucentBars" />
-
     <style name="CahueTheme.Dark.TranslucentBars.Tutorial">
         <item name="android:windowBackground">@drawable/tutorial_background</item>
-    </style>
-
-    <style name="CahueTheme.Dark.Login">
-        <item name="android:windowBackground">@drawable/gradient_background</item>
-    </style>
-
-    <style name="CahueTheme.Main">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-    </style>
-
-    <style name="CahueTheme.Button.Accent" parent="Widget.AppCompat.Button">
-        <item name="colorButtonNormal">@color/theme_accent</item>
-        <item name="android:textColor">@color/body_text_1_inverse</item>
-    </style>
-
-    <style name="CahueTheme.Button.Google" parent="Widget.AppCompat.Button">
-        <item name="colorButtonNormal">@color/google_red</item>
-        <item name="android:textColor">@color/body_text_1_inverse</item>
-    </style>
-
-    <style name="CahueTheme.Button.Facebook" parent="Widget.AppCompat.Button">
-        <item name="colorButtonNormal">@color/facebook_blue</item>
-        <item name="android:textColor">@color/body_text_1_inverse</item>
     </style>
 
     <style name="Marker">

@@ -6,6 +6,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.util.Tracking;
 
 /**
@@ -25,7 +26,7 @@ public class NotificationListener extends NotificationListenerService {
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
         Log.i(TAG, "onNotificationRemoved: " + sbn.toString());
-        if (sbn.getId() == PossibleParkedCarService.NOTIFICATION_ID) {
+        if (sbn.getId() == PossibleParkedCarReceiver.NOTIFICATION_ID) {
             Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_NOTIFICATION_REMOVED);
         }
     }

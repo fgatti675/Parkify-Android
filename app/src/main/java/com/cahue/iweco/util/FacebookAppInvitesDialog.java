@@ -24,7 +24,7 @@ public class FacebookAppInvitesDialog  {
 
     public static void showAppInviteDialog(@NonNull final MapsActivity activity) {
 
-        // Facebook callback registration
+        // Facebook callbacks registration
         CallbackManager mFacebookCallbackManager = CallbackManager.Factory.create();
         activity.setFacebookCallbackManager(mFacebookCallbackManager);
 

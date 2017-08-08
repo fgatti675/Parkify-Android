@@ -8,16 +8,20 @@ import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.CarMovedReceiver;
+import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.ParkedCarReceiver;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.parkedcar.ParkedCarService;
 
+import java.util.Calendar;
 import java.util.Set;
 
 /**
@@ -25,14 +29,16 @@ import java.util.Set;
  */
 public class BluetoothDetector extends BroadcastReceiver {
 
+    private static final String TAG = BluetoothDetector.class.getSimpleName();
+
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 
         if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            if(state == BluetoothAdapter.STATE_ON) {
+            if (state == BluetoothAdapter.STATE_ON) {
                 onBtTurnedOn(context);
-            } else if(state == BluetoothAdapter.STATE_OFF) {
+            } else if (state == BluetoothAdapter.STATE_OFF) {
                 onBtTurnedOff(context);
             }
         } else if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
@@ -86,11 +92,26 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         Log.d("Bluetooth", "onBtConnectedToCar");
 
-        // we create an intent to start the location poller service, as declared in manifest
-        Intent intent = new Intent();
-        intent.setClass(context, CarMovedService.class);
-        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-        context.startService(intent);
+        /**
+         * Check if the car was parked long enough
+         */
+        if (!BuildConfig.DEBUG) {
+            long now = Calendar.getInstance().getTimeInMillis();
+            if (car.time != null) {
+                long parkingTime = car.time.getTime();
+                boolean result = now - parkingTime > Constants.MINIMUM_STAY_MS;
+                if (!result) {
+                    Log.w(TAG, "Preconditions failed");
+                    return;
+                }
+            }
+        }
+
+        // start the CarMovedReceiver
+        LocationUpdatesHelper helper = new LocationUpdatesHelper(context, CarMovedReceiver.ACTION);
+        Bundle extras = new Bundle();
+        extras.putString(Constants.EXTRA_CAR_ID, car.id);
+        helper.startLocationUpdates(extras);
 
     }
 
@@ -99,10 +120,10 @@ public class BluetoothDetector extends BroadcastReceiver {
         Log.d("Bluetooth", "onBtDisconnectedFromCar");
 
         // we create an intent to start the location poller service, as declared in manifest
-        Intent intent = new Intent();
-        intent.setClass(context, ParkedCarService.class);
-        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-        context.startService(intent);
+        LocationUpdatesHelper helper = new LocationUpdatesHelper(context, ParkedCarReceiver.ACTION);
+        Bundle extras = new Bundle();
+        extras.putString(Constants.EXTRA_CAR_ID, car.id);
+        helper.startLocationUpdates(extras);
 
         /**
          * Start activity recognition if required

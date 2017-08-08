@@ -29,11 +29,14 @@ import android.util.Log;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
+import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import static android.app.Notification.PRIORITY_MIN;
+import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 import static com.google.android.gms.location.DetectedActivity.IN_VEHICLE;
 
 /**
@@ -80,6 +83,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
             DetectedActivity mostProbableActivity = result.getMostProbableActivity();
+            Log.d(TAG, "Detected activity: " + mostProbableActivity);
 
             // not probable enough
             if (mostProbableActivity.getConfidence() < 75) {
@@ -94,8 +98,6 @@ public class DetectedActivitiesIntentService extends IntentService {
             if (mostProbableActivity.getType() == DetectedActivity.TILTING || mostProbableActivity.getType() == DetectedActivity.UNKNOWN) {
                 return;
             }
-
-            Log.d(TAG, "Detected activity: " + mostProbableActivity);
 
             onNewActivityDetected(mostProbableActivity);
 
@@ -168,13 +170,14 @@ public class DetectedActivitiesIntentService extends IntentService {
         activityChangedIntent.setAction(Constants.ACTION_VEHICLE_TO_FOOT);
         sendBroadcast(activityChangedIntent);
 
-        this.startService(new Intent(this, PossibleParkedCarService.class));
+        LocationUpdatesHelper helper = new LocationUpdatesHelper(this, PossibleParkedCarReceiver.ACTION);
+        helper.startLocationUpdates(null);
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
+                    new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_access_time_black_18px)
                             .setColor(getResources().getColor(R.color.theme_primary))
@@ -201,7 +204,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             long[] pattern = {0, 100, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
+                    new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_access_time_black_18px)
                             .setColor(getResources().getColor(R.color.theme_primary))
@@ -215,7 +218,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private void showDebugNotification(@NonNull DetectedActivity mostProbableActivity) {
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
+                new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
                         .setPriority(PRIORITY_MIN)
                         .setSmallIcon(R.drawable.ic_navigation_cancel)
                         .setContentTitle(mostProbableActivity.toString())

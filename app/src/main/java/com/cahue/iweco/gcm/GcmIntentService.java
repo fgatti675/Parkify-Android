@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
+
 /**
  * Created by Francesco on 15/01/2015.
  */
@@ -114,7 +116,7 @@ public class GcmIntentService extends IntentService {
                 new Intent(this, MapsActivity.class), 0);
 
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
+                new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_stat_gcm)
                         .setContentTitle("GCM Notification")
                         .setStyle(new NotificationCompat.BigTextStyle()

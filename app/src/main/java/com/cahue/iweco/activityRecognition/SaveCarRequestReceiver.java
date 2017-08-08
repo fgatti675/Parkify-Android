@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.Tracking;
@@ -20,8 +22,12 @@ import com.cahue.iweco.util.Tracking;
  * notification
  */
 public class SaveCarRequestReceiver extends BroadcastReceiver {
+
+    public static final String TAG = SaveCarRequestReceiver.class.getSimpleName();
+
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+        Log.d(TAG, "onReceive: ");
 
         Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_CAR_SELECTED);
 
@@ -31,8 +37,8 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
         Car car = database.findCar(context, carId);
 
         // this should happen only if the user was logged out at that particular moment...
-        if (car == null){
-            if(BuildConfig.DEBUG)
+        if (car == null) {
+            if (BuildConfig.DEBUG)
                 Toast.makeText(context, "Trying to save null car", Toast.LENGTH_LONG);
             return;
         }
@@ -42,6 +48,6 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
         CarsSync.updateCarFromPossibleSpot(database, context, car, possibleSpot);
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
-        mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
+        mNotifyMgr.cancel(PossibleParkedCarReceiver.NOTIFICATION_ID);
     }
 }

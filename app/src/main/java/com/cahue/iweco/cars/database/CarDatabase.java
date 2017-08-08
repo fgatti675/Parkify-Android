@@ -576,8 +576,6 @@ public class CarDatabase {
         try {
             ContentValues values = createSpotContentValues(spot);
 
-            database.insertWithOnConflict(TABLE_POSSIBLE_SPOTS, COLUMN_TIME, values, SQLiteDatabase.CONFLICT_REPLACE);
-
             Cursor cursor = database.query(TABLE_POSSIBLE_SPOTS,
                     SPOT_PROJECTION,
                     null,
@@ -589,6 +587,8 @@ public class CarDatabase {
                 previousSpots.add(cursorToSpot(cursor));
             }
             cursor.close();
+
+            database.insertWithOnConflict(TABLE_POSSIBLE_SPOTS, COLUMN_TIME, values, SQLiteDatabase.CONFLICT_REPLACE);
 
             // remove spots that are too close
             for (ParkingSpot prevSpot : previousSpots) {
