@@ -114,7 +114,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 currentActivity = DetectedActivity.ON_FOOT;
                 vehicleCounter = 0;
             }
-            ActivityRecognitionService.startIfEnabled(this);
+//            ActivityRecognitionService.startIfEnabled(this);
         }
 
         // User in vehicle
@@ -125,7 +125,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 currentActivity = DetectedActivity.IN_VEHICLE;
                 handleFootToVehicle();
             }
-            ActivityRecognitionService.startIfEnabledFastRecognition(this);
+//            ActivityRecognitionService.startIfEnabledFastRecognition(this);
         }
 
         // User on foot
@@ -136,7 +136,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 handleVehicleToFoot();
             }
             currentActivity = DetectedActivity.ON_FOOT;
-            ActivityRecognitionService.startIfEnabled(this);
+//            ActivityRecognitionService.startIfEnabled(this);
         }
 
         // Log each activity.
@@ -214,6 +214,18 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
     }
 
+//
+//    private void showDebugNotification(@NonNull DetectedActivity mostProbableActivity) {
+//        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        NotificationCompat.Builder mBuilder =
+//                new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
+//                        .setPriority(PRIORITY_MIN)
+//                        .setSmallIcon(R.drawable.ic_navigation_cancel)
+//                        .setContentTitle(mostProbableActivity.toString())
+//                        .setContentText(String.valueOf(mostProbableActivity.getConfidence()));
+//
+//        mNotifyMgr.notify(null, 7908772, mBuilder.build());
+//    }
 
     private void showDebugNotification(@NonNull DetectedActivity mostProbableActivity) {
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
