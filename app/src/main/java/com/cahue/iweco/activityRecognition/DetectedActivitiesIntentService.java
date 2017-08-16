@@ -36,7 +36,6 @@ import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import static android.app.Notification.PRIORITY_MIN;
-import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 import static com.google.android.gms.location.DetectedActivity.IN_VEHICLE;
 
 /**
@@ -177,7 +176,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             long[] pattern = {0, 100, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
+                    new NotificationCompat.Builder(this)
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_access_time_black_18px)
                             .setColor(getResources().getColor(R.color.theme_primary))
@@ -204,7 +203,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             long[] pattern = {0, 100, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
+                    new NotificationCompat.Builder(this)
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_access_time_black_18px)
                             .setColor(getResources().getColor(R.color.theme_primary))
@@ -230,7 +229,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private void showDebugNotification(@NonNull DetectedActivity mostProbableActivity) {
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
+                new NotificationCompat.Builder(this)
                         .setPriority(PRIORITY_MIN)
                         .setSmallIcon(R.drawable.ic_navigation_cancel)
                         .setContentTitle(mostProbableActivity.toString())

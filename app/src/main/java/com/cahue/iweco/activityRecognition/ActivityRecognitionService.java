@@ -13,7 +13,6 @@ import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
-import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -77,7 +76,7 @@ public class ActivityRecognitionService {
 
                     NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
                     NotificationCompat.Builder mBuilder =
-                            new NotificationCompat.Builder(context, NotificationChannelsUtils.DEBUG_CHANNEL_ID)
+                            new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_action_action_settings_dark)
                                     .setContentTitle("Recognition Activated")
                                     .setContentText(String.valueOf(detectionInterval));
@@ -110,7 +109,7 @@ public class ActivityRecognitionService {
                 if (BuildConfig.DEBUG) {
                     NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
                     NotificationCompat.Builder mBuilder =
-                            new NotificationCompat.Builder(context, NotificationChannelsUtils.DEBUG_CHANNEL_ID)
+                            new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_action_action_settings_dark)
                                     .setContentTitle("Recognition Stopped");
                     mNotifyMgr.notify(null, 6472837, mBuilder.build());

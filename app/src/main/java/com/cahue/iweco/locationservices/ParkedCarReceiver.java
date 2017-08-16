@@ -23,7 +23,6 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.FetchAddressDelegate;
-import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 
@@ -73,7 +72,7 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
             }
 
             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(context, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID)
+                    new NotificationCompat.Builder(context)
                             .setContentIntent(pendingIntent)
                             .setColor(context.getResources().getColor(R.color.theme_primary))
                             .setSmallIcon(R.drawable.ic_car_white_48dp)

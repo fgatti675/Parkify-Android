@@ -23,8 +23,6 @@ import com.cahue.iweco.util.PreferencesUtil;
 import java.util.Date;
 import java.util.List;
 
-import static com.cahue.iweco.util.NotificationChannelsUtils.ACT_RECOG_CHANNEL_ID;
-
 /**
  * This service fetches the current location and ask the user if the car was set there.
  * It is started from the activity recognition service, when it detects that the user steps out of
@@ -105,7 +103,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context, ACT_RECOG_CHANNEL_ID)
+                new NotificationCompat.Builder(context)
                         .setVibrate(pattern)
                         .setContentIntent(pendingIntent)
                         .setColor(context.getResources().getColor(R.color.theme_primary))

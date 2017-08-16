@@ -1605,7 +1605,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        Button actRecog = findViewById(R.id.act_recog);
+        Button actRecog = (Button) findViewById(R.id.act_recog);
         actRecog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1617,7 +1617,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        Button carParked = findViewById(R.id.park);
+        Button carParked = (Button) findViewById(R.id.park);
         carParked.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1631,7 +1631,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        Button carMoved = findViewById(R.id.driveOff);
+        Button carMoved = (Button) findViewById(R.id.driveOff);
         carMoved.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1645,7 +1645,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        Button approachingCar = findViewById(R.id.approaching);
+        Button approachingCar = (Button) findViewById(R.id.approaching);
         approachingCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
