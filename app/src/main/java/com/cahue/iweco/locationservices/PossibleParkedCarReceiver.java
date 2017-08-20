@@ -14,6 +14,7 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
+import com.cahue.iweco.activityrecognition.SaveCarRequestReceiver;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
@@ -128,11 +129,11 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
     @NonNull
     private NotificationCompat.Action createCarSaveAction(Context context, @NonNull Car car, ParkingSpot possibleSpot, int index) {
 
-        Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);
+        Intent intent = new Intent(context, SaveCarRequestReceiver.class);
         intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
         intent.putExtra(Constants.EXTRA_SPOT, possibleSpot);
 
-        PendingIntent pIntent = PendingIntent.getBroadcast(context, 782982, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 782982 + index, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         String name = car.isOther() ? context.getResources().getString(R.string.other) : car.name;
         return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, name, pIntent);
     }

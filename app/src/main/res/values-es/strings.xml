@@ -86,7 +86,10 @@
     <string name="car_was_here_share">%1$s esta aquí (%2$s)</string>
     <string name="just_parked">Acabas de aparcar</string>
     <string name="terms_of_use">Política de privacidad</string>
-    <string name="activity_recog_channel_description">Notificación mostrada al detectar un posible aparcamiento, basado en movimiento</string>
-    <string name="just_parked_channel_description">Notificación mostrada al aparcar un coche, detectado por Bluetooth</string>
+    <string name="motion_recog_channel_description">Aparcamientos basados en detección de movimiento</string>
+    <string name="just_parked_channel_description">Aparcamiento detectado por Bluetooth</string>
+    <string name="motion_recognition_in_progress">Detección de movimiento en progreso</string>
+    <string name="stop">Detener</string>
+    <string name="motion_recognition_instructions">Parece que estás en un vehículo. Parkify detectará cuando aparques</string>
 
 </resources>

@@ -86,7 +86,12 @@
     <string name="public_parking">Public parking</string>
     <string name="car_was_here_share" >%1$s is here (%2$s)</string>
     <string name="terms_of_use">Terms of use</string>
-    <string name="just_parked_channel_description">Displayed when the user has parked his car</string>
-    <string name="activity_recog_channel_description">Displayed when a posisble parking event is detected</string>
+
+    <string name="just_parked_channel_description">Parking event detected by Bluetooth</string>
+    <string name="motion_recog_channel_description">Motion recognition events</string>
+
+    <string name="motion_recognition_in_progress">Motion recognition in progress</string>
+    <string name="motion_recognition_instructions">You seem to be in a vehicle. Parkify will detect when you park</string>
+    <string name="stop">Stop</string>
 
 </resources>

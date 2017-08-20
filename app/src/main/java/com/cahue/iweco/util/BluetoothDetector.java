@@ -77,7 +77,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Start activity recognition
          */
-        ActivityRecognitionService.startIfEnabled(context);
+        ActivityRecognitionService.startCheckingInCarIfEnabled(context);
     }
 
     private void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
@@ -85,7 +85,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Stop activity recognition
          */
-        ActivityRecognitionService.stop(context);
+        context.stopService(new Intent(context, ActivityRecognitionService.class));
 
         Log.d("Bluetooth", "onBtConnectedToCar");
 
@@ -125,6 +125,6 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Start activity recognition if required
          */
-        ActivityRecognitionService.startIfEnabled(context);
+        ActivityRecognitionService.startCheckingInCarIfEnabled(context);
     }
 }

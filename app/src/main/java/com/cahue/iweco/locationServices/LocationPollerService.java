@@ -35,51 +35,41 @@ public abstract class LocationPollerService extends Service implements
 
     public static final int FAILURE_RESULT = 0;
     public static final int SUCCESS_RESULT = 1;
-
-    /**
-     * Stores parameters for requests to the FusedLocationProviderApi.
-     */
-    private LocationRequest mLocationRequest;
-
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
     private static final long UPDATE_INTERVAL = 2000;
-
     /**
      * The fastest rate for active location updates. Updates will never be more frequent
      * than this value, but they may be less frequent.
      */
     private static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
-
     /**
      * The max time before batched results are delivered by location services. Results may be
      * delivered sooner than this interval.
      */
     private static final long MAX_WAIT_TIME = UPDATE_INTERVAL * 3;
-
     /**
      * Do nothing before this time has passed. Useful to avoid stale locations
      */
     private final static int MINIMUM_TIME_MS = 4000;
-
     /**
      * Timeout after we consider the location may have changed too much for the initial fix
      */
     private final static int PRECISE_FIX_TIMEOUT_MS = 18500;
-
     /**
      * Time after which the service dies
      */
     private final static int SERVICE_TIMEOUT_MS = 60000;
-
     /**
      * Minimum desired accuracy
      */
     private final static int ACCURACY_THRESHOLD_M = 22;
-
     private final static String TAG = LocationPollerService.class.getSimpleName();
-
+    /**
+     * Stores parameters for requests to the FusedLocationProviderApi.
+     */
+    private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
 
     private Date startTime;

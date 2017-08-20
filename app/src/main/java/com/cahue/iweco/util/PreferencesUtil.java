@@ -85,7 +85,7 @@ public class PreferencesUtil {
     public static CameraUpdate getLastCameraPosition(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        if(!prefs.contains(PREF_CAMERA_LAT) || !prefs.contains(PREF_CAMERA_LONG))
+        if (!prefs.contains(PREF_CAMERA_LAT) || !prefs.contains(PREF_CAMERA_LONG))
             return null;
 
         LatLng latLng = new LatLng(

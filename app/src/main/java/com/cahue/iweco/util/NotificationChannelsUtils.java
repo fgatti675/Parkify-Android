@@ -40,12 +40,12 @@ public class NotificationChannelsUtils {
                 return;
             /* Create or update. */
             NotificationChannel channel = new NotificationChannel(JUST_PARKED_CHANNEL_ID, context.getString(R.string.just_parked_channel_description),
-                    NotificationManager.IMPORTANCE_LOW);
+                    NotificationManager.IMPORTANCE_MIN);
             mNotifyMgr.createNotificationChannel(channel);
 
             /* Create or update. */
-            channel = new NotificationChannel(ACT_RECOG_CHANNEL_ID, context.getString(R.string.activity_recog_channel_description),
-                    NotificationManager.IMPORTANCE_LOW);
+            channel = new NotificationChannel(ACT_RECOG_CHANNEL_ID, context.getString(R.string.motion_recog_channel_description),
+                    NotificationManager.IMPORTANCE_MIN);
             mNotifyMgr.createNotificationChannel(channel);
         }
     }

@@ -17,7 +17,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive: ");
-        ActivityRecognitionService.startIfNoBT(context);
+        ActivityRecognitionService.startCheckingInCarIfNoBt(context);
     }
 
 }

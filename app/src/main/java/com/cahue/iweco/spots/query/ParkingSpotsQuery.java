@@ -32,7 +32,7 @@ public class ParkingSpotsQuery {
     private final LatLngBounds latLngBounds;
     private final ParkingSpotsUpdateListener listener;
 
-    public ParkingSpotsQuery( LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
+    public ParkingSpotsQuery(LatLngBounds latLngBounds, ParkingSpotsUpdateListener listener) {
         this.listener = listener;
         this.latLngBounds = latLngBounds;
     }

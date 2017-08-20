@@ -64,7 +64,7 @@ public class ColorSpinnerAdapter extends BaseAdapter {
     public Integer getItem(int position) {
 
         if (position == 0) return null;
-        return colorsValues[position-1];
+        return colorsValues[position - 1];
     }
 
     @Override

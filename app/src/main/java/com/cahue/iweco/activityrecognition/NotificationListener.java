@@ -1,7 +1,5 @@
 package com.cahue.iweco.activityrecognition;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -12,7 +10,6 @@ import com.cahue.iweco.util.Tracking;
 /**
  * Created by f.gatti.gomez on 17/04/16.
  */
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class NotificationListener extends NotificationListenerService {
 
     private static final String TAG = NotificationListener.class.getSimpleName();

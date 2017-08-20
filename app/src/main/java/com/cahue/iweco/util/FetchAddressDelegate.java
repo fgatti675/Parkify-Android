@@ -17,15 +17,7 @@ import java.util.Locale;
  */
 public class FetchAddressDelegate {
 
-    public interface Callbacks {
-        void onAddressFetched(String address);
-
-        void onError(String error);
-    }
-
-
     private static final String TAG = FetchAddressDelegate.class.getSimpleName();
-
     protected Callbacks callbacks;
 
     public void fetch(Context context, Location location, Callbacks callbacks) {
@@ -70,5 +62,11 @@ public class FetchAddressDelegate {
             Log.i(TAG, "Address found");
             callbacks.onAddressFetched(TextUtils.join(", ", addressFragments));
         }
+    }
+
+    public interface Callbacks {
+        void onAddressFetched(String address);
+
+        void onError(String error);
     }
 }

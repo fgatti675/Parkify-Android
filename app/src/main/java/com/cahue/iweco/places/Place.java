@@ -13,7 +13,7 @@ import org.json.JSONObject;
 /**
  * Created by f.gatti.gomez on 31/07/16.
  */
-public class Place  implements Parcelable{
+public class Place implements Parcelable {
 
     public static final Parcelable.Creator<Place> CREATOR =
             new Parcelable.Creator<Place>() {

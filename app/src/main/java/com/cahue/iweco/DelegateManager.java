@@ -17,7 +17,6 @@ public interface DelegateManager {
     void unregisterCameraUpdateRequester(CameraUpdateRequester cameraUpdateRequester);
 
     /**
-     *
      * @param cameraUpdate
      * @param cameraUpdateRequester
      */

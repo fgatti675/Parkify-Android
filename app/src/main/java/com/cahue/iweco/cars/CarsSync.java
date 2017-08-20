@@ -37,6 +37,7 @@ public class CarsSync {
 
     /**
      * Called from activity recognition possible spots
+     *
      * @param carDatabase
      * @param context
      * @param car

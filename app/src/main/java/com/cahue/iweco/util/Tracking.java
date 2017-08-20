@@ -92,14 +92,18 @@ public class Tracking {
     }
 
     public static void sendEvent(String category, String action) {
-        sendEvent(category, action, null, null);
+        sendEvent(category, action, null, null, false);
+    }
+
+    public static void sendEvent(String category, String action, boolean nonInteractionEvent) {
+        sendEvent(category, action, null, null, nonInteractionEvent);
     }
 
     public static void sendEvent(String category, String action, String label) {
-        sendEvent(category, action, label, null);
+        sendEvent(category, action, label, null, false);
     }
 
-    public static void sendEvent(String category, String action, @Nullable String label, @Nullable Long value) {
+    public static void sendEvent(String category, String action, @Nullable String label, @Nullable Long value, boolean nonInteractionEvent) {
 
         Log.i("Tracking", "Event: " + category + " / " + action + " / " + label + " / " + value);
 
@@ -108,6 +112,7 @@ public class Tracking {
         HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
         builder.setAction(action);
         builder.setCategory(category);
+        builder.setNonInteraction(nonInteractionEvent);
         if (label != null) builder.setLabel(label);
         if (value != null) builder.setValue(value == null ? -1 : value);
 

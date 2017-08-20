@@ -25,6 +25,9 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
 
     public static final String TAG = SaveCarRequestReceiver.class.getSimpleName();
 
+    public SaveCarRequestReceiver() {
+    }
+
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         Log.d(TAG, "onReceive: ");

@@ -87,7 +87,10 @@
     <string name="car_was_here_share">%1$s era qui (%2$s)</string>
     <string name="just_parked">Hai appena parcheggiato</string>
     <string name="terms_of_use">Terms of use</string>
-    <string name="activity_recog_channel_description">Si mostra quando si individua un possibile parcheggio</string>
-    <string name="just_parked_channel_description">Si mostra quando si ha parcheggiato con sicurezza</string>
+    <string name="motion_recog_channel_description">Parcheggio basato sul movimento</string>
+    <string name="just_parked_channel_description">Parcheggio basato su Bluetooth</string>
+    <string name="motion_recognition_in_progress">Motion detection</string>
+    <string name="stop">Fermare</string>
+    <string name="motion_recognition_instructions">Sembra che sei in macchina</string>
 
 </resources>

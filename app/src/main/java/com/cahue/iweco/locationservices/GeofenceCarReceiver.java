@@ -47,6 +47,29 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     private GoogleApiClient mGeofenceApiClient;
     private Car car;
 
+    /**
+     * Start the GeoFence service after 2 minutes
+     *
+     * @param context
+     * @param carId
+     */
+    public static void startDelayedGeofenceService(@NonNull Context context, String carId) {
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putString(Constants.EXTRA_CAR_ID, carId);
+
+        ComponentName serviceComponent = new ComponentName(context, DelayedGeofenceJob.class);
+        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+        builder.setMinimumLatency(2 * 60 * 1000); // wait at least
+        builder.setExtras(bundle);
+        //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
+        //builder.setRequiresDeviceIdle(true); // device should be idle
+        //builder.setRequiresCharging(false); // we don't care if the device is charging or not
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(builder.build());
+
+        Log.i(TAG, "Starting delayed geofence service");
+    }
+
     @Override
     protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
 
@@ -78,31 +101,6 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
 
         addGeofence(context, car);
     }
-
-
-    /**
-     * Start the GeoFence service after 2 minutes
-     *
-     * @param context
-     * @param carId
-     */
-    public static void startDelayedGeofenceService(@NonNull Context context, String carId) {
-        PersistableBundle bundle = new PersistableBundle();
-        bundle.putString(Constants.EXTRA_CAR_ID, carId);
-
-        ComponentName serviceComponent = new ComponentName(context, DelayedGeofenceJob.class);
-        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
-        builder.setMinimumLatency(2 * 60 * 1000); // wait at least
-        builder.setExtras(bundle);
-        //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
-        //builder.setRequiresDeviceIdle(true); // device should be idle
-        //builder.setRequiresCharging(false); // we don't care if the device is charging or not
-        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.schedule(builder.build());
-
-        Log.i(TAG, "Starting delayed geofence service");
-    }
-
 
     private void addGeofence(final Context context, @NonNull final Car car) {
 

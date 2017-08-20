@@ -28,23 +28,25 @@ import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
  */
 public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallbacks {
 
+    /**
+     * Do nothing before this time has passed. Useful to avoid stale locations
+     */
+    final static int MINIMUM_TIME_MS = 4000;
+
+    /**
+     * Timeout after we consider the location may have changed too much for the initial fix
+     */
+    final static int PRECISE_FIX_TIMEOUT_MS = 18500;
+
+    /**
+     * Time after which the service dies
+     */
+    final static int SERVICE_TIMEOUT_MS = 60000;
+
     private static final String TAG = LocationUpdatesHelper.class.getSimpleName();
 
     private static final int START = 1;
     private static final int STOP = 2;
-
-    private final Context context;
-    private GoogleApiClient mGoogleApiClient;
-    private String action;
-
-    private int mode; // start or stop
-
-    private Map<String, Class<? extends BroadcastReceiver>> receiversMap = new HashMap<String, Class<? extends BroadcastReceiver>>() {{
-        put(CarMovedReceiver.ACTION, CarMovedReceiver.class);
-        put(ParkedCarReceiver.ACTION, ParkedCarReceiver.class);
-        put(PossibleParkedCarReceiver.ACTION, PossibleParkedCarReceiver.class);
-        put(GeofenceCarReceiver.ACTION, GeofenceCarReceiver.class);
-    }};
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -63,24 +65,22 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
      */
     private static final long MAX_WAIT_TIME = UPDATE_INTERVAL * 3;
 
-    /**
-     * Do nothing before this time has passed. Useful to avoid stale locations
-     */
-    final static int MINIMUM_TIME_MS = 4000;
+    private final Context context;
+    private PendingIntent pendingIntent;
 
-    /**
-     * Timeout after we consider the location may have changed too much for the initial fix
-     */
-    final static int PRECISE_FIX_TIMEOUT_MS = 18500;
+    private GoogleApiClient mGoogleApiClient;
+    private String action;
 
-    /**
-     * Time after which the service dies
-     */
-    final static int SERVICE_TIMEOUT_MS = 60000;
+    private int mode; // start or stop
+
+    private Map<String, Class<? extends BroadcastReceiver>> receiversMap = new HashMap<String, Class<? extends BroadcastReceiver>>() {{
+        put(CarMovedReceiver.ACTION, CarMovedReceiver.class);
+        put(ParkedCarReceiver.ACTION, ParkedCarReceiver.class);
+        put(PossibleParkedCarReceiver.ACTION, PossibleParkedCarReceiver.class);
+        put(GeofenceCarReceiver.ACTION, GeofenceCarReceiver.class);
+    }};
 
     private Bundle extras;
-
-    PendingIntent pendingIntent;
 
     public LocationUpdatesHelper(Context context, String action) {
         this.context = context;

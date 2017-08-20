@@ -381,7 +381,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
                             LatLngBounds.Builder builder = LatLngBounds.builder();
                             builder.include(viewPortBounds.northeast);
                             builder.include(viewPortBounds.southwest);
-                            for(Place place:parkingQueryResult.places)
+                            for (Place place : parkingQueryResult.places)
                                 builder.include(place.getLatLng());
                             queriedBounds.add(builder.build());
                         }

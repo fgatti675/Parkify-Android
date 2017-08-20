@@ -26,7 +26,7 @@ public class AuthUtils {
         return prefs.getBoolean(PREF_SKIPPED_LOGGED_IN, false);
     }
 
-    public static void clearLoggedUserDetails(Context context){
+    public static void clearLoggedUserDetails(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit()
                 .remove(PREF_USER_NAME)
@@ -37,7 +37,7 @@ public class AuthUtils {
 
     }
 
-    public static void setLoggedUserDetails(Context context, String username, String email, String pictureURL){
+    public static void setLoggedUserDetails(Context context, String username, String email, String pictureURL) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit()
                 .putString(PREF_USER_NAME, username)

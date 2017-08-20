@@ -22,8 +22,8 @@ import com.cahue.iweco.login.LoginActivity;
 import java.util.concurrent.ExecutionException;
 
 /**
-* Created by Francesco on 25/02/2015.
-*/
+ * Created by Francesco on 25/02/2015.
+ */
 public class Authenticator extends AbstractAccountAuthenticator {
 
 
@@ -118,6 +118,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
     /**
      * Send a refresh request in order to get a new auth token
+     *
      * @param userId
      * @param refreshToken
      * @return

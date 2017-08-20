@@ -34,30 +34,19 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements OnCarClickedListener, PossibleSetCarDetailsFragment.OnPossibleSpotDeletedListener {
 
     public static final String FRAGMENT_TAG = "POSSIBLE_PARKED_CAR_DELEGATE";
-
-    private static final String ARG_SPOT = "spot";
-    private static final String ARG_RECENCY = "recency";
-
-    @Retention(SOURCE)
-    @IntDef({RECENT_0, RECENT_1, RECENT_2, RECENT_3, RECENT_4})
-    public @interface Recency {
-    }
-
     public static final int RECENT_0 = 0;
     public static final int RECENT_1 = 1;
     public static final int RECENT_2 = 2;
     public static final int RECENT_3 = 3;
     public static final int RECENT_4 = 4;
-
+    private static final String ARG_SPOT = "spot";
+    private static final String ARG_RECENCY = "recency";
     @Recency
     private int recency;
-
     @Nullable
     private ParkingSpot spot;
-
     @Nullable
     private Marker marker;
-
     private IconGenerator iconGenerator;
     private boolean following;
     private CarDatabase database;
@@ -155,7 +144,6 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
         return detailsFragment != null && detailsFragment instanceof PossibleSetCarDetailsFragment;
     }
 
-
     private void clearMarker() {
         if (marker != null) {
             marker.remove();
@@ -195,5 +183,10 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
         if (marker != null)
             marker.remove();
         detailsViewManager.hideDetails();
+    }
+
+    @Retention(SOURCE)
+    @IntDef({RECENT_0, RECENT_1, RECENT_2, RECENT_3, RECENT_4})
+    public @interface Recency {
     }
 }
