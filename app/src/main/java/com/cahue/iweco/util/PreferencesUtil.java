@@ -33,7 +33,6 @@ public class PreferencesUtil {
     public static final String PREF_USE_MILES = "PREF_USE_MILES";
     public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
     public static final String PREF_MOVEMENT_RECOGNITION_NOTIFICATION = "PREF_MOVEMENT_RECOGNITION_NOTIFICATION";
-    public static final String PREF_BT_ON_ENTER_VEHICLE = "PREF_BT_ON_ENTER_VEHICLE";
 
     public static final String PREF_REMOVE_ADS = "PREF_REMOVE_ADS";
     public static final String PREF_PURCHASED_CHECKED = "PREF_PURCHASED_CHECKED";
@@ -157,11 +156,6 @@ public class PreferencesUtil {
     public static boolean isMovementRecognitionNotificationEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(PREF_MOVEMENT_RECOGNITION_NOTIFICATION, true);
-    }
-
-    public static boolean isBtOnEnteringVehicleEnabled(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PREF_BT_ON_ENTER_VEHICLE, false);
     }
 
     public static boolean isDisplayParkedNotificationEnabled(Context context) {

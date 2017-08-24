@@ -1,16 +1,11 @@
 package com.cahue.iweco.activityrecognition;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.job.JobInfo;
-import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
-import android.app.job.JobService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,13 +26,16 @@ import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.fence.AwarenessFence;
+import com.google.android.gms.awareness.fence.DetectedActivityFence;
+import com.google.android.gms.awareness.fence.FenceState;
+import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
-import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
-import static android.app.job.JobInfo.BACKOFF_POLICY_LINEAR;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 import static com.google.android.gms.location.DetectedActivity.IN_VEHICLE;
 
@@ -50,6 +48,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     public static final int IN_CAR_DETECTION_JOB_ID = 1000;
     private static final long DETECTION_INTERVAL_IN_MILLISECONDS_IN_VEHICLE = 4000;
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
+
     // How many times the user has been still in a row
     public int stillCounter = 0;
     public int vehicleCounter = 0;
@@ -71,33 +70,100 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
      *
      * @param context
      */
-    public static void startCheckingInCarIfNoBt(@NonNull Context context) {
-        BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (defaultAdapter != null && !defaultAdapter.isEnabled()) {
-            startCheckingInCarIfEnabled(context);
-        }
+    public static void startCheckingActivityRecognition(@NonNull Context context) {
+        addActivityRecognitionFences(context);
     }
 
-    public static void startCheckingInCarIfEnabled(@NonNull Context context) {
-        if (!PreferencesUtil.isMovementRecognitionEnabled(context)) {
-            return;
-        }
-        scheduleCarCheck(context);
-    }
 
     /**
      * Start checking periodically the awareness API for car detection
      */
-    public static void scheduleCarCheck(Context context) {
-        ComponentName serviceComponent = new ComponentName(context, InCarDetectionJob.class);
-        JobInfo.Builder builder = new JobInfo.Builder(IN_CAR_DETECTION_JOB_ID, serviceComponent);
-        builder.setBackoffCriteria(30 * 1000, BACKOFF_POLICY_LINEAR);
-        builder.setMinimumLatency(1000); // wait at least
-        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.schedule(builder.build());
+    public static void addActivityRecognitionFences(Context context) {
+
+        AwarenessFence vehicleDuringFence = DetectedActivityFence.during(getInVehicleRelatedActivities());
+        AwarenessFence vehicleStartingFence = DetectedActivityFence.starting(getInVehicleRelatedActivities());
+
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(Awareness.API)
+                .build();
+
+        Intent intent = new Intent(context, InVehicleReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 7629, intent, FLAG_UPDATE_CURRENT);
+
+        googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(@Nullable Bundle bundle) {
+                Awareness.FenceApi.updateFences(
+                        googleApiClient,
+                        new FenceUpdateRequest.Builder()
+                                .addFence("vehicleDuringFenceKey", vehicleDuringFence, pendingIntent)
+                                .addFence("vehicleStartingFenceKey", vehicleStartingFence, pendingIntent)
+                                .build())
+                        .setResultCallback(status -> {
+                            if (status.isSuccess()) {
+                                Log.i(TAG, "Fence was successfully registered.");
+                            } else {
+                                Log.e(TAG, "Fence could not be registered: " + status);
+                            }
+                        });
+            }
+
+            @Override
+            public void onConnectionSuspended(int i) {
+
+            }
+        });
+        googleApiClient.connect();
+
     }
 
-    public static void start(@NonNull Context context) {
+    private static int[] getInVehicleRelatedActivities() {
+        if (BuildConfig.DEBUG)
+            return new int[]{DetectedActivityFence.IN_VEHICLE, DetectedActivityFence.ON_BICYCLE};
+        else
+            return new int[]{DetectedActivityFence.IN_VEHICLE};
+    }
+
+    public static class InVehicleReceiver extends BroadcastReceiver {
+        public InVehicleReceiver() {
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: ");
+
+
+
+            FenceState fenceState = FenceState.extract(intent);
+
+            switch (fenceState.getCurrentState()) {
+                case FenceState.TRUE:
+                    Log.i(TAG, "In vehicle fence detected TRUE");
+                    BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+                    if (defaultAdapter != null && !defaultAdapter.isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context)) {
+                        startActivityRecognition(context);
+                    }
+                    break;
+                case FenceState.FALSE:
+                    Log.i(TAG, "In vehicle fence FALSE");
+                    break;
+                case FenceState.UNKNOWN:
+                    Log.i(TAG, "In vehicle fence UNKNOWN");
+                    break;
+            }
+
+            if (BuildConfig.DEBUG) {
+                NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(context, NotificationChannelsUtils.DEBUG_CHANNEL_ID)
+                                .setSmallIcon(R.drawable.ic_action_action_settings_dark)
+                                .setContentTitle("In vehicle fence fired");
+                mNotifyMgr.notify(null, 6472837, mBuilder.build());
+            }
+        }
+    }
+
+    public static void startActivityRecognition(@NonNull Context context) {
         Intent intent = new Intent(context, ActivityRecognitionService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent);
@@ -154,8 +220,8 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         if (BuildConfig.DEBUG) {
             NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            Notification.Builder mBuilder =
-                    new Notification.Builder(this)
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this, NotificationChannelsUtils.DEBUG_CHANNEL_ID)
                             .setSmallIcon(R.drawable.ic_action_action_settings_dark)
                             .setContentTitle("Recognition Stopped");
             mNotifyMgr.notify(null, 6472837, mBuilder.build());
@@ -165,7 +231,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         mGoogleApiClient.disconnect();
 
-        ActivityRecognitionService.startCheckingInCarIfNoBt(this);
+        ActivityRecognitionService.startCheckingActivityRecognition(this);
     }
 
     @Override
@@ -213,7 +279,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
         if (isStill(detectedActivity)) {
             stillCounter++;
-            if (stillCounter > 10) {
+            if (stillCounter > 6) {
                 currentActivity = DetectedActivity.ON_FOOT;
                 vehicleCounter = 0;
                 handleIdle();
@@ -260,12 +326,12 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
     }
 
     private void handleIdle() {
-        Log.d(TAG, "handleIdle: ");
+        Log.i(TAG, "handleIdle: ");
         stopSelf();
     }
 
     private void handleVehicleToFoot() {
-        Log.d(TAG, "handleVehicleToFoot: ");
+        Log.i(TAG, "handleVehicleToFoot: ");
 
         LocationUpdatesHelper helper = new LocationUpdatesHelper(this, PossibleParkedCarReceiver.ACTION);
         helper.startLocationUpdates(null);
@@ -288,13 +354,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
 
     private void handleFootToVehicle() {
 
-        Log.d(TAG, "handleFootToVehicle: ");
-
-        // enable BT is requested in preferences
-        if (PreferencesUtil.isBtOnEnteringVehicleEnabled(this)) {
-            BluetoothAdapter.getDefaultAdapter().enable();
-            stopSelf();
-        }
+        Log.i(TAG, "handleFootToVehicle: ");
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};
@@ -307,50 +367,6 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
                             .setContentTitle("Foot -> Vehicle - " + vehicleCounter);
 
             mNotifyMgr.notify(null, 564544, mBuilder.build());
-        }
-    }
-
-    public static class InCarDetectionJob extends JobService {
-
-        @Override
-        public boolean onStartJob(JobParameters jobParameters) {
-            GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Awareness.API)
-                    .build();
-            googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                @Override
-                public void onConnected(@Nullable Bundle bundle) {
-                    Awareness.SnapshotApi.getDetectedActivity(googleApiClient)
-                            .setResultCallback(detectedActivityResult -> {
-                                if (!detectedActivityResult.getStatus().isSuccess()) {
-                                    Log.e(TAG, "Could not get the current activity.");
-                                    return;
-                                }
-                                ActivityRecognitionResult ar = detectedActivityResult.getActivityRecognitionResult();
-                                DetectedActivity probableActivity = ar.getMostProbableActivity();
-                                Log.i(TAG, "Car detection : " + probableActivity.toString());
-                                if (probableActivity.getType() == DetectedActivity.IN_VEHICLE || (BuildConfig.DEBUG && probableActivity.getType() == DetectedActivity.ON_BICYCLE)) {
-                                    start(InCarDetectionJob.this);
-                                    jobFinished(jobParameters, false);
-                                } else {
-                                    jobFinished(jobParameters, true);
-                                }
-                                googleApiClient.disconnect();
-                            });
-                }
-
-                @Override
-                public void onConnectionSuspended(int i) {
-
-                }
-            });
-            googleApiClient.connect();
-            return true;
-        }
-
-        @Override
-        public boolean onStopJob(JobParameters jobParameters) {
-            return false;
         }
     }
 

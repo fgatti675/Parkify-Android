@@ -51,13 +51,13 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
-    private static final long UPDATE_INTERVAL = 2000;
+    private static final long UPDATE_INTERVAL = 3000;
 
     /**
      * The fastest rate for active location updates. Updates will never be more frequent
      * than this value, but they may be less frequent.
      */
-    private static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
+    private static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL ;
 
     /**
      * The max time before batched results are delivered by location services. Results may be

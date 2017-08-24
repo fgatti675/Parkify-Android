@@ -228,7 +228,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             adapter.notifyItemInserted(carPosition);
 
             PreferencesUtil.setLongClickToastShown(getActivity(), false);
-            ActivityRecognitionService.startCheckingInCarIfNoBt(getActivity());
+            ActivityRecognitionService.startCheckingActivityRecognition(getActivity());
 
         } else {
             carPosition = 1;

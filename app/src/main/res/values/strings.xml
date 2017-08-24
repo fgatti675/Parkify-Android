@@ -91,7 +91,7 @@
     <string name="motion_recog_channel_description">Motion recognition events</string>
 
     <string name="motion_recognition_in_progress">Motion recognition in progress</string>
-    <string name="motion_recognition_instructions">You seem to be in a vehicle. Parkify will detect when you park</string>
+    <string name="motion_recognition_instructions">Parkify will detect when you park</string>
     <string name="stop">Stop</string>
 
 </resources>

@@ -19,11 +19,9 @@ package com.cahue.iweco.locationservices;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -32,9 +30,6 @@ import com.google.android.gms.location.LocationResult;
 
 import java.util.Date;
 import java.util.List;
-
-import static com.cahue.iweco.Constants.ACCURACY_THRESHOLD_M;
-import static com.cahue.iweco.locationservices.LocationUpdatesHelper.PRECISE_FIX_TIMEOUT_MS;
 
 /**
  * Receiver for handling location updates.
@@ -78,7 +73,7 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
         }
     }
 
-    public void onLocationChanged(Context context, String action, Bundle extras, @NonNull List<Location> locations) {
+    private void onLocationChanged(Context context, String action, Bundle extras, @NonNull List<Location> locations) {
 
         Log.d(TAG, "onLocationChanged: " + locations);
 
@@ -89,68 +84,15 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
             if (location == null || loc.getAccuracy() < location.getAccuracy())
                 location = loc;
         }
+
         if (location == null) {
             return;
         }
 
-        Date now = new Date();
-
-//        // do nothing before a few seconds
-//        if (now.getTime() - startTime.getTime() < LocationUpdatesHelper.MINIMUM_TIME_MS) {
-//            Log.d(TAG, "Doing nothing because not enough time passed");
-//            return;
-//        }
-
-        Log.v(TAG, location.toString());
-
-        if (location.getAccuracy() < ACCURACY_THRESHOLD_M) {
-            notifyFixLocationAndStop(context, extras, action, location);
-            return;
-        }
-
-        Location bestAccuracyLocation = getBestAccuracyLocation(context);
-
-        if (bestAccuracyLocation == null || location.getAccuracy() < bestAccuracyLocation.getAccuracy()) {
-            saveBestAccuracyLocation(context, location);
-        }
-
-        Date startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
-        if (now.getTime() - startTime.getTime() > PRECISE_FIX_TIMEOUT_MS) {
-            notifyFixLocationAndStop(context, extras, action, bestAccuracyLocation);
-        }
+        notifyFixLocationAndStop(context, extras, action, location);
 
     }
 
-    private void saveBestAccuracyLocation(Context context, Location location) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (location == null) {
-            sharedPreferences.edit().remove("LOCATION_LAT").apply();
-            sharedPreferences.edit().remove("LOCATION_LON").apply();
-            sharedPreferences.edit().remove("LOCATION_PROVIDER").apply();
-            sharedPreferences.edit().remove("LOCATION_ACC").apply();
-        } else {
-            sharedPreferences.edit().putFloat("LOCATION_LAT", (float) location.getLatitude()).apply();
-            sharedPreferences.edit().putFloat("LOCATION_LON", (float) location.getLongitude()).apply();
-            sharedPreferences.edit().putFloat("LOCATION_ACC", location.getAccuracy()).apply();
-            sharedPreferences.edit().putString("LOCATION_PROVIDER", location.getProvider()).apply();
-        }
-    }
-
-    private Location getBestAccuracyLocation(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Float lat = sharedPreferences.getFloat("LOCATION_LAT", -1);
-        Float lon = sharedPreferences.getFloat("LOCATION_LON", -1);
-        Float acc = sharedPreferences.getFloat("LOCATION_ACC", -1);
-        Location location = null;
-        if (lat != -1 && lon != -1) {
-            String provider = sharedPreferences.getString("LOCATION_PROVIDER", null);
-            location = new Location(provider);
-            location.setLatitude(lat);
-            location.setLongitude(lon);
-            location.setAccuracy(acc);
-        }
-        return location;
-    }
 
     /**
      * Notify the location of the event (like user parked or drove off)

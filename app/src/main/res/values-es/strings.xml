@@ -90,6 +90,6 @@
     <string name="just_parked_channel_description">Aparcamiento detectado por Bluetooth</string>
     <string name="motion_recognition_in_progress">Detección de movimiento en progreso</string>
     <string name="stop">Detener</string>
-    <string name="motion_recognition_instructions">Parece que estás en un vehículo. Parkify detectará cuando aparques</string>
+    <string name="motion_recognition_instructions">Parkify detectará cuando aparques</string>
 
 </resources>

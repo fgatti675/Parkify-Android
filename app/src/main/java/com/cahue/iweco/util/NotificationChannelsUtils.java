@@ -45,7 +45,7 @@ public class NotificationChannelsUtils {
 
             /* Create or update. */
             channel = new NotificationChannel(ACT_RECOG_CHANNEL_ID, context.getString(R.string.motion_recog_channel_description),
-                    NotificationManager.IMPORTANCE_MIN);
+                    NotificationManager.IMPORTANCE_LOW);
             mNotifyMgr.createNotificationChannel(channel);
         }
     }

@@ -78,6 +78,10 @@
         </activity>
 
         <receiver
+            android:name=".activityrecognition.ActivityRecognitionService$InVehicleReceiver"
+            android:exported="true" />
+
+        <receiver
             android:name=".locationservices.CarMovedReceiver"
             android:exported="true">
             <intent-filter>
@@ -219,12 +223,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".util.LocationTestBroadcastReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.BT_TEST" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".util.BluetoothDetector">
             <intent-filter>
-                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
                 <action android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
-                <action android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
-                <action android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
@@ -243,9 +250,6 @@
 
         <service
             android:name=".locationservices.DelayedGeofenceJob"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name=".activityrecognition.ActivityRecognitionService$InCarDetectionJob"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>

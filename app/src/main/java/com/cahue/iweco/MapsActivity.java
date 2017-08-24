@@ -24,7 +24,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -339,7 +338,6 @@ public class MapsActivity extends AppCompatActivity
         setUpNavigationDrawer();
 
         myLocationButton = findViewById(R.id.my_location);
-        ViewCompat.setElevation(myLocationButton, getResources().getDimension(R.dimen.elevation));
         myLocationButton.setBackgroundTintList(getResources().getColorStateList(R.color.button_states));
         myLocationButton.setOnClickListener(view -> setCameraFollowing(true));
 
@@ -394,6 +392,11 @@ public class MapsActivity extends AppCompatActivity
         nativeAdContainer = findViewById(R.id.navite_ad_container);
         nativeExpressAbMobContainer.setVisibility(View.GONE);
         nativeAdContainer.setVisibility(View.GONE);
+
+        /*
+         * Start activity recognition service (if enabled)
+         */
+        ActivityRecognitionService.startCheckingActivityRecognition(this);
 
     }
 
@@ -730,11 +733,6 @@ public class MapsActivity extends AppCompatActivity
          * Show some dialogs in case the user is bored
          */
         checkRatingDialogShown();
-
-        /*
-         * If BT is not enabled, start activity recognition service (if enabled)
-         */
-        ActivityRecognitionService.startCheckingInCarIfNoBt(this);
 
         // when our activity resumes, we want to register for car updates
         registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
@@ -1601,7 +1599,7 @@ public class MapsActivity extends AppCompatActivity
 
         Button startActRecog = findViewById(R.id.start_act_rec);
         startActRecog.setOnClickListener(v -> {
-            ActivityRecognitionService.start(MapsActivity.this);
+            ActivityRecognitionService.startActivityRecognition(MapsActivity.this);
         });
 
         Button actRecDetected = findViewById(R.id.act_recog);

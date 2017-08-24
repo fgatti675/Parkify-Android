@@ -91,6 +91,6 @@
     <string name="just_parked_channel_description">Parcheggio basato su Bluetooth</string>
     <string name="motion_recognition_in_progress">Motion detection</string>
     <string name="stop">Fermare</string>
-    <string name="motion_recognition_instructions">Sembra che sei in macchina</string>
+    <string name="motion_recognition_instructions">Parkify rileverà quando si parcheggia</string>
 
 </resources>

@@ -36,7 +36,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
             updateActRecPreferencesState(enableBtPreferences);
 
             if (enableBtPreferences) {
-                ActivityRecognitionService.startCheckingInCarIfNoBt(getActivity());
+                ActivityRecognitionService.startCheckingActivityRecognition(getActivity());
             } else {
                 getActivity().stopService(new Intent(getActivity(), ActivityRecognitionService.class));
             }
@@ -50,7 +50,6 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
     private void updateActRecPreferencesState(boolean enableARPreferences) {
         getPreferenceManager().findPreference(PreferencesUtil.PREF_MOVEMENT_RECOGNITION_NOTIFICATION).setEnabled(enableARPreferences);
-        getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableARPreferences);
     }
 
     private void updateBtPreferencesState(boolean enableBtPreferences) {

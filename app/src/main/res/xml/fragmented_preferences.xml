@@ -25,12 +25,6 @@
             android:summary="@string/motion_recognition_notification_description"
             android:title="@string/show_notification" />
 
-        <SwitchPreference
-            android:id="@+id/bt_on"
-            android:defaultValue="false"
-            android:key="PREF_BT_ON_ENTER_VEHICLE"
-            android:summary="@string/bt_on_vehicle_description"
-            android:title="@string/bt_on_vehicle" />
 
     </PreferenceCategory>
 
