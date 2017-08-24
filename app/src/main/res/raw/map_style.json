@@ -6,7 +6,7 @@
         "saturation": -65
       },
       {
-        "lightness": 70
+        "lightness": 60
       },
       {
         "visibility": "on"
@@ -58,9 +58,6 @@
     "featureType": "poi.park",
     "stylers": [
       {
-        "color": "#02edaf"
-      },
-      {
         "lightness": 90
       }
     ]
@@ -91,20 +88,8 @@
     ]
   },
   {
-    "featureType": "road",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "lightness": 100
-      }
-    ]
-  },
-  {
     "featureType": "road.arterial",
     "stylers": [
-      {
-        "lightness": 10
-      },
       {
         "visibility": "on"
       }
@@ -122,10 +107,7 @@
     "featureType": "road.local",
     "stylers": [
       {
-        "saturation": -100
-      },
-      {
-        "lightness": 20
+        "lightness": 10
       },
       {
         "visibility": "on"
@@ -148,7 +130,7 @@
     "elementType": "labels",
     "stylers": [
       {
-        "lightness": -25
+        "lightness": -50
       }
     ]
   }

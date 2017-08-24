@@ -93,6 +93,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         JobInfo.Builder builder = new JobInfo.Builder(IN_CAR_DETECTION_JOB_ID, serviceComponent);
         builder.setBackoffCriteria(30 * 1000, BACKOFF_POLICY_LINEAR);
         builder.setMinimumLatency(1000); // wait at least
+        builder.setPersisted(true);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.schedule(builder.build());
     }

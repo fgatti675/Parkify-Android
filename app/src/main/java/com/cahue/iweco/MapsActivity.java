@@ -24,7 +24,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -339,7 +338,6 @@ public class MapsActivity extends AppCompatActivity
         setUpNavigationDrawer();
 
         myLocationButton = findViewById(R.id.my_location);
-        ViewCompat.setElevation(myLocationButton, getResources().getDimension(R.dimen.elevation));
         myLocationButton.setBackgroundTintList(getResources().getColorStateList(R.color.button_states));
         myLocationButton.setOnClickListener(view -> setCameraFollowing(true));
 
