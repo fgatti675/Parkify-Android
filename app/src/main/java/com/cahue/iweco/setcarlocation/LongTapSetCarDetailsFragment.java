@@ -1,10 +1,7 @@
 package com.cahue.iweco.setcarlocation;
 
-import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -22,7 +19,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.CarButtonAdapter;
-import com.cahue.iweco.util.FetchAddressIntentService;
+import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 
 import java.util.List;
@@ -146,28 +143,19 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
      * Fetch address for the spot
      */
     private void fetchAddress() {
-        Intent fetchAddressIntent = new Intent(getActivity(), FetchAddressIntentService.class);
-        fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
-        fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, spot.location);
-        getActivity().startService(fetchAddressIntent);
-    }
 
+        FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
+        fetchAddressDelegate.fetch(getActivity(), spot.location, new FetchAddressDelegate.Callbacks() {
+            @Override
+            public void onAddressFetched(String address) {
+                spot.address = address;
+                updateAddress();
+            }
 
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver() {
-            super(new Handler());
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
-
-            if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
-                return;
-
-            spot.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-
-            updateAddress();
-        }
+            @Override
+            public void onError(String error) {
+            }
+        });
     }
 
 }

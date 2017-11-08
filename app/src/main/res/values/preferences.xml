@@ -8,7 +8,7 @@
     <string name="use_miles_description">Use miles instead of kilometers</string>
 
     <string name="motion_recognition">Motion recognition</string>
-    <string name="motion_recognition_description">Detect when you park your car even when Bluetooth is off. This feature consumes little additional battery. Please note that while your Bluetooth connection is on, motion recognition is not enabled.</string>
+    <string name="motion_recognition_description">Detect when you park your car even when Bluetooth is off. This feature consumes very little additional battery. Please note that while your Bluetooth connection is on, motion recognition is not enabled.</string>
 
     <string name="show_notification">Show notification</string>
     <string name="enable_sound">Enable sound</string>

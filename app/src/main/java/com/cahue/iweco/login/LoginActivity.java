@@ -34,7 +34,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
@@ -138,8 +137,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
         // Facebook callback registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
-
-        FacebookSdk.sdkInitialize(this);
 
         final LoginManager loginManager = LoginManager.getInstance();
         mFacebookLoginButton.setOnClickListener(new OnClickListener() {
@@ -413,7 +410,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         database.clearSaveAndBroadcast(this, loginResult.cars);
 
         final Intent resultIntent = new Intent();
-        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, TextUtils.isEmpty(loginResult.email) ? loginResult.email : loginResult.userId);
+        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, !TextUtils.isEmpty(loginResult.email) ? loginResult.email : loginResult.userId);
         resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.account_type));
         resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);

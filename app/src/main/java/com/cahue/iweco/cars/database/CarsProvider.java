@@ -43,6 +43,7 @@ public class CarsProvider extends ContentProvider {
             @NonNull String sortOrder) {
         return null;
     }
+
     /*
      * insert() always returns null (no URI)
      */
@@ -50,6 +51,7 @@ public class CarsProvider extends ContentProvider {
     public Uri insert(@NonNull Uri uri, ContentValues values) {
         return null;
     }
+
     /*
      * deleteCar() always returns "no rows affected" (0)
      */
@@ -57,6 +59,7 @@ public class CarsProvider extends ContentProvider {
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         return 0;
     }
+
     /*
      * update() always returns "no rows affected" (0)
      */

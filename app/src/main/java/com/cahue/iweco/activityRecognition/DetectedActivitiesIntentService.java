@@ -18,7 +18,6 @@ package com.cahue.iweco.activityrecognition;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -29,7 +28,6 @@ import android.util.Log;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
-import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
@@ -190,12 +188,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         Intent activityChangedIntent = new Intent(Constants.INTENT_ACTIVITY_CHANGED);
         activityChangedIntent.setAction(Constants.ACTION_FOOT_TO_VEHICLE);
         sendBroadcast(activityChangedIntent);
-
-        // enable BT is requested in preferences
-        if (PreferencesUtil.isBtOnEnteringVehicleEnabled(this)) {
-            BluetoothAdapter.getDefaultAdapter().enable();
-            ActivityRecognitionService.stop(this);
-        }
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};

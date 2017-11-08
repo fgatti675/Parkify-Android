@@ -377,8 +377,14 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
                     @Override
                     public void onResponse(JSONObject response) {
                         PlacesQueryResult parkingQueryResult = parseResult(response);
-                        if (!parkingQueryResult.moreResults)
-                            queriedBounds.add(viewPortBounds);
+                        if (!parkingQueryResult.moreResults) {
+                            LatLngBounds.Builder builder = LatLngBounds.builder();
+                            builder.include(viewPortBounds.northeast);
+                            builder.include(viewPortBounds.southwest);
+                            for (Place place : parkingQueryResult.places)
+                                builder.include(place.getLatLng());
+                            queriedBounds.add(builder.build());
+                        }
                         onPlacesUpdate(parkingQueryResult);
                     }
                 },

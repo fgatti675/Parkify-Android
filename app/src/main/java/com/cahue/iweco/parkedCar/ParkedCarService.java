@@ -1,14 +1,10 @@
 package com.cahue.iweco.parkedcar;
 
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.media.RingtoneManager;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -26,7 +22,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationservices.GeofenceCarService;
 import com.cahue.iweco.locationservices.LocationPollerService;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.util.FetchAddressIntentService;
+import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -135,41 +131,28 @@ public class ParkedCarService extends LocationPollerService {
         }
     }
 
-    private void fetchAddress(@NonNull Context context, @NonNull Car car) {
-        Log.d(TAG, "Fetching address");
-        Intent fetchAddressIntent = new Intent(context, FetchAddressIntentService.class);
-        fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new ParkedCarService.AddressResultReceiver());
-        fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, car.location);
-        context.startService(fetchAddressIntent);
-    }
+    private void fetchAddress(@NonNull final Context context, @NonNull final Car car) {
 
-    @SuppressLint("ParcelCreator")
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver() {
-            super(new Handler());
-        }
+        FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
+        fetchAddressDelegate.fetch(context, car.location, new FetchAddressDelegate.Callbacks() {
+            @Override
+            public void onAddressFetched(String address) {
+                carDatabase.updateAddress(ParkedCarService.this, car);
 
-        @Override
-        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
+                Log.d(TAG, "Sending car update broadcast");
 
-            if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
-                return;
+                Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
+                intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
+                intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
+                sendBroadcast(intent);
 
-            // Display the address string
-            // or an error message sent from the intent service.
-            car.address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-            carDatabase.updateAddress(ParkedCarService.this, car);
+                notifyUser();
+            }
 
-            Log.d(TAG, "Sending car update broadcast");
-
-            Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
-            intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-            intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
-            sendBroadcast(intent);
-
-            notifyUser();
-
-        }
+            @Override
+            public void onError(String error) {
+            }
+        });
     }
 
 

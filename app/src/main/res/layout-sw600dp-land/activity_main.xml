@@ -11,9 +11,25 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <include
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="@color/theme_primary"
             android:id="@+id/toolbar_actionbar"
-            layout="@layout/toolbar_main" />
+            android:elevation="@dimen/elevation"
+            android:gravity="start"
+            android:theme="@style/ActionBarThemeOverlay">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/default_padding"
+                android:scaleType="fitStart"
+                android:src="@drawable/parkify_logo">
+            </ImageView>
+
+        </android.support.v7.widget.Toolbar>
 
         <fragment
             android:id="@+id/navigation_drawer"

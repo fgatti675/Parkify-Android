@@ -1,13 +1,9 @@
 package com.cahue.iweco.activityrecognition;
 
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -20,7 +16,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationservices.LocationPollerService;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
-import com.cahue.iweco.util.FetchAddressIntentService;
+import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -70,10 +66,17 @@ public class PossibleParkedCarService extends LocationPollerService {
         /**
          * Fetch address
          */
-        Intent fetchAddressIntent = new Intent(context, FetchAddressIntentService.class);
-        fetchAddressIntent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver());
-        fetchAddressIntent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location);
-        context.startService(fetchAddressIntent);
+        FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
+        fetchAddressDelegate.fetch(this, location, new FetchAddressDelegate.Callbacks() {
+            @Override
+            public void onAddressFetched(String address) {
+                PossibleParkedCarService.this.onAddressFetched(address);
+            }
+
+            @Override
+            public void onError(String error) {
+            }
+        });
 
     }
 
@@ -136,24 +139,5 @@ public class PossibleParkedCarService extends LocationPollerService {
         return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, name, pIntent);
     }
 
-
-    @SuppressLint("ParcelCreator")
-    class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver() {
-            super(new Handler());
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, @NonNull Bundle resultData) {
-
-            if (resultCode != FetchAddressIntentService.SUCCESS_RESULT)
-                return;
-
-            String address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-
-            onAddressFetched(address);
-
-        }
-    }
 
 }

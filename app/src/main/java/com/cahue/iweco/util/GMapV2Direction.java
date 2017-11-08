@@ -49,7 +49,7 @@ public class GMapV2Direction {
                         public void onErrorResponse(@NonNull VolleyError error) {
                             error.printStackTrace();
                         }
-                    }) ;
+                    });
 
             // Add the request to the RequestQueue.
             queue.add(stringRequest);
@@ -189,7 +189,7 @@ public class GMapV2Direction {
     public ArrayList<LatLng> getDirection(@Nullable Document doc) {
         NodeList nl1, nl2, nl3;
         ArrayList<LatLng> listGeopoints = new ArrayList<>();
-        if(doc == null)
+        if (doc == null)
             return listGeopoints;
 
         nl1 = doc.getElementsByTagName("step");

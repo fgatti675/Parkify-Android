@@ -29,7 +29,9 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +43,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -82,9 +85,10 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.AdListener;
 import com.facebook.ads.NativeAd;
 import com.facebook.login.LoginManager;
-import com.facebook.share.widget.LikeView;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.android.gms.ads.formats.NativeAdOptions;
 import com.google.android.gms.ads.formats.NativeAppInstallAd;
 import com.google.android.gms.ads.formats.NativeContentAd;
@@ -229,14 +233,17 @@ public class MapsActivity extends AppCompatActivity
     private RelativeLayout detailsContainer;
     private DrawerLayout drawerLayout;
 
-    private ViewGroup adView;
+    private ViewGroup nativeAdContainer;
 
     @Nullable
     private BroadcastReceiver newPurchaseReceiver;
 
     private AdChoicesView adChoicesView;
-    private NativeAd nativeAd;
+    private NativeAd facebookNativeAd;
+
     private RelativeLayout mainContainer;
+
+    private FrameLayout nativeExpressAbMobContainer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -394,8 +401,11 @@ public class MapsActivity extends AppCompatActivity
 
         checkLocationPermission();
 
-        adView = (ViewGroup) findViewById(R.id.ad_container);
-        adView.setVisibility(View.GONE);
+
+        nativeExpressAbMobContainer = (FrameLayout) findViewById(R.id.ad_mob_container);
+        nativeAdContainer = (ViewGroup) findViewById(R.id.navite_ad_container);
+        nativeExpressAbMobContainer.setVisibility(View.GONE);
+        nativeAdContainer.setVisibility(View.GONE);
 
     }
 
@@ -461,8 +471,9 @@ public class MapsActivity extends AppCompatActivity
                     newPurchaseReceiver = new BroadcastReceiver() {
                         @Override
                         public void onReceive(Context context, Intent intent) {
-                            adView.setVisibility(View.GONE);
-                            nativeAd.destroy();
+                            nativeAdContainer.setVisibility(View.GONE);
+                            nativeExpressAbMobContainer.setVisibility(View.GONE);
+                            facebookNativeAd.destroy();
                         }
                     };
                     registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
@@ -480,9 +491,9 @@ public class MapsActivity extends AppCompatActivity
     private void setUpFacebookAd() {
 
         Log.d(TAG, "setUpFacebookAd");
-        nativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
-        nativeAd.setAdListener(MapsActivity.this);
-        nativeAd.loadAd();
+        facebookNativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
+        facebookNativeAd.setAdListener(MapsActivity.this);
+        facebookNativeAd.loadAd();
     }
 
 
@@ -497,15 +508,15 @@ public class MapsActivity extends AppCompatActivity
         Log.d(TAG, "onAdLoaded: ");
 
         // Downloading and setting the ad icon.
-        final NativeAd.Image adIcon = nativeAd.getAdIcon();
+        final NativeAd.Image adIcon = facebookNativeAd.getAdIcon();
 
         // Create native UI using the ad metadata.
-        final ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
-        final TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
+        final ImageView nativeAdIcon = (ImageView) nativeAdContainer.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = (TextView) nativeAdContainer.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = (TextView) nativeAdContainer.findViewById(R.id.native_ad_body);
         nativeAdBody.setSelected(true);
-        final Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
-        final ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
+        final Button nativeAdCallToAction = (Button) nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
+        final ViewGroup adChoicesWrap = (ViewGroup) nativeAdContainer.findViewById(R.id.ad_choices_wrap);
 
         RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
         if (adIcon != null) {
@@ -537,42 +548,75 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onError(Ad ad, AdError adError) {
         Log.d(TAG, "onAdError: ");
-//        setUpAdMobAd();
-        displayFacebookPromo();
+        setUpAdMobAdNativeExpress();
     }
 
-    private void displayFacebookPromo() {
 
-        ViewGroup facebookPromoView = (ViewGroup) findViewById(R.id.facebook_promo_container);
-        if (facebookPromoView != null) {
+    private void setUpAdMobAdNativeExpress() {
+        nativeAdContainer.setVisibility(View.GONE);
+        nativeExpressAbMobContainer.setVisibility(View.VISIBLE);
 
-            Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_LIKE, Tracking.ACTION_VIEW_DISPLAYED);
+        nativeExpressAbMobContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Display display = getWindowManager().getDefaultDisplay();
+                DisplayMetrics outMetrics = new DisplayMetrics();
+                display.getMetrics(outMetrics);
 
-            facebookPromoView.setVisibility(View.VISIBLE);
-            LikeView likeView = (LikeView) facebookPromoView.findViewById(R.id.like_button);
-            likeView.setObjectIdAndType(
-                    "https://www.facebook.com/parkifyapplication/",
-                    LikeView.ObjectType.PAGE);
-            likeView.setLikeViewStyle(LikeView.Style.BUTTON);
-            likeView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Tracking.sendEvent(Tracking.CATEGORY_FACEBOOK_LIKE, Tracking.ACTION_LIKE_CLICKED);
-                }
-            });
+                nativeExpressAbMobContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-        }
+                NativeExpressAdView nativeExpressAdView = new NativeExpressAdView(MapsActivity.this);
+                int width = (int) (nativeExpressAbMobContainer.getWidth() / outMetrics.density);
+                nativeExpressAdView.setAdSize(new AdSize(width, 80));
+                nativeExpressAdView.setAdUnitId("ca-app-pub-7749631063131885/9014982450");
+                nativeExpressAdView.setAdListener(new com.google.android.gms.ads.AdListener() {
+                    @Override
+                    public void onAdClosed() {
+                        super.onAdClosed();
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(int i) {
+                        super.onAdFailedToLoad(i);
+                    }
+
+                    @Override
+                    public void onAdLeftApplication() {
+                        super.onAdLeftApplication();
+                    }
+
+                    @Override
+                    public void onAdOpened() {
+                        super.onAdOpened();
+                    }
+
+                    @Override
+                    public void onAdLoaded() {
+                        super.onAdLoaded();
+                    }
+                });
+
+                AdRequest request = new AdRequest.Builder()
+                        .addTestDevice("978CFEF27A71410CEFEED093CC2599DA")
+                        .setLocation(getUserLocation()).build();
+                nativeExpressAdView.loadAd(request);
+
+                nativeExpressAbMobContainer.removeAllViews();
+                nativeExpressAbMobContainer.addView(nativeExpressAdView);
+            }
+        });
+
     }
 
-    private void setUpAdMobAd() {
+    private void setUpAdMobAdNative() {
         // Create native UI using the ad metadata.
-        final ImageView nativeAdIcon = (ImageView) adView.findViewById(R.id.native_ad_icon);
-        final TextView nativeAdTitle = (TextView) adView.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = (TextView) adView.findViewById(R.id.native_ad_body);
+        final ImageView nativeAdIcon = (ImageView) nativeAdContainer.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = (TextView) nativeAdContainer.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = (TextView) nativeAdContainer.findViewById(R.id.native_ad_body);
         nativeAdBody.setSelected(true);
-        final Button nativeAdCallToAction = (Button) adView.findViewById(R.id.native_ad_call_to_action);
-        final ViewGroup adChoicesWrap = (ViewGroup) adView.findViewById(R.id.ad_choices_wrap);
-        adView.setVisibility(View.VISIBLE);
+        final Button nativeAdCallToAction = (Button) nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
+        final ViewGroup adChoicesWrap = (ViewGroup) nativeAdContainer.findViewById(R.id.ad_choices_wrap);
+        nativeAdContainer.setVisibility(View.VISIBLE);
 
         AdLoader adLoader = new AdLoader.Builder(MapsActivity.this, "ca-app-pub-3940256099942544/3986624511")
                 .forAppInstallAd(new NativeAppInstallAd.OnAppInstallAdLoadedListener() {
@@ -612,14 +656,14 @@ public class MapsActivity extends AppCompatActivity
     }
 
     public void bindAdView(Button nativeAdCallToAction, final TextView nativeAdTitle, final TextView nativeAdBody, ViewGroup adChoicesWrap) {
-        adView.setVisibility(View.VISIBLE);
+        nativeAdContainer.setVisibility(View.VISIBLE);
 
-        nativeAd.unregisterView();
+        facebookNativeAd.unregisterView();
 
         // Setting the Text.
-        nativeAdCallToAction.setText(nativeAd.getAdCallToAction());
-        nativeAdTitle.setText(nativeAd.getAdTitle());
-        nativeAdBody.setText(nativeAd.getAdBody());
+        nativeAdCallToAction.setText(facebookNativeAd.getAdCallToAction());
+        nativeAdTitle.setText(facebookNativeAd.getAdTitle());
+        nativeAdBody.setText(facebookNativeAd.getAdBody());
 
         nativeAdTitle.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -631,13 +675,13 @@ public class MapsActivity extends AppCompatActivity
 
         // Add adChoices icon
         if (adChoicesView == null) {
-            adChoicesView = new AdChoicesView(MapsActivity.this, nativeAd, true);
+            adChoicesView = new AdChoicesView(MapsActivity.this, facebookNativeAd, true);
             adChoicesView.setGravity(Gravity.TOP | Gravity.END);
             adChoicesWrap.addView(adChoicesView);
         }
 
-        View adContainer = adView.findViewById(R.id.ad_container);
-        nativeAd.registerViewForInteraction(adContainer);
+        View adContainer = nativeAdContainer.findViewById(R.id.navite_ad_container);
+        facebookNativeAd.registerViewForInteraction(adContainer);
 
         setMapPadding();
     }
@@ -679,7 +723,7 @@ public class MapsActivity extends AppCompatActivity
 
         delegates.clear();
 
-        /**
+        /*
          * Add delegates
          */
         delegates.add(initSpotsDelegate());
@@ -973,7 +1017,7 @@ public class MapsActivity extends AppCompatActivity
         mainContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                int adHeight = adView == null ? 0 : adView.getMeasuredHeight();
+                int adHeight = nativeAdContainer == null ? 0 : nativeAdContainer.getMeasuredHeight();
                 mMap.setPadding(0, statusBarHeight + adHeight, 0, (detailsDisplayed ? cardDetailsContainer.getMeasuredHeight() : 0) + navBarHeight);
             }
         });

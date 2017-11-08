@@ -49,7 +49,6 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
     private void updateActRecPreferencesState(boolean enableARPreferences) {
         getPreferenceManager().findPreference(PreferencesUtil.PREF_MOVEMENT_RECOGNITION_NOTIFICATION).setEnabled(enableARPreferences);
-        getPreferenceManager().findPreference(PreferencesUtil.PREF_BT_ON_ENTER_VEHICLE).setEnabled(enableARPreferences);
     }
 
     private void updateBtPreferencesState(boolean enableBtPreferences) {
