@@ -49,6 +49,8 @@ public class Tracking {
 
     public static final String ACTION_CAR_EDIT = "Car edited";
 
+    public static final String ACTION_AD_IMPRESSION = "Ad impression";
+
     public static final String ACTION_AD_CLICKED = "Ad clicked";
 
     public static final String ACTION_VIEW_DISPLAYED = "View displayed";

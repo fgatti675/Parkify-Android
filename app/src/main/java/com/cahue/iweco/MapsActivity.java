@@ -648,6 +648,11 @@ public class MapsActivity extends AppCompatActivity
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "Facebook");
     }
 
+    @Override
+    public void onLoggingImpression(Ad ad) {
+        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
+    }
+
 
     @Override
     protected void onStart() {
