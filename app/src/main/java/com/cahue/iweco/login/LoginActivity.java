@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -490,7 +491,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                                     object.getString("email"),
                                     String.format("https://graph.facebook.com/%s/picture", object.getString("id")));
                             Intent intent = new Intent(Constants.INTENT_USER_INFO_UPDATE);
-                            sendBroadcast(intent);
+                            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

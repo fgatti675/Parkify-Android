@@ -15,6 +15,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -343,15 +344,15 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         // Register for broadcasts when a linkedDevice is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        activity.registerReceiver(mReceiver, filter);
+        LocalBroadcastManager.getInstance(activity).registerReceiver(mReceiver, filter);
 
         // Register for broadcasts when discovery has finished
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        activity.registerReceiver(mReceiver, filter);
+        LocalBroadcastManager.getInstance(activity).registerReceiver(mReceiver, filter);
 
         // Register for broadcasts when bt has been disconnected or disconnected
         filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        activity.registerReceiver(mReceiver, filter);
+        LocalBroadcastManager.getInstance(activity).registerReceiver(mReceiver, filter);
 
     }
 
@@ -360,8 +361,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         super.onDetach();
         callbacks = null;
 
-        // Unregister broadcast listeners
-        getActivity().unregisterReceiver(mReceiver);
+        // Unregister broadcast listeners0
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
     private void showClearDialog(@NonNull final Car car) {

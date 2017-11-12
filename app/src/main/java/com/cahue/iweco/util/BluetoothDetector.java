@@ -1,7 +1,9 @@
 package com.cahue.iweco.util;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,12 +36,13 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            if (state == BluetoothAdapter.STATE_ON) {
+            if(state == BluetoothAdapter.STATE_ON) {
                 onBtTurnedOn(context);
-            } else if (state == BluetoothAdapter.STATE_OFF) {
+            } else if(state == BluetoothAdapter.STATE_OFF) {
                 onBtTurnedOff(context);
             }
-        } else if (intent.getAction().equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+        } else if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
+                || intent.getAction().equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
 
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
@@ -74,7 +77,7 @@ public class BluetoothDetector extends BroadcastReceiver {
     }
 
     private void onBtTurnedOff(Context context) {
-        ActivityRecognitionService.startActivityRecognition(context);
+        ActivityRecognitionService.startCheckingActivityRecognition(context);
     }
 
     private void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
@@ -122,6 +125,6 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Start activity recognition if required
          */
-        ActivityRecognitionService.startActivityRecognition(context);
+        ActivityRecognitionService.startCheckingActivityRecognition(context);
     }
 }

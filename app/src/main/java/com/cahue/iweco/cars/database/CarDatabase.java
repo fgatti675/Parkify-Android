@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -258,7 +259,7 @@ public class CarDatabase {
 
         Intent intent = new Intent(Constants.INTENT_CAR_UPDATED);
         intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-        context.sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     /**

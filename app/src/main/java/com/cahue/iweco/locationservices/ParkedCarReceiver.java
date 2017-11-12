@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -115,7 +116,7 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
                 Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
                 intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
                 intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
-                context.sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
                 notifyUser(context);
             }

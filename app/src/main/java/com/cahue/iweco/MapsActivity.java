@@ -23,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -467,7 +468,7 @@ public class MapsActivity extends AppCompatActivity
                             facebookNativeAd.destroy();
                         }
                     };
-                    registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
+                    LocalBroadcastManager.getInstance(MapsActivity.this).registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
                     setUpFacebookAd();
 //                    setUpAdMobAdNativeExpress();
@@ -735,7 +736,7 @@ public class MapsActivity extends AppCompatActivity
         checkRatingDialogShown();
 
         // when our activity resumes, we want to register for car updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
 
         setInitialCamera();
 
@@ -1147,7 +1148,7 @@ public class MapsActivity extends AppCompatActivity
         unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
         if (newPurchaseReceiver != null) {
-            unregisterReceiver(newPurchaseReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(newPurchaseReceiver);
             newPurchaseReceiver = null;
         }
         super.onStop();
@@ -1292,7 +1293,7 @@ public class MapsActivity extends AppCompatActivity
             if (isLocationPermissionGranted())
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
-        unregisterReceiver(carUpdateReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(carUpdateReceiver);
 
         saveMapCameraPosition();
     }

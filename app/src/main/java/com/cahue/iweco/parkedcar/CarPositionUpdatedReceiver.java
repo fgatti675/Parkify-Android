@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Geocoder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -67,7 +68,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
                 Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
                 intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
                 intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
-                context.sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
 
             @Override

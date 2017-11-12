@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -61,7 +62,7 @@ public class BillingFragment extends Fragment {
              * Tell everyone the billing service is ready
              */
             if (getActivity() != null) {
-                getActivity().sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
                 onBillingReadyListener.onBillingReady(BillingFragment.this);
             }
         }
@@ -202,7 +203,8 @@ public class BillingFragment extends Fragment {
                 }
 
                 Util.showBlueToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
-                getActivity().sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
+
+                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
                 PreferencesUtil.setAdsRemoved(getActivity(), true);
 
             } else if (resultCode == Activity.RESULT_CANCELED) {
