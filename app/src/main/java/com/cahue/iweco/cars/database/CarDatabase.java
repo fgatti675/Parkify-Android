@@ -606,8 +606,8 @@ public class CarDatabase {
             }
 
             // remove stale spots
-            if (previousSpots.size() > MAX_POSSIBLE_SPOTS) {
-                for (ParkingSpot prevSpot : previousSpots.subList(MAX_POSSIBLE_SPOTS, previousSpots.size())) {
+            if (previousSpots.size() > MAX_POSSIBLE_SPOTS - 1) {
+                for (ParkingSpot prevSpot : previousSpots.subList(MAX_POSSIBLE_SPOTS - 1, previousSpots.size())) {
                     database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + prevSpot.getTime().getTime() + "'", null);
                 }
             }

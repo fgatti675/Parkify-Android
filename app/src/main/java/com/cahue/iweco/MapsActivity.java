@@ -974,7 +974,12 @@ public class MapsActivity extends AppCompatActivity
         if (possibleParkedCarDelegate == null) {
             Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot, order);
+
+            int recency = order == 0 || order == 1 ? PossibleParkedCarDelegate.RECENT : PossibleParkedCarDelegate.NOT_SO_RECENT;
+            if (System.currentTimeMillis() - spot.getTime().getTime() > 24 * 60 * 60 * 1000)
+                recency = PossibleParkedCarDelegate.NOT_SO_RECENT;
+
+            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot, recency);
             possibleParkedCarDelegate.setRetainInstance(true);
             transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
             transaction.commit();

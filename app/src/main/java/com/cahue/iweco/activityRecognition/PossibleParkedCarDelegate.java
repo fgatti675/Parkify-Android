@@ -34,11 +34,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements OnCarClickedListener, PossibleSetCarDetailsFragment.OnPossibleSpotDeletedListener {
 
     public static final String FRAGMENT_TAG = "POSSIBLE_PARKED_CAR_DELEGATE";
-    public static final int RECENT_0 = 0;
-    public static final int RECENT_1 = 1;
-    public static final int RECENT_2 = 2;
-    public static final int RECENT_3 = 3;
-    public static final int RECENT_4 = 4;
+
+    public static final int RECENT = 0;
+    public static final int NOT_SO_RECENT = 1;
+
     private static final String ARG_SPOT = "spot";
     private static final String ARG_RECENCY = "recency";
     @Recency
@@ -75,18 +74,15 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
         this.recency = getArguments().getInt(ARG_RECENCY);
 
         iconGenerator = new IconGenerator(getActivity());
-        iconGenerator.setColor(getActivity().getResources().getColor(R.color.theme_primary));
         iconGenerator.setContentRotation(-90);
         switch (recency) {
-            case RECENT_0:
+            case RECENT:
+                iconGenerator.setColor(getActivity().getResources().getColor(R.color.lightest_gray));
                 iconGenerator.setTextAppearance(getActivity(), R.style.Marker_PossibleCar);
-            case RECENT_1:
-                iconGenerator.setTextAppearance(getActivity(), R.style.Marker_PossibleCar12);
                 break;
-            case RECENT_2:
-            case RECENT_3:
-            case RECENT_4:
-                iconGenerator.setTextAppearance(getActivity(), R.style.Marker_PossibleCar8);
+            case NOT_SO_RECENT:
+                iconGenerator.setColor(getActivity().getResources().getColor(R.color.lightest_gray));
+                iconGenerator.setTextAppearance(getActivity(), R.style.Marker_PossibleCar10);
                 break;
         }
     }
@@ -186,7 +182,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Retention(SOURCE)
-    @IntDef({RECENT_0, RECENT_1, RECENT_2, RECENT_3, RECENT_4})
+    @IntDef({RECENT, NOT_SO_RECENT})
     public @interface Recency {
     }
 }
