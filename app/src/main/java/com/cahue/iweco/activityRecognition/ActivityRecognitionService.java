@@ -93,18 +93,16 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
             @Override
             public void onConnected(@Nullable Bundle bundle) {
-                Awareness.FenceApi.updateFences(
-                        googleApiClient,
+                Awareness.getFenceClient(context).updateFences(
                         new FenceUpdateRequest.Builder()
                                 .addFence("vehicleDuringFenceKey", vehicleDuringFence, pendingIntent)
                                 .addFence("vehicleStartingFenceKey", vehicleStartingFence, pendingIntent)
                                 .build())
-                        .setResultCallback(status -> {
-                            if (status.isSuccess()) {
-                                Log.i(TAG, "Fence was successfully registered.");
-                            } else {
-                                Log.e(TAG, "Fence could not be registered: " + status);
-                            }
+                        .addOnCompleteListener(task -> {
+                            Log.i(TAG, "Fence was successfully registered.");
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Fence could not be registered: " + e);
                         });
             }
 
@@ -122,6 +120,7 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
             return new int[]{DetectedActivityFence.IN_VEHICLE, DetectedActivityFence.ON_BICYCLE};
         else
             return new int[]{DetectedActivityFence.IN_VEHICLE};
+
     }
 
     public static class InVehicleReceiver extends BroadcastReceiver {
@@ -131,7 +130,6 @@ public class ActivityRecognitionService extends Service implements GoogleApiClie
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: ");
-
 
 
             FenceState fenceState = FenceState.extract(intent);
