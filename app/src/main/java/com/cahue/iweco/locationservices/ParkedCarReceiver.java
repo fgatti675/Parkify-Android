@@ -1,13 +1,14 @@
 package com.cahue.iweco.locationservices;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.media.RingtoneManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
@@ -30,8 +31,8 @@ import com.cahue.iweco.util.Util;
 
 import java.util.Date;
 
+import static android.app.Notification.PRIORITY_MIN;
 import static android.content.Intent.ACTION_VIEW;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
 
 /**
  * This class is in charge of receiving a location fix when the user parks his car.
@@ -73,8 +74,8 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
                 title = context.getString(R.string.just_parked);
             }
 
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(context, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID)
+            Notification.Builder mBuilder =
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID) : new Notification.Builder(context))
                             .setContentIntent(pendingIntent)
                             .setColor(context.getResources().getColor(R.color.theme_primary))
                             .setSmallIcon(R.drawable.ic_car_white_48dp)
@@ -96,7 +97,7 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
             mNotifyMgr.notify(car.id, NOTIFICATION_ID, mBuilder.build());
 
         } else {
-            Util.showBlueToastWithLogo(context, context.getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
+            Util.showBlueToast(context, context.getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
         }
     }
 

@@ -27,7 +27,7 @@ public class NotificationChannelsUtils {
                 return;
             /* Create or update. */
             NotificationChannel channel = new NotificationChannel(DEBUG_CHANNEL_ID, "Activity recognition debug",
-                    NotificationManager.IMPORTANCE_LOW);
+                    NotificationManager.IMPORTANCE_NONE);
             mNotifyMgr.createNotificationChannel(channel);
         }
     }

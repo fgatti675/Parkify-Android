@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -31,6 +32,7 @@ import com.google.android.gms.location.LocationServices;
 import java.util.Arrays;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 
 /**
  * This service is in charge of detecting if the user is far away enough after parking, and if so,
@@ -236,7 +238,7 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
         long[] pattern = {0, 1000, 200, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder mBuilder =
-                new Notification.Builder(context)
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, DEBUG_CHANNEL_ID) : new Notification.Builder(context))
                         .setVibrate(pattern)
                         .setSmallIcon(R.drawable.ic_car_white_48dp)
                         .setContentTitle("Approaching " + car.name);
@@ -253,7 +255,7 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
         long[] pattern = {0, 110, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder mBuilder =
-                new Notification.Builder(context)
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, DEBUG_CHANNEL_ID) : new Notification.Builder(context))
                         .setVibrate(pattern)
                         .setSmallIcon(R.drawable.crosshairs_gps)
                         .setContentTitle("Geofence ERROR for " + car.name)
@@ -268,7 +270,7 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
         long[] pattern = {0, 1000, 200, 1000};
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder mBuilder =
-                new Notification.Builder(context)
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, DEBUG_CHANNEL_ID) : new Notification.Builder(context))
                         .setVibrate(pattern)
                         .setSmallIcon(R.drawable.crosshairs_gps)
                         .setContentTitle("Geofence set for " + car.name);

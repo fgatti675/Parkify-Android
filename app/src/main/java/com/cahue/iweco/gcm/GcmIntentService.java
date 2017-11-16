@@ -1,13 +1,14 @@
 package com.cahue.iweco.gcm;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
@@ -42,7 +43,7 @@ public class GcmIntentService extends IntentService {
     public static final String DELETED_CAR = "DELETED_CAR";
     public static final int NOTIFICATION_ID = 1;
     private static final String TAG = GcmIntentService.class.getSimpleName();
-    NotificationCompat.Builder builder;
+    Notification.Builder builder;
     private NotificationManager mNotificationManager;
 
     public GcmIntentService() {
@@ -115,11 +116,11 @@ public class GcmIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MapsActivity.class), 0);
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this, DEBUG_CHANNEL_ID)
+        Notification.Builder mBuilder =
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, DEBUG_CHANNEL_ID) : new Notification.Builder(this))
                         .setSmallIcon(R.drawable.ic_stat_gcm)
                         .setContentTitle("GCM Notification")
-                        .setStyle(new NotificationCompat.BigTextStyle()
+                        .setStyle(new Notification.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
 

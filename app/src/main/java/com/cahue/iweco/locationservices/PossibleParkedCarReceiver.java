@@ -1,12 +1,13 @@
 package com.cahue.iweco.locationservices;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
@@ -105,8 +106,8 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(context, ACT_RECOG_CHANNEL_ID)
+        Notification.Builder mBuilder =
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, ACT_RECOG_CHANNEL_ID) : new Notification.Builder(context))
                         .setVibrate(pattern)
                         .setContentIntent(pendingIntent)
                         .setColor(context.getResources().getColor(R.color.theme_primary))
@@ -118,7 +119,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
         int numberActions = Math.min(cars.size(), 3);
         for (int i = 0; i < numberActions; i++) {
             Car car = cars.get(i);
-            NotificationCompat.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
+            Notification.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
             mBuilder.addAction(saveAction);
         }
 
@@ -127,7 +128,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
 
     @NonNull
-    private NotificationCompat.Action createCarSaveAction(Context context, @NonNull Car car, ParkingSpot possibleSpot, int index) {
+    private Notification.Action createCarSaveAction(Context context, @NonNull Car car, ParkingSpot possibleSpot, int index) {
 
         Intent intent = new Intent(context, SaveCarRequestReceiver.class);
         intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
@@ -135,7 +136,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
         PendingIntent pIntent = PendingIntent.getBroadcast(context, 782982 + index, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         String name = car.isOther() ? context.getResources().getString(R.string.other) : car.name;
-        return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, name, pIntent);
+        return new Notification.Action(R.drawable.ic_car_white_24dp, name, pIntent);
     }
 
 }

@@ -8,14 +8,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.cahue.iweco.util.Tracking;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
 /**
  * Created by f.gatti.gomez on 02.07.17.
  */
-public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallbacks {
+public class LocationUpdatesHelper {
 
     /**
      * Do nothing before this time has passed. Useful to avoid stale locations
@@ -45,9 +43,6 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
 
     private static final String TAG = LocationUpdatesHelper.class.getSimpleName();
 
-    private static final int START = 1;
-    private static final int STOP = 2;
-
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
@@ -57,7 +52,7 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
      * The fastest rate for active location updates. Updates will never be more frequent
      * than this value, but they may be less frequent.
      */
-    private static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL ;
+    private static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL;
 
     /**
      * The max time before batched results are delivered by location services. Results may be
@@ -66,12 +61,10 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
     private static final long MAX_WAIT_TIME = UPDATE_INTERVAL * 3;
 
     private final Context context;
+
     private PendingIntent pendingIntent;
 
-    private GoogleApiClient mGoogleApiClient;
     private String action;
-
-    private int mode; // start or stop
 
     private Map<String, Class<? extends BroadcastReceiver>> receiversMap = new HashMap<String, Class<? extends BroadcastReceiver>>() {{
         put(CarMovedReceiver.ACTION, CarMovedReceiver.class);
@@ -81,14 +74,12 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
     }};
 
     private Bundle extras;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     public LocationUpdatesHelper(Context context, String action) {
         this.context = context;
-        this.mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .build();
         this.action = action;
+        fusedLocationProviderClient = new FusedLocationProviderClient(context);
     }
 
     public void startLocationUpdates(Bundle extras) {
@@ -106,9 +97,26 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
             return;
         }
 
-        mode = START;
         pendingIntent = getPendingIntent(context, getIntent());
-        mGoogleApiClient.connect();
+
+        LocationRequest locationRequest = new LocationRequest();
+
+        locationRequest.setInterval(UPDATE_INTERVAL);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        // Sets the maximum time when batched location updates are delivered. Updates may be
+        // delivered sooner than this interval.
+        locationRequest.setMaxWaitTime(MAX_WAIT_TIME);
+
+        try {
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, pendingIntent);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -116,51 +124,15 @@ public class LocationUpdatesHelper implements GoogleApiClient.ConnectionCallback
      */
     public void stopLocationUpdates(Intent intent) {
         Log.i(TAG, "Removing location updates");
-        mode = STOP;
         pendingIntent = getPendingIntent(context, intent);
-        mGoogleApiClient.connect();
+
+        fusedLocationProviderClient.removeLocationUpdates(pendingIntent);
     }
 
     private PendingIntent getPendingIntent(Context context, Intent intent) {
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-        if (mode == START) {
-            LocationRequest locationRequest = new LocationRequest();
-
-            locationRequest.setInterval(UPDATE_INTERVAL);
-
-            // Sets the fastest rate for active location updates. This interval is exact, and your
-            // application will never receive updates faster than this value.
-            locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-            // Sets the maximum time when batched location updates are delivered. Updates may be
-            // delivered sooner than this interval.
-            locationRequest.setMaxWaitTime(MAX_WAIT_TIME);
-
-            try {
-                LocationServices.FusedLocationApi.requestLocationUpdates(
-                        mGoogleApiClient, locationRequest, pendingIntent);
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            }
-        } else if (mode == STOP) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(
-                    mGoogleApiClient, pendingIntent);
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
 
     private Intent getIntent() {
         Intent intent = new Intent(context, receiversMap.get(action));

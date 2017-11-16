@@ -80,7 +80,7 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
          */
         if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, car);
-            Util.showBlueToastWithLogo(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
+            Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
         }
 
         CarsSync.clearLocation(carDatabase, context, car);
