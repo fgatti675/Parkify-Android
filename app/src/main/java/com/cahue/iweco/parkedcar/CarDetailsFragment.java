@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -108,8 +109,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         super.onResume();
 
         Log.d(TAG, "Register receiver");
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
 
         updateLayout();
 
@@ -118,7 +119,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(carUpdatedReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(carUpdatedReceiver);
     }
 
     private void updateLayout() {

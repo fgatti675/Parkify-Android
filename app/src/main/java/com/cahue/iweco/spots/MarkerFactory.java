@@ -90,6 +90,7 @@ public class MarkerFactory {
                 .icon(parkingBitmap)
                 .anchor(0.5F, 1F);
     }
+
     private static String getMarkerText(long ms) {
         return String.format("%d'", ms / 60000);
     }

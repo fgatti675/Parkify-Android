@@ -17,15 +17,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -55,26 +54,25 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.ImageRequest;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityrecognition.PossibleParkedCarDelegate;
-import com.cahue.iweco.activityrecognition.PossibleParkedCarService;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
-import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.CarMovedReceiver;
+import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.ParkedCarReceiver;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.parkedcar.CarDetailsFragment;
-import com.cahue.iweco.parkedcar.ParkedCarService;
 import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
-import com.cahue.iweco.tutorial.TutorialActivity;
-import com.cahue.iweco.util.FacebookAppInvitesDialog;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
@@ -314,27 +312,25 @@ public class MapsActivity extends AppCompatActivity
                 }
             });
 
-        mainContainer = (RelativeLayout) findViewById(R.id.main_container);
-        detailsContainer = (RelativeLayout) findViewById(R.id.details_container);
+        mainContainer = findViewById(R.id.main_container);
+        detailsContainer = findViewById(R.id.details_container);
 
         /**
          * If translucent bars, apply the proper margins
          */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Resources resources = getResources();
+        Resources resources = getResources();
 
-            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
-            statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+        int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
 
-            if (resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                int navBarResId = resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android");
-                int navBarLandscapeHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-                mainContainer.setPadding(0, statusBarHeight, navBarLandscapeHeight, 0);
-            } else {
-                int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-                navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-                mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
-            }
+        if (resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            int navBarResId = resources.getIdentifier("navigation_bar_height_landscape", "dimen", "android");
+            int navBarLandscapeHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
+            mainContainer.setPadding(0, statusBarHeight, navBarLandscapeHeight, 0);
+        } else {
+            int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+            navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
+            mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
         }
 
         /**
@@ -342,23 +338,14 @@ public class MapsActivity extends AppCompatActivity
          */
         setUpNavigationDrawer();
 
-        myLocationButton = (FloatingActionButton) findViewById(R.id.my_location);
-        ViewCompat.setElevation(myLocationButton, getResources().getDimension(R.dimen.elevation));
+        myLocationButton = findViewById(R.id.my_location);
         myLocationButton.setBackgroundTintList(getResources().getColorStateList(R.color.button_states));
-        myLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setCameraFollowing(true);
-            }
-        });
+        myLocationButton.setOnClickListener(view -> setCameraFollowing(true));
 
         if (BuildConfig.DEBUG) {
-            myLocationButton.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    setDebugConfig();
-                    return false;
-                }
+            myLocationButton.setOnLongClickListener(v -> {
+                setDebugConfig();
+                return false;
             });
         }
 
@@ -388,10 +375,10 @@ public class MapsActivity extends AppCompatActivity
          * Details
          */
         detailsFragment = (DetailsFragment) getFragmentManager().findFragmentByTag(DETAILS_FRAGMENT_TAG);
-        cardDetailsContainer = (CardView) findViewById(R.id.card_details_container);
+        cardDetailsContainer = findViewById(R.id.card_details_container);
         cardDetailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
-        noCarsButton = (Button) findViewById(R.id.no_cars_button);
+        noCarsButton = findViewById(R.id.no_cars_button);
         noCarsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -402,10 +389,15 @@ public class MapsActivity extends AppCompatActivity
         checkLocationPermission();
 
 
-        nativeExpressAbMobContainer = (FrameLayout) findViewById(R.id.ad_mob_container);
-        nativeAdContainer = (ViewGroup) findViewById(R.id.navite_ad_container);
+        nativeExpressAbMobContainer = findViewById(R.id.ad_mob_container);
+        nativeAdContainer = findViewById(R.id.navite_ad_container);
         nativeExpressAbMobContainer.setVisibility(View.GONE);
         nativeAdContainer.setVisibility(View.GONE);
+
+        /*
+         * Start activity recognition service (if enabled)
+         */
+        ActivityRecognitionService.startCheckingActivityRecognition(this);
 
     }
 
@@ -476,9 +468,10 @@ public class MapsActivity extends AppCompatActivity
                             facebookNativeAd.destroy();
                         }
                     };
-                    registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
+                    LocalBroadcastManager.getInstance(MapsActivity.this).registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
                     setUpFacebookAd();
+//                    setUpAdMobAdNativeExpress();
 
                 } else {
                     PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
@@ -511,12 +504,12 @@ public class MapsActivity extends AppCompatActivity
         final NativeAd.Image adIcon = facebookNativeAd.getAdIcon();
 
         // Create native UI using the ad metadata.
-        final ImageView nativeAdIcon = (ImageView) nativeAdContainer.findViewById(R.id.native_ad_icon);
-        final TextView nativeAdTitle = (TextView) nativeAdContainer.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = (TextView) nativeAdContainer.findViewById(R.id.native_ad_body);
+        final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = nativeAdContainer.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
         nativeAdBody.setSelected(true);
-        final Button nativeAdCallToAction = (Button) nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
-        final ViewGroup adChoicesWrap = (ViewGroup) nativeAdContainer.findViewById(R.id.ad_choices_wrap);
+        final Button nativeAdCallToAction = nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
+        final ViewGroup adChoicesWrap = nativeAdContainer.findViewById(R.id.ad_choices_wrap);
 
         RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
         if (adIcon != null) {
@@ -610,12 +603,12 @@ public class MapsActivity extends AppCompatActivity
 
     private void setUpAdMobAdNative() {
         // Create native UI using the ad metadata.
-        final ImageView nativeAdIcon = (ImageView) nativeAdContainer.findViewById(R.id.native_ad_icon);
-        final TextView nativeAdTitle = (TextView) nativeAdContainer.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = (TextView) nativeAdContainer.findViewById(R.id.native_ad_body);
+        final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = nativeAdContainer.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
         nativeAdBody.setSelected(true);
-        final Button nativeAdCallToAction = (Button) nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
-        final ViewGroup adChoicesWrap = (ViewGroup) nativeAdContainer.findViewById(R.id.ad_choices_wrap);
+        final Button nativeAdCallToAction = nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
+        final ViewGroup adChoicesWrap = nativeAdContainer.findViewById(R.id.ad_choices_wrap);
         nativeAdContainer.setVisibility(View.VISIBLE);
 
         AdLoader adLoader = new AdLoader.Builder(MapsActivity.this, "ca-app-pub-3940256099942544/3986624511")
@@ -694,7 +687,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onLoggingImpression(Ad ad) {
-        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
+        Log.d(TAG, "onLoggingImpression: ");
     }
 
 
@@ -730,24 +723,20 @@ public class MapsActivity extends AppCompatActivity
 
         delegates.add(initPlacesDelegate());
 
+        int i = 0;
         for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots(this))
-            delegates.add(initPossibleParkedCarDelegate(spot));
+            delegates.add(initPossibleParkedCarDelegate(spot, i++));
 
         for (String id : carDatabase.getCarIds(this, true))
             delegates.add(initParkedCarDelegate(id));
 
-        /**
+        /*
          * Show some dialogs in case the user is bored
          */
         checkRatingDialogShown();
 
-        /**
-         * If BT is not enabled, start activity recognition service (if enabled)
-         */
-        ActivityRecognitionService.startIfNoBT(this);
-
         // when our activity resumes, we want to register for car updates
-        registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
 
         setInitialCamera();
 
@@ -767,6 +756,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        Log.d(TAG, "onNewIntent: ");
         handleIntent(intent);
     }
 
@@ -776,10 +766,10 @@ public class MapsActivity extends AppCompatActivity
             if (intent.getAction().equals(Constants.ACTION_POSSIBLE_PARKED_CAR)) {
 
                 ParkingSpot possibleSpot = intent.getParcelableExtra(Constants.EXTRA_SPOT);
-                initPossibleParkedCarDelegate(possibleSpot).activate();
+                getPossibleParkingDelegate(possibleSpot).activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-                mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
+                mNotifyMgr.cancel(PossibleParkedCarReceiver.NOTIFICATION_ID);
                 intent.setAction(null);
             } else if (intent.getAction().equals(ACTION_VIEW)) {
 
@@ -788,7 +778,7 @@ public class MapsActivity extends AppCompatActivity
                 parkedCarDelegate.activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-                mNotifyMgr.cancel(carId, ParkedCarService.NOTIFICATION_ID);
+                mNotifyMgr.cancel(carId, ParkedCarReceiver.NOTIFICATION_ID);
                 intent.setAction(null);
             }
         }
@@ -810,7 +800,7 @@ public class MapsActivity extends AppCompatActivity
         mNavigationDrawerFragment.setBottomMargin(navBarHeight);
 
         // Set up the drawer.
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         if (drawerLayout != null) {
             mNavigationDrawerFragment.setUpDrawer(
                     R.id.navigation_drawer,
@@ -834,7 +824,7 @@ public class MapsActivity extends AppCompatActivity
         setUpMap();
         setMapPadding();
 
-        /**
+        /*
          * Initial zoom
          */
         if (!mapInitialised) {
@@ -979,19 +969,27 @@ public class MapsActivity extends AppCompatActivity
      * @return
      */
     @NonNull
-    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(@NonNull ParkingSpot spot) {
-        PossibleParkedCarDelegate possibleParkedCarDelegate =
-                (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(spot));
+    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(@NonNull ParkingSpot spot, int order) {
+        PossibleParkedCarDelegate possibleParkedCarDelegate = getPossibleParkingDelegate(spot);
         if (possibleParkedCarDelegate == null) {
             Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
+
+            int recency = order == 0 || order == 1 ? PossibleParkedCarDelegate.RECENT : PossibleParkedCarDelegate.NOT_SO_RECENT;
+            if (System.currentTimeMillis() - spot.getTime().getTime() > 24 * 60 * 60 * 1000)
+                recency = PossibleParkedCarDelegate.NOT_SO_RECENT;
+
+            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot, recency);
             possibleParkedCarDelegate.setRetainInstance(true);
             transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
             transaction.commit();
             getFragmentManager().executePendingTransactions();
         }
         return possibleParkedCarDelegate;
+    }
+
+    private PossibleParkedCarDelegate getPossibleParkingDelegate(@NonNull ParkingSpot spot) {
+        return (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(spot));
     }
 
     /**
@@ -1014,12 +1012,9 @@ public class MapsActivity extends AppCompatActivity
 
     private void setMapPadding() {
         if (mMap == null) return;
-        mainContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                int adHeight = nativeAdContainer == null ? 0 : nativeAdContainer.getMeasuredHeight();
-                mMap.setPadding(0, statusBarHeight + adHeight, 0, (detailsDisplayed ? cardDetailsContainer.getMeasuredHeight() : 0) + navBarHeight);
-            }
+        mainContainer.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            int adHeight = nativeAdContainer == null ? 0 : nativeAdContainer.getMeasuredHeight();
+            mMap.setPadding(0, statusBarHeight + adHeight, 0, (detailsDisplayed ? cardDetailsContainer.getMeasuredHeight() : 0) + navBarHeight);
         });
     }
 
@@ -1158,7 +1153,7 @@ public class MapsActivity extends AppCompatActivity
         unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
         if (newPurchaseReceiver != null) {
-            unregisterReceiver(newPurchaseReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(newPurchaseReceiver);
             newPurchaseReceiver = null;
         }
         super.onStop();
@@ -1296,13 +1291,6 @@ public class MapsActivity extends AppCompatActivity
         startActivity(new Intent(this, SettingsActivity.class));
     }
 
-    public void goToTutorial() {
-        startActivity(new Intent(this, TutorialActivity.class));
-        // animation
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        PreferencesUtil.setTutorialShown(this, true);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -1310,7 +1298,7 @@ public class MapsActivity extends AppCompatActivity
             if (isLocationPermissionGranted())
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
-        unregisterReceiver(carUpdateReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(carUpdateReceiver);
 
         saveMapCameraPosition();
     }
@@ -1331,10 +1319,6 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnCameraMoveStartedListener(this);
     }
 
-
-    public void openShareDialog() {
-        FacebookAppInvitesDialog.showAppInviteDialog(this);
-    }
 
     public void openDonationDialog() {
         DonateDialog dialog = new DonateDialog();
@@ -1610,59 +1594,57 @@ public class MapsActivity extends AppCompatActivity
         debugLayout.setVisibility(View.VISIBLE);
 
 
-        Button refresh = (Button) findViewById(R.id.refresh);
-        refresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                initSpotsDelegate().queryCameraView();
-                if (mAccount != null)
-                    CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
-                else
-                    Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT).show();
-            }
+        Button refresh = findViewById(R.id.refresh);
+        refresh.setOnClickListener(v -> {
+            initSpotsDelegate().queryCameraView();
+            if (mAccount != null)
+                CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
+            else
+                Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT).show();
         });
 
-        Button actRecog = (Button) findViewById(R.id.act_recog);
-        actRecog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, PossibleParkedCarService.class);
-                startService(intent);
-            }
+        Button startActRecog = findViewById(R.id.start_act_rec);
+        startActRecog.setOnClickListener(v -> {
+            ActivityRecognitionService.startActivityRecognition(MapsActivity.this);
         });
 
-        Button carParked = (Button) findViewById(R.id.park);
-        carParked.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
-                intent.putExtra(Constants.EXTRA_CAR_ID, carDatabase.retrieveCars(MapsActivity.this, true).iterator().next().id);
-                startService(intent);
-            }
+        Button actRecDetected = findViewById(R.id.act_recog);
+        actRecDetected.setOnClickListener(v -> {
+            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
+            if (cars.isEmpty()) return;
+            // start the CarMovedReceiver
+            LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, PossibleParkedCarReceiver.ACTION);
+            helper.startLocationUpdates(null);
         });
 
-        Button carMoved = (Button) findViewById(R.id.driveOff);
-        carMoved.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
-                List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
-                if (cars.isEmpty()) return;
-                Car car = cars.iterator().next();
-                intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-                startService(intent);
-            }
+        Button carParked = findViewById(R.id.park);
+        carParked.setOnClickListener(v -> {
+            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
+            if (cars.isEmpty()) return;
+            // start the CarMovedReceiver
+            LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, ParkedCarReceiver.ACTION);
+            Bundle extras = new Bundle();
+            extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
+            helper.startLocationUpdates(extras);
         });
 
-        Button approachingCar = (Button) findViewById(R.id.approaching);
-        approachingCar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
-                if (cars.isEmpty()) return;
-                Car car = cars.iterator().next();
-                ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
-            }
+        Button carMoved = findViewById(R.id.driveOff);
+        carMoved.setOnClickListener(v -> {
+            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
+            if (cars.isEmpty()) return;
+            // start the CarMovedReceiver
+            LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, CarMovedReceiver.ACTION);
+            Bundle extras = new Bundle();
+            extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
+            helper.startLocationUpdates(extras);
+        });
+
+        Button approachingCar = findViewById(R.id.approaching);
+        approachingCar.setOnClickListener(v -> {
+            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
+            if (cars.isEmpty()) return;
+            Car car = cars.iterator().next();
+            ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
         });
     }
 

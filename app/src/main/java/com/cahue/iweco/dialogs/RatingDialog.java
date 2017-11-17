@@ -8,7 +8,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -78,21 +77,17 @@ public class RatingDialog extends DialogFragment {
         builder.setMessage(R.string.rating_message)
                 .setIcon(R.drawable.ic_logo_heart)
                 .setTitle(R.string.like_question)
-                .setPositiveButton(R.string.rate, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID));
-                        startActivity(intent);
-                        setRatedDialogAccepted(getActivity(), true);
-                        Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_ACCEPT);
-                    }
+                .setPositiveButton(R.string.rate, (dialog, id) -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID));
+                    startActivity(intent);
+                    setRatedDialogAccepted(getActivity(), true);
+                    Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_ACCEPT);
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        int currentInterval = getNextShowIntervalDays(getActivity());
-                        setNextShowIntervalDays(getActivity(), currentInterval + 3);
-                        Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_DISMISS);
-                    }
+                .setNegativeButton(R.string.cancel, (dialog, id) -> {
+                    int currentInterval = getNextShowIntervalDays(getActivity());
+                    setNextShowIntervalDays(getActivity(), currentInterval + 3);
+                    Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_DISMISS);
                 });
 
         setRateDialogLastDisplayed(getActivity(), new Date());

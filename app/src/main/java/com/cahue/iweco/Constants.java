@@ -41,6 +41,10 @@ public class Constants {
     // action telling the main activity that activity recognition has a possible spot
     public static final String ACTION_POSSIBLE_PARKED_CAR = BuildConfig.APPLICATION_ID + ".ACTION_POSSIBLE_PARKED_CAR";
 
+    public static final String ACTION_STOP_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".ACTION_STOP_ACTIVITY_RECOGNITION";
+
+    public static final String EXTRA_LOCATION_RECEIVER = BuildConfig.APPLICATION_ID + ".INTENT_LOCATION_RECEIVER";
+    public static final String EXTRA_LOCATION = BuildConfig.APPLICATION_ID + ".INTENT_EXTRA_LOCATION";
 
     // extra fields
     public static final String EXTRA_CAR_ID = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_ID";
@@ -49,22 +53,17 @@ public class Constants {
     public static final String EXTRA_CAR_TIME = BuildConfig.APPLICATION_ID + ".INTENT_CAR_EXTRA_TIME";
 
     public static final String EXTRA_SPOT = BuildConfig.APPLICATION_ID + ".INTENT_SPOT_EXTRA";
+    public static final String EXTRA_ACTIVITY = BuildConfig.APPLICATION_ID + ".INTENT_SPOT_EXTRA";
 
     public static final String EXTRA_START_TIME = BuildConfig.APPLICATION_ID + "EXTRA_START_TIME";
+    public static final String EXTRA_BUNDLE = BuildConfig.APPLICATION_ID + "EXTRA_BUNDLE";
 
     // billing
     public static final String INTENT_BILLING_READY = BuildConfig.APPLICATION_ID + ".INTENT_BILLING_READY";
     public static final String INTENT_ADS_REMOVED = BuildConfig.APPLICATION_ID + ".INTENT_ADS_REMOVED";
 
-    // Actions used to control start / stop of AR
-    public static final String ACTION_START_ACTIVITY_RECOGNITION_DEFAULT = BuildConfig.APPLICATION_ID + ".ACTION_START_ACTIVITY_RECOGNITION_DEFAULT";
-    public static final String ACTION_START_ACTIVITY_RECOGNITION_FAST = BuildConfig.APPLICATION_ID + ".ACTION_START_ACTIVITY_RECOGNITION_FAST";
-    public static final String ACTION_STOP_ACTIVITY_RECOGNITION = BuildConfig.APPLICATION_ID + ".ACTION_STOP_ACTIVITY_RECOGNITION";
-
     // Activity recognition change. Currently not received by anyone
     public static final String INTENT_ACTIVITY_CHANGED = BuildConfig.APPLICATION_ID + ".INTENT_ACTIVITY_CHANGED";
-    public static final String ACTION_VEHICLE_TO_FOOT = BuildConfig.APPLICATION_ID + ".ACTION_VEHICLE_TO_FOOT";
-    public static final String ACTION_FOOT_TO_VEHICLE = BuildConfig.APPLICATION_ID + ".ACTION_FOOT_TO_VEHICLE";
 
     // request to save a car
     public static final String INTENT_ENABLE_NOTIFICATION_SOUND = BuildConfig.APPLICATION_ID + ".INTENT_ENABLE_NOTIFICATION_SOUND";

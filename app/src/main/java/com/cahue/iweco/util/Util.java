@@ -55,23 +55,6 @@ public class Util {
         toast.show();
     }
 
-    public static void showBlueToastWithLogo(@NonNull Context context, int resId, int length) {
-        showBlueToastWithLogo(context, context.getString(resId), length);
-    }
-
-    public static void showBlueToastWithLogo(@NonNull Context context, String string, int length) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.toast_blue_with_logo, null);
-        TextView text = (TextView) layout.findViewById(R.id.text);
-        text.setText(string);
-
-        Toast toast = new Toast(context.getApplicationContext());
-
-        toast.setGravity(Gravity.BOTTOM, 0, getActionBarSize(context));
-        toast.setDuration(length);
-        toast.setView(layout);
-        toast.show();
-    }
 
     public static int getActionBarSize(@NonNull Context context) {
         final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(

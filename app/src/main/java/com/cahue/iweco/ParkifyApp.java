@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.os.Build;
 import android.os.StrictMode;
 
 import com.android.volley.Cache;
@@ -9,6 +10,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
+import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.facebook.FacebookSdk;
 import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -75,6 +77,16 @@ public class ParkifyApp extends Application {
                     .build());
 
             AdSettings.addTestDevice("2e398393636c7cca29281dda912adc42");
+
+
+        }
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (BuildConfig.DEBUG) {
+                NotificationChannelsUtils.createDebugNotificationChannel(this);
+            }
+            NotificationChannelsUtils.createDefaultNotificationChannels(this);
         }
     }
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Geocoder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.cahue.iweco.Constants;
@@ -22,12 +23,10 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
     private static final String TAG = CarPositionUpdatedReceiver.class.getSimpleName();
     @Nullable
     private Car car;
-    private Context context;
     private CarDatabase database;
 
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-        this.context = context;
 
         if (!Geocoder.isPresent()) {
             return;
@@ -56,6 +55,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
         /**
          * Fetch address
          */
+        Log.d(TAG, "Fetching address");
         FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
         fetchAddressDelegate.fetch(context, car.location, new FetchAddressDelegate.Callbacks() {
             @Override
@@ -70,7 +70,7 @@ public class CarPositionUpdatedReceiver extends BroadcastReceiver {
                 Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
                 intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
                 intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
-                context.sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
 
             @Override

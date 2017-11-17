@@ -50,8 +50,8 @@
                     layout="@layout/native_app_maps_install_ad_view"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginLeft="@dimen/small_padding"
-                    android:layout_toRightOf="@id/navigation_drawer_toggle" />
+                    android:layout_marginStart="@dimen/small_padding"
+                    android:layout_toEndOf="@id/navigation_drawer_toggle" />
 
                 <FrameLayout
                     android:id="@+id/ad_mob_container"
@@ -68,10 +68,9 @@
                     style="?android:attr/borderlessButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_margin="@dimen/default_padding"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
-                    android:drawableRight="@drawable/ic_keyboard_arrow_right_24dp"
                     android:text="@string/no_cars"
                     android:textColor="@color/white"
                     tools:visibility="gone" />
@@ -93,7 +92,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_gravity="center"
                     android:layout_marginBottom="@dimen/default_padding"
                     android:layout_marginLeft="@dimen/default_padding"
@@ -110,13 +108,13 @@
                     android:layout_above="@+id/card_details_container"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_margin="@dimen/large_padding"
                     android:elevation="@dimen/elevation"
                     android:src="@drawable/crosshairs_gps"
                     app:borderWidth="0dp" />
 
                 <include layout="@layout/debug_layout" />
+
 
             </RelativeLayout>
         </RelativeLayout>

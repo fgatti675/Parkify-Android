@@ -1,26 +1,35 @@
 package com.cahue.iweco.util;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.CarMovedReceiver;
+import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.ParkedCarReceiver;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.parkedcar.ParkedCarService;
 
+import java.util.Calendar;
 import java.util.Set;
 
 /**
  * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
  */
 public class BluetoothDetector extends BroadcastReceiver {
+
+    private static final String TAG = BluetoothDetector.class.getSimpleName();
 
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
@@ -32,7 +41,8 @@ public class BluetoothDetector extends BroadcastReceiver {
             } else if(state == BluetoothAdapter.STATE_OFF) {
                 onBtTurnedOff(context);
             }
-        } else {
+        } else if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
+                || intent.getAction().equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
 
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
@@ -53,10 +63,10 @@ public class BluetoothDetector extends BroadcastReceiver {
                 Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
 
                 Car car = carDatabase.findCarByBTAddress(context, address);
-
-                if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                int state = intent.getExtras().getInt(BluetoothProfile.EXTRA_STATE);
+                if (state == BluetoothProfile.STATE_DISCONNECTED) {
                     onBtDisconnectedFromCar(context, car);
-                } else if (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
+                } else if (state == BluetoothProfile.STATE_CONNECTED) {
                     onBtConnectedToCar(context, car);
                 }
             }
@@ -67,10 +77,7 @@ public class BluetoothDetector extends BroadcastReceiver {
     }
 
     private void onBtTurnedOff(Context context) {
-        /**
-         * Start activity recognition
-         */
-        ActivityRecognitionService.startIfEnabled(context);
+        ActivityRecognitionService.startCheckingActivityRecognition(context);
     }
 
     private void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
@@ -78,15 +85,30 @@ public class BluetoothDetector extends BroadcastReceiver {
         /**
          * Stop activity recognition
          */
-        ActivityRecognitionService.stop(context);
+        context.stopService(new Intent(context, ActivityRecognitionService.class));
 
         Log.d("Bluetooth", "onBtConnectedToCar");
 
-        // we create an intent to start the location poller service, as declared in manifest
-        Intent intent = new Intent();
-        intent.setClass(context, CarMovedService.class);
-        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-        context.startService(intent);
+        /**
+         * Check if the car was parked long enough
+         */
+        if (!BuildConfig.DEBUG) {
+            long now = Calendar.getInstance().getTimeInMillis();
+            if (car.time != null) {
+                long parkingTime = car.time.getTime();
+                boolean result = now - parkingTime > Constants.MINIMUM_STAY_MS;
+                if (!result) {
+                    Log.w(TAG, "Preconditions failed");
+                    return;
+                }
+            }
+        }
+
+        // start the CarMovedReceiver
+        LocationUpdatesHelper helper = new LocationUpdatesHelper(context, CarMovedReceiver.ACTION);
+        Bundle extras = new Bundle();
+        extras.putString(Constants.EXTRA_CAR_ID, car.id);
+        helper.startLocationUpdates(extras);
 
     }
 
@@ -95,14 +117,14 @@ public class BluetoothDetector extends BroadcastReceiver {
         Log.d("Bluetooth", "onBtDisconnectedFromCar");
 
         // we create an intent to start the location poller service, as declared in manifest
-        Intent intent = new Intent();
-        intent.setClass(context, ParkedCarService.class);
-        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-        context.startService(intent);
+        LocationUpdatesHelper helper = new LocationUpdatesHelper(context, ParkedCarReceiver.ACTION);
+        Bundle extras = new Bundle();
+        extras.putString(Constants.EXTRA_CAR_ID, car.id);
+        helper.startLocationUpdates(extras);
 
         /**
          * Start activity recognition if required
          */
-        ActivityRecognitionService.startIfEnabled(context);
+        ActivityRecognitionService.startCheckingActivityRecognition(context);
     }
 }

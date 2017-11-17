@@ -13,6 +13,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -170,7 +171,7 @@ public class NavigationDrawerFragment extends Fragment {
         adapter.setUpElements();
         adapter.notifyDataSetChanged();
 
-        getActivity().registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
 
     }
 
@@ -189,7 +190,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        getActivity().unregisterReceiver(userInfoReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(userInfoReceiver);
     }
 
     public boolean isDrawerOpen() {
@@ -259,8 +260,8 @@ public class NavigationDrawerFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
-        getActivity().registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
 
         setUpUserDetails();
     }
@@ -268,7 +269,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(carUpdatedReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(carUpdatedReceiver);
     }
 
     @Override
@@ -484,12 +485,9 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.icon.setImageResource(R.drawable.ic_edit_primary_blue_24dp);
             menuViewHolder.divider.setVisibility(View.VISIBLE);
 
-            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    navigation.goToCarManager();
-                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_MANAGER_CLICK);
-                }
+            menuViewHolder.itemView.setOnClickListener(v -> {
+                navigation.goToCarManager();
+                Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_MANAGER_CLICK);
             });
         }
 
@@ -499,24 +497,18 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.subtitle.setText(R.string.and_remove_ads);
             menuViewHolder.subtitle.setVisibility(View.VISIBLE);
             menuViewHolder.divider.setVisibility(View.VISIBLE);
-            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    navigation.openDonationDialog();
-                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_DONATION_CLICK);
-                }
+            menuViewHolder.itemView.setOnClickListener(v -> {
+                navigation.openDonationDialog();
+                Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_DONATION_CLICK);
             });
         }
 
         private void bindPreferences(@NonNull MenuViewHolder menuViewHolder) {
             menuViewHolder.title.setText(R.string.preferences);
             menuViewHolder.icon.setImageResource(R.drawable.ic_settings_24dp);
-            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    navigation.goToPreferences();
-                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SETTINGS_CLICK);
-                }
+            menuViewHolder.itemView.setOnClickListener(v -> {
+                navigation.goToPreferences();
+                Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SETTINGS_CLICK);
             });
         }
 
@@ -524,12 +516,9 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.itemView.setPadding(0, 0, 0, bottomMargin);
             menuViewHolder.title.setText(R.string.disconnect);
             menuViewHolder.icon.setImageResource(R.drawable.ic_logout_grey600_24dp);
-            menuViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    navigation.signOutAndGoToLoginScreen(true);
-                    Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SIGN_OUT);
-                }
+            menuViewHolder.itemView.setOnClickListener(v -> {
+                navigation.signOutAndGoToLoginScreen(true);
+                Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SIGN_OUT);
             });
         }
 
@@ -549,9 +538,9 @@ public class NavigationDrawerFragment extends Fragment {
             public MenuViewHolder(@NonNull View itemView) {
                 super(itemView);
                 this.itemView = itemView;
-                icon = (ImageView) itemView.findViewById(R.id.icon);
-                title = (TextView) itemView.findViewById(R.id.title);
-                subtitle = (TextView) itemView.findViewById(R.id.subtitle);
+                icon = itemView.findViewById(R.id.icon);
+                title = itemView.findViewById(R.id.title);
+                subtitle = itemView.findViewById(R.id.subtitle);
                 divider = itemView.findViewById(R.id.divider);
             }
         }

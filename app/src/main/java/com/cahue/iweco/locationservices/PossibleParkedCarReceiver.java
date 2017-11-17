@@ -1,27 +1,31 @@
-package com.cahue.iweco.activityrecognition;
+package com.cahue.iweco.locationservices;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
+import com.cahue.iweco.activityrecognition.SaveCarRequestReceiver;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationservices.LocationPollerService;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.cahue.iweco.util.NotificationChannelsUtils.ACT_RECOG_CHANNEL_ID;
 
 /**
  * This service fetches the current location and ask the user if the car was set there.
@@ -32,11 +36,13 @@ import java.util.List;
  *
  * @author Francesco
  */
-public class PossibleParkedCarService extends LocationPollerService {
+public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver {
+
+    public static final String ACTION = BuildConfig.APPLICATION_ID + ".POSSIBLE_PARKED_CAR_ACTION";
 
     public static final int NOTIFICATION_ID = 875644;
 
-    private final static String TAG = PossibleParkedCarService.class.getSimpleName();
+    private final static String TAG = PossibleParkedCarReceiver.class.getSimpleName();
 
     private static final int ACCURACY_THRESHOLD_M = 50;
 
@@ -44,40 +50,33 @@ public class PossibleParkedCarService extends LocationPollerService {
 
     private Location location;
 
-    private Date time;
+    private Date startTime;
+
 
     @Override
-    protected boolean checkPreconditions(Car car) {
-        return true;
-    }
-
-    @Override
-    public void onPreciseFixPolled(@NonNull Context context, @NonNull Location location, Car car, Date startTime, GoogleApiClient googleApiClient) {
+    protected void onPreciseFixPolled(final Context context, Location location, Bundle extras) {
 
         if (location.getAccuracy() > ACCURACY_THRESHOLD_M) return;
 
         this.location = location;
-        this.time = startTime;
+        this.startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
 
         Log.i(TAG, "Received : " + location);
 
         carDatabase = CarDatabase.getInstance();
 
-        /**
-         * Fetch address
-         */
+        Log.d(TAG, "Fetching address");
         FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
-        fetchAddressDelegate.fetch(this, location, new FetchAddressDelegate.Callbacks() {
+        fetchAddressDelegate.fetch(context, location, new FetchAddressDelegate.Callbacks() {
             @Override
             public void onAddressFetched(String address) {
-                PossibleParkedCarService.this.onAddressFetched(address);
+                PossibleParkedCarReceiver.this.onAddressFetched(context, address);
             }
 
             @Override
             public void onError(String error) {
             }
         });
-
     }
 
 
@@ -87,39 +86,40 @@ public class PossibleParkedCarService extends LocationPollerService {
      *
      * @param address
      */
-    private void onAddressFetched(String address) {
+    private void onAddressFetched(Context context, String address) {
 
-        ParkingSpot possibleParkingSpot = new ParkingSpot(null, location, address, time, false);
-        carDatabase.addPossibleParkingSpot(this, possibleParkingSpot);
+        ParkingSpot possibleParkingSpot = new ParkingSpot(null, location, address, startTime, false);
+        carDatabase.addPossibleParkingSpot(context, possibleParkingSpot);
 
-        if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(this))
+        if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(context))
             return;
 
         long[] pattern = {0, 100, 1000};
 
         // Intent to start the activity and show a just parked dialog
-        Intent intent = new Intent(this, MapsActivity.class);
+        Intent intent = new Intent(context, MapsActivity.class);
         intent.setAction(Constants.ACTION_POSSIBLE_PARKED_CAR);
         intent.putExtra(Constants.EXTRA_SPOT, possibleParkingSpot);
+//        intent.putExtra("test", "not null");
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
+        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
+        Notification.Builder mBuilder =
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, ACT_RECOG_CHANNEL_ID) : new Notification.Builder(context))
                         .setVibrate(pattern)
                         .setContentIntent(pendingIntent)
-                        .setColor(getResources().getColor(R.color.theme_primary))
+                        .setColor(context.getResources().getColor(R.color.theme_primary))
                         .setSmallIcon(R.drawable.ic_car_white_48dp)
-                        .setContentTitle(getString(R.string.ask_just_parked))
+                        .setContentTitle(context.getString(R.string.ask_just_parked))
                         .setContentText(address);
 
-        List<Car> cars = carDatabase.retrieveCars(this, true);
+        List<Car> cars = carDatabase.retrieveCars(context, true);
         int numberActions = Math.min(cars.size(), 3);
         for (int i = 0; i < numberActions; i++) {
             Car car = cars.get(i);
-            NotificationCompat.Action saveAction = createCarSaveAction(car, possibleParkingSpot, i);
+            Notification.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
             mBuilder.addAction(saveAction);
         }
 
@@ -128,16 +128,15 @@ public class PossibleParkedCarService extends LocationPollerService {
 
 
     @NonNull
-    private NotificationCompat.Action createCarSaveAction(@NonNull Car car, ParkingSpot possibleSpot, int index) {
+    private Notification.Action createCarSaveAction(Context context, @NonNull Car car, ParkingSpot possibleSpot, int index) {
 
-        Intent intent = new Intent(Constants.INTENT_SAVE_CAR_REQUEST + "." + index);
+        Intent intent = new Intent(context, SaveCarRequestReceiver.class);
         intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
         intent.putExtra(Constants.EXTRA_SPOT, possibleSpot);
 
-        PendingIntent pIntent = PendingIntent.getBroadcast(this, 782982, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        String name = car.isOther() ? getResources().getString(R.string.other) : car.name;
-        return new NotificationCompat.Action(R.drawable.ic_car_white_24dp, name, pIntent);
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 782982 + index, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        String name = car.isOther() ? context.getResources().getString(R.string.other) : car.name;
+        return new Notification.Action(R.drawable.ic_car_white_24dp, name, pIntent);
     }
-
 
 }

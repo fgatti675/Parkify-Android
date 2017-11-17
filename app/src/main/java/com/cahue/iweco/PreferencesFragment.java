@@ -1,5 +1,6 @@
 package com.cahue.iweco;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
@@ -35,9 +36,9 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
             updateActRecPreferencesState(enableBtPreferences);
 
             if (enableBtPreferences) {
-                ActivityRecognitionService.startIfNoBT(getActivity());
+                ActivityRecognitionService.startCheckingActivityRecognition(getActivity());
             } else {
-                ActivityRecognitionService.stop(getActivity());
+                getActivity().stopService(new Intent(getActivity(), ActivityRecognitionService.class));
             }
         }
 

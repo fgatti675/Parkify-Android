@@ -49,6 +49,9 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
+            android:name="com.google.android.awareness.API_KEY"
+            android:value="AIzaSyC0-fkwiFWR306wYJsp7qd13VPMkHzsIco"/>
+        <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
         <meta-data
@@ -56,7 +59,8 @@
             android:value="@string/facebook_app_id" />
 
 
-        <activity android:name=".MapsActivity"
+        <activity
+            android:name=".MapsActivity"
             android:launchMode="singleInstance"
             android:theme="@style/CahueTheme.Main">
             <intent-filter>
@@ -73,11 +77,39 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".parkedcar.ParkedCarService" />
-        <service android:name=".locationservices.CarMovedService" />
-        <service
-            android:name=".locationservices.GeofenceCarService"
-            android:enabled="true" />
+        <receiver
+            android:name=".activityrecognition.ActivityRecognitionService$InVehicleReceiver"
+            android:exported="true" />
+
+        <receiver
+            android:name=".locationservices.CarMovedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.CAR_MOVED_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".locationservices.ParkedCarReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.PARKED_CAR_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".locationservices.GeofenceCarReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.GEOFENCE_ACTIVATED_ACTION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".locationservices.PossibleParkedCarReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="${applicationId}.POSSIBLE_PARKED_CAR_ACTION" />
+            </intent-filter>
+        </receiver>
+
 
         <activity
             android:name=".login.LoginActivity"
@@ -142,15 +174,14 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <!-- Activity recognition -->
         <service android:name=".activityrecognition.ActivityRecognitionService" />
-        <service android:name=".activityrecognition.PossibleParkedCarService" />
+
         <service
             android:name=".activityrecognition.DetectedActivitiesIntentService"
             android:exported="false" />
         <service android:name=".locationservices.GeofenceTransitionsIntentService" />
 
-        <receiver android:name=".activityrecognition.SaveCarRequestReceiver">
+        <receiver android:name=".activityrecognition.SaveCarRequestReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.0" />
                 <action android:name="${applicationId}.INTENT_SAVE_CAR_REQUEST.1" />
@@ -158,18 +189,24 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"/>
+        <receiver
+            android:name=".activityrecognition.ActivityRecognitionService$StopActivityRecognitionBroadcastReceiver"
+            android:enabled="true" />
+
+        <activity android:name="com.facebook.FacebookActivity"
+            android:configChanges=
+                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name" />
 
         <receiver android:name=".util.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".activityrecognition.NotificationListener"
+        <service
+            android:name=".activityrecognition.NotificationListener"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
@@ -186,11 +223,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".util.LocationTestBroadcastReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.BT_TEST" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".util.BluetoothDetector">
             <intent-filter>
-                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
-                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
@@ -202,9 +243,14 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.google.android.gms.analytics.AnalyticsService"
+        <service
+            android:name="com.google.android.gms.analytics.AnalyticsService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <service
+            android:name=".locationservices.DelayedGeofenceJob"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>
 

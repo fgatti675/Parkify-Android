@@ -189,19 +189,9 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
     }
 
     /**
-     * Interface for telling the containing activity that the car position has been deleted
-     */
-    public interface OnPossibleSpotDeletedListener {
-
-        void onPossibleSpotDeleted(ParkingSpot spot);
-
-    }
-
-    /**
      * Fetch address for the spot
      */
     private void fetchAddress() {
-
         FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
         fetchAddressDelegate.fetch(getActivity(), spot.location, new FetchAddressDelegate.Callbacks() {
             @Override
@@ -214,6 +204,15 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
             public void onError(String error) {
             }
         });
+    }
+
+    /**
+     * Interface for telling the containing activity that the car position has been deleted
+     */
+    public interface OnPossibleSpotDeletedListener {
+
+        void onPossibleSpotDeleted(ParkingSpot spot);
+
     }
 
 }

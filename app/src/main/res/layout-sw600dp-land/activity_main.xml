@@ -99,7 +99,6 @@
                 android:layout_above="@+id/card_details_container"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_margin="@dimen/large_padding"
                 android:elevation="@dimen/elevation"
                 android:src="@drawable/crosshairs_gps"
