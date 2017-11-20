@@ -39,7 +39,7 @@ public class CarManagerActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
         toolbar.setTitle(R.string.cars);
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
         ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.elevation));
         setSupportActionBar(toolbar);
 

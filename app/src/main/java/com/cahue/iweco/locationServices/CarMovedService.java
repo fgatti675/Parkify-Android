@@ -62,7 +62,7 @@ public class CarMovedService extends LocationPollerService {
          */
         if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
             ParkingSpotSender.doPostSpotLocation(this, spotLocation, false, car);
-            Util.showBlueToastWithLogo(CarMovedService.this, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
+            Util.showBlueToast(CarMovedService.this, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
         }
 
         CarsSync.clearLocation(carDatabase, this, car);

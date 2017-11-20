@@ -127,7 +127,7 @@ public class ParkedCarService extends LocationPollerService {
             mNotifyMgr.notify(car.id, NOTIFICATION_ID, mBuilder.build());
 
         } else {
-            Util.showBlueToastWithLogo(ParkedCarService.this, getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
+            Util.showBlueToast(ParkedCarService.this, getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
         }
     }
 
