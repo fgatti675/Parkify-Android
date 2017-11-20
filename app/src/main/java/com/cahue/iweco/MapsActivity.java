@@ -427,10 +427,10 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void clearAccounts() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
-            for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
-                mAccountManager.removeAccount(account, null, null);
-        }
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
+        for (Account account : mAccountManager.getAccountsByType(getString(R.string.account_type)))
+            mAccountManager.removeAccount(account, null, null);
+//        }
     }
 
 
