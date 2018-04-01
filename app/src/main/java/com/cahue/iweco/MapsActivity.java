@@ -4,6 +4,8 @@ import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -69,6 +72,7 @@ import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
@@ -119,6 +123,7 @@ import java.util.Set;
 import bolts.AppLinks;
 
 import static android.content.Intent.ACTION_VIEW;
+import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 
 public class MapsActivity extends AppCompatActivity
         implements
@@ -398,6 +403,20 @@ public class MapsActivity extends AppCompatActivity
          * Start activity recognition service (if enabled)
          */
         ActivityRecognitionService.startCheckingActivityRecognition(this);
+
+        if (BuildConfig.DEBUG) {
+            long[] pattern = {0, 110, 1000};
+            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, DEBUG_CHANNEL_ID) : new Notification.Builder(this))
+                            .setVibrate(pattern)
+                            .setSmallIcon(R.drawable.crosshairs_gps)
+                            .setContentTitle("DEBUG " )
+                            .setContentText("test");
+
+            int id = (int) (Math.random() * 10000);
+            mNotifyMgr.notify("" + id, id, mBuilder.build());
+        }
 
     }
 
@@ -723,9 +742,8 @@ public class MapsActivity extends AppCompatActivity
 
         delegates.add(initPlacesDelegate());
 
-        int i = 0;
-        for (ParkingSpot spot : carDatabase.retrievePossibleParkingSpots(this))
-            delegates.add(initPossibleParkedCarDelegate(spot, i++));
+        for (PossibleSpot spot : carDatabase.retrievePossibleParkingSpots(this))
+            delegates.add(initPossibleParkedCarDelegate(spot));
 
         for (String id : carDatabase.getCarIds(this, true))
             delegates.add(initParkedCarDelegate(id));
@@ -765,8 +783,8 @@ public class MapsActivity extends AppCompatActivity
             initialCameraSet = true;
             if (intent.getAction().equals(Constants.ACTION_POSSIBLE_PARKED_CAR)) {
 
-                ParkingSpot possibleSpot = intent.getParcelableExtra(Constants.EXTRA_SPOT);
-                getPossibleParkingDelegate(possibleSpot).activate();
+                PossibleSpot possibleSpot = intent.getParcelableExtra(Constants.EXTRA_SPOT);
+                initPossibleParkedCarDelegate(possibleSpot).activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
                 mNotifyMgr.cancel(PossibleParkedCarReceiver.NOTIFICATION_ID);
@@ -969,17 +987,13 @@ public class MapsActivity extends AppCompatActivity
      * @return
      */
     @NonNull
-    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(@NonNull ParkingSpot spot, int order) {
+    private PossibleParkedCarDelegate initPossibleParkedCarDelegate(@NonNull PossibleSpot spot) {
         PossibleParkedCarDelegate possibleParkedCarDelegate = getPossibleParkingDelegate(spot);
         if (possibleParkedCarDelegate == null) {
             Log.d(TAG, "Creating new PossibleParkedCarDelegate: " + spot.toString());
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-            int recency = order == 0 || order == 1 ? PossibleParkedCarDelegate.RECENT : PossibleParkedCarDelegate.NOT_SO_RECENT;
-            if (System.currentTimeMillis() - spot.getTime().getTime() > 24 * 60 * 60 * 1000)
-                recency = PossibleParkedCarDelegate.NOT_SO_RECENT;
-
-            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot, recency);
+            possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
             possibleParkedCarDelegate.setRetainInstance(true);
             transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
             transaction.commit();
@@ -988,7 +1002,7 @@ public class MapsActivity extends AppCompatActivity
         return possibleParkedCarDelegate;
     }
 
-    private PossibleParkedCarDelegate getPossibleParkingDelegate(@NonNull ParkingSpot spot) {
+    private PossibleParkedCarDelegate getPossibleParkingDelegate(@NonNull PossibleSpot spot) {
         return (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(spot));
     }
 

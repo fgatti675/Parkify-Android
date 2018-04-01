@@ -155,7 +155,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     public void onCarSelected(@NonNull Car car) {
         deactivate();
 
-        CarsSync.updateCarFromPossibleSpot(CarDatabase.getInstance(), getActivity(), car, spot);
+        CarsSync.updateCarFromTappedSpot(CarDatabase.getInstance(), getActivity(), car, spot);
 
         detailsViewManager.hideDetails();
     }

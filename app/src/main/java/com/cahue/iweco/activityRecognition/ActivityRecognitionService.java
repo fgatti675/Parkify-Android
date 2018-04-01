@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.app.job.JobScheduler;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothHeadset;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -127,9 +128,15 @@ public class ActivityRecognitionService extends Service {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... voids) {
-                            BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (defaultAdapter != null && !defaultAdapter.isEnabled() && PreferencesUtil.isMovementRecognitionEnabled(context)) {
-                                startActivityRecognition(context);
+                            if (PreferencesUtil.isMovementRecognitionEnabled(context)) {
+                                BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+                                if (defaultAdapter != null) {
+                                    if (!defaultAdapter.isEnabled()
+                                            ||
+                                            defaultAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) != BluetoothHeadset.STATE_CONNECTED) {
+                                        startActivityRecognition(context);
+                                    }
+                                }
                             }
                             return null;
                         }

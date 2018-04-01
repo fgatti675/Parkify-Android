@@ -1,10 +1,11 @@
 package com.cahue.iweco.activityrecognition;
 
+import android.app.NotificationManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 
 import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.DetailsFragment;
@@ -13,7 +14,7 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,9 +25,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 
-import java.lang.annotation.Retention;
-
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import static com.cahue.iweco.locationservices.PossibleParkedCarReceiver.NOTIFICATION_ID;
+import static com.cahue.iweco.model.PossibleSpot.NOT_SO_RECENT;
+import static com.cahue.iweco.model.PossibleSpot.RECENT;
 
 /**
  * Delegate to show a marker where a car might be parked, based on activity recognition
@@ -35,15 +36,9 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
 
     public static final String FRAGMENT_TAG = "POSSIBLE_PARKED_CAR_DELEGATE";
 
-    public static final int RECENT = 0;
-    public static final int NOT_SO_RECENT = 1;
 
     private static final String ARG_SPOT = "spot";
-    private static final String ARG_RECENCY = "recency";
-    @Recency
-    private int recency;
-    @Nullable
-    private ParkingSpot spot;
+    private PossibleSpot spot;
     @Nullable
     private Marker marker;
     private IconGenerator iconGenerator;
@@ -51,16 +46,15 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     private CarDatabase database;
 
     @NonNull
-    public static String getFragmentTag(@NonNull ParkingSpot spot) {
+    public static String getFragmentTag(@NonNull PossibleSpot spot) {
         return FRAGMENT_TAG + "." + spot.time.getTime();
     }
 
     @NonNull
-    public static PossibleParkedCarDelegate newInstance(ParkingSpot spot, @Recency int recency) {
+    public static PossibleParkedCarDelegate newInstance(PossibleSpot spot) {
         PossibleParkedCarDelegate fragment = new PossibleParkedCarDelegate();
         Bundle args = new Bundle();
         args.putParcelable(ARG_SPOT, spot);
-        args.putInt(ARG_RECENCY, recency);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,12 +64,10 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
         super.onCreate(savedInstanceState);
         database = CarDatabase.getInstance();
         this.spot = getArguments().getParcelable(ARG_SPOT);
-        //noinspection WrongConstant
-        this.recency = getArguments().getInt(ARG_RECENCY);
 
         iconGenerator = new IconGenerator(getActivity());
         iconGenerator.setContentRotation(-90);
-        switch (recency) {
+        switch (spot.getRecency()) {
             case RECENT:
                 iconGenerator.setColor(getActivity().getResources().getColor(R.color.lightest_gray));
                 iconGenerator.setTextAppearance(getActivity(), R.style.Marker_PossibleCar);
@@ -174,15 +166,29 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     }
 
     @Override
-    public void onPossibleSpotDeleted(@NonNull ParkingSpot spot) {
+    public void onPossibleSpotDeleted(@NonNull PossibleSpot spot) {
+        if (this.spot != spot) throw new IllegalStateException("Wtf?");
+        delete();
+        detailsViewManager.hideDetails();
+        NotificationManagerCompat.from(getActivity()).cancel(NOTIFICATION_ID);
+    }
+
+    private void delete() {
         database.removeParkingSpot(getActivity(), spot);
         if (marker != null)
             marker.remove();
-        detailsViewManager.hideDetails();
     }
 
-    @Retention(SOURCE)
-    @IntDef({RECENT, NOT_SO_RECENT})
-    public @interface Recency {
+    @Override
+    public void onAllPossibleSpotsDeleted() {
+
+        for (PossibleSpot s : database.retrievePossibleParkingSpots(getActivity())) {
+            PossibleParkedCarDelegate delegate = (PossibleParkedCarDelegate) getFragmentManager().findFragmentByTag(PossibleParkedCarDelegate.getFragmentTag(s));
+            delegate.delete();
+        }
+
+        detailsViewManager.hideDetails();
+        NotificationManagerCompat.from(getActivity()).cancel(NOTIFICATION_ID);
     }
+
 }

@@ -3,45 +3,56 @@ package com.cahue.iweco.model;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.cahue.iweco.R;
-import com.cahue.iweco.util.Util;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
+import java.lang.annotation.Retention;
 import java.util.Date;
+
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Created by Francesco on 11/10/2014.
  */
-public class ParkingSpot implements Parcelable {
+public class PossibleSpot implements Parcelable {
 
-    public static final Parcelable.Creator<ParkingSpot> CREATOR =
-            new Parcelable.Creator<ParkingSpot>() {
+
+    public static final int RECENT = 0;
+    public static final int NOT_SO_RECENT = 1;
+
+    @Retention(SOURCE)
+    @IntDef({RECENT, NOT_SO_RECENT})
+    public @interface Recency {
+    }
+
+
+    public static final Creator<PossibleSpot> CREATOR =
+            new Creator<PossibleSpot>() {
                 @NonNull
                 @Override
-                public ParkingSpot createFromParcel(@NonNull Parcel parcel) {
-                    return new ParkingSpot(parcel);
+                public PossibleSpot createFromParcel(@NonNull Parcel parcel) {
+                    return new PossibleSpot(parcel);
                 }
 
                 @NonNull
                 @Override
-                public ParkingSpot[] newArray(int size) {
-                    return new ParkingSpot[size];
+                public PossibleSpot[] newArray(int size) {
+                    return new PossibleSpot[size];
                 }
             };
     private static final long GREEN_TIME_THRESHOLD_MS = 5 * 60 * 1000;
     private static final long YELLOW_TIME_THRESHOLD_MS = 10 * 60 * 1000;
 
-    @Nullable
-    public final Long id;
     public final Location location;
     public final Date time;
+    public final int recency;
 
     public final boolean future;
 
@@ -49,44 +60,22 @@ public class ParkingSpot implements Parcelable {
     public String address;
     private LatLng latLng;
 
-    public ParkingSpot(@NonNull Parcel parcel) {
-
-        Long parcelid = parcel.readLong();
-        if (parcelid == -1) parcelid = null;
-
-        id = parcelid;
+    public PossibleSpot(@NonNull Parcel parcel) {
         location = parcel.readParcelable(Location.class.getClassLoader());
         address = parcel.readString();
         time = (Date) parcel.readSerializable();
         future = parcel.readByte() != 0;
+        recency = parcel.readInt();
     }
 
-    public ParkingSpot(@Nullable Long id, Location location, @Nullable String address, Date time, boolean future) {
-        this.id = id;
+    public PossibleSpot(Location location, @Nullable String address, Date time, boolean future, int recency) {
         this.location = location;
         this.address = address;
         this.time = time;
         this.future = future;
+        this.recency = recency;
     }
 
-    @NonNull
-    public static ParkingSpot fromJSON(@NonNull JSONObject jsonObject) throws JSONException {
-        try {
-            Location location = new Location("Json");
-            location.setLatitude(jsonObject.getDouble("latitude"));
-            location.setLongitude(jsonObject.getDouble("longitude"));
-            location.setAccuracy(Float.parseFloat(jsonObject.getString("accuracy")));
-            return new ParkingSpot(
-                    jsonObject.getLong("id"),
-                    location,
-                    null,
-                    Util.DATE_FORMAT.parse(jsonObject.getString("time")),
-                    jsonObject.optBoolean("future"));
-        } catch (ParseException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public int describeContents() {
@@ -95,11 +84,11 @@ public class ParkingSpot implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeLong(id == null ? -1 : id);
         parcel.writeParcelable(location, i);
         parcel.writeString(address);
         parcel.writeSerializable(time);
         parcel.writeByte((byte) (future ? 1 : 0));
+        parcel.writeInt(recency);
     }
 
     @Nullable
@@ -124,7 +113,6 @@ public class ParkingSpot implements Parcelable {
     @Override
     public String toString() {
         return "ParkingSpot{" +
-                "id='" + id + '\'' +
                 ", location=" + location +
                 ", time=" + time +
                 ", future=" + future +
@@ -136,18 +124,20 @@ public class ParkingSpot implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ParkingSpot that = (ParkingSpot) o;
+        PossibleSpot that = (PossibleSpot) o;
 
-        if (!id.equals(that.id)) return false;
         if (!location.equals(that.location)) return false;
         return time.equals(that.time);
 
     }
 
+    public int getRecency() {
+        return recency;
+    }
+
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + location.hashCode();
+        int result = location.hashCode();
         result = 31 * result + time.hashCode();
         return result;
     }

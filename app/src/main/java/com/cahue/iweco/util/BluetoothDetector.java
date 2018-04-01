@@ -1,5 +1,7 @@
 package com.cahue.iweco.util;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,12 +10,14 @@ import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.R;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationservices.CarMovedReceiver;
@@ -23,6 +27,9 @@ import com.cahue.iweco.model.Car;
 
 import java.util.Calendar;
 import java.util.Set;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 
 /**
  * This receiver is in charge of detecting BT disconnection or connection, as declared on the manifest
@@ -110,6 +117,19 @@ public class BluetoothDetector extends BroadcastReceiver {
         extras.putString(Constants.EXTRA_CAR_ID, car.id);
         helper.startLocationUpdates(extras);
 
+
+        if (BuildConfig.DEBUG){
+            long[] pattern = {0, 1000, 200, 1000};
+            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, DEBUG_CHANNEL_ID) : new Notification.Builder(context))
+                            .setVibrate(pattern)
+                            .setSmallIcon(R.drawable.com_facebook_tooltip_blue_topnub)
+                            .setContentTitle("BT connected to car: " + car.name);
+            int id = (int) (Math.random() * 10000);
+            mNotifyMgr.notify("" + id, id, mBuilder.build());
+        }
+
     }
 
     private void onBtDisconnectedFromCar(@NonNull Context context, @NonNull Car car) {
@@ -126,5 +146,17 @@ public class BluetoothDetector extends BroadcastReceiver {
          * Start activity recognition if required
          */
         ActivityRecognitionService.startCheckingActivityRecognition(context);
+
+        if (BuildConfig.DEBUG){
+            long[] pattern = {0, 1000, 200, 1000};
+            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+            Notification.Builder mBuilder =
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, DEBUG_CHANNEL_ID) : new Notification.Builder(context))
+                            .setVibrate(pattern)
+                            .setSmallIcon(R.drawable.com_facebook_tooltip_blue_bottomnub)
+                            .setContentTitle("BT disconnected from car: " + car.name);
+            int id = (int) (Math.random() * 10000);
+            mNotifyMgr.notify("" + id, id, mBuilder.build());
+        }
     }
 }

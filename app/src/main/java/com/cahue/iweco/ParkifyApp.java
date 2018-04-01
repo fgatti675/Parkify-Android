@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.net.TrafficStats;
 import android.os.Build;
 import android.os.StrictMode;
 
@@ -24,6 +25,7 @@ public class ParkifyApp extends Application {
     private static Tracker tracker;
     private static ParkifyApp parkifyApp;
     private RequestQueue mRequestQueue;
+    private static final int THREAD_ID = 10000;
 
     public static ParkifyApp getParkifyApp() {
         return parkifyApp;
@@ -36,10 +38,7 @@ public class ParkifyApp extends Application {
 
         parkifyApp = this;
 
-        /**
-         * Start Facebook SDK
-         */
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        TrafficStats.setThreadStatsTag(THREAD_ID);
 
         /**
          * Start Google analytics

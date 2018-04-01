@@ -75,7 +75,7 @@
     <string name="permission_error">Permiso necesario!</string>
     <string name="based_on_activity_recognition">Parece que has bajado de un vehículo aquí, basado en la detección de movimiento</string>
     <string name="did_you_park">¿Has aparcado aquí?</string>
-    <string name="clear">Borrar</string>
+    <string name="clear_this_spot">Borrar esta ubicación posible</string>
 
     <string name="and_remove_ads">¡Y elimina los anuncios!</string>
     <string name="thanks_free_spot">Acabas de dejar un hueco libre ¡Gracias! :)</string>
@@ -91,5 +91,6 @@
     <string name="motion_recognition_in_progress">Detección de movimiento en progreso</string>
     <string name="stop">Detener</string>
     <string name="motion_recognition_instructions">Parkify detectará cuando aparques</string>
+    <string name="clear_all_spot">Borrar todas las ubicaciones posibles</string>
 
 </resources>

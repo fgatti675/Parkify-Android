@@ -14,6 +14,7 @@ import android.util.Log;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +22,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.cahue.iweco.model.PossibleSpot.NOT_SO_RECENT;
+import static com.cahue.iweco.model.PossibleSpot.RECENT;
 
 /**
  * Created by Francesco on 22/01/2015.
@@ -200,7 +204,7 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateCarRemoveSpotAndBroadcast(Context context, @NonNull Car car, @NonNull ParkingSpot spot) {
+    public void updateCarRemoveSpotAndBroadcast(Context context, @NonNull Car car, @NonNull PossibleSpot spot) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -570,7 +574,7 @@ public class CarDatabase {
         }
     }
 
-    public void addPossibleParkingSpot(Context context, @NonNull ParkingSpot spot) {
+    public void addPossibleParkingSpot(Context context, @NonNull PossibleSpot spot) {
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
 
@@ -618,6 +622,8 @@ public class CarDatabase {
         }
     }
 
+
+
     /**
      * Create ContentValues from Car
      *
@@ -625,7 +631,7 @@ public class CarDatabase {
      * @return
      */
     @NonNull
-    private ContentValues createSpotContentValues(@NonNull ParkingSpot spot) {
+    private ContentValues createSpotContentValues(@NonNull PossibleSpot spot) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_LATITUDE, spot.location.getLatitude());
         values.put(COLUMN_LONGITUDE, spot.location.getLongitude());
@@ -642,8 +648,8 @@ public class CarDatabase {
      * @return
      */
     @NonNull
-    public List<ParkingSpot> retrievePossibleParkingSpots(Context context) {
-        List<ParkingSpot> spots = new ArrayList<>();
+    public List<PossibleSpot> retrievePossibleParkingSpots(Context context) {
+        List<PossibleSpot> spots = new ArrayList<>();
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
@@ -655,8 +661,9 @@ public class CarDatabase {
                     null, null, null,
                     COLUMN_TIME + " DESC");
 
+            int i = 0;
             while (cursor.moveToNext()) {
-                spots.add(cursorToSpot(cursor));
+                spots.add(cursorToPossibleSpot(cursor, i++));
             }
             cursor.close();
 
@@ -675,7 +682,7 @@ public class CarDatabase {
      *
      * @param spot
      */
-    public void removeParkingSpot(Context context, @NonNull ParkingSpot spot) {
+    public void removeParkingSpot(Context context, @NonNull PossibleSpot spot) {
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
@@ -703,5 +710,21 @@ public class CarDatabase {
         String address = cursor.isNull(4) ? null : cursor.getString(4);
 
         return new ParkingSpot(null, location, address, time, false);
+    }
+
+    @NonNull
+    private PossibleSpot cursorToPossibleSpot(@NonNull Cursor cursor, int order) {
+
+        double latitude = cursor.getDouble(0);
+        double longitude = cursor.getDouble(1);
+        float accuracy = cursor.getFloat(2);
+        Location location = new Location("db");
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        location.setAccuracy(accuracy);
+        Date time = new Date(cursor.getLong(3));
+        String address = cursor.isNull(4) ? null : cursor.getString(4);
+
+        return new PossibleSpot(location, address, time, false, order < 2 ? RECENT : NOT_SO_RECENT);
     }
 }

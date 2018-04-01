@@ -18,7 +18,7 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.activityrecognition.SaveCarRequestReceiver;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 
@@ -88,7 +88,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
      */
     private void onAddressFetched(Context context, String address) {
 
-        ParkingSpot possibleParkingSpot = new ParkingSpot(null, location, address, startTime, false);
+        PossibleSpot possibleParkingSpot = new PossibleSpot(location, address, startTime, false, PossibleSpot.RECENT);
         carDatabase.addPossibleParkingSpot(context, possibleParkingSpot);
 
         if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(context))
@@ -100,7 +100,6 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
         Intent intent = new Intent(context, MapsActivity.class);
         intent.setAction(Constants.ACTION_POSSIBLE_PARKED_CAR);
         intent.putExtra(Constants.EXTRA_SPOT, possibleParkingSpot);
-//        intent.putExtra("test", "not null");
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -128,7 +127,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
 
     @NonNull
-    private Notification.Action createCarSaveAction(Context context, @NonNull Car car, ParkingSpot possibleSpot, int index) {
+    private Notification.Action createCarSaveAction(Context context, @NonNull Car car, PossibleSpot possibleSpot, int index) {
 
         Intent intent = new Intent(context, SaveCarRequestReceiver.class);
         intent.putExtra(Constants.EXTRA_CAR_ID, car.id);

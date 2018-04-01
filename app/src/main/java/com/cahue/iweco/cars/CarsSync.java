@@ -21,6 +21,7 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.Requests;
 import com.cahue.iweco.util.Util;
 
@@ -43,7 +44,7 @@ public class CarsSync {
      * @param car
      * @param spot
      */
-    public static void updateCarFromPossibleSpot(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car, @NonNull ParkingSpot spot) {
+    public static void updateCarFromPossibleSpot(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car, @NonNull PossibleSpot spot) {
 
         Log.i(TAG, "Updating car " + car + " " + spot);
 
@@ -56,6 +57,24 @@ public class CarsSync {
             Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
 
         carDatabase.updateCarRemoveSpotAndBroadcast(context, car, spot);
+
+        if (!AuthUtils.isSkippedLogin(context))
+            postCar(car, context, carDatabase);
+    }
+
+    public static void updateCarFromTappedSpot(@NonNull CarDatabase carDatabase, @NonNull Context context, @NonNull Car car, @NonNull ParkingSpot spot) {
+
+        Log.i(TAG, "Updating car " + car + " " + spot);
+
+        car.location = spot.location;
+        car.address = spot.address;
+        car.spotId = null;
+        car.time = spot.time;
+
+        if (BuildConfig.DEBUG)
+            Toast.makeText(context, "Storing car", Toast.LENGTH_LONG);
+
+        carDatabase.saveCarAndBroadcast(context, car);
 
         if (!AuthUtils.isSkippedLogin(context))
             postCar(car, context, carDatabase);

@@ -49,7 +49,7 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     private GoogleApiClient mGeofenceApiClient;
     private Car car;
 
-    /**
+    /**x
      * Start the GeoFence service after 2 minutes
      *
      * @param context

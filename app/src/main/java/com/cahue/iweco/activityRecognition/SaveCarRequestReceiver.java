@@ -14,7 +14,7 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.Tracking;
 
 /**
@@ -46,7 +46,7 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
             return;
         }
 
-        ParkingSpot possibleSpot = intent.getExtras().getParcelable(Constants.EXTRA_SPOT);
+        PossibleSpot possibleSpot = intent.getExtras().getParcelable(Constants.EXTRA_SPOT);
 
         CarsSync.updateCarFromPossibleSpot(database, context, car, possibleSpot);
 

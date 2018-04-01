@@ -23,7 +23,7 @@ import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
-import com.cahue.iweco.model.ParkingSpot;
+import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.CarButtonAdapter;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
@@ -41,7 +41,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
     private static final String ARG_DELEGATE_FRAGMENT_ID = "arg_delegate_fragment_id";
 
     @Nullable
-    private ParkingSpot spot;
+    private PossibleSpot spot;
 
     private CarDatabase carDatabase;
 
@@ -62,7 +62,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
      * @return A new instance of fragment LongTapSetCarDetailsFragment.
      */
     @NonNull
-    public static DetailsFragment newInstance(ParkingSpot spot, String parentFragmentTag) {
+    public static DetailsFragment newInstance(PossibleSpot spot, String parentFragmentTag) {
         DetailsFragment fragment = new PossibleSetCarDetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_SPOT, spot);
@@ -112,32 +112,32 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
         View view = inflater.inflate(R.layout.layout_possible_set_car_details, container, false);
         if (spot != null) {
 
-            toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            toolbar = view.findViewById(R.id.toolbar);
             toolbar.inflateMenu(R.menu.possible_spot_menu);
-            toolbar.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                    switch (menuItem.getItemId()) {
-                        case R.id.action_delete:
-                            possibleSpotDeletedListener.onPossibleSpotDeleted(spot);
-                            return true;
-                    }
-                    return false;
+            toolbar.setOnMenuItemClickListener(menuItem -> {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_delete:
+                        possibleSpotDeletedListener.onPossibleSpotDeleted(spot);
+                        return true;
+                    case R.id.action_delete_all:
+                        possibleSpotDeletedListener.onAllPossibleSpotsDeleted();
+                        return true;
                 }
+                return false;
             });
             // Set time ago
-            timeAgoView = (TextView) view.findViewById(R.id.time);
+            timeAgoView = view.findViewById(R.id.time);
             updateTimeAgo();
 
             // Update distance
-            distanceView = (TextView) view.findViewById(R.id.distance);
+            distanceView = view.findViewById(R.id.distance);
             updateDistance();
 
             // Update addressView
-            addressView = (TextView) view.findViewById(R.id.address);
+            addressView = view.findViewById(R.id.address);
             updateAddress();
 
-            GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
+            GridView buttonsLayout = view.findViewById(R.id.car_buttons);
             List<Car> cars = carDatabase.retrieveCars(getActivity(), true);
             int numCars = cars.size();
             int numColumns;
@@ -211,7 +211,8 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
      */
     public interface OnPossibleSpotDeletedListener {
 
-        void onPossibleSpotDeleted(ParkingSpot spot);
+        void onPossibleSpotDeleted(PossibleSpot spot);
+        void onAllPossibleSpotsDeleted();
 
     }
 

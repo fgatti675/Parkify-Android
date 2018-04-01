@@ -609,12 +609,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                 DeviceViewHolder deviceViewHolder = (DeviceViewHolder) viewHolder;
                 final BluetoothDevice device = devices.get(position - cars.size() - 1);
                 deviceViewHolder.title.setText(device.getName());
-                deviceViewHolder.layout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onDeviceSelected(device);
-                    }
-                });
+                deviceViewHolder.layout.setOnClickListener(v -> onDeviceSelected(device));
 
             }
         }
