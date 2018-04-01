@@ -9,13 +9,14 @@
     tools:context="com.cahue.iweco.login.LoginActivity">
 
 
-    <pl.droidsonroids.gif.GifImageView
-        android:id="@+id/weco_anim"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/ic_logo_heart"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/large_padding"
         android:adjustViewBounds="true"
-        android:src="@drawable/weco_anim"
+        android:src="@drawable/ic_logo_heart"
         tools:showIn="@layout/activity_login" />
 
     <ImageView
@@ -24,7 +25,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:paddingBottom="@dimen/large_padding"
-        android:paddingTop="@dimen/large_padding"
         android:src="@drawable/parkify_logo" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -90,12 +90,12 @@
 
                 <TextView
                     android:id="@+id/terms_of_use"
-                    android:layout_marginTop="40dp"
-                    android:alpha=".75"
-                    android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/terms_of_use"/>
+                    android:layout_gravity="center"
+                    android:layout_marginTop="32dp"
+                    android:alpha=".75"
+                    android:text="@string/terms_of_use" />
             </LinearLayout>
 
         </RelativeLayout>

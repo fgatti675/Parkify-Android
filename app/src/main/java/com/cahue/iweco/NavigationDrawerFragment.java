@@ -85,7 +85,6 @@ public class NavigationDrawerFragment extends Fragment {
 
     };
     private View mFragmentContainerView;
-    private View userDetailsView;
     private ImageView userImage;
     private TextView usernameTextView;
     private TextView emailTextView;
@@ -127,8 +126,6 @@ public class NavigationDrawerFragment extends Fragment {
                 R.layout.fragment_navigation_drawer,
                 container,
                 false);
-
-        userDetailsView = mRootView.findViewById(R.id.user_details);
 
         userImage = (ImageView) mRootView.findViewById(R.id.profile_image);
         usernameTextView = (TextView) mRootView.findViewById(R.id.username);
@@ -320,10 +317,12 @@ public class NavigationDrawerFragment extends Fragment {
     private void setUpUserDetails() {
 
         if (skippedLogin) {
-            userDetailsView.setVisibility(View.GONE);
+            usernameTextView.setVisibility(View.GONE);
+            emailTextView.setVisibility(View.GONE);
             signInButton.setVisibility(View.VISIBLE);
         } else {
-            userDetailsView.setVisibility(View.VISIBLE);
+            usernameTextView.setVisibility(View.VISIBLE);
+            emailTextView.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
             String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
 
