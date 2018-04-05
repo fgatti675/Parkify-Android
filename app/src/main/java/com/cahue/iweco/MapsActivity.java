@@ -707,6 +707,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onLoggingImpression(Ad ad) {
         Log.d(TAG, "onLoggingImpression: ");
+        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
     }
 
 
