@@ -21,6 +21,7 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.Tracking;
 
 import java.util.Date;
 import java.util.List;
@@ -77,6 +78,9 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
             public void onError(String error) {
             }
         });
+
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_POSSIBLE_SPOT_DETECTED);
     }
 
 

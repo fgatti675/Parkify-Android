@@ -26,6 +26,7 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
@@ -49,13 +50,17 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     private GoogleApiClient mGeofenceApiClient;
     private Car car;
 
-    /**x
+    /**
+     * x
      * Start the GeoFence service after 2 minutes
      *
      * @param context
      * @param carId
      */
     public static void startDelayedGeofenceService(@NonNull Context context, String carId) {
+
+        if (carId == null) return;
+
         PersistableBundle bundle = new PersistableBundle();
         bundle.putString(Constants.EXTRA_CAR_ID, carId);
 
@@ -74,6 +79,9 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
 
     @Override
     protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
+
+        if (location == null) return;
+        if (car == null) return;
 
         CarDatabase carDatabase = CarDatabase.getInstance();
         String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
@@ -105,6 +113,8 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     }
 
     private void addGeofence(final Context context, @NonNull final Car car) {
+
+        if (car == null) return;
 
         /**
          * Create a geofence around the car

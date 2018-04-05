@@ -14,6 +14,7 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
+import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -85,5 +86,8 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
         CarsSync.clearLocation(carDatabase, context, car);
         clearGeofence(context, car);
+
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
     }
 }

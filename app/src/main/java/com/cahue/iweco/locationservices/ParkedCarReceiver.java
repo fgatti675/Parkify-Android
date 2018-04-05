@@ -27,6 +27,7 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.cahue.iweco.util.PreferencesUtil;
+import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 
 import java.util.Date;
@@ -151,6 +152,8 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
         }
 
         fetchAddress(context, car);
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_PARKING);
     }
 
 }

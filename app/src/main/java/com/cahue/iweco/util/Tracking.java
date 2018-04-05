@@ -20,6 +20,8 @@ public class Tracking {
 
     public static final String CATEGORY_CAR_MANAGER = "Car Manager";
 
+    public static final String CATEGORY_PARKING = "Parking";
+
     public static final String CATEGORY_NAVIGATION_DRAWER = "Navigation drawer";
 
     public static final String CATEGORY_RATING_DIALOG = "Rating Dialog";
@@ -30,6 +32,12 @@ public class Tracking {
 
     public static final String CATEGORY_NOTIFICATION_ACT_RECOG = "Notification act. recognition";
 
+
+    public static final String ACTION_POSSIBLE_SPOT_DETECTED = "Possible spot detected";
+
+    public static final String ACTION_BLUETOOTH_PARKING = "Bluetooth parking detected";
+
+    public static final String ACTION_BLUETOOTH_FREED_SPOT = "Bluetooth freed parking spot";
 
     public static final String ACTION_DO_LOGIN = "Do login";
 
