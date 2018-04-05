@@ -404,20 +404,6 @@ public class MapsActivity extends AppCompatActivity
          */
         ActivityRecognitionService.startCheckingActivityRecognition(this);
 
-        if (BuildConfig.DEBUG) {
-            long[] pattern = {0, 110, 1000};
-            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            Notification.Builder mBuilder =
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, DEBUG_CHANNEL_ID) : new Notification.Builder(this))
-                            .setVibrate(pattern)
-                            .setSmallIcon(R.drawable.crosshairs_gps)
-                            .setContentTitle("DEBUG " )
-                            .setContentText("test");
-
-            int id = (int) (Math.random() * 10000);
-            mNotifyMgr.notify("" + id, id, mBuilder.build());
-        }
-
     }
 
     public void goToLogin() {
@@ -571,6 +557,8 @@ public class MapsActivity extends AppCompatActivity
         nativeExpressAbMobContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+
+                Log.d(TAG, "Displaying Admob native ad");
                 Display display = getWindowManager().getDefaultDisplay();
                 DisplayMetrics outMetrics = new DisplayMetrics();
                 display.getMetrics(outMetrics);
@@ -589,21 +577,25 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onAdFailedToLoad(int i) {
+                        Log.d(TAG, "onAdFailedToLoad");
                         super.onAdFailedToLoad(i);
                     }
 
                     @Override
                     public void onAdLeftApplication() {
+                        Log.d(TAG, "onAdLeftApplication");
                         super.onAdLeftApplication();
                     }
 
                     @Override
                     public void onAdOpened() {
+                        Log.d(TAG, "onAdOpened");
                         super.onAdOpened();
                     }
 
                     @Override
                     public void onAdLoaded() {
+                        Log.d(TAG, "onAdLoaded");
                         super.onAdLoaded();
                     }
                 });

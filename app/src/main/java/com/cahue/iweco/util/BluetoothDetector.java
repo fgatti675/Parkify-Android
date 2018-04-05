@@ -43,15 +43,16 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            if(state == BluetoothAdapter.STATE_ON) {
+            if (state == BluetoothAdapter.STATE_ON) {
                 onBtTurnedOn(context);
-            } else if(state == BluetoothAdapter.STATE_OFF) {
+            } else if (state == BluetoothAdapter.STATE_OFF) {
                 onBtTurnedOff(context);
             }
         } else if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
                 || intent.getAction().equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
 
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            if (device == null) return;
 
             String address = device.getAddress();
             String name = device.getName();
@@ -118,7 +119,7 @@ public class BluetoothDetector extends BroadcastReceiver {
         helper.startLocationUpdates(extras);
 
 
-        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             long[] pattern = {0, 1000, 200, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
             Notification.Builder mBuilder =
@@ -147,7 +148,7 @@ public class BluetoothDetector extends BroadcastReceiver {
          */
         ActivityRecognitionService.startCheckingActivityRecognition(context);
 
-        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             long[] pattern = {0, 1000, 200, 1000};
             NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
             Notification.Builder mBuilder =
