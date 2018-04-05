@@ -7,7 +7,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 27
         applicationId "com.whereismycar"
         versionCode 84
