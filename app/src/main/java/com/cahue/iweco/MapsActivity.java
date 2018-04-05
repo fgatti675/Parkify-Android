@@ -4,8 +4,6 @@ import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +17,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -113,6 +110,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,7 +121,6 @@ import java.util.Set;
 import bolts.AppLinks;
 
 import static android.content.Intent.ACTION_VIEW;
-import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 
 public class MapsActivity extends AppCompatActivity
         implements
@@ -149,6 +146,8 @@ public class MapsActivity extends AppCompatActivity
     static final String DETAILS_FRAGMENT_TAG = "DETAILS_FRAGMENT";
 
     private static final int REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION = 10;
+
+    FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -433,7 +432,10 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onBillingReady(BillingFragment billingFragment) {
-        if (PreferencesUtil.isAdsRemoved(this)) return;
+        if (PreferencesUtil.isAdsRemoved(this)) {
+            firebaseAnalytics.setUserProperty("paying_user", "true");
+            return;
+        }
 
         if (carDatabase.isEmptyOfCars(this)) return;
 
@@ -464,13 +466,11 @@ public class MapsActivity extends AppCompatActivity
                 Log.d(TAG, "Display ads returned " + displayAd);
 
                 if (displayAd) {
-
+                    firebaseAnalytics.setUserProperty("paying_user", "false");
                     newPurchaseReceiver = new BroadcastReceiver() {
                         @Override
                         public void onReceive(Context context, Intent intent) {
-                            nativeAdContainer.setVisibility(View.GONE);
-                            nativeExpressAbMobContainer.setVisibility(View.GONE);
-                            facebookNativeAd.destroy();
+                            hideAds();
                         }
                     };
                     LocalBroadcastManager.getInstance(MapsActivity.this).registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
@@ -479,6 +479,7 @@ public class MapsActivity extends AppCompatActivity
 //                    setUpAdMobAdNativeExpress();
 
                 } else {
+                    firebaseAnalytics.setUserProperty("paying_user", "true");
                     PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
                 }
 
@@ -486,8 +487,13 @@ public class MapsActivity extends AppCompatActivity
         }.execute();
     }
 
-    private void setUpFacebookAd() {
+    private void hideAds() {
+        nativeAdContainer.setVisibility(View.GONE);
+        nativeExpressAbMobContainer.setVisibility(View.GONE);
+        facebookNativeAd.destroy();
+    }
 
+    private void setUpFacebookAd() {
         Log.d(TAG, "setUpFacebookAd");
         facebookNativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
         facebookNativeAd.setAdListener(MapsActivity.this);
@@ -522,7 +528,7 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onResponse(Bitmap response) {
                     nativeAdIcon.setImageBitmap(response);
-                    bindAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
+                    bindFacebookAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
 
                 }
             }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
@@ -533,7 +539,7 @@ public class MapsActivity extends AppCompatActivity
             requestQueue.add(adPicture);
         } else {
             Log.w(TAG, "adview without adIcon");
-            bindAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
+            bindFacebookAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
         }
 
     }
@@ -659,7 +665,7 @@ public class MapsActivity extends AppCompatActivity
         adLoader.loadAd(new AdRequest.Builder().build());
     }
 
-    public void bindAdView(Button nativeAdCallToAction, final TextView nativeAdTitle, final TextView nativeAdBody, ViewGroup adChoicesWrap) {
+    private void bindFacebookAdView(Button nativeAdCallToAction, final TextView nativeAdTitle, final TextView nativeAdBody, ViewGroup adChoicesWrap) {
         nativeAdContainer.setVisibility(View.VISIBLE);
 
         facebookNativeAd.unregisterView();

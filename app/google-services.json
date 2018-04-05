@@ -15,19 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "582791978228-9urc7sdr1514ku9g7sgms4d1thm75q8b.apps.googleusercontent.com",
+          "client_id": "582791978228-7o6m7bevu682b6a32d7epmo6a6sc7t7k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.whereismycar",
-            "certificate_hash": "6C19A8E5FA2FDD1A467DA725631A3381C12F31C7"
-          }
-        },
-        {
-          "client_id": "582791978228-p4nb6p692t4pan7rdpabuskbqnegcsta.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.whereismycar",
-            "certificate_hash": "2885A58F6BDDAD656BD4B028632851BF678DEF9A"
+            "certificate_hash": "52120803a0bd9d786b263613bbe58dbe6767873d"
           }
         },
         {
@@ -41,11 +33,30 @@
         {
           "client_id": "582791978228-pa6ku34g35hqfjnab8l00eso4s6bhij8.apps.googleusercontent.com",
           "client_type": 3
+        },
+        {
+          "client_id": "582791978228-9urc7sdr1514ku9g7sgms4d1thm75q8b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whereismycar",
+            "certificate_hash": "6c19a8e5fa2fdd1a467da725631a3381c12f31c7"
+          }
+        },
+        {
+          "client_id": "582791978228-p4nb6p692t4pan7rdpabuskbqnegcsta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whereismycar",
+            "certificate_hash": "2885a58f6bddad656bd4b028632851bf678def9a"
+          }
         }
       ],
       "api_key": [
         {
           "current_key": "AIzaSyBib6gJ2g34aWFN2bzbzE6SdQbButk_pd4"
+        },
+        {
+          "current_key": "AIzaSyDj-Ee_jdRU2g8LTYai9JspJv9-mSv_qOk"
         }
       ],
       "services": {

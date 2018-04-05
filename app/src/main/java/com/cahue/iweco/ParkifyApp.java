@@ -12,10 +12,10 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.cahue.iweco.util.NotificationChannelsUtils;
-import com.facebook.FacebookSdk;
 import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * Created by Francesco on 14/06/2015.
@@ -26,6 +26,8 @@ public class ParkifyApp extends Application {
     private static ParkifyApp parkifyApp;
     private RequestQueue mRequestQueue;
     private static final int THREAD_ID = 10000;
+
+    FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
     public static ParkifyApp getParkifyApp() {
         return parkifyApp;
@@ -105,5 +107,9 @@ public class ParkifyApp extends Application {
 
     public RequestQueue getRequestQueue() {
         return mRequestQueue;
+    }
+
+    public FirebaseAnalytics getFirebaseAnalytics() {
+        return firebaseAnalytics;
     }
 }
