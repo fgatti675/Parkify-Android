@@ -39,6 +39,7 @@ import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -448,6 +449,12 @@ public class NavigationDrawerFragment extends Fragment {
                         if (car.location != null) {
 
                             Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_DRAWER);
+
+                            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+                            Bundle bundle = new Bundle();
+                            bundle.putString("car", car.id);
+                            firebaseAnalytics.logEvent("car_clicked_menu", bundle);
+
                             ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(car.id))).activate();
 
                             mCallbacks.onCarSelected(car);
@@ -486,7 +493,6 @@ public class NavigationDrawerFragment extends Fragment {
 
             menuViewHolder.itemView.setOnClickListener(v -> {
                 navigation.goToCarManager();
-                Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_MANAGER_CLICK);
             });
         }
 
@@ -498,6 +504,9 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.divider.setVisibility(View.VISIBLE);
             menuViewHolder.itemView.setOnClickListener(v -> {
                 navigation.openDonationDialog();
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+                Bundle bundle = new Bundle();
+                firebaseAnalytics.logEvent("donation_start", bundle);
                 Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_DONATION_CLICK);
             });
         }
@@ -507,7 +516,6 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.icon.setImageResource(R.drawable.ic_settings_24dp);
             menuViewHolder.itemView.setOnClickListener(v -> {
                 navigation.goToPreferences();
-                Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SETTINGS_CLICK);
             });
         }
 
@@ -518,6 +526,9 @@ public class NavigationDrawerFragment extends Fragment {
             menuViewHolder.itemView.setOnClickListener(v -> {
                 navigation.signOutAndGoToLoginScreen(true);
                 Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_SIGN_OUT);
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+                Bundle bundle = new Bundle();
+                firebaseAnalytics.logEvent("sign_out", bundle);
             });
         }
 

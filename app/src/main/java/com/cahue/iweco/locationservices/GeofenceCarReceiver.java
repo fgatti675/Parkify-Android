@@ -26,7 +26,6 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 

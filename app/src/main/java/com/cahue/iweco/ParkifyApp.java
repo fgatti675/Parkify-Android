@@ -27,7 +27,7 @@ public class ParkifyApp extends Application {
     private RequestQueue mRequestQueue;
     private static final int THREAD_ID = 10000;
 
-    FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    private FirebaseAnalytics firebaseAnalytics;
 
     public static ParkifyApp getParkifyApp() {
         return parkifyApp;
@@ -49,6 +49,8 @@ public class ParkifyApp extends Application {
 
         tracker = analytics.newTracker(getResources().getString(R.string.analytics_id));
         tracker.enableAdvertisingIdCollection(true);
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         /**
          * Start volley queue

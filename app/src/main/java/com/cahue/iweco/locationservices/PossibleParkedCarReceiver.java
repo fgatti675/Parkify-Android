@@ -22,6 +22,7 @@ import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Date;
 import java.util.List;
@@ -81,6 +82,11 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_POSSIBLE_SPOT_DETECTED);
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        Bundle bundle = new Bundle();
+        firebaseAnalytics.logEvent("ar_possible_spot_detected", bundle);
     }
 
 

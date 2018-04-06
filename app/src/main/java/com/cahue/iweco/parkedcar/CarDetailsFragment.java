@@ -30,6 +30,7 @@ import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Tracking;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * Use the {@link CarDetailsFragment#newInstance} factory method to
@@ -238,6 +239,13 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share)));
 
         Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_CAR_LOCATION_SHARED);
+
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        Bundle bundle = new Bundle();
+        bundle.putString("car", carId);
+        firebaseAnalytics.logEvent("share_car_location", bundle);
+
 
     }
 

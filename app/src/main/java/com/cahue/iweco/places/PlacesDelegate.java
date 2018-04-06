@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -233,6 +234,11 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
             detailsViewManager.setDetailsFragment(this, PlaceDetailsFragment.newInstance(selectedPlace, userLocation));
 
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_PARKING_SELECTED);
+
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+            Bundle bundle = new Bundle();
+            firebaseAnalytics.logEvent("public_parking_click", bundle);
+
             return true;
         } else {
             return false;

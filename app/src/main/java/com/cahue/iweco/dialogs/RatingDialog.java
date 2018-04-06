@@ -19,6 +19,7 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Date;
 
@@ -74,6 +75,7 @@ public class RatingDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
         builder.setMessage(R.string.rating_message)
                 .setIcon(R.drawable.ic_logo_heart)
                 .setTitle(R.string.like_question)
@@ -83,11 +85,15 @@ public class RatingDialog extends DialogFragment {
                     startActivity(intent);
                     setRatedDialogAccepted(getActivity(), true);
                     Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_ACCEPT);
+                    Bundle bundle = new Bundle();
+                    firebaseAnalytics.logEvent("rating_dialog_accept", bundle);
                 })
                 .setNegativeButton(R.string.cancel, (dialog, id) -> {
                     int currentInterval = getNextShowIntervalDays(getActivity());
                     setNextShowIntervalDays(getActivity(), currentInterval + 3);
                     Tracking.sendEvent(Tracking.CATEGORY_RATING_DIALOG, Tracking.ACTION_DISMISS);
+                    Bundle bundle = new Bundle();
+                    firebaseAnalytics.logEvent("rating_dialog_cancel", bundle);
                 });
 
         setRateDialogLastDisplayed(getActivity(), new Date());

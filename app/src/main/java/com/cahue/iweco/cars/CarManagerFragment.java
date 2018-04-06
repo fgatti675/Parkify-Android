@@ -38,6 +38,7 @@ import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -268,6 +269,12 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
         Tracking.sendEvent(Tracking.CATEGORY_CAR_MANAGER, Tracking.ACTION_CAR_EDIT);
 
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        Bundle bundle = new Bundle();
+        bundle.putString("car", car.id);
+        bundle.putBoolean("newCar", newCar);
+        firebaseAnalytics.logEvent( "editor_car_edit" , bundle);
+
     }
 
     public void onCarRemoved(@NonNull Car car) {
@@ -285,6 +292,11 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         selectedDeviceAddresses.remove(car.btAddress);
         setBondedDevices();
         adapter.notifyDataSetChanged();
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        Bundle bundle = new Bundle();
+        bundle.putString("car", car.id);
+        firebaseAnalytics.logEvent("editor_car_removed", bundle);
     }
 
     private void setBondedDevices() {

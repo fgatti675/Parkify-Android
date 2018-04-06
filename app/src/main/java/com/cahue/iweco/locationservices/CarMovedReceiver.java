@@ -18,6 +18,7 @@ import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Arrays;
 
@@ -89,5 +90,9 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        Bundle bundle = new Bundle();
+        bundle.putString("car", carId);
+        firebaseAnalytics.logEvent("bt_freed_spot", bundle);
     }
 }

@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -396,6 +397,10 @@ public class SpotsDelegate extends AbstractMarkerDelegate
             detailsViewManager.setDetailsFragment(this, SpotDetailsFragment.newInstance(selectedSpot, userLocation));
 
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_FREE_SPOT_SELECTED);
+
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+            Bundle bundle = new Bundle();
+            firebaseAnalytics.logEvent("free_spot_clicked", bundle);
 
             return true;
         } else {

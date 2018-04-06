@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.maps.android.ui.IconGenerator;
 
 import static com.cahue.iweco.locationservices.PossibleParkedCarReceiver.NOTIFICATION_ID;
@@ -114,6 +115,9 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
             activate();
 
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_POSSIBLE_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_MARKER);
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+            Bundle bundle = new Bundle();
+            firebaseAnalytics.logEvent("possible_spot_click_map", bundle);
             return true;
         }
         return false;

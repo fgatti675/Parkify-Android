@@ -50,6 +50,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -199,6 +200,11 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         database.saveCarAndBroadcast(this, database.generateOtherCar());
         AuthUtils.setSkippedLogin(LoginActivity.this, true);
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        Bundle bundle = new Bundle();
+        firebaseAnalytics.logEvent("skip_login", bundle);
+
         goToNextActivity();
     }
 
@@ -417,6 +423,12 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
 
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        Bundle bundle = new Bundle();
+        bundle.putString("type", type == LoginType.Facebook ? "facebook" : "google");
+        firebaseAnalytics.logEvent("login", bundle);
 
         finalizeLogin(resultIntent, loginResult, type);
 

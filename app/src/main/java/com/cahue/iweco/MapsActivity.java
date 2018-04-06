@@ -147,7 +147,7 @@ public class MapsActivity extends AppCompatActivity
 
     private static final int REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION = 10;
 
-    FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    FirebaseAnalytics firebaseAnalytics;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -275,6 +275,9 @@ public class MapsActivity extends AppCompatActivity
          */
         initBillingFragment();
 
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+
         loginType = null;
 
         if (availableAccounts.length > 0) {
@@ -312,7 +315,6 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     drawerLayout.openDrawer(GravityCompat.START);
-                    Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_NAVIGATION_TOGGLE);
                 }
             });
 
@@ -344,7 +346,11 @@ public class MapsActivity extends AppCompatActivity
 
         myLocationButton = findViewById(R.id.my_location);
         myLocationButton.setBackgroundTintList(getResources().getColorStateList(R.color.button_states));
-        myLocationButton.setOnClickListener(view -> setCameraFollowing(true));
+        myLocationButton.setOnClickListener(view -> {
+            setCameraFollowing(true);
+            Bundle bundle = new Bundle();
+            firebaseAnalytics.logEvent("my_location_clicked", bundle);
+        });
 
         if (BuildConfig.DEBUG) {
             myLocationButton.setOnLongClickListener(v -> {
@@ -383,11 +389,10 @@ public class MapsActivity extends AppCompatActivity
         cardDetailsContainer.setVisibility(detailsDisplayed ? View.VISIBLE : View.INVISIBLE);
 
         noCarsButton = findViewById(R.id.no_cars_button);
-        noCarsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToCarManager();
-            }
+        noCarsButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            firebaseAnalytics.logEvent("no_cars_button_clicked", bundle);
+            goToCarManager();
         });
 
         checkLocationPermission();
@@ -700,12 +705,18 @@ public class MapsActivity extends AppCompatActivity
     public void onAdClicked(Ad ad) {
         Log.d(TAG, "onAdClicked: ");
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "Facebook");
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        Bundle bundle = new Bundle();
+        firebaseAnalytics.logEvent("fb_ad_clicked", bundle);
     }
 
     @Override
     public void onLoggingImpression(Ad ad) {
         Log.d(TAG, "onLoggingImpression: ");
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        Bundle bundle = new Bundle();
+        firebaseAnalytics.logEvent("fb_ad_impression", bundle);
     }
 
 
@@ -744,8 +755,13 @@ public class MapsActivity extends AppCompatActivity
         for (PossibleSpot spot : carDatabase.retrievePossibleParkingSpots(this))
             delegates.add(initPossibleParkedCarDelegate(spot));
 
-        for (String id : carDatabase.getCarIds(this, true))
-            delegates.add(initParkedCarDelegate(id));
+        List<Car> cars = carDatabase.retrieveCars(this, true);
+        for (Car car : cars)
+            delegates.add(initParkedCarDelegate(car.id));
+
+        boolean hasBtCar = false;
+        for (Car car : cars) if (car.btAddress != null) hasBtCar = true;
+        firebaseAnalytics.setUserProperty("has_bluetooth_car", hasBtCar ? "true" : "false");
 
         /*
          * Show some dialogs in case the user is bored
@@ -1422,6 +1438,9 @@ public class MapsActivity extends AppCompatActivity
         LongTapLocationDelegate longTapLocationDelegate = initLongTapLocationDelegate();
         longTapLocationDelegate.setMap(mMap);
         longTapLocationDelegate.activate(spot);
+
+        Bundle bundle = new Bundle();
+        firebaseAnalytics.logEvent("map_long_click", bundle);
 
     }
 

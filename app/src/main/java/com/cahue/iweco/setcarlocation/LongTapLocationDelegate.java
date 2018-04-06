@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.maps.android.ui.IconGenerator;
 
 /**
@@ -156,6 +157,11 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
         deactivate();
 
         CarsSync.updateCarFromTappedSpot(CarDatabase.getInstance(), getActivity(), car, spot);
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        Bundle bundle = new Bundle();
+        bundle.putString("car", car.id);
+        firebaseAnalytics.logEvent("car_position_set_manual", bundle);
 
         detailsViewManager.hideDetails();
     }

@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.maps.android.ui.IconGenerator;
 
 /**
@@ -360,6 +361,11 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
             activate();
 
             Tracking.sendEvent(Tracking.CATEGORY_MAP, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_MARKER);
+
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+            Bundle bundle = new Bundle();
+            bundle.putString("car", car.id);
+            firebaseAnalytics.logEvent("car_clicked_marker", bundle);
 
             return true;
         } else {

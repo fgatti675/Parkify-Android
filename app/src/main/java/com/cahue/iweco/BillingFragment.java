@@ -21,6 +21,7 @@ import com.android.vending.billing.IInAppBillingService;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -158,10 +159,17 @@ public class BillingFragment extends Fragment {
                     UUID.randomUUID().toString());
 
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
             if (pendingIntent == null) {
                 Util.showBlueToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
                 Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_ERROR);
+                Bundle bundle = new Bundle();
+                bundle.putString("sku", sku);
+                firebaseAnalytics.logEvent("donation_error", bundle);
             } else {
+                Bundle bundle = new Bundle();
+                bundle.putString("sku", sku);
+                firebaseAnalytics.logEvent("donation_intent", bundle);
                 getActivity().startIntentSenderForResult(pendingIntent.getIntentSender(),
                         1001, new Intent(), 0, 0, 0);
             }
@@ -176,6 +184,8 @@ public class BillingFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         // element purchase
         if (requestCode == REQUEST_ON_PURCHASE) {
@@ -195,11 +205,17 @@ public class BillingFragment extends Fragment {
 
                         Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_SUCCESSFUL, sku);
 
+                        Bundle bundle = new Bundle();
+                        bundle.putString("sku", sku);
+                        firebaseAnalytics.logEvent("donation_successful", bundle);
+
                     } catch (JSONException e) {
                     }
 
                 } else {
                     Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_SUCCESSFUL);
+                    Bundle bundle = new Bundle();
+                    firebaseAnalytics.logEvent("donation_successful", bundle);
                 }
 
                 Util.showBlueToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
@@ -208,6 +224,8 @@ public class BillingFragment extends Fragment {
                 PreferencesUtil.setAdsRemoved(getActivity(), true);
 
             } else if (resultCode == Activity.RESULT_CANCELED) {
+                Bundle bundle = new Bundle();
+                firebaseAnalytics.logEvent("donation_cancelled", bundle);
                 Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_CANCELLED);
             }
         }

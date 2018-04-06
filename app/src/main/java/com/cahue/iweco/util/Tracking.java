@@ -1,6 +1,5 @@
 package com.cahue.iweco.util;
 
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -96,20 +95,20 @@ public class Tracking {
     }
 
     public static void sendEvent(String category, String action) {
-        sendEvent(category, action, null,  false);
+        sendEvent(category, action, null, false);
     }
 
     public static void sendEvent(String category, String action, boolean nonInteractionEvent) {
-        sendEvent(category, action, null,  nonInteractionEvent);
+        sendEvent(category, action, null, nonInteractionEvent);
     }
 
     public static void sendEvent(String category, String action, String label) {
-        sendEvent(category, action, label,  false);
+        sendEvent(category, action, label, false);
     }
 
-    public static void sendEvent(String category, String action, @Nullable String label,  boolean nonInteractionEvent) {
+    public static void sendEvent(String category, String action, @Nullable String label, boolean nonInteractionEvent) {
 
-        Log.i("Tracking", "Event: " + category + " / " + action + " / " + label );
+        Log.i("Tracking", "Event: " + category + " / " + action + " / " + label);
 
         if (BuildConfig.DEBUG) return;
 
@@ -121,9 +120,6 @@ public class Tracking {
 
         getTracker().send(builder.build());
 
-        Bundle bundle = new Bundle();
-        bundle.putString(category, action);
-        getFirebaseAnalytics().logEvent(category, bundle);
 
     }
 
@@ -143,6 +139,7 @@ public class Tracking {
 
     public static void setTrackerUserId(String trackerUserId) {
         ParkifyApp.getParkifyApp().setTrackerUserId(trackerUserId);
+        getFirebaseAnalytics().setUserId(trackerUserId);
     }
 
     private static Tracker getTracker() {

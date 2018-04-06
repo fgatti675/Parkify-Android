@@ -29,6 +29,7 @@ import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Date;
 
@@ -154,6 +155,12 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
         fetchAddress(context, car);
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_PARKING);
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        Bundle bundle = new Bundle();
+        bundle.putString("car", carId);
+        firebaseAnalytics.logEvent("bt_car_parked", bundle);
     }
 
 }
