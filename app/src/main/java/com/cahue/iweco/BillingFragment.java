@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -27,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -139,15 +141,48 @@ public class BillingFragment extends Fragment {
         return iInAppBillingService != null;
     }
 
-    @Nullable
-    public Bundle getPurchases() {
-        try {
-            return iInAppBillingService.getPurchases(3, BuildConfig.APPLICATION_ID, "inapp", null);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return null;
+    public interface PurchasesCheckListener {
+        void onPurchaseCheck(List<String> purchaseDataList);
+    }
+
+    public static class CheckPurchaseAsyncTask extends AsyncTask<Void, Void, List<String>> {
+        IInAppBillingService iInAppBillingService;
+        PurchasesCheckListener listener;
+
+        public CheckPurchaseAsyncTask(IInAppBillingService iInAppBillingService, PurchasesCheckListener listener) {
+            this.iInAppBillingService = iInAppBillingService;
+            this.listener = listener;
+        }
+
+        @Override
+        protected List<String> doInBackground(Void... voids) {
+
+            try {
+                Bundle ownedItems = iInAppBillingService.getPurchases(3, BuildConfig.APPLICATION_ID, "inapp", null);
+                int response = ownedItems.getInt("RESPONSE_CODE");
+                if (response == 0) {
+                    List<String> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
+                    Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
+                    return purchaseDataList;
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            return new ArrayList<>();
+        }
+
+        @Override
+        protected void onPostExecute(List<String> purchaseDataList) {
+            super.onPostExecute(purchaseDataList);
+            listener.onPurchaseCheck(purchaseDataList);
         }
     }
+
+
+    public void checkPurchases(PurchasesCheckListener listener) {
+        new CheckPurchaseAsyncTask(iInAppBillingService, listener).execute();
+    }
+
 
     public void doPurchase(String sku) {
         try {

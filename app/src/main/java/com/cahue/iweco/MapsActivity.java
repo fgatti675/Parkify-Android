@@ -238,7 +238,12 @@ public class MapsActivity extends AppCompatActivity
     private ViewGroup nativeAdContainer;
 
     @Nullable
-    private BroadcastReceiver newPurchaseReceiver;
+    private BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            hideAds();
+        }
+    };
 
     private AdChoicesView adChoicesView;
     private NativeAd facebookNativeAd;
@@ -448,48 +453,27 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void checkForPurchases(final BillingFragment billingFragment) {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                /**
-                 * Check if the user has purchases. If there is an error we don't display just in case
-                 */
-                boolean displayAd = false;
-                Bundle ownedItems = billingFragment.getPurchases();
-                int response = ownedItems.getInt("RESPONSE_CODE");
-                if (response == 0) {
-                    ArrayList<?> purchaseDataList = ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-                    Log.d(TAG, "Purchased items: " + purchaseDataList.toString());
-                    displayAd = purchaseDataList.isEmpty();
-                }
-                PreferencesUtil.setPurchasesCheked(MapsActivity.this, true);
-                return displayAd;
-            }
 
-            @Override
-            protected void onPostExecute(Boolean displayAd) {
-                Log.d(TAG, "Display ads returned " + displayAd);
+        billingFragment.checkPurchases(purchaseDataList -> {
+            PreferencesUtil.setPurchasesCheked(MapsActivity.this, true);
 
-                if (displayAd) {
-                    firebaseAnalytics.setUserProperty("paying_user", "false");
-                    newPurchaseReceiver = new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            hideAds();
-                        }
-                    };
-                    LocalBroadcastManager.getInstance(MapsActivity.this).registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
+            Log.d(TAG, "Purchased data list: " + purchaseDataList);
 
-                    setUpFacebookAd();
+            boolean shouldDisplayAd = purchaseDataList.isEmpty();
+
+            if (shouldDisplayAd) {
+                firebaseAnalytics.setUserProperty("paying_user", "false");
+
+                setUpFacebookAd();
 //                    setUpAdMobAdNativeExpress();
 
-                } else {
-                    firebaseAnalytics.setUserProperty("paying_user", "true");
-                    PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
-                }
-
+            } else {
+                firebaseAnalytics.setUserProperty("paying_user", "true");
+                PreferencesUtil.setAdsRemoved(MapsActivity.this, true);
             }
-        }.execute();
+
+        });
+
     }
 
     private void hideAds() {
@@ -727,6 +711,8 @@ public class MapsActivity extends AppCompatActivity
         long initTime = System.currentTimeMillis();
 
         registerCameraUpdateRequester(this);
+
+        LocalBroadcastManager.getInstance(MapsActivity.this).registerReceiver(newPurchaseReceiver, new IntentFilter(Constants.INTENT_ADS_REMOVED));
 
         mGoogleApiClient.connect();
 
@@ -1181,10 +1167,7 @@ public class MapsActivity extends AppCompatActivity
     protected void onStop() {
         unregisterCameraUpdateRequester(this);
         mGoogleApiClient.disconnect();
-        if (newPurchaseReceiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(newPurchaseReceiver);
-            newPurchaseReceiver = null;
-        }
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(newPurchaseReceiver);
         super.onStop();
     }
 
