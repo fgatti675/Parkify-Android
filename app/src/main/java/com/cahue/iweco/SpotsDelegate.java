@@ -127,7 +127,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
 
-        directionsDelegate = new DirectionsDelegate(this);
+        directionsDelegate = new DirectionsDelegate();
     }
 
     @Override

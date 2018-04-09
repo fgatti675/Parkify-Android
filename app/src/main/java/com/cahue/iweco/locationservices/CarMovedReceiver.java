@@ -10,7 +10,6 @@ import android.widget.Toast;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
@@ -19,6 +18,8 @@ import com.cahue.iweco.util.Util;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 
@@ -62,37 +63,44 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
     }
 
     @Override
-    protected void onPreciseFixPolled(Context context, Location spotLocation, Bundle extras) {
+    protected void onPreciseFixPolled(Context context, final Location spotLocation, Bundle extras) {
 
         CarDatabase carDatabase = CarDatabase.getInstance();
         String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
-        Car car = carDatabase.findCar(context, carId);
 
-        /**
-         * If the accuracy is not good enough, we can check the previous location of the car
-         * and if it's close and more accurate, we use it.
-         */
-        if (spotLocation.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
-            if (car.location != null && car.location.distanceTo(spotLocation) < Constants.ACCURACY_THRESHOLD_M)
-                spotLocation = car.location;
-        }
+        DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
+        documentReference.get().addOnSuccessListener(documentSnapshot -> {
 
-        /**
-         * If it's accurate enough we notify
-         */
-        if (spotLocation.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-            ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, car);
-            Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
-        }
+            Car car = Car.fromFirestore(documentSnapshot);
 
-        CarsSync.clearLocation(carDatabase, context, car);
-        clearGeofence(context, car);
+            /**
+             * If the accuracy is not good enough, we can check the previous location of the car
+             * and if it's close and more accurate, we use it.
+             */
+            Location location = spotLocation;
+            if (location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
+                if (car.location != null && car.location.distanceTo(location) < Constants.ACCURACY_THRESHOLD_M)
+                    location = car.location;
+            }
 
+            /**
+             * If it's accurate enough we notify
+             */
+            if (location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
+                ParkingSpotSender.doPostSpotLocation(context, location, false, car);
+                Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
+            }
 
-        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-        Bundle bundle = new Bundle();
-        bundle.putString("car", carId);
-        firebaseAnalytics.logEvent("bt_freed_spot", bundle);
+            carDatabase.removeCarLocation(car.id);
+            clearGeofence(context, car);
+
+            Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
+
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+            Bundle bundle = new Bundle();
+            bundle.putString("car", carId);
+            firebaseAnalytics.logEvent("bt_freed_spot", bundle);
+        });
+
     }
 }

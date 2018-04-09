@@ -1,6 +1,5 @@
 package com.cahue.iweco.activityrecognition;
 
-import android.app.NotificationManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +10,6 @@ import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.PossibleSpot;
@@ -158,7 +156,7 @@ public class PossibleParkedCarDelegate extends AbstractMarkerDelegate implements
     @Override
     public void onCarSelected(@NonNull Car car) {
         clearMarker();
-        CarsSync.updateCarFromPossibleSpot(database, getActivity(), car, spot);
+        database.updateCarFromArSpot(getActivity(), car.id, spot);
         detailsViewManager.hideDetails();
     }
 

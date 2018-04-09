@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/default_padding"
+            android:layout_marginBottom="@dimen/default_padding"
             android:text="@string/activate_bluetooth"
             android:theme="@style/CahueTheme.Button.Accent" />
 

@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -138,20 +136,30 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
             updateAddress();
 
             GridView buttonsLayout = view.findViewById(R.id.car_buttons);
-            List<Car> cars = carDatabase.retrieveCars(getActivity(), true);
-            int numCars = cars.size();
-            int numColumns;
-            if (numCars < 4) numColumns = numCars;
-            else if (numCars % 3 == 0) numColumns = 3;
-            else if (numCars % 2 == 0) numColumns = 2;
-            else numColumns = 3;
-            buttonsLayout.setNumColumns(numColumns);
+            carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+                @Override
+                public void onCarsRetrieved(List<Car> cars) {
 
-            if (!cars.isEmpty())
-                buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
+                    int numCars = cars.size();
+                    int numColumns;
+                    if (numCars < 4) numColumns = numCars;
+                    else if (numCars % 3 == 0) numColumns = 3;
+                    else if (numCars % 2 == 0) numColumns = 2;
+                    else numColumns = 3;
+                    buttonsLayout.setNumColumns(numColumns);
 
-            Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
-            view.startAnimation(fadeInAnimation);
+                    if (!cars.isEmpty())
+                        buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
+
+                    Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
+                    view.startAnimation(fadeInAnimation);
+                }
+
+                @Override
+                public void onCarsRetrievedError() {
+
+                }
+            });
         }
         return view;
     }

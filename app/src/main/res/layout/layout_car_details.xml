@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:adjustViewBounds="false"
-        android:background="@color/theme_accent"
+        tools:background="@color/theme_accent"
         android:cropToPadding="false"
         android:padding="@dimen/large_padding"
         android:scaleType="fitStart"

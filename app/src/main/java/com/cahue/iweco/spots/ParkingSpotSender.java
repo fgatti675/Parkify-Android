@@ -19,6 +19,7 @@ import com.cahue.iweco.util.Requests;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Created by francesco on 27.03.2015.
@@ -28,10 +29,9 @@ public class ParkingSpotSender {
     private static final String TAG = ParkingSpotSender.class.getSimpleName();
 
     public static void doPostSpotLocation(@NonNull Context context, Location spotLocation, boolean future, @NonNull Car car) {
-        ParkingSpot spot = new ParkingSpot(car.spotId, spotLocation, null, new Date(), future);
+        ParkingSpot spot = new ParkingSpot(new Random().nextLong(), spotLocation, null, new Date(), future);
         postSpot(context, spot, car);
     }
-
 
     private static void postSpot(@NonNull Context context, @NonNull ParkingSpot spot, @NonNull final Car car) {
 
@@ -45,7 +45,6 @@ public class ParkingSpotSender {
                 .authority(BuildConfig.BACKEND_URL)
                 .appendPath("spots");
 
-
         // Send a JSON spot location.
         JSONObject parkingSpotJSON = spot.toJSON(car);
         Log.i(TAG, "Posting: " + parkingSpotJSON);
@@ -55,18 +54,8 @@ public class ParkingSpotSender {
                 context,
                 url,
                 parkingSpotJSON,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(@NonNull JSONObject response) {
-                        Log.i(TAG, "Post result: " + response.toString());
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(@NonNull VolleyError error) {
-                        error.printStackTrace();
-                    }
-                });
+                response -> Log.i(TAG, "Post result: " + response.toString()),
+                error -> error.printStackTrace());
 
         // Add the request to the RequestQueue.
         queue.add(stringRequest);

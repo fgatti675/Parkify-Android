@@ -34,7 +34,7 @@ import static com.cahue.iweco.util.NotificationChannelsUtils.ACT_RECOG_CHANNEL_I
  * It is started from the activity recognition service, when it detects that the user steps out of
  * a vehicle.
  * <p>
- * When the location is retrieved the user gets a notification asking him whan car he has parked.
+ * When the location is retrieved the user g    ets a notification asking him whan car he has parked.
  *
  * @author Francesco
  */
@@ -58,7 +58,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
     @Override
     protected void onPreciseFixPolled(final Context context, Location location, Bundle extras) {
 
-        if (location.getAccuracy() > ACCURACY_THRESHOLD_M) return;
+//        if (location.getAccuracy() > ACCURACY_THRESHOLD_M) return;
 
         this.location = location;
         this.startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
@@ -83,9 +83,9 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_POSSIBLE_SPOT_DETECTED);
 
-        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
         Bundle bundle = new Bundle();
+        bundle.putDouble("accuracy", location.getAccuracy());
         firebaseAnalytics.logEvent("ar_possible_spot_detected", bundle);
     }
 
@@ -124,15 +124,23 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
                         .setContentTitle(context.getString(R.string.ask_just_parked))
                         .setContentText(address);
 
-        List<Car> cars = carDatabase.retrieveCars(context, true);
-        int numberActions = Math.min(cars.size(), 3);
-        for (int i = 0; i < numberActions; i++) {
-            Car car = cars.get(i);
-            Notification.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
-            mBuilder.addAction(saveAction);
-        }
+        carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+            @Override
+            public void onCarsRetrieved(List<Car> cars) {
+                int numberActions = Math.min(cars.size(), 3);
+                for (int i = 0; i < numberActions; i++) {
+                    Car car = cars.get(i);
+                    Notification.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
+                    mBuilder.addAction(saveAction);
+                }
+                mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
+            }
 
-        mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
+            @Override
+            public void onCarsRetrievedError() {
+
+            }
+        });
     }
 
 

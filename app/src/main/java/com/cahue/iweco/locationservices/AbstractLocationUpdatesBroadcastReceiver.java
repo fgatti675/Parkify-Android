@@ -48,6 +48,8 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
 
     private static final String TAG = "LUBroadcastReceiver";
     private Intent intent;
+    private Location location = null;
+    private Date startTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -63,7 +65,8 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
                 // TODO: change to extras when this is fixed: https://issuetracker.google.com/issues/37013793
                 Bundle bundle = new Bundle();
                 Uri data = intent.getData();
-                bundle.putSerializable(Constants.EXTRA_START_TIME, new Date(Long.parseLong(data.getQueryParameter("startTime"))));
+                startTime = new Date(Long.parseLong(data.getQueryParameter("startTime")));
+                bundle.putSerializable(Constants.EXTRA_START_TIME, startTime);
                 String carId = data.getQueryParameter("car");
                 bundle.putString(Constants.EXTRA_CAR_ID, carId);
                 onLocationChanged(context, action, bundle, result.getLocations());
@@ -73,11 +76,10 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
         }
     }
 
+
     private void onLocationChanged(Context context, String action, Bundle extras, @NonNull List<Location> locations) {
 
         Log.d(TAG, "onLocationChanged: " + locations);
-
-        Location location = null;
 
         for (Location loc : locations) {
             Log.d(TAG, "Location polled: " + loc);
@@ -93,6 +95,7 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
 
     }
 
+    private boolean notified = false;
 
     /**
      * Notify the location of the event (like user parked or drove off)
@@ -103,7 +106,9 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
         Log.i(TAG, "Notifying location polled: " + location);
         Date startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
         Log.i(TAG, "\tafter " + (System.currentTimeMillis() - startTime.getTime()) + " ms");
-        onPreciseFixPolled(context, location, extras);
+        if (!notified)
+            onPreciseFixPolled(context, location, extras);
+        notified = true;
         new LocationUpdatesHelper(context, action).stopLocationUpdates(intent);
     }
 

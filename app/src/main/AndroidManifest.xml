@@ -122,8 +122,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/CahueTheme.Dark.TranslucentBars.Tutorial" />
 
-        <service android:name=".gcm.GcmIntentService" />
-
         <activity
             android:name=".cars.CarManagerActivity"
             android:parentActivityName=".MapsActivity"
@@ -142,28 +140,11 @@
                 android:value=".MapsActivity" />
         </activity>
 
-
         <provider
             android:name=".cars.database.CarsProvider"
             android:authorities="com.cahue.iweco.cars"
             android:exported="true"
             android:syncable="true" />
-
-        <!-- This service implements our SyncAdapter. It needs to be exported, so that the system
-               sync framework can access it. -->
-        <service
-            android:name=".cars.sync.SyncService"
-            android:exported="true">
-            <!-- This intent filter is required. It allows the system to launch our sync service
-            as needed. -->
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
-            <!-- This points to a required XML file which describes our SyncAdapter. -->
-            <meta-data
-                android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
-        </service>
 
         <service android:name=".auth.ParkifyAccountService">
             <intent-filter>
@@ -214,15 +195,6 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name=".gcm.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="${applicationId}" />
-            </intent-filter>
-        </receiver>
-
         <receiver android:name=".util.LocationTestBroadcastReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.BT_TEST" />
@@ -239,13 +211,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".parkedcar.CarPositionUpdatedReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="${applicationId}.INTENT_CAR_UPDATED" />
-            </intent-filter>
-        </receiver>
 
         <service
             android:name="com.google.android.gms.analytics.AnalyticsService"

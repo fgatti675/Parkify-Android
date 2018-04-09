@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import java.util.List;
 public class LongTapSetCarDetailsFragment extends DetailsFragment {
 
     private static final String ARG_SPOT = "arg_spot";
+    private static final String TAG = LongTapSetCarDetailsFragment.class.getSimpleName();
 
     @Nullable
     private ParkingSpot spot;
@@ -42,6 +44,8 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
     private Location userLocation;
 
     private OnCarClickedListener carSelectedListener;
+    private View mainView;
+    private GridView buttonsLayout;
 
     /**
      * Use this factory method to create a new instance of
@@ -81,34 +85,52 @@ public class LongTapSetCarDetailsFragment extends DetailsFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.layout_long_tap_set_car_details, container, false);
+        mainView = inflater.inflate(R.layout.layout_long_tap_set_car_details, container, false);
         if (spot != null) {
 
             // Update distance
-            distanceView = (TextView) view.findViewById(R.id.distance);
-            updateDistance();
+            distanceView = mainView.findViewById(R.id.distance);
 
             // Update addressView
-            addressView = (TextView) view.findViewById(R.id.address);
-            updateAddress();
+            addressView = mainView.findViewById(R.id.address);
 
-            GridView buttonsLayout = (GridView) view.findViewById(R.id.car_buttons);
-            List<Car> cars = carDatabase.retrieveCars(getActivity(), true);
-            int numCars = cars.size();
-            int numColumns;
-            if (numCars < 4) numColumns = numCars;
-            else if (numCars % 3 == 0) numColumns = 3;
-            else if (numCars % 2 == 0) numColumns = 2;
-            else numColumns = 3;
-            buttonsLayout.setNumColumns(numColumns);
+            buttonsLayout = mainView.findViewById(R.id.car_buttons);
 
-            if (!cars.isEmpty())
-                buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
 
-            Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
-            view.startAnimation(fadeInAnimation);
         }
-        return view;
+        return mainView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+            @Override
+            public void onCarsRetrieved(List<Car> cars) {
+                int numCars = cars.size();
+                int numColumns;
+                if (numCars < 4) numColumns = numCars;
+                else if (numCars % 3 == 0) numColumns = 3;
+                else if (numCars % 2 == 0) numColumns = 2;
+                else numColumns = 3;
+                buttonsLayout.setNumColumns(numColumns);
+
+                if (!cars.isEmpty())
+                    buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
+
+                Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
+                mainView.startAnimation(fadeInAnimation);
+
+            }
+
+            @Override
+            public void onCarsRetrievedError() {
+                Log.e(TAG, "Error populating car buttons");
+            }
+        });
+
+        updateDistance();
+        updateAddress();
     }
 
     @Override

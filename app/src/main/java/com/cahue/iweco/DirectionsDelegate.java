@@ -44,10 +44,7 @@ public class DirectionsDelegate {
     private GoogleMap mMap;
     private int color;
 
-    private AbstractMarkerDelegate markerDelegate;
-
-    public DirectionsDelegate(AbstractMarkerDelegate markerDelegate) {
-        this.markerDelegate = markerDelegate;
+    public DirectionsDelegate() {
         directionPoints = new ArrayList<>();
         gMapV2Direction = new GMapV2Direction();
     }

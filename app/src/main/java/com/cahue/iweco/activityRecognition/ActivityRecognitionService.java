@@ -68,23 +68,14 @@ public class ActivityRecognitionService extends Service {
     };
 
     /**
-     * Only fetch updates if BT is off and the user has requested so
+     * Start checking periodically the awareness API for car detection
      *
      * @param context
      */
     public static void startCheckingActivityRecognition(@NonNull Context context) {
-        addActivityRecognitionFences(context);
-    }
-
-
-    /**
-     * Start checking periodically the awareness API for car detection
-     */
-    public static void addActivityRecognitionFences(Context context) {
 
         AwarenessFence vehicleDuringFence = DetectedActivityFence.during(getInVehicleRelatedActivities());
         AwarenessFence vehicleStartingFence = DetectedActivityFence.starting(getInVehicleRelatedActivities());
-
 
         Intent intent = new Intent(context, InVehicleReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 7629, intent, FLAG_UPDATE_CURRENT);
@@ -124,23 +115,19 @@ public class ActivityRecognitionService extends Service {
 
             switch (fenceState.getCurrentState()) {
                 case FenceState.TRUE:
+
                     Log.i(TAG, "In vehicle fence detected TRUE");
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            if (PreferencesUtil.isMovementRecognitionEnabled(context)) {
-                                BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
-                                if (defaultAdapter != null) {
-                                    if (!defaultAdapter.isEnabled()
-                                            ||
-                                            defaultAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) != BluetoothHeadset.STATE_CONNECTED) {
-                                        startActivityRecognition(context);
-                                    }
-                                }
+
+                    if (PreferencesUtil.isMovementRecognitionEnabled(context)) {
+                        BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+                        if (defaultAdapter != null) {
+                            if (!defaultAdapter.isEnabled()
+                                    ||
+                                    defaultAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) != BluetoothHeadset.STATE_CONNECTED) {
+                                startActivityRecognition(context);
                             }
-                            return null;
                         }
-                    }.execute();
+                    }
 
                     break;
                 case FenceState.FALSE:

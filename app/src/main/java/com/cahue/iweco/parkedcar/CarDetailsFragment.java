@@ -3,34 +3,30 @@ package com.cahue.iweco.parkedcar;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.cahue.iweco.Constants;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarViewHolder;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Tracking;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 /**
  * Use the {@link CarDetailsFragment#newInstance} factory method to
@@ -49,26 +45,11 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     @NonNull
     private String carId;
 
-    private Car car;
-
     @Nullable
     private OnCarPositionDeletedListener mListener;
     private CarDatabase carDatabase;
-
-    @NonNull
-    private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, @NonNull Intent intent) {
-            String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
-            if (carId.equals(CarDetailsFragment.this.carId)) {
-                Log.d(TAG, "Received car update request" + carId);
-                car = carDatabase.findCar(getActivity(), carId);
-                updateLayout();
-            }
-        }
-
-    };
+    private Car car;
+    private ListenerRegistration listenerRegistration;
 
     public CarDetailsFragment() {
         // Required empty public constructor
@@ -101,29 +82,28 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
         parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(carId));
 
-        car = carDatabase.findCar(getActivity(), carId);
+        DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
+
+        listenerRegistration = documentReference.addSnapshotListener((documentSnapshot, e) -> {
+            car = Car.fromFirestore(documentSnapshot);
+            updateLayout(car);
+        });
     }
 
     @Override
-    public void onResume() {
-
-        super.onResume();
-
-        Log.d(TAG, "Register receiver");
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
-
-        updateLayout();
-
+    public void onDestroy() {
+        super.onDestroy();
+        listenerRegistration.remove();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(carUpdatedReceiver);
     }
 
-    private void updateLayout() {
+    private void updateLayout(Car car) {
+
+        if (!isAdded()) return;
 
         if (car == null) {
             mListener.onCarRemoved(carId);
@@ -155,14 +135,14 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         if (mListener != null) {
             mListener.onCarRemoved(carId);
         }
-        CarsSync.clearLocation(carDatabase, getActivity(), car);
+        carDatabase.removeCarLocation(carId);
         parkedCarDelegate.removeCar();
     }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
         View view = getView();
-        if (view != null) {
+        if (view != null && car != null) {
             carViewHolder.updateDistance(getActivity(), userLocation, car.location);
         }
     }

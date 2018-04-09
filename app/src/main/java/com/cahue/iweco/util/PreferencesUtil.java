@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
+import com.cahue.iweco.MapsActivity;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -33,6 +34,8 @@ public class PreferencesUtil {
     public static final String PREF_USE_MILES = "PREF_USE_MILES";
     public static final String PREF_MOVEMENT_RECOGNITION = "PREF_MOVEMENT_RECOGNITION";
     public static final String PREF_MOVEMENT_RECOGNITION_NOTIFICATION = "PREF_MOVEMENT_RECOGNITION_NOTIFICATION";
+
+    public static final String PREF_FIREBASE_MIGRATION = "PREF_FIREBASE_MIGRATION";
 
     public static final String PREF_REMOVE_ADS = "PREF_REMOVE_ADS";
     public static final String PREF_PURCHASED_CHECKED = "PREF_PURCHASED_CHECKED";
@@ -171,6 +174,16 @@ public class PreferencesUtil {
     public static void setDisplayParkedSoundEnabled(Context context, boolean checked) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putBoolean(PREF_PARKED_NOTIFICATION_ENABLE_SOUND, checked).apply();
+    }
+
+    public static void setFirebaseMigrationDone(Context context, boolean done) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(PREF_FIREBASE_MIGRATION, done).apply();
+    }
+
+    public static boolean isFirebaseMigrationDone(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(PREF_FIREBASE_MIGRATION, false);
     }
 
 }

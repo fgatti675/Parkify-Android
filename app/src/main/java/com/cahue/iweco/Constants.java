@@ -24,20 +24,6 @@ public class Constants {
 
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 8 * 60 * 60 * 1000;
 
-    /**
-     * Intents
-     */
-    public static final String INTENT_USER_INFO_UPDATE = BuildConfig.APPLICATION_ID + ".INTENT_USER_INFO_UPDATE";
-
-    // updated address
-    public static final String INTENT_ADDRESS_UPDATE = BuildConfig.APPLICATION_ID + ".INTENT_ADDRESS_UPDATE";
-
-    // request to save a car
-    public static final String INTENT_SAVE_CAR_REQUEST = BuildConfig.APPLICATION_ID + ".INTENT_SAVE_CAR_REQUEST";
-
-    // a car was updated
-    public static final String INTENT_CAR_UPDATED = BuildConfig.APPLICATION_ID + ".INTENT_CAR_UPDATED";
-
     // action telling the main activity that activity recognition has a possible spot
     public static final String ACTION_POSSIBLE_PARKED_CAR = BuildConfig.APPLICATION_ID + ".ACTION_POSSIBLE_PARKED_CAR";
 

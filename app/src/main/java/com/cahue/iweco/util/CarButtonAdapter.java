@@ -56,12 +56,7 @@ public class CarButtonAdapter extends BaseAdapter {
         if (car.isOther()) button.setText(R.string.other);
         else button.setText(car.name);
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                carSelectedListener.onCarSelected(car);
-            }
-        });
+        button.setOnClickListener(view -> carSelectedListener.onCarSelected(car));
         return button;
     }
 }

@@ -14,9 +14,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.ParkedCarDelegate;
 import com.cahue.iweco.R;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -24,8 +26,13 @@ import com.cahue.iweco.locationservices.CarMovedReceiver;
 import com.cahue.iweco.locationservices.LocationUpdatesHelper;
 import com.cahue.iweco.locationservices.ParkedCarReceiver;
 import com.cahue.iweco.model.Car;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Set;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -62,22 +69,30 @@ public class BluetoothDetector extends BroadcastReceiver {
 
             // we need to get which BT device the user chose as the one of his car
 
-            CarDatabase carDatabase = CarDatabase.getInstance();
-            Set<String> storedAddress = carDatabase.getPairedBTAddresses(context);
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-            // If the device we just disconnected from is our chosen one
-            if (storedAddress.contains(address)) {
+            db.collection("cars")
+                    .whereEqualTo("owner", FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .whereEqualTo("bt_address", address)
+                    .get()
+                    .addOnSuccessListener((snapshot) -> {
+                        for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
+                            Log.d("Bluetooth", "storedAddress matched: " + address);
+                            Car car = Car.fromFirestore(documentSnapshot);
+                            if (car.btAddress.equals(address)) {
+                                int state = intent.getExtras().getInt(BluetoothProfile.EXTRA_STATE);
+                                int previousState = intent.getExtras().getInt(BluetoothProfile.EXTRA_PREVIOUS_STATE);
 
-                Log.d("Bluetooth", "storedAddress matched: " + storedAddress);
+                                if (state == BluetoothProfile.STATE_DISCONNECTED && previousState == BluetoothProfile.STATE_CONNECTED) {
+                                    onBtDisconnectedFromCar(context, car);
+                                } else if (state == BluetoothProfile.STATE_CONNECTED && previousState == BluetoothProfile.STATE_DISCONNECTED) {
+                                    onBtConnectedToCar(context, car);
+                                }
+                                break;
+                            }
+                        }
 
-                Car car = carDatabase.findCarByBTAddress(context, address);
-                int state = intent.getExtras().getInt(BluetoothProfile.EXTRA_STATE);
-                if (state == BluetoothProfile.STATE_DISCONNECTED) {
-                    onBtDisconnectedFromCar(context, car);
-                } else if (state == BluetoothProfile.STATE_CONNECTED) {
-                    onBtConnectedToCar(context, car);
-                }
-            }
+                    });
         }
     }
 

@@ -38,13 +38,14 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
 
         this.cardView = itemView;
 
-        carImage = (ImageView) itemView.findViewById(R.id.car_image);
-        toolbar = (Toolbar) itemView.findViewById(R.id.car_toolbar);
-        linkedDevice = (TextView) itemView.findViewById(R.id.linked_device);
-        name = (TextView) itemView.findViewById(R.id.name);
-        time = (TextView) itemView.findViewById(R.id.time);
-        distance = (TextView) itemView.findViewById(R.id.distance);
-        address = (TextView) itemView.findViewById(R.id.address);
+        carImage = itemView.findViewById(R.id.car_image);
+        toolbar = itemView.findViewById(R.id.car_toolbar);
+        linkedDevice = itemView.findViewById(R.id.linked_device);
+        name = itemView.findViewById(R.id.name);
+        time = itemView.findViewById(R.id.time);
+        distance = itemView.findViewById(R.id.distance);
+        address = itemView.findViewById(R.id.address);
+
     }
 
     public void bind(@NonNull Context context, @NonNull final Car car, Location userLastLocation, @Nullable BluetoothAdapter btAdapter) {

@@ -1,7 +1,6 @@
 package com.cahue.iweco.cars;
 
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
@@ -15,21 +14,20 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.cars.database.CarDatabase;
@@ -39,8 +37,12 @@ import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -55,12 +57,14 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     // Debugging
     private static final String TAG = CarManagerFragment.class.getSimpleName();
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     // Member fields
     private CarDatabase carDatabase;
 
-    private List<Car> cars;
+    private List<Car> cars = new ArrayList<>();
 
-    private List<BluetoothDevice> devices;
+    private List<BluetoothDevice> devices = new ArrayList<>();
 
     private LinearLayoutManager layoutManager;
     private RecyclerViewCarsAdapter adapter;
@@ -79,8 +83,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     @NonNull
     private Callbacks callbacks;
 
-    private RecyclerView recyclerView;
-    private Set<String> selectedDeviceAddresses;
+    private Set<String> selectedDeviceAddresses = new HashSet<>();
+
     // The BroadcastReceiver that listens for discovered devices and
     // changes the title when discovery is finished
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -110,8 +114,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
 
                 updateEnableBTButton();
                 setBondedDevices();
-                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                if (state == BluetoothAdapter.STATE_ON) {
+                if (mBtAdapter.isEnabled()) {
                     doDiscovery();
                 }
 
@@ -147,7 +150,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         /**
          * RecyclerView
          */
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
 
         layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -176,13 +179,24 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         devices = new ArrayList<>();
-        cars = carDatabase.retrieveCars(getActivity(), false);
+        carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+            @Override
+            public void onCarsRetrieved(List<Car> cars) {
 
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                .addConnectionCallbacks(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
+                CarManagerFragment.this.cars = cars;
+
+                mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                        .addConnectionCallbacks(CarManagerFragment.this)
+                        .addApi(LocationServices.API)
+                        .build();
+                mGoogleApiClient.connect();
+            }
+
+            @Override
+            public void onCarsRetrievedError() {
+
+            }
+        });
     }
 
     @Override
@@ -265,7 +279,15 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         /**
          * DB and server update
          */
-        CarsSync.storeCar(carDatabase, getActivity(), car);
+        Log.i(TAG, "Storing car " + car);
+
+        if (BuildConfig.DEBUG)
+            Toast.makeText(getActivity(), "Storing car", Toast.LENGTH_LONG);
+
+        if (newCar)
+            carDatabase.createCar(car, null);
+        else
+            carDatabase.updateCar(car, null);
 
         Tracking.sendEvent(Tracking.CATEGORY_CAR_MANAGER, Tracking.ACTION_CAR_EDIT);
 
@@ -273,13 +295,13 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         Bundle bundle = new Bundle();
         bundle.putString("car", car.id);
         bundle.putBoolean("newCar", newCar);
-        firebaseAnalytics.logEvent( "editor_car_edit" , bundle);
+        firebaseAnalytics.logEvent("editor_car_edit", bundle);
 
     }
 
     public void onCarRemoved(@NonNull Car car) {
 
-        CarsSync.remove(getActivity(), car, CarDatabase.getInstance());
+        CarDatabase.getInstance().deleteCar(getActivity(), car);
 
         int i = 0;
         for (Car c : cars) {
@@ -306,14 +328,24 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             adapter.notifyDataSetChanged();
         }
 
-        selectedDeviceAddresses = carDatabase.getPairedBTAddresses(getActivity());
+        db.collection("cars")
+                .whereEqualTo("owner", FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener((snapshot) -> {
 
-        // Get a set of currently paired devices
-        if (mBtAdapter != null) {
-            Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
-            for (BluetoothDevice bluetoothDevice : bondedDevices)
-                addDevice(bluetoothDevice);
-        }
+                    for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
+                        selectedDeviceAddresses.add((String) documentSnapshot.get("bt_address"));
+                    }
+
+                    // Get a set of currently paired devices
+                    if (mBtAdapter != null) {
+                        Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
+                        for (BluetoothDevice bluetoothDevice : bondedDevices)
+                            addDevice(bluetoothDevice);
+                    }
+                });
+
+
     }
 
     private void updateEnableBTButton() {
@@ -338,33 +370,33 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     @Override
-    public void onAttach(@NonNull Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement DeviceSelectionLoadingListener");
         }
 
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement DeviceSelectionLoadingListener");
         }
 
         // Register for broadcasts when a linkedDevice is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(mReceiver, filter);
+        getActivity().registerReceiver(mReceiver, filter);
 
         // Register for broadcasts when discovery has finished
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(mReceiver, filter);
+        getActivity().registerReceiver(mReceiver, filter);
 
         // Register for broadcasts when bt has been disconnected or disconnected
         filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        LocalBroadcastManager.getInstance(activity).registerReceiver(mReceiver, filter);
+        getActivity().registerReceiver(mReceiver, filter);
 
     }
 
@@ -372,9 +404,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     public void onDetach() {
         super.onDetach();
         callbacks = null;
-
-        // Unregister broadcast listeners0
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        getActivity().unregisterReceiver(mReceiver);
     }
 
     private void showClearDialog(@NonNull final Car car) {
@@ -409,7 +439,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     @NonNull
     private Car createCar() {
         Car car = new Car();
-        car.id = UUID.randomUUID().toString();
+        car.legacy_id = UUID.randomUUID().toString();
         return car;
     }
 
@@ -502,14 +532,11 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                                 false);
 
                 enableBTButton = (Button) itemView.findViewById(R.id.enable_bt);
-                enableBTButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mBtAdapter != null) {
-                            mBtAdapter.enable();
-                        }
-                        updateEnableBTButton();
+                enableBTButton.setOnClickListener(v -> {
+                    if (mBtAdapter != null) {
+                        mBtAdapter.enable();
                     }
+                    updateEnableBTButton();
                 });
                 updateEnableBTButton();
 
@@ -596,19 +623,16 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
                  */
                 carViewHolder.toolbar.getMenu().clear();
                 carViewHolder.toolbar.inflateMenu(R.menu.edit_car_menu);
-                carViewHolder.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                        switch (menuItem.getItemId()) {
-                            case R.id.action_edit:
-                                editCar(car, false);
-                                return true;
-                            case R.id.action_delete:
-                                showClearDialog(car);
-                                return true;
-                        }
-                        return false;
+                carViewHolder.toolbar.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_edit:
+                            editCar(car, false);
+                            return true;
+                        case R.id.action_delete:
+                            showClearDialog(car);
+                            return true;
                     }
+                    return false;
                 });
 
             }

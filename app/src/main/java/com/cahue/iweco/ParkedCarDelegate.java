@@ -1,13 +1,12 @@
 package com.cahue.iweco;
 
-import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.util.ColorUtil;
@@ -25,6 +24,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.maps.android.ui.IconGenerator;
 
 /**
@@ -37,10 +38,13 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private static final int MAX_DIRECTIONS_DISTANCE = 2000;
 
     private static final String ARG_CAR_ID = "car";
-    @Nullable
+
+    @NonNull
     private String carId;
+
     @Nullable
     private Car car;
+
     private boolean following = false;
     private IconGenerator iconGenerator;
     private OnCarClickedListener carSelectedListener;
@@ -54,6 +58,8 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     private Marker carMarker;
     private Circle accuracyCircle;
     private DirectionsDelegate directionsDelegate;
+    private FirebaseFirestore firebaseFirestore;
+    private ListenerRegistration carListener;
 
     @NonNull
     public static String getFragmentTag(String carId) {
@@ -78,13 +84,13 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
 
     @Override
-    public void onAttach(@NonNull Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
 
         try {
-            this.carSelectedListener = (OnCarClickedListener) activity;
+            this.carSelectedListener = (OnCarClickedListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement " + OnCarClickedListener.class.getName());
         }
     }
@@ -94,23 +100,42 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         super.onCreate(savedInstanceState);
 
         iconGenerator = new IconGenerator(getActivity());
-        directionsDelegate = new DirectionsDelegate(this);
+        directionsDelegate = new DirectionsDelegate();
 
         this.carId = getArguments().getString(ARG_CAR_ID);
 
-        this.car = CarDatabase.getInstance().findCar(getActivity(), carId);
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        carListener = firebaseFirestore.collection("cars")
+                .document(carId)
+                .addSnapshotListener((snapshot, e) -> {
+                    update(Car.fromFirestore(snapshot), true);
+                    if (isActive) activate();
+                    else Log.v(TAG, "car update: not active");
+                });
 
         Log.i(TAG, "onCreate " + carId);
     }
 
-    public void update(boolean resetDirections) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isActive) activate();
+        else Log.v(TAG, "onResume: not active");
+    }
 
-        if (!isMapReady() || !isResumed()) return;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        carListener.remove();
+    }
 
-        this.car = CarDatabase.getInstance().findCar(getActivity(), carId);
+    public void update(Car car, boolean resetDirections) {
 
-        if (car == null || car.location == null) {
-            isActive = false;
+        this.car = car;
+
+        if (car == null || !isMapReady() || !isResumed()) return;
+
+        if (car.location == null) {
             clear();
             return;
         }
@@ -127,9 +152,10 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public void onMapReady(GoogleMap map) {
         directionsDelegate.setMap(map);
-        update(true);
+        update(car, true);
         if (isActive)
             activate();
+        else Log.v(TAG, "onMapReady: not active");
     }
 
 
@@ -270,7 +296,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
     @Override
     public void setCameraFollowing(boolean following) {
 
-        Log.v(TAG, "Setting camera following mode to " + following);
+        Log.d(TAG, "Setting camera following mode to " + following);
 
         this.following = following;
 
@@ -308,7 +334,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
         if (car.location == null || userLocation == null) return false;
 
-        if (car.location.distanceTo(userLocation) < 100) {
+        if (car.location.distanceTo(userLocation) < 30) {
             zoomToCar();
         } else {
 
@@ -376,6 +402,13 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
     public void activate() {
         isActive = true;
+
+        if (car == null) {
+            return;
+        }
+
+        Log.d(TAG, "Activating ParkedCarDelegate " + car);
+
         drawDirections();
         setCameraFollowing(true);
         detailsViewManager.setDetailsFragment(this, CarDetailsFragment.newInstance(carId));

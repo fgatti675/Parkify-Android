@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -21,7 +20,6 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.FetchAddressDelegate;
@@ -30,6 +28,8 @@ import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
 
@@ -50,11 +50,65 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
 
     private final static String TAG = ParkedCarReceiver.class.getSimpleName();
 
-    private Car car;
     private CarDatabase carDatabase;
 
+    @Override
+    protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
 
-    private void notifyUser(Context context) {
+        carDatabase = CarDatabase.getInstance();
+
+        String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
+
+        Date now = new Date();
+
+        Log.d(TAG, "Fetching address");
+        FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
+        fetchAddressDelegate.fetch(context, location, new FetchAddressDelegate.Callbacks() {
+            @Override
+            public void onAddressFetched(String address) {
+                // Display the address string
+                // or an error message sent from the intent service.
+                carDatabase.updateCarLocation(carId, location, address, now, "bt_event", new CarDatabase.CarUpdateListener() {
+                    @Override
+                    public void onCarUpdated(Car car) {
+                        Log.d(TAG, "Sending car update broadcast");
+                        notifyUser(context, car);
+                    }
+
+                    @Override
+                    public void onCarUpdateError() {
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onError(String error) {
+                carDatabase.updateCarLocation(carId, location, null, now, "bt_event");
+            }
+        });
+
+        /**
+         * If the location of the car is good enough we can set a geofence afterwards.
+         */
+        if (location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
+            GeofenceCarReceiver.startDelayedGeofenceService(context, carId);
+        }
+
+
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_PARKING);
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        Bundle bundle = new Bundle();
+        bundle.putString("car", carId);
+        firebaseAnalytics.logEvent("bt_car_parked", bundle);
+
+    }
+
+
+    private void notifyUser(Context context, Car car) {
+
         if (PreferencesUtil.isDisplayParkedNotificationEnabled(context)) {
 
             NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
@@ -101,66 +155,7 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
         } else {
             Util.showBlueToast(context, context.getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
         }
-    }
 
-    private void fetchAddress(@NonNull final Context context, @NonNull final Car car) {
-        Log.d(TAG, "Fetching address");
-        FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
-        fetchAddressDelegate.fetch(context, car.location, new FetchAddressDelegate.Callbacks() {
-            @Override
-            public void onAddressFetched(String address) {
-                // Display the address string
-                // or an error message sent from the intent service.
-                car.address = address;
-                carDatabase.updateAddress(context, car);
-
-                Log.d(TAG, "Sending car update broadcast");
-
-                Intent intent = new Intent(Constants.INTENT_ADDRESS_UPDATE);
-                intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-                intent.putExtra(Constants.EXTRA_CAR_ADDRESS, car.address);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-
-                notifyUser(context);
-            }
-
-            @Override
-            public void onError(String error) {
-            }
-        });
-    }
-
-    @Override
-    protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
-        carDatabase = CarDatabase.getInstance();
-        String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
-        this.car = carDatabase.findCar(context, carId);
-
-        Log.i(TAG, "Received : " + location);
-
-        car.spotId = null;
-        car.location = location;
-        car.address = null;
-        car.time = new Date();
-
-        CarsSync.storeCar(carDatabase, context, car);
-
-        /**
-         * If the location of the car is good enough we can set a geofence afterwards.
-         */
-        if (car.location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-            GeofenceCarReceiver.startDelayedGeofenceService(context, car.id);
-        }
-
-        fetchAddress(context, car);
-
-        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_PARKING);
-
-        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-        Bundle bundle = new Bundle();
-        bundle.putString("car", carId);
-        firebaseAnalytics.logEvent("bt_car_parked", bundle);
     }
 
 }

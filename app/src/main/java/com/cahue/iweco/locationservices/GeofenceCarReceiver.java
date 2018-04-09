@@ -28,6 +28,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 
@@ -47,7 +49,6 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     private PendingIntent mGeofencePendingIntent;
 
     private GoogleApiClient mGeofenceApiClient;
-    private Car car;
 
     /**
      * x
@@ -80,35 +81,40 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
 
         if (location == null) return;
-        if (car == null) return;
 
-        CarDatabase carDatabase = CarDatabase.getInstance();
         String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
-        car = carDatabase.findCar(context, carId);
 
-        if (car.location == null) return;
+        DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
+        documentReference.get().addOnSuccessListener(documentSnapshot -> {
+            Car car = Car.fromFirestore(documentSnapshot);
 
-        if (car.location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
-                || location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
-            String msg = "Geofence not added because accuracy is not good enough: Car " + car.location.getAccuracy() + " / User " + location.getAccuracy();
-            Log.d(TAG, msg);
-            if (BuildConfig.DEBUG) {
-                notifyGeofenceError(context, car, msg);
+            if (car.location == null) return;
+
+            if (car.location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M
+                    || location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
+                String msg = "Geofence not added because accuracy is not good enough: Car " + car.location.getAccuracy() + " / User " + location.getAccuracy();
+                Log.d(TAG, msg);
+                if (BuildConfig.DEBUG) {
+                    notifyGeofenceError(context, car, msg);
+                }
+                return;
             }
-            return;
-        }
 
-        float distanceTo = car.location.distanceTo(location);
-        if (distanceTo < Constants.PARKED_DISTANCE_THRESHOLD) {
-            String msg = "GF Error: Too close to car: " + distanceTo;
-            Log.d(TAG, msg);
-            if (BuildConfig.DEBUG) {
-                notifyGeofenceError(context, car, msg);
+            float distanceTo = car.location.distanceTo(location);
+            if (distanceTo < Constants.PARKED_DISTANCE_THRESHOLD) {
+                String msg = "GF Error: Too close to car: " + distanceTo;
+                Log.d(TAG, msg);
+                if (BuildConfig.DEBUG) {
+                    notifyGeofenceError(context, car, msg);
+                }
+                return;
             }
-            return;
-        }
 
-        addGeofence(context, car);
+            addGeofence(context, car);
+
+        });
+
+
     }
 
     private void addGeofence(final Context context, @NonNull final Car car) {

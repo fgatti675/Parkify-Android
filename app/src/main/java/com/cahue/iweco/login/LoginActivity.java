@@ -1,30 +1,22 @@
 package com.cahue.iweco.login;
 
-import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
-import com.cahue.iweco.auth.Authenticator;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.tutorial.TutorialActivity;
@@ -35,8 +27,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.GoogleAuthException;
@@ -50,14 +40,27 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A login screen that offers login via Google+
@@ -76,18 +79,24 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     // UI references.
     private View mProgressView;
     private View mButtonsLayout;
-    private Button mPlusSignInButton;
-    private Button mFacebookLoginButton;
 
     private GoogleCloudMessaging gcm;
-    private CarDatabase database;
-
-    private AccountManager mAccountManager;
 
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
 
     private CallbackManager mFacebookCallbackManager;
+
+    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    private FirebaseAnalytics firebaseAnalytics;
+
+    private Set<Car> legacyCars;
+
+    private AccessToken facebookAccessToken;
+    private GoogleSignInAccount googleAccessToken;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +110,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken("582791978228-1djp2v9ot1s14c5rmrm70hc19u916g6r.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
@@ -111,42 +122,32 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        database = CarDatabase.getInstance();
-        mAccountManager = AccountManager.get(this);
-
         mButtonsLayout = findViewById(R.id.buttons);
 
         // Find the Google+ sign in button.
-        mPlusSignInButton = (Button) findViewById(R.id.plus_sign_in_button);
+        Button googleSignIn = findViewById(R.id.plus_sign_in_button);
         mProgressView = findViewById(R.id.login_progress);
 
         if (checkPlayServices()) {
             // Set a listener to connect the user when the G+ button is clicked.
-            mPlusSignInButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    googleLogin();
-                }
-            });
+            googleSignIn.setOnClickListener(view -> googleLogin());
         } else {
-            // Don't offer G+ sign in if the app's version is too low to support Google Play
-            // Services.
-            mPlusSignInButton.setVisibility(View.GONE);
+            googleSignIn.setVisibility(View.GONE);
             return;
         }
 
-        mFacebookLoginButton = (Button) findViewById(R.id.facebook_login_button);
+        Button mFacebookLoginButton = findViewById(R.id.facebook_login_button);
 
         // Facebook callbacks registration
         mFacebookCallbackManager = CallbackManager.Factory.create();
 
         final LoginManager loginManager = LoginManager.getInstance();
-        mFacebookLoginButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginManager.logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
-                setLoading(true);
-            }
+        mFacebookLoginButton.setOnClickListener(v -> {
+
+            // set default miles use
+            PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
+            loginManager.logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
+            setLoading(true);
         });
 
         loginManager.registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
@@ -155,8 +156,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                 AccessToken facebookAccessToken = loginResult.getAccessToken();
                 String facebookToken = facebookAccessToken.getToken();
                 onAuthTokenSet(facebookToken, LoginType.Facebook);
-                storeFacebookProfileInformation(facebookAccessToken);
                 Log.d(TAG, facebookToken);
+                LoginActivity.this.facebookAccessToken = loginResult.getAccessToken();
             }
 
             @Override
@@ -172,20 +173,12 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             }
         });
 
-        Button noSingIn = (Button) findViewById(R.id.no_sign_in);
-        noSingIn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onLoginSkipped();
-            }
-        });
+        Button noSingIn = findViewById(R.id.no_sign_in);
+        noSingIn.setOnClickListener(v -> onLoginSkipped());
 
-        findViewById(R.id.terms_of_use).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://glossy-radio.appspot.com/terms_of_use.txt"));
-                startActivity(myIntent);
-            }
+        findViewById(R.id.terms_of_use).setOnClickListener(v -> {
+            Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://glossy-radio.appspot.com/terms_of_use.txt"));
+            startActivity(myIntent);
         });
 
     }
@@ -197,18 +190,29 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
     public void onLoginSkipped() {
-        database.saveCarAndBroadcast(this, database.generateOtherCar());
-        AuthUtils.setSkippedLogin(LoginActivity.this, true);
+
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_SKIP_LOGIN);
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
         Bundle bundle = new Bundle();
         firebaseAnalytics.logEvent("skip_login", bundle);
 
-        goToNextActivity();
+        firebaseAuth.signInAnonymously().addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                // Sign in success, update UI with the signed-in user's information
+                Log.d(TAG, "signInWithCredential:success");
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                saveFirebaseUser(user);
+            } else {
+                // If sign in fails, display a message to the user.
+                Log.w(TAG, "signInWithCredential:failure", task.getException());
+                onError();
+            }
+        });
     }
 
     public void goToNextActivity() {
+        if (isFinishing()) return;
         Intent intent = new Intent(this, PreferencesUtil.isTutorialShown(this) ? MapsActivity.class : TutorialActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -222,39 +226,11 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
 
+        // set default miles use
+        PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
+
     }
 
-    protected void onAuthTokenSet(final String authToken, final LoginType type) {
-        new AsyncTask<Void, Void, String>() {
-
-            @Nullable
-            @Override
-            protected String doInBackground(Void... params) {
-                try {
-                    String gcmDeviceId = GCMUtil.getRegistrationId(LoginActivity.this);
-
-                    if (gcmDeviceId.isEmpty()) {
-                        gcmDeviceId = gcm.register(GCMUtil.SENDER_ID);
-                        Log.d(TAG, "Device registered, registration ID: " + gcmDeviceId);
-
-                        // Persist the regID - no need to register again.
-                        GCMUtil.storeRegistrationId(LoginActivity.this, gcmDeviceId);
-                    }
-
-                    return gcmDeviceId;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(@Nullable String regId) {
-                if (regId != null) onGCMRegIdSet(regId, authToken, type);
-                else onGCMError(authToken);
-            }
-        }.execute();
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -265,17 +241,19 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 // Signed in successfully, show authenticated UI.
-                GoogleSignInAccount acct = result.getSignInAccount();
+                googleAccessToken = result.getSignInAccount();
 
-                requestGoogleOauthToken(acct.getEmail());
 
-                String pictureURL = acct.getPhotoUrl() != null ? acct.getPhotoUrl().toString() : null;
-                AuthUtils.setLoggedUserDetails(this, acct.getDisplayName(), acct.getEmail(), pictureURL);
+                requestGoogleOauthToken(googleAccessToken.getEmail());
 
-                Log.w(TAG, "Name: " + acct.getDisplayName() + ", email: " + acct.getEmail()
+                String pictureURL = googleAccessToken.getPhotoUrl() != null ? googleAccessToken.getPhotoUrl().toString() : null;
+                AuthUtils.setLoggedUserDetails(this, googleAccessToken.getDisplayName(), googleAccessToken.getEmail(), pictureURL);
+
+                Log.w(TAG, "Name: " + googleAccessToken.getDisplayName() + ", email: " + googleAccessToken.getEmail()
                         + ", Image: " + pictureURL);
 
             } else {
+                Log.e(TAG, "google sign in error: " + result.getStatus());
                 // Signed out, show unauthenticated UI.
                 setLoading(false);
             }
@@ -293,23 +271,25 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private void onGCMError(String authToken) {
         setLoading(false);
         mGoogleApiClient.disconnect();
-        clearGoogleToken(authToken);
         Util.showBlueToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
-    private void clearGoogleToken(final String authToken) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    GoogleAuthUtil.clearToken(LoginActivity.this, authToken);
-                } catch (GoogleAuthException | IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-    }
+    @Override
+    public void onBackEndLogin(@NonNull LoginResultBean loginResult, @NonNull LoginType type) {
 
+        legacyCars = new HashSet<>(loginResult.cars);
+
+        Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        Bundle bundle = new Bundle();
+        bundle.putString("type", type == LoginType.Facebook ? "facebook" : "google");
+        firebaseAnalytics.logEvent("login", bundle);
+
+
+        finalizeLogin(type);
+
+    }
 
     /**
      * Check the device to make sure it has the Google Play Services APK. If
@@ -396,6 +376,40 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     }
 
+
+    protected void onAuthTokenSet(final String authToken, final LoginType type) {
+        new AsyncTask<Void, Void, String>() {
+
+            @Nullable
+            @Override
+            protected String doInBackground(Void... params) {
+                try {
+                    String gcmDeviceId = GCMUtil.getRegistrationId(LoginActivity.this);
+
+                    if (gcmDeviceId.isEmpty()) {
+                        gcmDeviceId = gcm.register(GCMUtil.SENDER_ID);
+                        Log.d(TAG, "Device registered, registration ID: " + gcmDeviceId);
+
+                        // Persist the regID - no need to register again.
+                        GCMUtil.storeRegistrationId(LoginActivity.this, gcmDeviceId);
+                    }
+
+                    return gcmDeviceId;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(@Nullable String regId) {
+                if (regId != null) onGCMRegIdSet(regId, authToken, type);
+                else onGCMError(authToken);
+            }
+        }.execute();
+    }
+
+
     private void onTokenRetrieveError() {
         Util.showBlueToast(this, "Error Google auth", Toast.LENGTH_SHORT);
         setLoading(false);
@@ -403,120 +417,162 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     }
 
 
-    @Override
-    public void onBackEndLogin(@NonNull LoginResultBean loginResult, @NonNull LoginType type) {
+    private void finalizeLogin(@NonNull LoginType type) {
+        if (type == LoginType.Google)
+            firebaseAuthWithGoogle(googleAccessToken);
+        else
+            firebaseAuthWithFacebook(facebookAccessToken);
 
-        /**
-         * Maybe there was some data there already due to that the app was being used
-         * without signing in
-         */
-        List<Car> cars = database.retrieveCars(this, false);
-        for (Car car : cars)
-            CarsSync.postCar(car, this, CarDatabase.getInstance());
-
-        database.clearSaveAndBroadcast(this, loginResult.cars);
-
-        final Intent resultIntent = new Intent();
-        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, !TextUtils.isEmpty(loginResult.email) ? loginResult.email : loginResult.userId);
-        resultIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.account_type));
-        resultIntent.putExtra(AccountManager.KEY_AUTHTOKEN, loginResult.authToken);
-        resultIntent.putExtra(AccountManager.KEY_PASSWORD, loginResult.refreshToken);
-
-        Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
-
-        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-        Bundle bundle = new Bundle();
-        bundle.putString("type", type == LoginType.Facebook ? "facebook" : "google");
-        firebaseAnalytics.logEvent("login", bundle);
-
-        finalizeLogin(resultIntent, loginResult, type);
-
-    }
-
-    private void finalizeLogin(@NonNull Intent intent, @NonNull LoginResultBean loginResult, @NonNull LoginType type) {
-
-        String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-
-        final Account account = new Account(accountName, intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-
-        String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
-        String refreshToken = intent.getStringExtra(AccountManager.KEY_PASSWORD);
-        String authTokenType = getString(R.string.account_type);
-
-        // Creating the account on the device and setting the auth token we got
-        // (Not setting the auth token will cause another call to the server to authenticate the user)
-        Bundle bundle = new Bundle();
-        bundle.putString(Authenticator.USER_ID, loginResult.userId);
-        bundle.putString(Authenticator.LOGIN_TYPE, type.toString());
-        bundle.putLong(Authenticator.LOGIN_DATE, System.currentTimeMillis());
-
-        AuthUtils.setLoginDate(this, System.currentTimeMillis());
-
-        mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
-        mAccountManager.setAuthToken(account, authTokenType, authToken);
-
-        // Inform the system that this account supports sync
-        ContentResolver.setIsSyncable(account, getString(R.string.content_authority), 1);
-        // Inform the system that this account is eligible for auto sync when the network is up
-        ContentResolver.setSyncAutomatically(account, getString(R.string.content_authority), true);
-        // Recommend a schedule for automatic synchronization. The system may modify this based
-        // on other scheduled syncs and network utilization.
-//        ContentResolver.addPeriodicSync(
-//                account, CarsProvider.CONTENT_AUTHORITY, new Bundle(), CarsProvider.SYNC_FREQUENCY);
-
-
-        // set default miles use
-        PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
-
-        setResult(RESULT_OK, intent);
-
-        goToNextActivity();
     }
 
     @Override
     public void onLoginError(String authToken, LoginType type) {
         setLoading(false);
-        if (type == LoginType.Google) {
-            clearGoogleToken(authToken);
-        }
+        onError();
+    }
+
+    private void onError() {
         AuthUtils.clearLoggedUserDetails(this);
         Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+        setLoading(false);
     }
 
-
-    /**
-     * Fetching user's information name, mLoggedEmail, profile pic
-     */
-    private void storeFacebookProfileInformation(AccessToken facebookAccessToken) {
-        GraphRequest request = GraphRequest.newMeRequest(
-                facebookAccessToken,
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted(
-                            @NonNull JSONObject object,
-                            GraphResponse response) {
-                        Log.d(TAG, "Facebook result : " + object.toString());
-                        try {
-                            AuthUtils.setLoggedUserDetails(LoginActivity.this,
-                                    object.getString("name"),
-                                    object.getString("email"),
-                                    String.format("https://graph.facebook.com/%s/picture", object.getString("id")));
-                            Intent intent = new Intent(Constants.INTENT_USER_INFO_UPDATE);
-                            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,email");
-        request.setParameters(parameters);
-        request.executeAsync();
-    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        firebaseLogin(credential);
+    }
+
+
+    private void firebaseAuthWithFacebook(AccessToken token) {
+        Log.d(TAG, "firebaseAuthWithFacebook:" + token);
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        firebaseLogin(credential);
+    }
+
+    AuthCredential facebookPendingCredential = null;
+
+    private void firebaseLogin(AuthCredential credential) {
+        firebaseAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithCredential:success");
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        if (facebookPendingCredential == null) {
+                            saveFirebaseUser(user);
+                        } else{
+                            user.linkWithCredential(facebookPendingCredential).addOnCompleteListener(task1 -> saveFirebaseUser(user));
+                        }
+                    } else {
+                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                            setLoading(false);
+                            facebookPendingCredential = credential;
+                            Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            onError();
+                        }
+                    }
+                });
+    }
+
+    private void saveFirebaseUser(FirebaseUser firebaseUser) {
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("email", firebaseUser.getEmail());
+        user.put("name", firebaseUser.getDisplayName());
+        if (firebaseUser.getPhotoUrl() != null)
+            user.put("photo_url", firebaseUser.getPhotoUrl().toString());
+
+        db.collection("users")
+                .document(firebaseUser.getUid())
+                .set(user, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "User saved");
+                    migrateToFirestore();
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error adding document", e);
+                    onError();
+                });
+    }
+
+    CarDatabase carDatabase = CarDatabase.getInstance();
+
+    public void migrateToFirestore() {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        if (legacyCars == null || legacyCars.isEmpty()) {
+            goToNextActivity();
+            return;
+        }
+
+        firestore.collection("cars").whereEqualTo("owner", FirebaseAuth.getInstance().getCurrentUser().getUid()).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+
+                    Map<String, String> legacyIdsMap = new HashMap<>();
+                    for (DocumentSnapshot documentSnapshot : documents) {
+                        legacyIdsMap.put((String) documentSnapshot.get("legacy_id"), documentSnapshot.getId());
+                    }
+
+                    for (Car car : legacyCars) {
+                        if (legacyIdsMap.containsKey(car.legacy_id)) {
+                            car.id = legacyIdsMap.get(car.legacy_id);
+                            carDatabase.updateCar(car, new CarDatabase.CarUpdateListener() {
+                                @Override
+                                public void onCarUpdated(Car car) {
+                                    goToNextActivity();
+                                }
+
+                                @Override
+                                public void onCarUpdateError() {
+                                    onError();
+                                }
+                            });
+                        } else {
+                            carDatabase.createCar(car, new CarDatabase.CarUpdateListener() {
+                                @Override
+                                public void onCarUpdated(Car car) {
+                                    onMigratedCarCreated(car);
+                                }
+
+                                @Override
+                                public void onCarUpdateError() {
+                                    onError();
+                                }
+                            });
+                        }
+                    }
+
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Firestore migration error: " + e);
+                    goToNextActivity();
+                });
+    }
+
+    private void onMigratedCarCreated(Car car) {
+        carDatabase.updateCarLocation(car.id, car.location, car.address, car.time, null, new CarDatabase.CarUpdateListener() {
+            @Override
+            public void onCarUpdated(Car car) {
+                goToNextActivity();
+            }
+
+            @Override
+            public void onCarUpdateError() {
+
+            }
+        });
     }
 }
 

@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -40,6 +39,11 @@ import com.cahue.iweco.model.Car;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,14 +59,12 @@ public class NavigationDrawerFragment extends Fragment {
     private static final String TAG = NavigationDrawerFragment.class.getSimpleName();
 
     private boolean skippedLogin;
-    private List<Car> cars;
     private Location mLastUserLocation;
     private Navigation navigation;
 
     /**
      * A pointer to the current callbacks instance (the Activity).
      */
-    @Nullable
     private OnCarClickedListener mCallbacks;
 
     /**
@@ -73,18 +75,7 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
 
     private RecyclerViewDrawerAdapter adapter;
-    @NonNull
-    private final BroadcastReceiver carUpdatedReceiver = new BroadcastReceiver() {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            retrieveCarsFromDB();
-
-            adapter.setUpElements();
-            adapter.notifyDataSetChanged();
-        }
-
-    };
     private View mFragmentContainerView;
     private ImageView userImage;
     private TextView usernameTextView;
@@ -98,9 +89,10 @@ public class NavigationDrawerFragment extends Fragment {
         }
     };
     private int bottomMargin;
-    private int topMargin;
 
     private RelativeLayout mRootView;
+    private ListenerRegistration carListener;
+    private FirebaseUser currentUser;
 
     public NavigationDrawerFragment() {
     }
@@ -109,9 +101,9 @@ public class NavigationDrawerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        skippedLogin = AuthUtils.isSkippedLogin(getActivity());
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        skippedLogin = currentUser == null || currentUser.isAnonymous();
 
-        retrieveCarsFromDB();
     }
 
     @Override
@@ -128,22 +120,17 @@ public class NavigationDrawerFragment extends Fragment {
                 container,
                 false);
 
-        userImage = (ImageView) mRootView.findViewById(R.id.profile_image);
-        usernameTextView = (TextView) mRootView.findViewById(R.id.username);
-        emailTextView = (TextView) mRootView.findViewById(R.id.email);
+        userImage = mRootView.findViewById(R.id.profile_image);
+        usernameTextView = mRootView.findViewById(R.id.username);
+        emailTextView = mRootView.findViewById(R.id.email);
 
-        signInButton = (Button) mRootView.findViewById(R.id.sign_in_button);
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigation.signOutAndGoToLoginScreen(true);
-            }
-        });
+        signInButton = mRootView.findViewById(R.id.sign_in_button);
+        signInButton.setOnClickListener(v -> navigation.signOutAndGoToLoginScreen(true));
 
         /**
          * RecyclerView
          */
-        RecyclerView recyclerView = (RecyclerView) mRootView.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = mRootView.findViewById(R.id.recycler_view);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -151,38 +138,12 @@ public class NavigationDrawerFragment extends Fragment {
 
 
         adapter = new RecyclerViewDrawerAdapter();
-        adapter.setUpElements();
         recyclerView.setAdapter(adapter);
 
         // this call is actually only necessary with custom ItemAnimators
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         return mRootView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        retrieveCarsFromDB();
-
-        adapter.setUpElements();
-        adapter.notifyDataSetChanged();
-
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(userInfoReceiver, new IntentFilter(Constants.INTENT_USER_INFO_UPDATE));
-
-    }
-
-    private void retrieveCarsFromDB() {
-        cars = CarDatabase.getInstance().retrieveCars(getActivity(), true);
-
-        // hide 'Other' car if not parked
-        Iterator<Car> iterator = cars.iterator();
-        while (iterator.hasNext()) {
-            Car car = iterator.next();
-            if (car.isOther() && car.location == null) iterator.remove();
-        }
-
     }
 
     @Override
@@ -257,17 +218,26 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(carUpdatedReceiver, new IntentFilter(Constants.INTENT_ADDRESS_UPDATE));
-
         setUpUserDetails();
+        carListener = FirebaseFirestore.getInstance().collection("cars")
+                .whereEqualTo("owner", currentUser.getUid())
+                .addSnapshotListener((snapshot, e) -> {
+
+                    List<Car> cars = new ArrayList<>();
+                    for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
+                        Car car = Car.fromFirestore(documentSnapshot);
+                        cars.add(car);
+                    }
+
+                    adapter.setUpElements(cars);
+                    adapter.notifyDataSetChanged();
+                });
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(carUpdatedReceiver);
+        carListener.remove();
     }
 
     @Override
@@ -317,24 +287,28 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void setUpUserDetails() {
 
-        if (skippedLogin) {
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+
+        if (currentUser == null || currentUser.isAnonymous()) {
             usernameTextView.setVisibility(View.GONE);
             emailTextView.setVisibility(View.GONE);
             signInButton.setVisibility(View.VISIBLE);
-        } else {
+        }
+
+        else {
+
             usernameTextView.setVisibility(View.VISIBLE);
             emailTextView.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
-            String loggedUsername = AuthUtils.getLoggedUsername(getActivity());
 
             // in case it is being loaded in the background
-            if (loggedUsername == null)
+            if (currentUser == null)
                 return;
 
-            usernameTextView.setText(loggedUsername);
-            emailTextView.setText(AuthUtils.getEmail(getActivity()));
-            String profilePicURL = AuthUtils.getProfilePicURL(getActivity());
-
+            usernameTextView.setText(currentUser.getDisplayName());
+            emailTextView.setText(currentUser.getEmail());
+            String profilePicURL = currentUser.getPhotoUrl().toString();
 
             if (profilePicURL != null) {
                 RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
@@ -354,7 +328,6 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     public void setTopMargin(int topMargin) {
-        this.topMargin = topMargin;
         mRootView.setPadding(0, topMargin, 0, 0);
     }
 
@@ -372,11 +345,13 @@ public class NavigationDrawerFragment extends Fragment {
         public static final int SIGN_OUT_TYPE = 4;
 
         // each entry represents an item in the drawer
-        private List<Integer> itemTypes;
+        private List<Integer> itemTypes = new ArrayList<>();
+        private List<Car> cars;
 
-        public void setUpElements() {
+        public void setUpElements(List<Car> cars) {
+            this.cars = cars;
 
-            itemTypes = new ArrayList<>();
+            itemTypes.clear();
 
             for (int i = 0; i < cars.size(); i++) {
                 itemTypes.add(CAR_TYPE);
@@ -443,28 +418,25 @@ public class NavigationDrawerFragment extends Fragment {
                 /**
                  * Set up click listener
                  */
-                View.OnClickListener clickListener = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (car.location != null) {
+                View.OnClickListener clickListener = v -> {
+                    if (car.location != null) {
 
-                            Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_DRAWER);
+                        Tracking.sendEvent(Tracking.CATEGORY_NAVIGATION_DRAWER, Tracking.ACTION_CAR_SELECTED, Tracking.LABEL_SELECTED_FROM_DRAWER);
 
-                            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
-                            Bundle bundle = new Bundle();
-                            bundle.putString("car", car.id);
-                            firebaseAnalytics.logEvent("car_clicked_menu", bundle);
+                        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+                        Bundle bundle = new Bundle();
+                        bundle.putString("car", car.id);
+                        firebaseAnalytics.logEvent("car_clicked_menu", bundle);
 
-                            ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(car.id))).activate();
+                        ((ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(car.id))).activate();
 
-                            mCallbacks.onCarSelected(car);
+                        mCallbacks.onCarSelected(car);
 
-                            if (mDrawerLayout != null)
-                                mDrawerLayout.closeDrawers();
+                        if (mDrawerLayout != null)
+                            mDrawerLayout.closeDrawers();
 
-                        } else {
-                            Util.showBlueToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
-                        }
+                    } else {
+                        Util.showBlueToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
                     }
                 };
                 carViewHolder.cardView.setOnClickListener(clickListener);

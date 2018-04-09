@@ -13,10 +13,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -50,13 +47,11 @@ import android.widget.Toast;
 
 import com.android.volley.Cache;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.ImageRequest;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityrecognition.PossibleParkedCarDelegate;
 import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarManagerActivity;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
@@ -66,7 +61,6 @@ import com.cahue.iweco.locationservices.ParkedCarReceiver;
 import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
-import com.cahue.iweco.login.LoginType;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.model.PossibleSpot;
@@ -77,7 +71,6 @@ import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
-import com.facebook.CallbackManager;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.AdError;
@@ -91,12 +84,8 @@ import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.android.gms.ads.formats.NativeAdOptions;
 import com.google.android.gms.ads.formats.NativeAppInstallAd;
 import com.google.android.gms.ads.formats.NativeContentAd;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -111,11 +100,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import bolts.AppLinks;
@@ -147,7 +144,10 @@ public class MapsActivity extends AppCompatActivity
 
     private static final int REQUEST_PERMISSIONS_ACCESS_FINE_LOCATION = 10;
 
-    FirebaseAnalytics firebaseAnalytics;
+
+    private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseAnalytics firebaseAnalytics;
 
     // These settings are the same as the settings for the map. They will in fact give you updates
     // at the maximal rates currently possible.
@@ -156,20 +156,6 @@ public class MapsActivity extends AppCompatActivity
             .setFastestInterval(32)    // 32ms = 30fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-    /**
-     * If we get a new car position while we are using the app, we update the map
-     */
-    @Nullable
-    private final BroadcastReceiver carUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, @NonNull Intent intent) {
-            String carId = intent.getExtras().getString(Constants.EXTRA_CAR_ID);
-            if (carId != null) {
-                Log.i(TAG, "Car update received: " + carId);
-                initParkedCarDelegate(carId).update(true);
-            }
-        }
-    };
 
     @NonNull
     private final Set<AbstractMarkerDelegate> delegates = new HashSet<>();
@@ -208,22 +194,13 @@ public class MapsActivity extends AppCompatActivity
     /**
      * The user didn't log in, but we still love him
      */
-    private boolean mSkippedLogin;
-
-    @Nullable
-    private LoginType loginType;
-
-    private CallbackManager mFacebookCallbackManager;
+    private boolean skippedLogin;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
-    /**
-     * Current logged user
-     */
-    private Account mAccount;
 
     private boolean mapInitialised = false;
     private boolean initialCameraSet = false;
@@ -251,6 +228,8 @@ public class MapsActivity extends AppCompatActivity
     private RelativeLayout mainContainer;
 
     private FrameLayout nativeExpressAbMobContainer;
+    private ListenerRegistration carListener;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -261,42 +240,26 @@ public class MapsActivity extends AppCompatActivity
 
         carDatabase = CarDatabase.getInstance();
 
-        mSkippedLogin = AuthUtils.isSkippedLogin(this);
-
         mAccountManager = AccountManager.get(this);
-        final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
 
-        if (availableAccounts.length == 0 && !mSkippedLogin) {
+        currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
             goToLogin();
             return;
         }
-        // There should be just one account
-        else if (availableAccounts.length > 1) {
-            Log.w(TAG, "Multiple accounts found");
-        }
 
-        /**
+        /*
          * Bind service used for donations
          */
         initBillingFragment();
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        Tracking.setTrackerUserId(currentUser.getUid());
 
-        loginType = null;
+        skippedLogin = currentUser.isAnonymous();
 
-        if (availableAccounts.length > 0) {
-            mAccount = availableAccounts[0];
-
-            String userId = mAccountManager.getUserData(mAccount, Authenticator.USER_ID);
-            Tracking.setTrackerUserId(userId);
-
-            String typeString = mAccountManager.getUserData(mAccount, Authenticator.LOGIN_TYPE);
-            if (typeString != null)
-                loginType = LoginType.valueOf(typeString);
-        }
-
-        /**
+        /*
          * Create a GoogleApiClient instance
          */
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
@@ -305,28 +268,16 @@ public class MapsActivity extends AppCompatActivity
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this);
 
-        if (!mSkippedLogin && loginType == LoginType.Google) {
-            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .build();
-            builder.addApi(Auth.GOOGLE_SIGN_IN_API, gso);
-        }
-
         mGoogleApiClient = builder.build();
 
         drawerToggle = findViewById(R.id.navigation_drawer_toggle);
         if (drawerToggle != null)
-            drawerToggle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    drawerLayout.openDrawer(GravityCompat.START);
-                }
-            });
+            drawerToggle.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
         mainContainer = findViewById(R.id.main_container);
         detailsContainer = findViewById(R.id.details_container);
 
-        /**
+        /*
          * If translucent bars, apply the proper margins
          */
         Resources resources = getResources();
@@ -344,7 +295,7 @@ public class MapsActivity extends AppCompatActivity
             mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
         }
 
-        /**
+        /*
          * Navigation drawer
          */
         setUpNavigationDrawer();
@@ -413,13 +364,44 @@ public class MapsActivity extends AppCompatActivity
          */
         ActivityRecognitionService.startCheckingActivityRecognition(this);
 
+//        if (!PreferencesUtil.isFirebaseMigrationDone(this) && !skippedLogin)
+            firebaseMigration();
+
+
+    }
+
+    private void firebaseMigration() {
+
+        mAccountManager = AccountManager.get(this);
+        final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
+
+        if (availableAccounts.length > 0) {
+
+            Account account = availableAccounts[0];
+            String userId = mAccountManager.getUserData(account, Authenticator.USER_ID);
+            Tracking.setTrackerUserId(userId);
+            FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+
+            if (firebaseUser != null) {
+                Map<String, Object> user = new HashMap<>();
+                user.put("email", firebaseUser.getEmail());
+                user.put("name", firebaseUser.getDisplayName());
+                user.put("photo_url", firebaseUser.getPhotoUrl().toString());
+                user.put("legacy_id", userId);
+                db.collection("users")
+                        .document(firebaseUser.getUid())
+                        .set(user, SetOptions.merge())
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Firebase migration completed");
+                            PreferencesUtil.setFirebaseMigrationDone(this, true);
+                        })
+                        .addOnFailureListener(e -> Log.w(TAG, "Migration error", e));
+            }
+        }
     }
 
     public void goToLogin() {
         if (!isFinishing()) {
-
-            if (!mSkippedLogin)
-                carDatabase.clearCars(this);
 
             AuthUtils.setSkippedLogin(this, false);
 
@@ -442,14 +424,19 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onBillingReady(BillingFragment billingFragment) {
+
         if (PreferencesUtil.isAdsRemoved(this)) {
             firebaseAnalytics.setUserProperty("paying_user", "true");
             return;
         }
 
-        if (carDatabase.isEmptyOfCars(this)) return;
-
-        checkForPurchases(billingFragment);
+        db.collection("cars")
+                .whereEqualTo("owner", currentUser.getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if(!queryDocumentSnapshots.isEmpty())
+                        checkForPurchases(billingFragment);
+                });
     }
 
     private void checkForPurchases(final BillingFragment billingFragment) {
@@ -513,13 +500,10 @@ public class MapsActivity extends AppCompatActivity
 
         RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
         if (adIcon != null) {
-            ImageRequest adPicture = new ImageRequest(adIcon.getUrl(), new Response.Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-                    nativeAdIcon.setImageBitmap(response);
-                    bindFacebookAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
+            ImageRequest adPicture = new ImageRequest(adIcon.getUrl(), response -> {
+                nativeAdIcon.setImageBitmap(response);
+                bindFacebookAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
 
-                }
             }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
 
             Cache.Entry entry = new Cache.Entry();
@@ -731,6 +715,21 @@ public class MapsActivity extends AppCompatActivity
 
         delegates.clear();
 
+        carListener = db.collection("cars")
+                .whereEqualTo("owner", currentUser.getUid())
+                .addSnapshotListener((snapshot, e) -> {
+                    for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
+                        Car car = Car.fromFirestore(documentSnapshot);
+                        ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
+                        if (mMap != null)
+                            parkedCarDelegate.setMap(mMap);
+                        parkedCarDelegate.update(car, false);
+                        delegates.add(parkedCarDelegate);
+                    }
+
+                    noCarsButton.setVisibility(snapshot.isEmpty() ? View.VISIBLE : View.GONE);
+                });
+
         /*
          * Add delegates
          */
@@ -741,27 +740,29 @@ public class MapsActivity extends AppCompatActivity
         for (PossibleSpot spot : carDatabase.retrievePossibleParkingSpots(this))
             delegates.add(initPossibleParkedCarDelegate(spot));
 
-        List<Car> cars = carDatabase.retrieveCars(this, true);
-        for (Car car : cars)
-            delegates.add(initParkedCarDelegate(car.id));
-
-        boolean hasBtCar = false;
-        for (Car car : cars) if (car.btAddress != null) hasBtCar = true;
-        firebaseAnalytics.setUserProperty("has_bluetooth_car", hasBtCar ? "true" : "false");
 
         /*
          * Show some dialogs in case the user is bored
          */
         checkRatingDialogShown();
 
-        // when our activity resumes, we want to register for car updates
-        LocalBroadcastManager.getInstance(this).registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
+//        // when our activity resumes, we want to register for car updates
+//        LocalBroadcastManager.getInstance(this).registerReceiver(carUpdateReceiver, new IntentFilter(Constants.INTENT_CAR_UPDATED));
 
         setInitialCamera();
 
-        showOnLongClickToast();
 
-        noCarsButton.setVisibility(carDatabase.isEmptyOfCars(this) ? View.VISIBLE : View.GONE);
+        db.collection("cars")
+                .whereEqualTo("owner", currentUser.getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (PreferencesUtil.isLongClickToastShown(this) || queryDocumentSnapshots.isEmpty())
+                        return;
+
+                    Util.showBlueToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
+
+                    PreferencesUtil.setLongClickToastShown(this, true);
+                });
 
         mapFragment.getMapAsync(this);
 
@@ -1153,15 +1154,6 @@ public class MapsActivity extends AppCompatActivity
         if (moveLocationButton) myLocationButton.startAnimation(translateAnimation);
     }
 
-    private void showOnLongClickToast() {
-        if (PreferencesUtil.isLongClickToastShown(this) || carDatabase.isEmptyOfCars(this))
-            return;
-
-        Util.showBlueToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
-
-        PreferencesUtil.setLongClickToastShown(this, true);
-    }
-
 
     @Override
     protected void onStop() {
@@ -1222,21 +1214,12 @@ public class MapsActivity extends AppCompatActivity
             billingFragment.onActivityResult(requestCode, resultCode, data);
         }
 
-        // FB
-        if (mFacebookCallbackManager != null)
-            mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
-
-    }
-
-    public void setFacebookCallbackManager(CallbackManager facebookCallbackManager) {
-        this.mFacebookCallbackManager = facebookCallbackManager;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-
         saveMapCameraPosition();
     }
 
@@ -1258,29 +1241,13 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    /**
-     * Checks whether the device currently has a network connection
-     */
-    private boolean isDeviceOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
-    }
 
     /**
      * Sign out the user (so they can switch to another account).
      */
     public void signOutAndGoToLoginScreen(boolean resetPreferences) {
 
-        // We only want to sign out if we're connected.
-        if (mGoogleApiClient.isConnected() && loginType == LoginType.Google) {
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(@NonNull Status status) {
-                    Log.d(TAG, "Google Signed out!");
-                }
-            });
-        }
+        firebaseAuth.signOut();
 
         // Facebook disconnect
         final LoginManager loginManager = LoginManager.getInstance();
@@ -1310,7 +1277,8 @@ public class MapsActivity extends AppCompatActivity
             if (isLocationPermissionGranted())
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(carUpdateReceiver);
+
+        carListener.remove();
 
         saveMapCameraPosition();
     }
@@ -1381,28 +1349,38 @@ public class MapsActivity extends AppCompatActivity
         LatLng userPosition = getUserLatLng();
         if (userPosition != null) {
 
-            final List<Car> parkedCars = carDatabase.retrieveParkedCars(this);
+            carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+                @Override
+                public void onCarsRetrieved(List<Car> cars) {
 
-            List<Car> closeCars = new ArrayList<>();
-            for (Car car : parkedCars) {
-                ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
-                parkedCarDelegate.onLocationChanged(getUserLocation());
-                if (!parkedCarDelegate.isTooFar()) {
-                    closeCars.add(car);
+                    List<Car> closeCars = new ArrayList<>();
+                    for (Car car : cars) {
+                        ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
+                        parkedCarDelegate.onLocationChanged(getUserLocation());
+                        if (!parkedCarDelegate.isTooFar()) {
+                            closeCars.add(car);
+                        }
+                    }
+
+                    // One parked car
+                    if (closeCars.size() == 1) {
+                        Car car = closeCars.get(0);
+                        initParkedCarDelegate(car.id).activate();
+                    }
+                    // zoom to user otherwise
+                    else {
+                        setCameraFollowing(true);
+                    }
+
+                    initialCameraSet = true;
                 }
-            }
 
-            // One parked car
-            if (closeCars.size() == 1) {
-                Car car = closeCars.get(0);
-                initParkedCarDelegate(car.id).activate();
-            }
-            // zoom to user otherwise
-            else {
-                setCameraFollowing(true);
-            }
+                @Override
+                public void onCarsRetrievedError() {
 
-            initialCameraSet = true;
+                }
+            });
+
         }
 
     }
@@ -1612,10 +1590,6 @@ public class MapsActivity extends AppCompatActivity
         Button refresh = findViewById(R.id.refresh);
         refresh.setOnClickListener(v -> {
             initSpotsDelegate().queryCameraView();
-            if (mAccount != null)
-                CarsSync.TriggerRefresh(MapsActivity.this, mAccount);
-            else
-                Toast.makeText(MapsActivity.this, "Not logged in, so cannot perform refresh", Toast.LENGTH_SHORT).show();
         });
 
         Button startActRecog = findViewById(R.id.start_act_rec);
@@ -1625,41 +1599,77 @@ public class MapsActivity extends AppCompatActivity
 
         Button actRecDetected = findViewById(R.id.act_recog);
         actRecDetected.setOnClickListener(v -> {
-            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
-            if (cars.isEmpty()) return;
-            // start the CarMovedReceiver
-            LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, PossibleParkedCarReceiver.ACTION);
-            helper.startLocationUpdates(null);
+            carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+                @Override
+                public void onCarsRetrieved(List<Car> cars) {
+                    if (cars.isEmpty()) return;
+                    // start the CarMovedReceiver
+                    LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, PossibleParkedCarReceiver.ACTION);
+                    helper.startLocationUpdates(null);
+                }
+
+                @Override
+                public void onCarsRetrievedError() {
+
+                }
+            });
         });
 
         Button carParked = findViewById(R.id.park);
         carParked.setOnClickListener(v -> {
-            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
-            if (cars.isEmpty()) return;
-            // start the CarMovedReceiver
-            LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, ParkedCarReceiver.ACTION);
-            Bundle extras = new Bundle();
-            extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
-            helper.startLocationUpdates(extras);
+            carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+                @Override
+                public void onCarsRetrieved(List<Car> cars) {
+                    if (cars.isEmpty()) return;
+                    // start the CarMovedReceiver
+                    LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, ParkedCarReceiver.ACTION);
+                    Bundle extras = new Bundle();
+                    extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
+                    helper.startLocationUpdates(extras);
+                }
+
+                @Override
+                public void onCarsRetrievedError() {
+
+                }
+            });
         });
 
         Button carMoved = findViewById(R.id.driveOff);
         carMoved.setOnClickListener(v -> {
-            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
-            if (cars.isEmpty()) return;
-            // start the CarMovedReceiver
-            LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, CarMovedReceiver.ACTION);
-            Bundle extras = new Bundle();
-            extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
-            helper.startLocationUpdates(extras);
+            carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+                @Override
+                public void onCarsRetrieved(List<Car> cars) {
+                    if (cars.isEmpty()) return;
+                    // start the CarMovedReceiver
+                    LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, CarMovedReceiver.ACTION);
+                    Bundle extras = new Bundle();
+                    extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
+                    helper.startLocationUpdates(extras);
+                }
+
+                @Override
+                public void onCarsRetrievedError() {
+
+                }
+            });
         });
 
         Button approachingCar = findViewById(R.id.approaching);
         approachingCar.setOnClickListener(v -> {
-            List<Car> cars = carDatabase.retrieveCars(MapsActivity.this, false);
-            if (cars.isEmpty()) return;
-            Car car = cars.iterator().next();
-            ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
+            carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
+                @Override
+                public void onCarsRetrieved(List<Car> cars) {
+                    if (cars.isEmpty()) return;
+                    Car car = cars.iterator().next();
+                    ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
+                }
+
+                @Override
+                public void onCarsRetrievedError() {
+
+                }
+            });
         });
     }
 

@@ -2,26 +2,34 @@ package com.cahue.iweco.cars.database;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.cahue.iweco.Constants;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.model.PossibleSpot;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.SuccessContinuation;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import static com.cahue.iweco.model.PossibleSpot.NOT_SO_RECENT;
 import static com.cahue.iweco.model.PossibleSpot.RECENT;
@@ -31,21 +39,36 @@ import static com.cahue.iweco.model.PossibleSpot.RECENT;
  */
 public class CarDatabase {
 
+
+    public interface CarUpdateListener {
+        void onCarUpdated(Car car);
+
+        void onCarUpdateError();
+    }
+
+    public interface CarsRetrieveListener {
+        void onCarsRetrieved(List<Car> cars);
+
+        void onCarsRetrievedError();
+    }
+
     public static final String TABLE_CARS = "cars";
     public static final String TABLE_POSSIBLE_SPOTS = "possible_spots";
 
     public static final String COLUMN_ID = "id";
+    public static final String COLUMN_FIRESTORE_ID = "firestore_id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_BT_ADDRESS = "bt_address";
-    public static final String COLUMN_SPOT_ID = "spot_id";
     public static final String COLUMN_LATITUDE = "latitude";
     public static final String COLUMN_LONGITUDE = "longitude";
     public static final String COLUMN_ACCURACY = "accuracy";
     public static final String COLUMN_ADDRESS = "address";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_COLOR = "color";
+
     public static final String[] CAR_PROJECTION = new String[]{
             COLUMN_ID,
+            COLUMN_FIRESTORE_ID,
             COLUMN_NAME,
             COLUMN_BT_ADDRESS,
             COLUMN_COLOR,
@@ -54,7 +77,6 @@ public class CarDatabase {
             COLUMN_ACCURACY,
             COLUMN_TIME,
             COLUMN_ADDRESS,
-            COLUMN_SPOT_ID
     };
 
     private static final String[] SPOT_PROJECTION = new String[]{
@@ -68,6 +90,8 @@ public class CarDatabase {
     private static final String TAG = CarDatabase.class.getSimpleName();
     private static CarDatabase mInstance;
 
+    private FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
     public static CarDatabase getInstance() {
         if (mInstance == null) {
             mInstance = new CarDatabase();
@@ -75,98 +99,27 @@ public class CarDatabase {
         return mInstance;
     }
 
-    /**
-     * Create the 'Other' car
-     */
-    @NonNull
-    public Car generateOtherCar() {
-        Car car = new Car();
-        car.id = Car.OTHER_ID;
-        return car;
-    }
-
-    /**
-     * Persist the location of the car in the shared preferences
-     *
-     * @param cars
-     */
-    public void clearSaveAndBroadcast(Context context, @NonNull Collection<Car> cars) {
-
-        cars.add(generateOtherCar());
-
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
-        try {
-
-            database.delete(TABLE_CARS, null, null);
-
-            for (Car car : cars) {
-
-                if (car.id == null)
-                    throw new NullPointerException("Car without an ID");
-
-                ContentValues values = createCarContentValues(car);
-                database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
-
-                broadCastCarUpdate(context, car);
-            }
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-    }
 
     /**
      * Update the spot ID of a parked car
      *
-     * @param car
+     * @param carId
+     * @param address
      */
-    public void updateSpotId(Context context, @NonNull Car car) {
+    public void updateAddress(@NonNull String carId, @NonNull String address) {
 
-        Log.i(TAG, "Updating spot: " + car);
-
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
-
-        try {
-            if (car.id == null)
-                throw new NullPointerException("Car without an ID");
-
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_SPOT_ID, car.spotId);
-            database.update(TABLE_CARS, values, "id = '" + car.id + "'", null);
-
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-
-    }
-
-    /**
-     * Update the spot ID of a parked car
-     *
-     * @param car
-     */
-    public void updateAddress(Context context, @NonNull Car car) {
-
-        Log.i(TAG, "Updating address: " + car);
-
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
-
-        try {
-            if (car.id == null)
-                throw new NullPointerException("Car without an ID");
-
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_ADDRESS, car.address);
-            database.update(TABLE_CARS, values, "id = '" + car.id + "'", null);
-
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
+        Map<String, Object> fsCar = new HashMap<>();
+        fsCar.put("parked_at.address", address);
+        firestore
+                .collection("cars")
+                .document(carId)
+                .update(fsCar)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Car address updated");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Migration error", e);
+                });
 
     }
 
@@ -175,27 +128,61 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void saveCarAndBroadcast(Context context, @NonNull Car car) {
+    public void updateCar(@NonNull Car car, CarUpdateListener listener) {
 
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
+        Map<String, Object> fsCar = car.toFireStoreMap(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        firestore
+                .collection("cars")
+                .document(car.id)
+                .update(fsCar)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Car saved");
+                    if (listener != null)
+                        listener.onCarUpdated(car);
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Migration error", e);
+                    if (listener != null)
+                        listener.onCarUpdateError();
+                });
 
-        try {
-            if (car.id == null)
-                throw new NullPointerException("Car without an ID");
+    }
 
-            // check the parked value has not an earlier date than the saved one
-            if (checkDatePrevious(car, database)) return;
 
-            ContentValues values = createCarContentValues(car);
-            database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
+    /**
+     * Persist car location
+     */
+    public void updateCarLocation(String carId, Location location, String address, Date time, String source) {
+        updateCarLocation(carId, location, address, time, source, null);
+    }
 
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
+    public void updateCarLocation(String carId, Location location, String address, Date time, String source, CarUpdateListener carUpdateListener) {
 
-        broadCastCarUpdate(context, car);
+        Map<String, Object> fsCar = new HashMap<>();
+        fsCar.put("parked_at", Car.toFirestoreParkingEvent(location, time, address, source));
+        firestore
+                .collection("cars")
+                .document(carId)
+                .update(fsCar)
+                .addOnSuccessListener(aVoid -> {
+                    firestore.collection("cars").document(carId).get().addOnCompleteListener(o -> {
+                        if (o.isSuccessful()) {
+                            Car car = Car.fromFirestore(o.getResult());
+                            if (carUpdateListener != null)
+                                carUpdateListener.onCarUpdated(car);
+                        } else {
+                            if (carUpdateListener != null)
+                                carUpdateListener.onCarUpdateError();
+                        }
+
+                    });
+                    Log.d(TAG, "Car address updated : " + aVoid);
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Car address error", e);
+                    if (carUpdateListener != null)
+                        carUpdateListener.onCarUpdateError();
+                });
 
     }
 
@@ -204,370 +191,111 @@ public class CarDatabase {
      *
      * @param car
      */
-    public void updateCarRemoveSpotAndBroadcast(Context context, @NonNull Car car, @NonNull PossibleSpot spot) {
+    public void createCar(@NonNull Car car, CarUpdateListener listener) {
+
+        Map<String, Object> fsCar = car.toFireStoreMap(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        firestore
+                .collection("cars")
+                .add(fsCar)
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "Car saved");
+                    car.id = documentReference.getId();
+                    if (listener != null)
+                        listener.onCarUpdated(car);
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Migration error", e);
+                    if (listener != null)
+                        listener.onCarUpdateError();
+                });
+
+
+    }
+
+    /**
+     * Update a car location from a possible AR spot
+     */
+    public void updateCarFromArSpot(Context context, String carId, @NonNull PossibleSpot spot) {
+
+        Log.i(TAG, "Updating car " + carId + " " + spot);
+
+        updateCarLocation(carId, spot.location, spot.address, spot.time, "ar_possible_spot");
 
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
 
         try {
-            if (car.id == null)
-                throw new NullPointerException("Car without an ID");
-
-            // check the parked value has not an earlier date than the saved one
-            if (checkDatePrevious(car, database)) return;
-
-            ContentValues values = createCarContentValues(car);
-            database.insertWithOnConflict(TABLE_CARS, COLUMN_ID, values, SQLiteDatabase.CONFLICT_REPLACE);
             database.delete(TABLE_POSSIBLE_SPOTS, COLUMN_TIME + " = '" + spot.time.getTime() + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();
         }
 
-        broadCastCarUpdate(context, car);
-
-    }
-
-    /**
-     * Check the parked value has not an earlier date than the saved one
-     *
-     * @param car
-     * @param database
-     * @return
-     */
-    private boolean checkDatePrevious(@NonNull Car car, SQLiteDatabase database) {
-
-        if (car.time == null) return false;
-
-        Cursor cursor = database.query(TABLE_CARS, new String[]{COLUMN_TIME,},
-                COLUMN_ID + " = '" + car.id + "'",
-                null, null, null, null);
-        if (cursor.getCount() != 0) {
-            try {
-                cursor.moveToFirst();
-                Date storedDate = new Date(cursor.getLong(0));
-                if (storedDate.after(car.time)) return true;
-            } finally {
-                cursor.close();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Tell everyone interested that this car was updated
-     */
-    private void broadCastCarUpdate(Context context, @NonNull Car car) {
-
-        Log.d(TAG, "Sending car update broadcast");
-
-        Intent intent = new Intent(Constants.INTENT_CAR_UPDATED);
-        intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
-    /**
-     * Create ContentValues from Car
-     *
-     * @param car
-     * @return
-     */
-    @NonNull
-    private ContentValues createCarContentValues(@NonNull Car car) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, car.id);
-        values.put(COLUMN_NAME, car.name);
-        values.put(COLUMN_BT_ADDRESS, car.btAddress);
-        values.put(COLUMN_COLOR, car.color);
-
-        if (car.location != null) {
-            values.put(COLUMN_SPOT_ID, car.spotId);
-            values.put(COLUMN_LATITUDE, car.location.getLatitude());
-            values.put(COLUMN_LONGITUDE, car.location.getLongitude());
-            values.put(COLUMN_ACCURACY, car.location.getAccuracy());
-            values.put(COLUMN_TIME, car.time != null ? car.time.getTime() : null);
-            values.put(COLUMN_ADDRESS, car.address);
-        }
-
-        return values;
     }
 
 
-    @NonNull
-    public Set<String> getPairedBTAddresses(Context context) {
-        Set<String> addresses = new HashSet<>();
+    public void retrieveCars(CarsRetrieveListener listener) {
+        firestore.collection("cars").whereEqualTo("owner", FirebaseAuth.getInstance().getCurrentUser().getUid()).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+                    List<Car> cars = new ArrayList<>();
+                    for (DocumentSnapshot documentSnapshot : documents) {
+                        Car car = Car.fromFirestore(documentSnapshot);
+                        cars.add(car);
+                    }
+                    listener.onCarsRetrieved(cars);
 
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-        try {
-            Cursor cursor = database.query(true,
-                    TABLE_CARS,
-                    new String[]{COLUMN_BT_ADDRESS},
-                    COLUMN_BT_ADDRESS + " IS NOT NULL",
-                    null, null, null, null, null);
-
-            Log.d(TAG, "Paired BT addresses: ");
-            while (cursor.moveToNext()) {
-                String address = cursor.getString(0);
-                Log.d(TAG, "\t" + address);
-                addresses.add(address);
-            }
-            cursor.close();
-
-        } finally {
-            database.close();
-        }
-
-        return addresses;
-    }
-
-    /**
-     * Get a Collection of available car ids
-     *
-     * @param includeOther Should the "Other" car be included
-     * @return
-     */
-    @NonNull
-    public List<String> getCarIds(Context context, boolean includeOther) {
-        List<String> ids = new ArrayList<>();
-
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-
-        // was the 'Other' car already in the database
-        try {
-
-            Cursor cursor = database.query(TABLE_CARS,
-                    new String[]{COLUMN_ID},
-                    includeOther ? null : COLUMN_ID + " != '" + Car.OTHER_ID + "'",
-                    null, null, null,
-                    COLUMN_TIME + " DESC");
-
-            while (cursor.moveToNext()) {
-                String id = cursor.getString(0);
-                ids.add(id);
-            }
-            cursor.close();
-
-        } finally {
-            database.close();
-        }
-
-        Log.d(TAG, "Retrieved car ids from DB: " + ids);
-
-        return ids;
-    }
-
-    /**
-     * Get a Collection of available cars, can have the location set to null
-     *
-     * @param includeOther Should the "Other" car be included
-     * @return
-     */
-    @NonNull
-    public List<Car> retrieveCars(Context context, boolean includeOther) {
-        List<Car> cars = new ArrayList<>();
-
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-
-        try {
-            Cursor cursor = database.query(TABLE_CARS,
-                    CAR_PROJECTION,
-                    includeOther ? null : COLUMN_ID + " != '" + Car.OTHER_ID + "'",
-                    null, null, null,
-                    COLUMN_TIME + " DESC");
-
-            while (cursor.moveToNext()) {
-                Car car = cursorToCar(cursor);
-                cars.add(car);
-            }
-            cursor.close();
-
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-
-        Log.d(TAG, "Retrieved cars from DB: " + cars);
-        return cars;
-    }
-
-    /**
-     * Get a Collection of available cars, location will be not null
-     *
-     * @return
-     */
-    @NonNull
-    public List<Car> retrieveParkedCars(Context context) {
-        List<Car> cars = new ArrayList<>();
-
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-        try {
-
-            Cursor cursor = database.query(TABLE_CARS,
-                    CAR_PROJECTION,
-                    COLUMN_LATITUDE + " > 0",
-                    null, null, null,
-                    COLUMN_TIME + " DESC");
-
-            while (cursor.moveToNext()) {
-                cars.add(cursorToCar(cursor));
-            }
-            cursor.close();
-
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-
-        Log.d(TAG, "Retrieved cars from DB: " + cars);
-
-        return cars;
+                })
+                .addOnFailureListener(f -> listener.onCarsRetrievedError());
     }
 
 
-    @Nullable
-    public Car findCar(Context context, String id) {
+    public void removeCarLocation(String carId) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("parked_at", FieldValue.delete());
+        firestore.collection("cars").document(carId).update(updates);
 
-        Log.d(TAG, "Querying car by ID: " + id);
-        Car car;
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-        try {
-            Cursor cursor = database.query(TABLE_CARS,
-                    CAR_PROJECTION,
-                    COLUMN_ID + " = '" + id + "'",
-                    null, null, null, null);
-
-            if (cursor.getCount() == 0) return null;
-
-            cursor.moveToFirst();
-
-            car = cursorToCar(cursor);
-            cursor.close();
-
-            Log.d(TAG, "Retrieved car by ID: " + car);
-
-        } finally {
-            database.close();
-        }
-
-        return car;
-
-    }
-
-    @Nullable
-    public Car findCarByBTAddress(Context context, String btAddress) {
-        Car car;
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-        try {
-            Cursor cursor = database.query(TABLE_CARS,
-                    CAR_PROJECTION,
-                    COLUMN_BT_ADDRESS + " = '" + btAddress + "'",
-                    null, null, null, null);
-
-            if (cursor.getCount() == 0) return null;
-
-            cursor.moveToFirst();
-
-            car = cursorToCar(cursor);
-            cursor.close();
-
-            Log.d(TAG, "Retrieved car by BT address: " + car);
-
-        } finally {
-            database.close();
-        }
-
-        return car;
+//        final DocumentReference carDocRef = firestore.collection("cars").document(carId);
+//        firestore.runTransaction(new Transaction.Function<Double>() {
+//            @Override
+//            public Double apply(Transaction transaction) throws FirebaseFirestoreException {
+//                DocumentSnapshot snapshot = transaction.get(carDocRef);
+//                HashMap<String, Object> currentlyParkedAt = (HashMap<String, Object>) snapshot.get("parked_at");
+//                if (newPopulation <= 1000000) {
+//                    transaction.update(carDocRef, "parked_at", newPopulation);
+//                    return newPopulation;
+//                } else {
+//                    throw new FirebaseFirestoreException("Population too high",
+//                            FirebaseFirestoreException.Code.ABORTED);
+//                }
+//            }
+//        }).addOnSuccessListener(new OnSuccessListener<Double>() {
+//            @Override
+//            public void onSuccess(Double result) {
+//                Log.d(TAG, "Transaction success: " + result);
+//            }
+//        })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.w(TAG, "Transaction failure.", e);
+//                    }
+//                });
 
     }
 
-
-    @NonNull
-    private Car cursorToCar(@NonNull Cursor cursor) {
-
-        Car car = new Car();
-        car.id = cursor.getString(0);
-        car.name = cursor.getString(1);
-        car.btAddress = cursor.getString(2);
-        car.color = cursor.isNull(3) ? null : cursor.getInt(3);
-
-        if (!cursor.isNull(4) && !cursor.isNull(5)) {
-            double latitude = cursor.getDouble(4);
-            double longitude = cursor.getDouble(5);
-            float accuracy = cursor.getFloat(6);
-            Location location = new Location("db");
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setAccuracy(accuracy);
-            car.location = location;
-            car.time = new Date(cursor.getLong(7));
-            car.address = cursor.isNull(8) ? null : cursor.getString(8);
-        }
-
-        if (!cursor.isNull(9))
-            car.spotId = cursor.getLong(9);
-
-        return car;
-    }
-
-    /**
-     * Remove all the cars in the database
-     */
-    public void clearCars(Context context) {
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
-        try {
-            database.execSQL("delete from " + TABLE_CARS);
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-    }
 
     public void deleteCar(Context context, @NonNull Car car) {
+
+        firestore
+                .collection("cars")
+                .document(car.id)
+                .delete();
+
         CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
         SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
         try {
-            database.delete(TABLE_CARS, "id = '" + car.id + "'", null);
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-    }
-
-    public void deleteCar(Context context, String carId) {
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getWritableDatabase();
-        try {
-            database.delete(TABLE_CARS, "id = '" + carId + "'", null);
-        } finally {
-            database.close();
-            carDatabaseHelper.close();
-        }
-    }
-
-    /**
-     * Check if there is at least one car
-     *
-     * @return
-     */
-    public boolean isEmptyOfCars(Context context) {
-        CarDatabaseHelper carDatabaseHelper = new CarDatabaseHelper(context);
-        SQLiteDatabase database = carDatabaseHelper.getReadableDatabase();
-        try {
-            Cursor cursor = database.query(TABLE_CARS,
-                    new String[]{COLUMN_ID},
-                    COLUMN_ID + " != '" + Car.OTHER_ID + "'",
-                    null, null, null, null);
-
-            boolean res = cursor.getCount() == 0;
-            cursor.close();
-            return res;
+            database.delete(TABLE_CARS, "id = '" + car.legacy_id + "'", null);
         } finally {
             database.close();
             carDatabaseHelper.close();
@@ -621,7 +349,6 @@ public class CarDatabase {
             carDatabaseHelper.close();
         }
     }
-
 
 
     /**
@@ -727,4 +454,6 @@ public class CarDatabase {
 
         return new PossibleSpot(location, address, time, false, order < 2 ? RECENT : NOT_SO_RECENT);
     }
+
+
 }

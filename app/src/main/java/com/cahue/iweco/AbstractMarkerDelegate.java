@@ -1,7 +1,7 @@
 package com.cahue.iweco;
 
-import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,7 +34,7 @@ public abstract class AbstractMarkerDelegate extends Fragment implements CameraU
     private GoogleMap mMap;
 
     @Override
-    public void onAttach(@NonNull Activity context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
         try {

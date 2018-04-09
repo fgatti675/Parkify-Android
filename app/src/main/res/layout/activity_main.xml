@@ -73,7 +73,7 @@
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
                     android:text="@string/no_cars"
                     android:textColor="@color/white"
-                    tools:visibility="gone" />
+                    android:visibility="gone" />
 
             </RelativeLayout>
 

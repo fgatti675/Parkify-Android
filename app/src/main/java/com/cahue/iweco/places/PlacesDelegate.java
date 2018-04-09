@@ -92,7 +92,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        directionsDelegate = new DirectionsDelegate(this);
+        directionsDelegate = new DirectionsDelegate();
         directionsDelegate.setColor(getResources().getColor(R.color.theme_primary));
     }
 

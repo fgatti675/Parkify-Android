@@ -96,8 +96,6 @@ public class PossibleSpot implements Parcelable {
         try {
             JSONObject obj = new JSONObject();
             obj.put("car", car.id);
-            if (car.spotId != null)
-                obj.put("id", car.spotId);
             obj.put("latitude", location.getLatitude());
             obj.put("longitude", location.getLongitude());
             obj.put("accuracy", location.getAccuracy());

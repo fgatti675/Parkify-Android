@@ -16,7 +16,7 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
     /**
      * Schema version.
      */
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     /**
      * Filename for SQLite file.
@@ -34,9 +34,9 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CAR_ENTRIES =
             "CREATE TABLE " + CarDatabase.TABLE_CARS + " (" +
                     CarDatabase.COLUMN_ID + TYPE_TEXT + " PRIMARY KEY" + COMMA_SEP +
+                    CarDatabase.COLUMN_FIRESTORE_ID + TYPE_TEXT + " UNIQUE " + COMMA_SEP +
                     CarDatabase.COLUMN_NAME + TYPE_TEXT + COMMA_SEP +
                     CarDatabase.COLUMN_BT_ADDRESS + TYPE_TEXT + COMMA_SEP +
-                    CarDatabase.COLUMN_SPOT_ID + TYPE_INTEGER + COMMA_SEP +
                     CarDatabase.COLUMN_COLOR + TYPE_INTEGER + COMMA_SEP +
                     CarDatabase.COLUMN_LATITUDE + TYPE_REAL + COMMA_SEP +
                     CarDatabase.COLUMN_LONGITUDE + TYPE_REAL + COMMA_SEP +
@@ -78,12 +78,16 @@ public class CarDatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (oldVersion < 4) {
-            db.execSQL("ALTER TABLE " + CarDatabase.TABLE_CARS + " ADD COLUMN " + CarDatabase.COLUMN_SPOT_ID + " " + TYPE_INTEGER);
+//            db.execSQL("ALTER TABLE " + CarDatabase.TABLE_CARS + " ADD COLUMN " + CarDatabase.COLUMN_SPOT_ID + " " + TYPE_INTEGER);
         }
 
         if (oldVersion < 5) {
             db.execSQL(SQL_ADD_OTHER_CAR);
             db.execSQL(SQL_CREATE_POSSIBLE_SPOTS_ENTRIES);
+        }
+
+        if (oldVersion < 6) {
+            db.execSQL("ALTER TABLE " + CarDatabase.TABLE_CARS + " ADD COLUMN " + CarDatabase.COLUMN_FIRESTORE_ID + " " + TYPE_TEXT);
         }
 
         Log.d(TAG, "Database updated from " + oldVersion + " to " + newVersion);

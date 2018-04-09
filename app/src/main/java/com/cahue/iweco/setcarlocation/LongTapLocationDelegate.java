@@ -11,7 +11,6 @@ import com.cahue.iweco.AbstractMarkerDelegate;
 import com.cahue.iweco.DetailsFragment;
 import com.cahue.iweco.OnCarClickedListener;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
@@ -156,7 +155,7 @@ public class LongTapLocationDelegate extends AbstractMarkerDelegate implements O
     public void onCarSelected(@NonNull Car car) {
         deactivate();
 
-        CarsSync.updateCarFromTappedSpot(CarDatabase.getInstance(), getActivity(), car, spot);
+        CarDatabase.getInstance().updateCarLocation(car.id, spot.location, spot.address, spot.time, "long_tap");
 
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
         Bundle bundle = new Bundle();

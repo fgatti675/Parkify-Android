@@ -68,34 +68,19 @@ public class TutorialActivity extends AppCompatActivity
         mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        next = (Button) findViewById(R.id.next);
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
-            }
-        });
+        next = findViewById(R.id.next);
+        next.setOnClickListener(v -> mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true));
 
-        previous = (Button) findViewById(R.id.previous);
-        previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true);
-            }
-        });
+        previous = findViewById(R.id.previous);
+        previous.setOnClickListener(v -> mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true));
 
-        ok = (Button) findViewById(R.id.ok);
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        ok = findViewById(R.id.ok);
+        ok.setOnClickListener(v -> finish());
 
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar = findViewById(R.id.progress_bar);
 
         final LayerDrawable background = (LayerDrawable) getWindow().getDecorView().getBackground();
 
@@ -104,23 +89,20 @@ public class TutorialActivity extends AppCompatActivity
         background.getDrawable(2).setAlpha(0);
         background.getDrawable(3).setAlpha(0);
 
-        mViewPager.setPageTransformer(true, new ViewPager.PageTransformer() {
-            @Override
-            public void transformPage(@NonNull View view, float position) {
+        mViewPager.setPageTransformer(true, (view, position) -> {
 
-                int index = (Integer) view.getTag();
-                Drawable currentDrawableInLayerDrawable;
-                currentDrawableInLayerDrawable = background.getDrawable(3 - index);
+            int index = (Integer) view.getTag();
+            Drawable currentDrawableInLayerDrawable;
+            currentDrawableInLayerDrawable = background.getDrawable(3 - index);
 
-                if (position <= -1 || position >= 1) {
-                    currentDrawableInLayerDrawable.setAlpha(0);
-                } else if (position == 0) {
-                    currentDrawableInLayerDrawable.setAlpha(255);
-                } else {
-                    currentDrawableInLayerDrawable.setAlpha((int) (255 - Math.abs(position * 255)));
-                }
-
+            if (position <= -1 || position >= 1) {
+                currentDrawableInLayerDrawable.setAlpha(0);
+            } else if (position == 0) {
+                currentDrawableInLayerDrawable.setAlpha(255);
+            } else {
+                currentDrawableInLayerDrawable.setAlpha((int) (255 - Math.abs(position * 255)));
             }
+
         });
         mViewPager.setOffscreenPageLimit(TOTAL_NUMBER_PAGES - 1);
         mViewPager.addOnPageChangeListener(this);
@@ -128,16 +110,14 @@ public class TutorialActivity extends AppCompatActivity
         /**
          * If translucent bars, apply the proper margins
          */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Resources resources = getResources();
+        Resources resources = getResources();
 
-            RelativeLayout mainContainer = (RelativeLayout) findViewById(R.id.main_container);
-            int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
-            int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
-            int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-            int navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-            mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
-        }
+        RelativeLayout mainContainer = findViewById(R.id.main_container);
+        int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
+        int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        int navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
+        mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
 
     }
 
