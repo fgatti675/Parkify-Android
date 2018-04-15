@@ -49,7 +49,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     public static final String FRAGMENT_TAG = "PLACES_DELEGATE";
 
     // higher means closer zoom
-    private final static float MAX_ZOOM = 13F;
+    private final static float MAX_ZOOM = 13.5F;
     // how many markers
     private final static int MAX_MARKERS_PER_REQUEST = 20;
     private final static int MAX_DISPLAYED_MARKERS = 30;
@@ -80,6 +80,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
     private Handler handler = new Handler();
     private Random random = new Random();
+    private double zoom;
 
     @NonNull
     public static PlacesDelegate newInstance() {
@@ -100,47 +101,53 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
     protected void onMapReady(GoogleMap map) {
         super.onMapReady(map);
         directionsDelegate.setMap(map);
+        this.zoom = map.getCameraPosition().zoom;
         doDraw();
     }
 
     public void doDraw() {
 
+        Log.d(TAG, "doDraw");
+
         if (!isMapReady() || !isResumed()) return;
 
         displayedMarker.clear();
 
-        LatLngBounds viewPortBounds = getViewPortBounds();
-        for (Place place : places) {
-            if (viewPortBounds.contains(place.getLatLng())) {
-                Marker marker = placeMarkerMap.get(place);
-                if (marker == null) {
-                    final Marker newMarker = getMap().addMarker(MarkerFactory.getParkingMarker(place, getActivity()));
-                    placeMarkerMap.put(place, newMarker);
-                    newMarker.setTag(place);
-                    newMarker.setAlpha(0);
-                    handler.postDelayed(new Runnable() {
-                        float alpha = 0;
+        if (zoom > MAX_ZOOM) {
+            LatLngBounds viewPortBounds = getViewPortBounds();
+            for (Place place : places) {
+                if (viewPortBounds.contains(place.getLatLng())) {
+                    Marker marker = placeMarkerMap.get(place);
+                    if (marker == null) {
+                        final Marker newMarker = getMap().addMarker(MarkerFactory.getParkingMarker(place, getActivity()));
+                        placeMarkerMap.put(place, newMarker);
+                        newMarker.setTag(place);
+                        newMarker.setAlpha(0);
+                        handler.postDelayed(new Runnable() {
+                            float alpha = 0;
 
-                        @Override
-                        public void run() {
-                            alpha += 0.04;
-                            newMarker.setAlpha(alpha);
-                            if (alpha < 1) {
-                                handler.postDelayed(this, 16);
+                            @Override
+                            public void run() {
+                                alpha += 0.05;
+                                newMarker.setAlpha(alpha);
+                                if (alpha < 1) {
+                                    handler.postDelayed(this, 16);
+                                }
                             }
-                        }
-                    }, random.nextInt(300));
-                    marker = newMarker;
-                } else {
-                    marker.setVisible(true);
-                    marker.setAlpha(1);
+                        }, random.nextInt(200));
+                        marker = newMarker;
+                    } else {
+                        marker.setVisible(true);
+                        marker.setAlpha(1);
+                    }
+
+                    displayedMarker.add(marker);
+
+                    if (displayedMarker.size() == MAX_DISPLAYED_MARKERS) break;
                 }
-
-                displayedMarker.add(marker);
-
-                if (displayedMarker.size() == MAX_DISPLAYED_MARKERS) break;
             }
         }
+
 
         if (selectedPlace != null) {
             drawDirections();
@@ -149,8 +156,11 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
     }
 
-    public void fadeOutMarkers(CameraPosition cameraPosition) {
-        float zoom = cameraPosition.zoom;
+    public void fadeOutMarkers() {
+
+        Log.d(TAG, "fadeOutMarkers");
+
+        handler.removeCallbacksAndMessages(null);
         if (zoom < MAX_ZOOM) {
             for (final Marker marker : placeMarkerMap.values()) {
                 handler.postDelayed(new Runnable() {
@@ -158,7 +168,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
                     @Override
                     public void run() {
-                        alpha -= 0.05;
+                        alpha -= 0.06;
                         marker.setAlpha(alpha);
                         if (alpha <= 0) {
                             marker.setVisible(false);
@@ -166,7 +176,7 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
                             handler.postDelayed(this, 16);
                         }
                     }
-                }, random.nextInt(200));
+                }, random.nextInt(100));
             }
 
             clearSelectedMarker();
@@ -288,21 +298,15 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
         currentUserLocationRequest = new JsonObjectRequest(
                 url,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        lastUserLatLngQueried = latLng;
-                        currentUserLocationRequest = null;
-                        PlacesQueryResult parkingQueryResult = parseResult(response);
-                        onPlacesUpdate(parkingQueryResult);
-                    }
+                response -> {
+                    lastUserLatLngQueried = latLng;
+                    currentUserLocationRequest = null;
+                    PlacesQueryResult parkingQueryResult = parseResult(response);
+                    onPlacesUpdate(parkingQueryResult);
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(@NonNull VolleyError error) {
-                        currentUserLocationRequest = null;
-                        error.printStackTrace();
-                    }
+                error -> {
+                    currentUserLocationRequest = null;
+                    error.printStackTrace();
                 });
 
         // Add the request to the RequestQueue.
@@ -339,10 +343,10 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
         LatLng viewPortCenter = viewPortBounds.getCenter();
         int displayedMarkers = 0;
 
-        if (displayedMarker.size() == MAX_DISPLAYED_MARKERS) {
-            Log.d(TAG, "Too many places in viewport");
-            return;
-        }
+//        if (displayedMarker.size() == MAX_DISPLAYED_MARKERS) {
+//            Log.d(TAG, "Too many places in viewport");
+//            return;
+//        }
 
         float distances[] = new float[3];
         for (Place place : places) {
@@ -362,7 +366,6 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
             }
         }
 
-
         int distance = getRadiusFromCenter();
 
         RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
@@ -379,27 +382,21 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
         Request request = new JsonObjectRequest(
                 url,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        PlacesQueryResult parkingQueryResult = parseResult(response);
-                        if (!parkingQueryResult.moreResults) {
-                            LatLngBounds.Builder builder = LatLngBounds.builder();
-                            builder.include(viewPortBounds.northeast);
-                            builder.include(viewPortBounds.southwest);
-                            for (Place place : parkingQueryResult.places)
-                                builder.include(place.getLatLng());
-                            queriedBounds.add(builder.build());
-                        }
-                        onPlacesUpdate(parkingQueryResult);
+                response -> {
+                    PlacesQueryResult parkingQueryResult = parseResult(response);
+                    if (!parkingQueryResult.moreResults) {
+                        LatLngBounds.Builder builder = LatLngBounds.builder();
+                        builder.include(viewPortBounds.northeast);
+                        builder.include(viewPortBounds.southwest);
+                        for (Place place : parkingQueryResult.places)
+                            builder.include(place.getLatLng());
+                        queriedBounds.add(builder.build());
                     }
+                    onPlacesUpdate(parkingQueryResult);
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(@NonNull VolleyError error) {
-                        queriedBounds.remove(viewPortBounds);
-                        error.printStackTrace();
-                    }
+                error -> {
+                    queriedBounds.remove(viewPortBounds);
+                    error.printStackTrace();
                 });
 
         // Add the request to the RequestQueue.
@@ -430,11 +427,13 @@ public class PlacesDelegate extends AbstractMarkerDelegate {
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
+        this.zoom = cameraPosition.zoom;
+        Log.v(TAG, "zoom: " + zoom);
         if (cameraPosition.zoom > MAX_ZOOM) {
             makePlacesViewPortRequest();
             doDraw();
         } else {
-            fadeOutMarkers(cameraPosition);
+            fadeOutMarkers();
         }
 
     }

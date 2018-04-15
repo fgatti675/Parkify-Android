@@ -124,6 +124,7 @@ public class MapsActivity extends AppCompatActivity
         LocationListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnCameraMoveStartedListener,
+        GoogleMap.OnCameraIdleListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
         CarDetailsFragment.OnCarPositionDeletedListener,
@@ -1297,6 +1298,7 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraMoveStartedListener(this);
+        mMap.setOnCameraIdleListener(this);
     }
 
 
@@ -1431,15 +1433,25 @@ public class MapsActivity extends AppCompatActivity
             if (reason == REASON_GESTURE)
                 requester.setCameraFollowing(false);
 
-            requester.onCameraChange(mMap.getCameraPosition());
-
         }
 
         if (detailsFragment != null && detailsFragment.isResumed())
             detailsFragment.onCameraUpdate();
 
 
-        Log.v(TAG, "onCameraChange");
+        Log.v(TAG, "onCameraMoveStarted");
+    }
+
+
+    @Override
+    public void onCameraIdle() {
+        if (mMap == null) return;
+
+        for (CameraUpdateRequester requester : cameraUpdateRequesterList) {
+            requester.onCameraChange(mMap.getCameraPosition());
+        }
+
+        Log.v(TAG, "onCameraMove");
     }
 
     @Override
