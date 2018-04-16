@@ -223,6 +223,8 @@ public class NavigationDrawerFragment extends Fragment {
                 .whereEqualTo("owner", currentUser.getUid())
                 .addSnapshotListener((snapshot, e) -> {
 
+                    if(snapshot == null) return;
+
                     List<Car> cars = new ArrayList<>();
                     for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
                         Car car = Car.fromFirestore(documentSnapshot);

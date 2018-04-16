@@ -719,6 +719,8 @@ public class MapsActivity extends AppCompatActivity
         carListener = db.collection("cars")
                 .whereEqualTo("owner", currentUser.getUid())
                 .addSnapshotListener((snapshot, e) -> {
+                    if(snapshot == null) return;
+
                     for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
                         Car car = Car.fromFirestore(documentSnapshot);
                         ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);

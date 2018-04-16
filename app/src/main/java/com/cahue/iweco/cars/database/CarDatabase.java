@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.model.PossibleSpot;
@@ -168,6 +169,7 @@ public class CarDatabase {
                     firestore.collection("cars").document(carId).get().addOnCompleteListener(o -> {
                         if (o.isSuccessful()) {
                             Car car = Car.fromFirestore(o.getResult());
+                            CarsSync.postCar(car); // TODO: to be removed
                             if (carUpdateListener != null)
                                 carUpdateListener.onCarUpdated(car);
                         } else {
@@ -254,34 +256,6 @@ public class CarDatabase {
         Map<String, Object> updates = new HashMap<>();
         updates.put("parked_at", FieldValue.delete());
         firestore.collection("cars").document(carId).update(updates);
-
-//        final DocumentReference carDocRef = firestore.collection("cars").document(carId);
-//        firestore.runTransaction(new Transaction.Function<Double>() {
-//            @Override
-//            public Double apply(Transaction transaction) throws FirebaseFirestoreException {
-//                DocumentSnapshot snapshot = transaction.get(carDocRef);
-//                HashMap<String, Object> currentlyParkedAt = (HashMap<String, Object>) snapshot.get("parked_at");
-//                if (newPopulation <= 1000000) {
-//                    transaction.update(carDocRef, "parked_at", newPopulation);
-//                    return newPopulation;
-//                } else {
-//                    throw new FirebaseFirestoreException("Population too high",
-//                            FirebaseFirestoreException.Code.ABORTED);
-//                }
-//            }
-//        }).addOnSuccessListener(new OnSuccessListener<Double>() {
-//            @Override
-//            public void onSuccess(Double result) {
-//                Log.d(TAG, "Transaction success: " + result);
-//            }
-//        })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.w(TAG, "Transaction failure.", e);
-//                    }
-//                });
-
     }
 
 

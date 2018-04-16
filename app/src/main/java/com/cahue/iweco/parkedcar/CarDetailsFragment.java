@@ -85,6 +85,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
 
         listenerRegistration = documentReference.addSnapshotListener((documentSnapshot, e) -> {
+            if (documentSnapshot == null) return;
             car = Car.fromFirestore(documentSnapshot);
             updateLayout(car);
         });

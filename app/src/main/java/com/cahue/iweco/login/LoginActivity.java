@@ -1,8 +1,10 @@
 package com.cahue.iweco.login;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -11,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.solver.widgets.Snapshot;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +21,8 @@ import android.widget.Toast;
 
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
+import com.cahue.iweco.auth.Authenticator;
+import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.tutorial.TutorialActivity;
@@ -84,6 +89,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     private GoogleCloudMessaging gcm;
 
+    private AccountManager mAccountManager;
+
     // This is the helper object that connects to Google Play Services.
     private GoogleApiClient mGoogleApiClient;
 
@@ -107,6 +114,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         super.onCreate(savedInstanceState);
 
         gcm = GoogleCloudMessaging.getInstance(this);
+        mAccountManager = AccountManager.get(this);
 
         setContentView(R.layout.activity_login);
 
@@ -282,6 +290,46 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Util.showBlueToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
+    private void finalizeLogin(@NonNull Intent intent, @NonNull LoginResultBean loginResult, @NonNull LoginType type) {
+
+        String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+
+        final Account account = new Account(accountName, intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
+
+        String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+        String refreshToken = intent.getStringExtra(AccountManager.KEY_PASSWORD);
+        String authTokenType = getString(R.string.account_type);
+
+        // Creating the account on the device and setting the auth token we got
+        // (Not setting the auth token will cause another call to the server to authenticate the user)
+        Bundle bundle = new Bundle();
+        bundle.putString(Authenticator.USER_ID, loginResult.userId);
+        bundle.putString(Authenticator.LOGIN_TYPE, type.toString());
+        bundle.putLong(Authenticator.LOGIN_DATE, System.currentTimeMillis());
+
+        AuthUtils.setLoginDate(this, System.currentTimeMillis());
+
+        mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
+        mAccountManager.setAuthToken(account, authTokenType, authToken);
+
+        // Inform the system that this account supports sync
+        ContentResolver.setIsSyncable(account, getString(R.string.content_authority), 1);
+        // Inform the system that this account is eligible for auto sync when the network is up
+        ContentResolver.setSyncAutomatically(account, getString(R.string.content_authority), true);
+        // Recommend a schedule for automatic synchronization. The system may modify this based
+        // on other scheduled syncs and network utilization.
+//        ContentResolver.addPeriodicSync(
+//                account, CarsProvider.CONTENT_AUTHORITY, new Bundle(), CarsProvider.SYNC_FREQUENCY);
+
+
+        // set default miles use
+        PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
+
+        setResult(RESULT_OK, intent);
+
+        goToNextActivity();
+    }
+
     @Override
     public void onBackEndLogin(@NonNull LoginResultBean loginResult, @NonNull LoginType type) {
 
@@ -290,12 +338,33 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
 
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        Bundle fbBundle = new Bundle();
+        fbBundle.putString("type", type == LoginType.Facebook ? "facebook" : "google");
+        firebaseAnalytics.logEvent("login", fbBundle);
+
+
+        String accountName = !TextUtils.isEmpty(loginResult.email) ? loginResult.email : loginResult.userId;
+
+        final Account account = new Account(accountName, getString(R.string.account_type));
+
+        String authToken = loginResult.authToken;
+        String refreshToken = loginResult.refreshToken;
+        String authTokenType = getString(R.string.account_type);
+
+        // Creating the account on the device and setting the auth token we got
+        // (Not setting the auth token will cause another call to the server to authenticate the user)
         Bundle bundle = new Bundle();
-        bundle.putString("type", type == LoginType.Facebook ? "facebook" : "google");
-        firebaseAnalytics.logEvent("login", bundle);
+        bundle.putString(Authenticator.USER_ID, loginResult.userId);
+        bundle.putString(Authenticator.LOGIN_TYPE, type.toString());
+        bundle.putLong(Authenticator.LOGIN_DATE, System.currentTimeMillis());
 
+        mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
+        mAccountManager.setAuthToken(account, authTokenType, authToken);
 
-        finalizeLogin(type);
+        if (type == LoginType.Google)
+            firebaseAuthWithGoogle(googleAccessToken);
+        else
+            firebaseAuthWithFacebook(facebookAccessToken);
 
     }
 
@@ -424,14 +493,6 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         mGoogleApiClient.disconnect();
     }
 
-
-    private void finalizeLogin(@NonNull LoginType type) {
-        if (type == LoginType.Google)
-            firebaseAuthWithGoogle(googleAccessToken);
-        else
-            firebaseAuthWithFacebook(facebookAccessToken);
-
-    }
 
     @Override
     public void onLoginError(String authToken, LoginType type) {
