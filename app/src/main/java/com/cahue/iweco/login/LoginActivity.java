@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.solver.widgets.Snapshot;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -52,6 +53,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
@@ -96,6 +98,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     private AccessToken facebookAccessToken;
     private GoogleSignInAccount googleAccessToken;
+    private String previousAnonymousUid;
 
 
     @Override
@@ -197,12 +200,16 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Bundle bundle = new Bundle();
         firebaseAnalytics.logEvent("skip_login", bundle);
 
+        if (firebaseAuth.getCurrentUser() != null) goToNextActivity();
+
+        setLoading(true);
+
         firebaseAuth.signInAnonymously().addOnCompleteListener(this, task -> {
+
             if (task.isSuccessful()) {
                 // Sign in success, update UI with the signed-in user's information
                 Log.d(TAG, "signInWithCredential:success");
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                saveFirebaseUser(user);
+                goToNextActivity();
             } else {
                 // If sign in fails, display a message to the user.
                 Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -213,7 +220,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     public void goToNextActivity() {
         if (isFinishing()) return;
-        Intent intent = new Intent(this, PreferencesUtil.isTutorialShown(this) ? MapsActivity.class : TutorialActivity.class);
+        boolean tutorialShown = PreferencesUtil.isTutorialShown(this);
+        Intent intent = new Intent(this, tutorialShown ? MapsActivity.class : TutorialActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         finish();
@@ -458,29 +466,72 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     AuthCredential facebookPendingCredential = null;
 
     private void firebaseLogin(AuthCredential credential) {
-        firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "signInWithCredential:success");
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        if (facebookPendingCredential == null) {
-                            saveFirebaseUser(user);
-                        } else{
-                            user.linkWithCredential(facebookPendingCredential).addOnCompleteListener(task1 -> saveFirebaseUser(user));
-                        }
-                    } else {
-                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
-                            setLoading(false);
-                            facebookPendingCredential = credential;
-                            Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
+
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null)
+            firebaseAuth.signInWithCredential(credential)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential:success");
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            if (facebookPendingCredential == null) {
+                                saveFirebaseUser(user);
+                            } else {
+                                user.linkWithCredential(facebookPendingCredential).addOnCompleteListener(task1 -> saveFirebaseUser(user));
+                            }
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            onError();
+                            if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                setLoading(false);
+                                facebookPendingCredential = credential;
+                                Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Log.w(TAG, "signInWithCredential:failure", task.getException());
+                                onError();
+                            }
                         }
-                    }
-                });
+                    });
+        else { // previous anonymous user existed
+
+            previousAnonymousUid = currentUser.getUid();
+
+            currentUser.linkWithCredential(credential)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential:success");
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            if (facebookPendingCredential == null) {
+                                saveFirebaseUser(user);
+                            } else {
+                                user.linkWithCredential(facebookPendingCredential).addOnCompleteListener(task1 -> saveFirebaseUser(user));
+                            }
+
+
+                        } else {
+                            Log.e(TAG, "signInWithCredential:error " + task.getException());
+
+                            currentUser.delete();
+                            firebaseAuth.signOut();
+                            firebaseLogin(credential);
+                        }
+                    });
+
+        }
+    }
+
+    private void migratePreviousAnonymousCars(String newUid) {
+
+        FirebaseFirestore.getInstance().collection("cars").whereEqualTo("owner", previousAnonymousUid).get().addOnCompleteListener(t -> {
+            QuerySnapshot carsSnapshot = t.getResult();
+            Map<String, Object> ownerUpdate = new HashMap<>();
+            ownerUpdate.put("owner", newUid);
+            for (DocumentSnapshot snapshot : carsSnapshot.getDocuments()) {
+                snapshot.getReference().update(ownerUpdate);
+            }
+        });
+
     }
 
     private void saveFirebaseUser(FirebaseUser firebaseUser) {
@@ -503,6 +554,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                     Log.w(TAG, "Error adding document", e);
                     onError();
                 });
+
+        migratePreviousAnonymousCars(firebaseUser.getUid());
     }
 
     CarDatabase carDatabase = CarDatabase.getInstance();

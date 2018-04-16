@@ -125,7 +125,7 @@ public class NavigationDrawerFragment extends Fragment {
         emailTextView = mRootView.findViewById(R.id.email);
 
         signInButton = mRootView.findViewById(R.id.sign_in_button);
-        signInButton.setOnClickListener(v -> navigation.signOutAndGoToLoginScreen(true));
+        signInButton.setOnClickListener(v -> navigation.signOutAndGoToLoginScreen(false));
 
         /**
          * RecyclerView

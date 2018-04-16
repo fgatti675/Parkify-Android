@@ -24,6 +24,7 @@ import com.cahue.iweco.R;
 import com.cahue.iweco.cars.CarManagerFragment;
 import com.cahue.iweco.cars.EditCarDialog;
 import com.cahue.iweco.model.Car;
+import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 
 
@@ -60,6 +61,8 @@ public class TutorialActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        PreferencesUtil.setTutorialShown(this, true);
 
         setContentView(R.layout.activity_tutorial);
 

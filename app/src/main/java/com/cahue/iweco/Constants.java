@@ -8,7 +8,7 @@ public class Constants {
     /**
      * Minimum desired accuracy
      */
-    public final static int ACCURACY_THRESHOLD_M = 25;
+    public final static int ACCURACY_THRESHOLD_M = 30;
 
     /**
      * Only post locations if the car has stopped for at least a few minutes

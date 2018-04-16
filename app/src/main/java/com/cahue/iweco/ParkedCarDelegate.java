@@ -108,6 +108,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
         carListener = firebaseFirestore.collection("cars")
                 .document(carId)
                 .addSnapshotListener((snapshot, e) -> {
+                    if(snapshot == null) return; // this may happen on logout
                     update(Car.fromFirestore(snapshot), true);
                     if (isActive) activate();
                     else Log.v(TAG, "car update: not active");

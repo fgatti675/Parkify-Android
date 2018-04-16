@@ -47,33 +47,56 @@ import java.util.List;
 public abstract class AbstractLocationUpdatesBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "LUBroadcastReceiver";
+    public static final int MINIMUM_ACCURACY = 30;
+    public static final long MAX_DURATION = 20 * 1000;
     private Intent intent;
     private Location location = null;
     private Date startTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
         this.intent = intent;
+
+
         if (intent != null) {
 
             final String action = intent.getAction();
 
             LocationResult result = LocationResult.extractResult(intent);
 
+            // TODO: change to extras when this is fixed: https://issuetracker.google.com/issues/37013793
+            Bundle extras = new Bundle();
+            Uri data = intent.getData();
+            startTime = new Date(Long.parseLong(data.getQueryParameter("startTime")));
+
+            long elapsedTime = new Date().getTime() - startTime.getTime();
+            extras.putSerializable(Constants.EXTRA_START_TIME, startTime);
+
             if (result != null) {
-//                onLocationChanged(context, action, intent.getBundleExtra(Constants.EXTRA_BUNDLE), result.getLocations());
-                // TODO: change to extras when this is fixed: https://issuetracker.google.com/issues/37013793
-                Bundle bundle = new Bundle();
-                Uri data = intent.getData();
-                startTime = new Date(Long.parseLong(data.getQueryParameter("startTime")));
-                bundle.putSerializable(Constants.EXTRA_START_TIME, startTime);
                 String carId = data.getQueryParameter("car");
-                bundle.putString(Constants.EXTRA_CAR_ID, carId);
-                onLocationChanged(context, action, bundle, result.getLocations());
+                extras.putString(Constants.EXTRA_CAR_ID, carId);
+                onLocationChanged(context, action, extras, result.getLocations());
+
+                if (elapsedTime > MAX_DURATION) {
+                    if (location != null)
+                        notifyFixLocationAndStop(context, extras, action, location);
+                }
+
             } else {
-                Log.e(TAG, "No location result");
+                Log.w(TAG, "No location result");
             }
+
+
+            if (elapsedTime > MAX_DURATION) {
+                if (location == null)
+                    Log.w(TAG, "Timed out and no location");
+            }
+
+            Log.d(TAG, "elapsed time: " + elapsedTime);
+
         }
+
     }
 
 
@@ -91,7 +114,10 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
             return;
         }
 
-        notifyFixLocationAndStop(context, extras, action, location);
+        if (location.hasAccuracy() && location.getAccuracy() < MINIMUM_ACCURACY) {
+            notifyFixLocationAndStop(context, extras, action, location);
+        }
+
 
     }
 
@@ -109,6 +135,10 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
         if (!notified)
             onPreciseFixPolled(context, location, extras);
         notified = true;
+        stop(context, action);
+    }
+
+    private void stop(Context context, String action) {
         new LocationUpdatesHelper(context, action).stopLocationUpdates(intent);
     }
 

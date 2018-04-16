@@ -136,7 +136,7 @@ public class PreferencesUtil {
                 .remove(PREF_IWECO_PROMO_DATE)
                 .remove(PREF_FACEBOOK_INVITES_DIALOG_SHOWN)
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
-                .remove(PREF_TUTORIAL_SHOWN)
+//                .remove(PREF_TUTORIAL_SHOWN)
                 .remove(PREF_LONG_CLICK_SHOWN)
                 .apply();
     }

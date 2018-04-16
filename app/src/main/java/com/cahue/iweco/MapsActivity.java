@@ -365,7 +365,7 @@ public class MapsActivity extends AppCompatActivity
          */
         ActivityRecognitionService.startCheckingActivityRecognition(this);
 
-//        if (!PreferencesUtil.isFirebaseMigrationDone(this) && !skippedLogin)
+        if (!PreferencesUtil.isFirebaseMigrationDone(this) && !skippedLogin)
             firebaseMigration();
 
 
@@ -435,7 +435,7 @@ public class MapsActivity extends AppCompatActivity
                 .whereEqualTo("owner", currentUser.getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if(!queryDocumentSnapshots.isEmpty())
+                    if (!queryDocumentSnapshots.isEmpty())
                         checkForPurchases(billingFragment);
                 });
     }
@@ -1248,7 +1248,8 @@ public class MapsActivity extends AppCompatActivity
      */
     public void signOutAndGoToLoginScreen(boolean resetPreferences) {
 
-        firebaseAuth.signOut();
+        if (!currentUser.isAnonymous())
+            firebaseAuth.signOut();
 
         // Facebook disconnect
         final LoginManager loginManager = LoginManager.getInstance();
