@@ -8,7 +8,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,7 +26,7 @@ public class LoginResultBean {
 
     String facebookId;
 
-    Set<Car> cars = new HashSet<>();
+    List<Car> cars = new ArrayList<>();
 
     String refreshToken;
 

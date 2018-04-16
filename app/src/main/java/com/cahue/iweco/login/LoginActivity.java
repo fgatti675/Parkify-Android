@@ -62,6 +62,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,7 +102,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     private FirebaseAnalytics firebaseAnalytics;
 
-    private Set<Car> legacyCars;
+    private List<Car> legacyCars;
 
     private AccessToken facebookAccessToken;
     private GoogleSignInAccount googleAccessToken;
@@ -217,7 +218,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
             if (task.isSuccessful()) {
                 // Sign in success, update UI with the signed-in user's information
                 Log.d(TAG, "signInWithCredential:success");
-                goToNextActivity();
+                legacyCars = carDatabase.retrieveCarsDatabase(LoginActivity.this, false);
+                migrateToFirestore();
             } else {
                 // If sign in fails, display a message to the user.
                 Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -290,50 +292,10 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
         Util.showBlueToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
-    private void finalizeLogin(@NonNull Intent intent, @NonNull LoginResultBean loginResult, @NonNull LoginType type) {
-
-        String accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-
-        final Account account = new Account(accountName, intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-
-        String authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN);
-        String refreshToken = intent.getStringExtra(AccountManager.KEY_PASSWORD);
-        String authTokenType = getString(R.string.account_type);
-
-        // Creating the account on the device and setting the auth token we got
-        // (Not setting the auth token will cause another call to the server to authenticate the user)
-        Bundle bundle = new Bundle();
-        bundle.putString(Authenticator.USER_ID, loginResult.userId);
-        bundle.putString(Authenticator.LOGIN_TYPE, type.toString());
-        bundle.putLong(Authenticator.LOGIN_DATE, System.currentTimeMillis());
-
-        AuthUtils.setLoginDate(this, System.currentTimeMillis());
-
-        mAccountManager.addAccountExplicitly(account, refreshToken, bundle);
-        mAccountManager.setAuthToken(account, authTokenType, authToken);
-
-        // Inform the system that this account supports sync
-        ContentResolver.setIsSyncable(account, getString(R.string.content_authority), 1);
-        // Inform the system that this account is eligible for auto sync when the network is up
-        ContentResolver.setSyncAutomatically(account, getString(R.string.content_authority), true);
-        // Recommend a schedule for automatic synchronization. The system may modify this based
-        // on other scheduled syncs and network utilization.
-//        ContentResolver.addPeriodicSync(
-//                account, CarsProvider.CONTENT_AUTHORITY, new Bundle(), CarsProvider.SYNC_FREQUENCY);
-
-
-        // set default miles use
-        PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
-
-        setResult(RESULT_OK, intent);
-
-        goToNextActivity();
-    }
-
     @Override
     public void onBackEndLogin(@NonNull LoginResultBean loginResult, @NonNull LoginType type) {
 
-        legacyCars = new HashSet<>(loginResult.cars);
+        legacyCars = new ArrayList<>(loginResult.cars);
 
         Tracking.sendEvent(Tracking.CATEGORY_LOGIN, Tracking.ACTION_DO_LOGIN, type == LoginType.Facebook ? Tracking.LABEL_FACEBOOK_LOGIN : Tracking.LABEL_GOOGLE_LOGIN);
 

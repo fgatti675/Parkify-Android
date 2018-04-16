@@ -94,4 +94,9 @@
     <string name="motion_recognition_instructions">Parkify rileverà quando si parcheggia</string>
     <string name="clear_all_spot">Elimina tutte le posizioni possibili</string>
 
+
+    <string name="open_the_app">Devi riaprire l\'app</string>
+    <string name="open_the_app_long">Stiamo apportando alcune modifiche che richiedono l\'apertura dell\'app per continuare. Promettiamo che sarà fantastico in futuro.<working> </working></string>
+
+
 </resources>

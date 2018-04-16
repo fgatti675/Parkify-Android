@@ -70,7 +70,7 @@
     <string name="and_remove_ads">And remove ads!</string>
 
     <string name="rating_message">You would really help us if you gave us a good rating in the Play Store :)</string>
-    <string name="like_question" >Do you like this app?</string>
+    <string name="like_question">Do you like this app?</string>
     <string name="rate">Rate</string>
 
     <string name="invite_title">Invite your friends</string>
@@ -85,7 +85,7 @@
     <string name="car_location_registered">\"%s\" location registered at Parkify!</string>
 
     <string name="public_parking">Public parking</string>
-    <string name="car_was_here_share" >%1$s is here (%2$s)</string>
+    <string name="car_was_here_share">%1$s is here (%2$s)</string>
     <string name="terms_of_use">Terms of use</string>
 
     <string name="just_parked_channel_description">Parking event detected by Bluetooth</string>
@@ -94,5 +94,8 @@
     <string name="motion_recognition_in_progress">Motion recognition in progress</string>
     <string name="motion_recognition_instructions">Parkify will detect when you park</string>
     <string name="stop">Stop</string>
+
+    <string name="open_the_app">You need to open the app</string>
+    <string name="open_the_app_long">We are making some changes under the hood that requires that you open the app to continue. We promise it will be awesome in the future.<working> </working></string>
 
 </resources>

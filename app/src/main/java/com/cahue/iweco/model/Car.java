@@ -15,9 +15,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,9 +75,9 @@ public class Car implements Parcelable {
     }
 
     @NonNull
-    public static Set<Car> fromJSONArray(@NonNull JSONArray carsArray) {
+    public static List<Car> fromJSONArray(@NonNull JSONArray carsArray) {
         try {
-            Set<Car> cars = new HashSet<>();
+            List<Car> cars = new ArrayList<>();
             for (int i = 0; i < carsArray.length(); i++) {
 
                 JSONObject carJSON = carsArray.getJSONObject(i);
@@ -153,11 +155,11 @@ public class Car implements Parcelable {
         return id.equals(car.id);
 
     }
-
-    @Override
-    public int hashCode() {
-        return legacy_id.hashCode();
-    }
+//
+//    @Override
+//    public int hashCode() {
+//        return legacy_id.hashCode();
+//    }
 
     @NonNull
     @Override

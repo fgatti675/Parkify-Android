@@ -93,4 +93,7 @@
     <string name="motion_recognition_instructions">Parkify detectará cuando aparques</string>
     <string name="clear_all_spot">Borrar todas las ubicaciones posibles</string>
 
+    <string name="open_the_app">Es necesario abrir la app</string>
+    <string name="open_the_app_long">Estamos realizando algunos cambios bajo el capó que requieren que abras la aplicación para continuar. Prometemos que será increíble en el futuro.<working> </working></string>
+
 </resources>
