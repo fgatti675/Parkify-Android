@@ -10,8 +10,8 @@ android {
         minSdkVersion 24
         targetSdkVersion 27
         applicationId "com.whereismycar"
-        versionCode 88
-        versionName "3.10.2"
+        versionCode 89
+        versionName "3.10.3"
         buildConfigField "String", "BACKEND_URL", "\"glossy-radio.appspot.com\""
 
     }
