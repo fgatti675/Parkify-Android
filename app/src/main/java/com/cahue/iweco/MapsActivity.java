@@ -68,9 +68,11 @@ import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
 import com.cahue.iweco.spots.ParkingSpotSender;
+import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.AdError;
@@ -373,31 +375,41 @@ public class MapsActivity extends AppCompatActivity
 
     private void firebaseMigration() {
 
-        mAccountManager = AccountManager.get(this);
-        final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
+        try {
 
-        if (availableAccounts.length > 0) {
+            mAccountManager = AccountManager.get(this);
+            final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
 
-            Account account = availableAccounts[0];
-            String userId = mAccountManager.getUserData(account, Authenticator.USER_ID);
-            Tracking.setTrackerUserId(userId);
-            FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+            if (availableAccounts.length > 0) {
 
-            if (firebaseUser != null) {
-                Map<String, Object> user = new HashMap<>();
-                user.put("email", firebaseUser.getEmail());
-                user.put("name", firebaseUser.getDisplayName());
-                user.put("photo_url", firebaseUser.getPhotoUrl().toString());
-                user.put("legacy_id", userId);
-                db.collection("users")
-                        .document(firebaseUser.getUid())
-                        .set(user, SetOptions.merge())
-                        .addOnSuccessListener(aVoid -> {
-                            Log.d(TAG, "Firebase migration completed");
-                            PreferencesUtil.setFirebaseMigrationDone(this, true);
-                        })
-                        .addOnFailureListener(e -> Log.w(TAG, "Migration error", e));
+                Account account = availableAccounts[0];
+                String userId = mAccountManager.getUserData(account, Authenticator.USER_ID);
+                Tracking.setTrackerUserId(userId);
+                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+
+                if (firebaseUser != null) {
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("email", firebaseUser.getEmail());
+                    user.put("name", firebaseUser.getDisplayName());
+                    user.put("photo_url", firebaseUser.getPhotoUrl().toString());
+                    user.put("legacy_id", userId);
+                    db.collection("users")
+                            .document(firebaseUser.getUid())
+                            .set(user, SetOptions.merge())
+                            .addOnSuccessListener(aVoid -> {
+                                try {
+                                    Log.d(TAG, "Firebase migration completed");
+                                    PreferencesUtil.setFirebaseMigrationDone(this, true);
+                                } catch (Exception e) {
+                                    Crashlytics.logException(e);
+                                }
+                            })
+                            .addOnFailureListener(e -> Log.w(TAG, "Migration error", e));
+                }
             }
+
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
@@ -719,10 +731,14 @@ public class MapsActivity extends AppCompatActivity
         carListener = db.collection("cars")
                 .whereEqualTo("owner", currentUser.getUid())
                 .addSnapshotListener((snapshot, e) -> {
-                    if(snapshot == null) return;
+                    if (snapshot == null) return;
 
                     for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
                         Car car = Car.fromFirestore(documentSnapshot);
+                        if (car.location != null && car.address == null) {
+                            Log.d(TAG, "Car fetched with no address");
+                            updateCarLocationAddress(car);
+                        }
                         ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
                         if (mMap != null)
                             parkedCarDelegate.setMap(mMap);
@@ -775,6 +791,21 @@ public class MapsActivity extends AppCompatActivity
         }
 
         Log.d("App speed", "On resume init time : " + (System.currentTimeMillis() - initTime));
+    }
+
+    private void updateCarLocationAddress(Car car) {
+        FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
+        fetchAddressDelegate.fetch(this, car.location, new FetchAddressDelegate.Callbacks() {
+            @Override
+            public void onAddressFetched(String address) {
+                carDatabase.updateAddress(car.id, address);
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
     }
 
     @Override

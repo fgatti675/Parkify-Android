@@ -82,9 +82,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
         parkedCarDelegate = (ParkedCarDelegate) getFragmentManager().findFragmentByTag(ParkedCarDelegate.getFragmentTag(carId));
 
-        DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
-
-        listenerRegistration = documentReference.addSnapshotListener((documentSnapshot, e) -> {
+        DocumentReference carReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
+        listenerRegistration = carReference.addSnapshotListener((documentSnapshot, e) -> {
             if (documentSnapshot == null) return;
             car = Car.fromFirestore(documentSnapshot);
             updateLayout(car);
@@ -112,6 +111,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
 
         carViewHolder.bind(getActivity(), car, userLocation, BluetoothAdapter.getDefaultAdapter());
+        carViewHolder.toolbar.getMenu().findItem(R.id.action_share).setVisible(true);
 
         updateFollowButtonState();
     }
@@ -128,6 +128,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
         carViewHolder.toolbar.inflateMenu(R.menu.parked_car_menu);
         carViewHolder.toolbar.setOnMenuItemClickListener(this);
+        carViewHolder.toolbar.getMenu().findItem(R.id.action_share).setVisible(false);
 
         return view;
     }

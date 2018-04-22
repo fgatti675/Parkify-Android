@@ -37,7 +37,7 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
     private GoogleApiClient mGeofenceApiClient;
 
-    private void clearGeofence(Context context, @NonNull final Car car) {
+    private void clearGeofence(Context context, @NonNull final String carId) {
         mGeofenceApiClient = new GoogleApiClient.Builder(context)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -46,7 +46,7 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
                         LocationServices.GeofencingApi.removeGeofences(
                                 mGeofenceApiClient,
-                                Arrays.asList(car.id)
+                                Arrays.asList(carId)
                         );
                         Log.d(TAG, "Geofence removed");
                     }
@@ -73,26 +73,11 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
             Car car = Car.fromFirestore(documentSnapshot);
 
-            /**
-             * If the accuracy is not good enough, we can check the previous location of the car
-             * and if it's close and more accurate, we use it.
-             */
-            Location location = spotLocation;
-            if (location.getAccuracy() > Constants.ACCURACY_THRESHOLD_M) {
-                if (car.location != null && car.location.distanceTo(location) < Constants.ACCURACY_THRESHOLD_M)
-                    location = car.location;
-            }
+            ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, car);
+            Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
 
-            /**
-             * If it's accurate enough we notify
-             */
-            if (location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-                ParkingSpotSender.doPostSpotLocation(context, location, false, car);
-                Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
-            }
-
-            carDatabase.removeCarLocation(car.id);
-            clearGeofence(context, car);
+            carDatabase.removeCarLocation(carId);
+            clearGeofence(context, carId);
 
             Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
 

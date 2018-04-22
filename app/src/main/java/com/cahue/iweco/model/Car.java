@@ -196,7 +196,7 @@ public class Car implements Parcelable {
     }
 
     public boolean isOther() {
-        return legacy_id.equals(OTHER_ID);
+        return legacy_id != null && legacy_id.equals(OTHER_ID);
     }
 
 
