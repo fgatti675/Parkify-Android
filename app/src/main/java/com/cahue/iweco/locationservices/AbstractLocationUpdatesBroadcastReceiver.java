@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.cahue.iweco.Constants;
 import com.google.android.gms.location.LocationResult;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Date;
 import java.util.List;
@@ -47,11 +48,10 @@ import java.util.List;
 public abstract class AbstractLocationUpdatesBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "LUBroadcastReceiver";
-    public static final int MINIMUM_ACCURACY = 30;
+    public static final int MINIMUM_ACCURACY = 25;
     public static final long MAX_DURATION = 20 * 1000;
     private Intent intent;
     private Location location = null;
-    private Date startTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -68,7 +68,7 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
             // TODO: change to extras when this is fixed: https://issuetracker.google.com/issues/37013793
             Bundle extras = new Bundle();
             Uri data = intent.getData();
-            startTime = new Date(Long.parseLong(data.getQueryParameter("startTime")));
+            Date startTime = new Date(Long.parseLong(data.getQueryParameter("startTime")));
 
             long elapsedTime = new Date().getTime() - startTime.getTime();
             extras.putSerializable(Constants.EXTRA_START_TIME, startTime);
@@ -77,20 +77,23 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
                 String carId = data.getQueryParameter("car");
                 extras.putString(Constants.EXTRA_CAR_ID, carId);
                 onLocationChanged(context, action, extras, result.getLocations());
-
-                if (elapsedTime > MAX_DURATION) {
-                    if (location != null)
-                        notifyFixLocationAndStop(context, extras, action, location);
-                }
-
             } else {
                 Log.w(TAG, "No location result");
             }
 
-
             if (elapsedTime > MAX_DURATION) {
-                if (location == null)
+
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("has_location", location != null);
+                firebaseAnalytics.logEvent("location_timed_out", bundle);
+
+                if (location == null) {
                     Log.w(TAG, "Timed out and no location");
+                    stop(context, action);
+                } else {
+                    notifyFixLocationAndStop(context, extras, action, location);
+                }
             }
 
             Log.d(TAG, "elapsed time: " + elapsedTime);
@@ -129,13 +132,21 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
      * @param location
      */
     private void notifyFixLocationAndStop(Context context, Bundle extras, String action, @NonNull Location location) {
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        Bundle bundle = new Bundle();
+        bundle.putInt("accuracy", (int) location.getAccuracy());
+        firebaseAnalytics.logEvent("location_polled", bundle);
+
         Log.i(TAG, "Notifying location polled: " + location);
         Date startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
         Log.i(TAG, "\tafter " + (System.currentTimeMillis() - startTime.getTime()) + " ms");
         if (!notified)
             onPreciseFixPolled(context, location, extras);
         notified = true;
+
         stop(context, action);
+
     }
 
     private void stop(Context context, String action) {
