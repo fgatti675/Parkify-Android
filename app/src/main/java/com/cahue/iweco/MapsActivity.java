@@ -391,7 +391,8 @@ public class MapsActivity extends AppCompatActivity
                     Map<String, Object> user = new HashMap<>();
                     user.put("email", firebaseUser.getEmail());
                     user.put("name", firebaseUser.getDisplayName());
-                    user.put("photo_url", firebaseUser.getPhotoUrl().toString());
+                    if (firebaseUser.getPhotoUrl() != null)
+                        user.put("photo_url", firebaseUser.getPhotoUrl().toString());
                     user.put("legacy_id", userId);
                     db.collection("users")
                             .document(firebaseUser.getUid())

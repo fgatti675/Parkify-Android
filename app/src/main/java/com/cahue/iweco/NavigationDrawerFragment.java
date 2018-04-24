@@ -223,7 +223,7 @@ public class NavigationDrawerFragment extends Fragment {
                 .whereEqualTo("owner", currentUser.getUid())
                 .addSnapshotListener((snapshot, e) -> {
 
-                    if(snapshot == null) return;
+                    if (snapshot == null) return;
 
                     List<Car> cars = new ArrayList<>();
                     for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
@@ -296,30 +296,21 @@ public class NavigationDrawerFragment extends Fragment {
             usernameTextView.setVisibility(View.GONE);
             emailTextView.setVisibility(View.GONE);
             signInButton.setVisibility(View.VISIBLE);
-        }
-
-        else {
+        } else {
 
             usernameTextView.setVisibility(View.VISIBLE);
             emailTextView.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
 
-            // in case it is being loaded in the background
-            if (currentUser == null)
-                return;
-
             usernameTextView.setText(currentUser.getDisplayName());
             emailTextView.setText(currentUser.getEmail());
-            String profilePicURL = currentUser.getPhotoUrl().toString();
+            String profilePicURL = currentUser.getPhotoUrl() != null ? currentUser.getPhotoUrl().toString() : null;
 
             if (profilePicURL != null) {
                 RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
-                ImageRequest profilePicRequest = new ImageRequest(profilePicURL, new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        userImage.setImageBitmap(response);
-                    }
-                }, 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
+                ImageRequest profilePicRequest = new ImageRequest(profilePicURL,
+                        response ->
+                                userImage.setImageBitmap(response), 0, 0, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, null);
                 Cache.Entry entry = new Cache.Entry();
                 entry.ttl = 24 * 60 * 60 * 1000;
                 profilePicRequest.setCacheEntry(entry);
