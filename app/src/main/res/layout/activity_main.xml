@@ -53,15 +53,17 @@
                     android:layout_marginStart="@dimen/small_padding"
                     android:layout_toEndOf="@id/navigation_drawer_toggle" />
 
-                <FrameLayout
-                    android:id="@+id/ad_mob_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginTop="-24dp"
-                    android:layout_toEndOf="@id/navigation_drawer_toggle"
+                <com.google.android.gms.ads.AdView
+                    android:id="@+id/adMobView"
+                    android:layout_marginStart="@dimen/small_padding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
                     android:visibility="gone"
-                    tools:visibility="visible" />
+                    android:layout_marginEnd="@dimen/default_padding"
+                    app:adSize='BANNER'
+                    app:adUnitId='ca-app-pub-7749631063131885/9575761178'
+                    />
 
                 <Button
                     android:id="@+id/no_cars_button"

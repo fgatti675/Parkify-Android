@@ -25,9 +25,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +37,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -79,13 +76,9 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.AdListener;
 import com.facebook.ads.NativeAd;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.NativeExpressAdView;
-import com.google.android.gms.ads.formats.NativeAdOptions;
-import com.google.android.gms.ads.formats.NativeAppInstallAd;
-import com.google.android.gms.ads.formats.NativeContentAd;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -108,6 +101,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -195,11 +189,6 @@ public class MapsActivity extends AppCompatActivity
     private boolean cameraFollowing;
 
     /**
-     * The user didn't log in, but we still love him
-     */
-    private boolean skippedLogin;
-
-    /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
@@ -216,6 +205,7 @@ public class MapsActivity extends AppCompatActivity
     private DrawerLayout drawerLayout;
 
     private ViewGroup nativeAdContainer;
+    private AdView adMobView;
 
     @Nullable
     private BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
@@ -230,7 +220,6 @@ public class MapsActivity extends AppCompatActivity
 
     private RelativeLayout mainContainer;
 
-    private FrameLayout nativeExpressAbMobContainer;
     private ListenerRegistration carListener;
     private FirebaseUser currentUser;
 
@@ -240,6 +229,8 @@ public class MapsActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(this, "ca-app-pub-7749631063131885~9161270854");
 
         carDatabase = CarDatabase.getInstance();
 
@@ -260,7 +251,6 @@ public class MapsActivity extends AppCompatActivity
 
         Tracking.setTrackerUserId(currentUser.getUid());
 
-        skippedLogin = currentUser.isAnonymous();
 
         /*
          * Create a GoogleApiClient instance
@@ -357,19 +347,19 @@ public class MapsActivity extends AppCompatActivity
         checkLocationPermission();
 
 
-        nativeExpressAbMobContainer = findViewById(R.id.ad_mob_container);
         nativeAdContainer = findViewById(R.id.navite_ad_container);
-        nativeExpressAbMobContainer.setVisibility(View.GONE);
         nativeAdContainer.setVisibility(View.GONE);
+
+        adMobView = findViewById(R.id.adMobView);
+        adMobView.setVisibility(View.GONE);
 
         /*
          * Start activity recognition service (if enabled)
          */
         ActivityRecognitionService.startCheckingActivityRecognition(this);
 
-        if (!PreferencesUtil.isFirebaseMigrationDone(this) && !skippedLogin)
+        if (!PreferencesUtil.isFirebaseMigrationDone(this) && !currentUser.isAnonymous())
             firebaseMigration();
-
 
     }
 
@@ -455,6 +445,8 @@ public class MapsActivity extends AppCompatActivity
 
     private void checkForPurchases(final BillingFragment billingFragment) {
 
+        if (isFinishing()) return;
+
         billingFragment.checkPurchases(purchaseDataList -> {
             PreferencesUtil.setPurchasesCheked(MapsActivity.this, true);
 
@@ -465,8 +457,12 @@ public class MapsActivity extends AppCompatActivity
             if (shouldDisplayAd) {
                 firebaseAnalytics.setUserProperty("paying_user", "false");
 
-                setUpFacebookAd();
-//                    setUpAdMobAdNativeExpress();
+                FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+                if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
+                    setUpFacebookAd();
+                } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("admob")) {
+                    setUpAdMobBanner();
+                }
 
             } else {
                 firebaseAnalytics.setUserProperty("paying_user", "true");
@@ -479,11 +475,14 @@ public class MapsActivity extends AppCompatActivity
 
     private void hideAds() {
         nativeAdContainer.setVisibility(View.GONE);
-        nativeExpressAbMobContainer.setVisibility(View.GONE);
+        adMobView.setVisibility(View.GONE);
         facebookNativeAd.destroy();
     }
 
     private void setUpFacebookAd() {
+
+        adMobView.setVisibility(View.GONE);
+
         Log.d(TAG, "setUpFacebookAd");
         facebookNativeAd = new NativeAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
         facebookNativeAd.setAdListener(MapsActivity.this);
@@ -529,6 +528,9 @@ public class MapsActivity extends AppCompatActivity
             bindFacebookAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
         }
 
+        nativeAdContainer.setVisibility(View.VISIBLE);
+        adMobView.setVisibility(View.GONE);
+
     }
 
     /**
@@ -539,117 +541,45 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onError(Ad ad, AdError adError) {
         Log.d(TAG, "onAdError: ");
-        setUpAdMobAdNativeExpress();
+        setUpAdMobBanner();
     }
 
 
-    private void setUpAdMobAdNativeExpress() {
+    private void setUpAdMobBanner() {
+
         nativeAdContainer.setVisibility(View.GONE);
-        nativeExpressAbMobContainer.setVisibility(View.VISIBLE);
 
-        nativeExpressAbMobContainer.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        adMobView.setVisibility(View.VISIBLE);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adMobView.loadAd(adRequest);
+        adMobView.setAdListener(new com.google.android.gms.ads.AdListener() {
             @Override
-            public void onGlobalLayout() {
+            public void onAdClicked() {
+                Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "AdMob");
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+                Bundle bundle = new Bundle();
+                bundle.putString("provider", "admob");
+                bundle.putString("type", "banner");
+                firebaseAnalytics.logEvent("ad_clicked", bundle);
+            }
 
-                Log.d(TAG, "Displaying Admob native ad");
-                Display display = getWindowManager().getDefaultDisplay();
-                DisplayMetrics outMetrics = new DisplayMetrics();
-                display.getMetrics(outMetrics);
+            @Override
+            public void onAdImpression() {
+                Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "AdMob");
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+                Bundle bundle = new Bundle();
+                bundle.putString("provider", "admob");
+                bundle.putString("type", "banner");
+                firebaseAnalytics.logEvent("admob_ad_impression", bundle);
+            }
 
-                nativeExpressAbMobContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                NativeExpressAdView nativeExpressAdView = new NativeExpressAdView(MapsActivity.this);
-                int width = (int) (nativeExpressAbMobContainer.getWidth() / outMetrics.density);
-                nativeExpressAdView.setAdSize(new AdSize(width, 80));
-                nativeExpressAdView.setAdUnitId("ca-app-pub-7749631063131885/9014982450");
-                nativeExpressAdView.setAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdClosed() {
-                        super.onAdClosed();
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(int i) {
-                        Log.d(TAG, "onAdFailedToLoad");
-                        super.onAdFailedToLoad(i);
-                    }
-
-                    @Override
-                    public void onAdLeftApplication() {
-                        Log.d(TAG, "onAdLeftApplication");
-                        super.onAdLeftApplication();
-                    }
-
-                    @Override
-                    public void onAdOpened() {
-                        Log.d(TAG, "onAdOpened");
-                        super.onAdOpened();
-                    }
-
-                    @Override
-                    public void onAdLoaded() {
-                        Log.d(TAG, "onAdLoaded");
-                        super.onAdLoaded();
-                    }
-                });
-
-                AdRequest request = new AdRequest.Builder()
-                        .addTestDevice("978CFEF27A71410CEFEED093CC2599DA")
-                        .setLocation(getUserLocation()).build();
-                nativeExpressAdView.loadAd(request);
-
-                nativeExpressAbMobContainer.removeAllViews();
-                nativeExpressAbMobContainer.addView(nativeExpressAdView);
+            @Override
+            public void onAdFailedToLoad(int i) {
+                adMobView.setVisibility(View.GONE);
+                setUpFacebookAd();
             }
         });
-
-    }
-
-    private void setUpAdMobAdNative() {
-        // Create native UI using the ad metadata.
-        final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
-        final TextView nativeAdTitle = nativeAdContainer.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
-        nativeAdBody.setSelected(true);
-        final Button nativeAdCallToAction = nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
-        final ViewGroup adChoicesWrap = nativeAdContainer.findViewById(R.id.ad_choices_wrap);
-        nativeAdContainer.setVisibility(View.VISIBLE);
-
-        AdLoader adLoader = new AdLoader.Builder(MapsActivity.this, "ca-app-pub-3940256099942544/3986624511")
-                .forAppInstallAd(new NativeAppInstallAd.OnAppInstallAdLoadedListener() {
-                    @Override
-                    public void onAppInstallAdLoaded(NativeAppInstallAd appInstallAd) {
-                        nativeAdIcon.setImageDrawable(appInstallAd.getIcon().getDrawable());
-                        nativeAdTitle.setText(appInstallAd.getHeadline());
-                        nativeAdBody.setText(appInstallAd.getBody());
-                        nativeAdCallToAction.setText(appInstallAd.getCallToAction());
-                        nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
-                    }
-                })
-                .forContentAd(new NativeContentAd.OnContentAdLoadedListener() {
-                    @Override
-                    public void onContentAdLoaded(NativeContentAd contentAd) {
-                        nativeAdIcon.setImageDrawable(contentAd.getLogo().getDrawable());
-                        nativeAdTitle.setText(contentAd.getHeadline());
-                        nativeAdBody.setText(contentAd.getBody());
-                        nativeAdCallToAction.setText(contentAd.getCallToAction());
-                        nativeAdBody.setVisibility(nativeAdTitle.getLineCount() == 1 ? View.VISIBLE : View.GONE);
-                    }
-                })
-                .withAdListener(new com.google.android.gms.ads.AdListener() {
-                    @Override
-                    public void onAdFailedToLoad(int errorCode) {
-                        // Handle the failure by logging, altering the UI, etc.
-                        Log.d(TAG, "onAdFailedToLoad: " + errorCode);
-                    }
-                })
-                .withNativeAdOptions(new NativeAdOptions.Builder()
-                        // Methods in the NativeAdOptions.Builder class can be
-                        // used here to specify individual options settings.
-                        .build())
-                .build();
-
-        adLoader.loadAd(new AdRequest.Builder().build());
+        setMapPadding();
     }
 
     private void bindFacebookAdView(Button nativeAdCallToAction, final TextView nativeAdTitle, final TextView nativeAdBody, ViewGroup adChoicesWrap) {
@@ -689,7 +619,9 @@ public class MapsActivity extends AppCompatActivity
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "Facebook");
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
         Bundle bundle = new Bundle();
-        firebaseAnalytics.logEvent("fb_ad_clicked", bundle);
+        bundle.putString("provider", "facebook");
+        bundle.putString("type", "native");
+        firebaseAnalytics.logEvent("ad_clicked", bundle);
     }
 
     @Override
@@ -698,6 +630,8 @@ public class MapsActivity extends AppCompatActivity
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
         Bundle bundle = new Bundle();
+        bundle.putString("provider", "facebook");
+        bundle.putString("type", "native");
         firebaseAnalytics.logEvent("fb_ad_impression", bundle);
     }
 
@@ -966,7 +900,7 @@ public class MapsActivity extends AppCompatActivity
             billingFragment = BillingFragment.newInstance();
             billingFragment.setRetainInstance(true);
             transaction.add(billingFragment, BillingFragment.FRAGMENT_TAG);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         }
         return billingFragment;
     }

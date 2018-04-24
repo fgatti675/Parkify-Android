@@ -60,6 +60,18 @@
                         android:layout_toEndOf="@id/navigation_drawer_toggle"
                         android:maxWidth="320dp" />
 
+                    <com.google.android.gms.ads.AdView
+                        android:id="@+id/adMobView"
+                        android:layout_marginStart="@dimen/small_padding"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:visibility="gone"
+                        android:layout_marginEnd="@dimen/default_padding"
+                        cahue:adSize='BANNER'
+                        cahue:adUnitId='ca-app-pub-7749631063131885/9575761178'
+                        />
+
                     <FrameLayout
                         android:id="@+id/ad_mob_container"
                         android:layout_width="match_parent"
