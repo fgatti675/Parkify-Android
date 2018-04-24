@@ -134,6 +134,10 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
                     mBuilder.addAction(saveAction);
                 }
                 mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
+
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+                Bundle bundle = new Bundle();
+                firebaseAnalytics.logEvent("ar_notification_displayed", bundle);
             }
 
             @Override
