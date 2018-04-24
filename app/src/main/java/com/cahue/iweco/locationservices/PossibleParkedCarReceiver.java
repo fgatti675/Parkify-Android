@@ -2,6 +2,7 @@ package com.cahue.iweco.locationservices;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -133,11 +134,12 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
                     Notification.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
                     mBuilder.addAction(saveAction);
                 }
+                mBuilder.setDeleteIntent(createDeleteIntent(context));
                 mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
 
-                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-                Bundle bundle = new Bundle();
-                firebaseAnalytics.logEvent("ar_notification_displayed", bundle);
+//                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+//                Bundle bundle = new Bundle();
+//                firebaseAnalytics.logEvent("ar_notification_displayed", bundle);
             }
 
             @Override
@@ -147,6 +149,17 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
         });
     }
 
+
+    private PendingIntent createDeleteIntent(Context context) {
+        Intent intent = new Intent();
+        intent.setAction("com.whereismycar.DELETE_AR_NOTIFICATION");
+        return PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_ONE_SHOT
+        );
+    }
 
     @NonNull
     private Notification.Action createCarSaveAction(Context context, @NonNull Car car, PossibleSpot possibleSpot, int index) {
@@ -160,4 +173,23 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
         return new Notification.Action(R.drawable.ic_car_white_24dp, name, pIntent);
     }
 
+
+
+    public static class NotificationBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (action == null || !action.equals("com.whereismycar.DELETE_AR_NOTIFICATION")) {
+                return;
+            }
+
+            Tracking.sendEvent(Tracking.CATEGORY_NOTIFICATION_ACT_RECOG, Tracking.ACTION_NOTIFICATION_REMOVED);
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+            Bundle bundle = new Bundle();
+            firebaseAnalytics.logEvent("ar_notification_removed", bundle);
+            Log.i(TAG, "Notification removed");
+        }
+    }
 }

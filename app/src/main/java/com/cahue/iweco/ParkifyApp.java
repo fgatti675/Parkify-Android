@@ -1,6 +1,7 @@
 package com.cahue.iweco;
 
 import android.app.Application;
+import android.content.IntentFilter;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.StrictMode;
@@ -11,6 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -50,6 +52,11 @@ public class ParkifyApp extends Application {
         firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
 
         TrafficStats.setThreadStatsTag(THREAD_ID);
+
+        registerReceiver(
+                new PossibleParkedCarReceiver.NotificationBroadcastReceiver(),
+                new IntentFilter("com.whereismycar.DELETE_AR_NOTIFICATION")
+        );
 
         /**
          * Start Google analytics
