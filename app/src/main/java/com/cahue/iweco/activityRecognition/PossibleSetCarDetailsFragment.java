@@ -35,7 +35,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
 
     private static final String ARG_SPOT = "arg_spot";
 
-    // id of the fragment contructing this one
+    // id of the fragment constructing this one
     private static final String ARG_DELEGATE_FRAGMENT_ID = "arg_delegate_fragment_id";
 
     @Nullable
@@ -140,6 +140,8 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
                 @Override
                 public void onCarsRetrieved(List<Car> cars) {
 
+                    if (!isAdded()) return;
+
                     int numCars = cars.size();
                     int numColumns;
                     if (numCars < 4) numColumns = numCars;
@@ -220,6 +222,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
     public interface OnPossibleSpotDeletedListener {
 
         void onPossibleSpotDeleted(PossibleSpot spot);
+
         void onAllPossibleSpotsDeleted();
 
     }
