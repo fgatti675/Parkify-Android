@@ -19,7 +19,19 @@ exports.onCarChangedLocation = functions.firestore
     const parked_at_now = newValue.parked_at;
     const parked_at_before = previousValue.parked_at;
 
-    if (parked_at_before === parked_at_now) return;
+
+    if (!parked_at_now || !parked_at_now.location) {
+        console.log('No new parking location');
+        return null;
+    }
+
+    if (parked_at_before && parked_at_before.location
+            && parked_at_before.location._latitude === parked_at_now.location._latitude
+            && parked_at_before.location._longitude === parked_at_now.location._longitude
+        ) {
+        console.log('Parking location didn\'t change: ', parked_at_before, parked_at_now);
+        return null;
+    }
 
     console.log('Parked_at change: ', parked_at_before, parked_at_now);
 
