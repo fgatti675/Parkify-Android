@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.locationservices.CarMovedReceiver;
 import com.cahue.iweco.locationservices.LocationUpdatesHelper;
 import com.cahue.iweco.locationservices.ParkedCarReceiver;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.model.Car;
 import com.google.firebase.auth.FirebaseAuth;
@@ -64,9 +66,8 @@ public class BluetoothDetector extends BroadcastReceiver {
                             .setVibrate(pattern)
                             .setSmallIcon(R.drawable.ic_exit_to_app_24dp_white)
                             .setContentTitle(context.getString(R.string.open_the_app))
-                            .setContentText(context.getString(R.string.open_the_app_long))
-                    ;
-            mNotifyMgr.notify("57934" , 57934, mBuilder.build());
+                            .setContentText(context.getString(R.string.open_the_app_long));
+            mNotifyMgr.notify("57934", 57934, mBuilder.build());
             return;
         }
 
@@ -126,14 +127,18 @@ public class BluetoothDetector extends BroadcastReceiver {
 
     private void onBtConnectedToCar(@NonNull Context context, @NonNull Car car) {
 
-        /**
+        /* Remove existing notification */
+        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
+        mNotifyMgr.cancel(car.id, ParkedCarReceiver.NOTIFICATION_ID);
+
+        /*
          * Stop activity recognition
          */
         context.stopService(new Intent(context, ActivityRecognitionService.class));
 
         Log.d("Bluetooth", "onBtConnectedToCar");
 
-        /**
+        /*
          * Check if the car was parked long enough
          */
         if (!BuildConfig.DEBUG) {
@@ -157,7 +162,6 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 1000, 200, 1000};
-            NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
             Notification.Builder mBuilder =
                     (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, DEBUG_CHANNEL_ID) : new Notification.Builder(context))
                             .setVibrate(pattern)

@@ -8,7 +8,6 @@ import android.location.Location;
 import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -28,8 +27,6 @@ import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
 
@@ -123,11 +120,11 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
 
             CharSequence title;
             if (car.name != null) {
-                Spannable sb = new SpannableString(car.name + " - " + context.getString(R.string.just_parked));
+                Spannable sb = new SpannableString(car.name + " - " + context.getString(R.string.location_stored));
                 sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, car.name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 title = sb;
             } else {
-                title = context.getString(R.string.just_parked);
+                title = context.getString(R.string.location_stored);
             }
 
             Notification.Builder mBuilder =

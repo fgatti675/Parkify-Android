@@ -77,7 +77,7 @@
     <string name="invite_promo">Invite at least 3 Facebook friends and get rid of ads! :)</string>
 
     <string name="ask_just_parked">Did you just park?</string>
-    <string name="just_parked">You just parked</string>
+    <string name="location_stored">Location stored</string>
     <string name="free_spot">Available parking spot</string>
     <string name="free_spot_info">Somebody just left a free parking spot</string>
     <string name="long_click_instructions">Long click to set your car\'s position. Next time it will be automatic!</string>
