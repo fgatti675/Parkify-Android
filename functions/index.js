@@ -35,6 +35,14 @@ exports.onCarChangedLocation = functions.firestore
 
     console.log('Parked_at change: ', parked_at_before, parked_at_now);
 
-    // You must return a Promise when performing asynchronous tasks inside a Functions such as
     return change.after.ref.collection("parking_events").add(parked_at_now);
+
   });
+
+
+exports.minute_job =
+  functions.pubsub.topic('minute-tick').onPublish((event) => {
+    console.log("This job is ran every minute!");
+    return null;
+  });
+
