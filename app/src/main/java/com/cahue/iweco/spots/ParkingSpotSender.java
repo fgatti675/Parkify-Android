@@ -28,12 +28,12 @@ public class ParkingSpotSender {
 
     private static final String TAG = ParkingSpotSender.class.getSimpleName();
 
-    public static void doPostSpotLocation(@NonNull Context context, Location spotLocation, boolean future, @NonNull Car car) {
+    public static void doPostSpotLocation(@NonNull Context context, Location spotLocation, boolean future, @NonNull String carId) {
         ParkingSpot spot = new ParkingSpot(new Random().nextLong(), spotLocation, null, new Date(), future);
-        postSpot(context, spot, car);
+        postSpot(context, spot, carId);
     }
 
-    private static void postSpot(@NonNull Context context, @NonNull ParkingSpot spot, @NonNull final Car car) {
+    private static void postSpot(@NonNull Context context, @NonNull ParkingSpot spot, @NonNull final String carId) {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
@@ -46,7 +46,7 @@ public class ParkingSpotSender {
                 .appendPath("spots");
 
         // Send a JSON spot location.
-        JSONObject parkingSpotJSON = spot.toJSON(car);
+        JSONObject parkingSpotJSON = spot.toJSON(carId);
         Log.i(TAG, "Posting: " + parkingSpotJSON);
         String url = builder.toString();
         Log.d(TAG, url);

@@ -61,11 +61,7 @@ public class BillingFragment extends Fragment {
         public void onServiceConnected(ComponentName name, IBinder service) {
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
 
-            /**
-             * Tell everyone the billing service is ready
-             */
             if (getActivity() != null) {
-                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(Constants.INTENT_BILLING_READY));
                 onBillingReadyListener.onBillingReady(BillingFragment.this);
             }
         }
@@ -86,7 +82,7 @@ public class BillingFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(Context activity) {
         super.onAttach(activity);
 
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");

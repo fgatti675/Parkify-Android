@@ -45,7 +45,6 @@ public class Constants {
     public static final String EXTRA_BUNDLE = BuildConfig.APPLICATION_ID + "EXTRA_BUNDLE";
 
     // billing
-    public static final String INTENT_BILLING_READY = BuildConfig.APPLICATION_ID + ".INTENT_BILLING_READY";
     public static final String INTENT_ADS_REMOVED = BuildConfig.APPLICATION_ID + ".INTENT_ADS_REMOVED";
 
     // Activity recognition change. Currently not received by anyone

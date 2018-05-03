@@ -23,6 +23,8 @@
 
 -dontwarn com.google.common.**
 
+-keep public class * extends android.support.v4.os.ResultReceiver
+
 -dontwarn java.nio.file.Files
 -dontwarn java.nio.file.Path
 -dontwarn java.nio.file.OpenOption

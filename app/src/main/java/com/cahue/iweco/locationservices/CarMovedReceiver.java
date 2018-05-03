@@ -68,24 +68,19 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
         CarDatabase carDatabase = CarDatabase.getInstance();
         String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
 
-        DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
-        documentReference.get().addOnSuccessListener(documentSnapshot -> {
 
-            Car car = Car.fromFirestore(documentSnapshot);
+        ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, carId);
+        Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
 
-            ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, car);
-            Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
+        carDatabase.removeCarLocation(carId);
+        clearGeofence(context, carId);
 
-            carDatabase.removeCarLocation(carId);
-            clearGeofence(context, carId);
+        Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
 
-            Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
-
-            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-            Bundle bundle = new Bundle();
-            bundle.putString("car", carId);
-            firebaseAnalytics.logEvent("bt_freed_spot", bundle);
-        });
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        Bundle bundle = new Bundle();
+        bundle.putString("car", carId);
+        firebaseAnalytics.logEvent("bt_freed_spot", bundle);
 
     }
 }

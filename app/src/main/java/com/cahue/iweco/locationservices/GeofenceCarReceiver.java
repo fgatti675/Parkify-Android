@@ -208,7 +208,7 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
                     if (BuildConfig.DEBUG)
                         notifyApproachingCar(context, location, car);
 
-                    ParkingSpotSender.doPostSpotLocation(context, car.location, true, car);
+                    ParkingSpotSender.doPostSpotLocation(context, car.location, true, car.id);
                 }
 
                 mGeofenceApiClient = new GoogleApiClient.Builder(context)

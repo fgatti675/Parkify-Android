@@ -25,7 +25,6 @@ import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.locationservices.CarMovedReceiver;
 import com.cahue.iweco.locationservices.LocationUpdatesHelper;
 import com.cahue.iweco.locationservices.ParkedCarReceiver;
-import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.model.Car;
 import com.google.firebase.auth.FirebaseAuth;

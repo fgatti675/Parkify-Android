@@ -103,10 +103,10 @@ public class ParkingSpot implements Parcelable {
     }
 
     @Nullable
-    public JSONObject toJSON(@NonNull Car car) {
+    public JSONObject toJSON(@NonNull String carId) {
         try {
             JSONObject obj = new JSONObject();
-            obj.put("car", car.id);
+            obj.put("car", carId);
             obj.put("latitude", location.getLatitude());
             obj.put("longitude", location.getLongitude());
             obj.put("accuracy", location.getAccuracy());

@@ -429,6 +429,8 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onBillingReady(BillingFragment billingFragment) {
 
+        if(isFinishing()) return;
+
         if (PreferencesUtil.isAdsRemoved(this)) {
             firebaseAnalytics.setUserProperty("paying_user", "true");
             return;
@@ -916,7 +918,7 @@ public class MapsActivity extends AppCompatActivity
             placesDelegate = PlacesDelegate.newInstance();
             placesDelegate.setRetainInstance(true);
             transaction.add(placesDelegate, PlacesDelegate.FRAGMENT_TAG);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         }
         return placesDelegate;
     }
@@ -930,7 +932,7 @@ public class MapsActivity extends AppCompatActivity
             spotsDelegate = SpotsDelegate.newInstance();
             spotsDelegate.setRetainInstance(true);
             transaction.add(spotsDelegate, SpotsDelegate.FRAGMENT_TAG);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         }
         return spotsDelegate;
     }
@@ -948,7 +950,7 @@ public class MapsActivity extends AppCompatActivity
             parkedCarDelegate = ParkedCarDelegate.newInstance(carId);
             parkedCarDelegate.setRetainInstance(true);
             transaction.add(parkedCarDelegate, ParkedCarDelegate.getFragmentTag(carId));
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
             getFragmentManager().executePendingTransactions();
         }
         return parkedCarDelegate;
@@ -968,7 +970,7 @@ public class MapsActivity extends AppCompatActivity
             possibleParkedCarDelegate = PossibleParkedCarDelegate.newInstance(spot);
             possibleParkedCarDelegate.setRetainInstance(true);
             transaction.add(possibleParkedCarDelegate, PossibleParkedCarDelegate.getFragmentTag(spot));
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
             getFragmentManager().executePendingTransactions();
         }
         return possibleParkedCarDelegate;
@@ -990,7 +992,7 @@ public class MapsActivity extends AppCompatActivity
             longTapLocationDelegate = LongTapLocationDelegate.newInstance();
             longTapLocationDelegate.setRetainInstance(true);
             transaction.add(longTapLocationDelegate, LongTapLocationDelegate.FRAGMENT_TAG);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
             getFragmentManager().executePendingTransactions();
         }
         return longTapLocationDelegate;
@@ -1645,7 +1647,7 @@ public class MapsActivity extends AppCompatActivity
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
                     Car car = cars.iterator().next();
-                    ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car);
+                    ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car.id);
                 }
 
                 @Override

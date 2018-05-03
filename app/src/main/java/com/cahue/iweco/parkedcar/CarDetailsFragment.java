@@ -3,6 +3,7 @@ package com.cahue.iweco.parkedcar;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
@@ -48,7 +49,10 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     @Nullable
     private OnCarPositionDeletedListener mListener;
     private CarDatabase carDatabase;
+
+    @Nullable
     private Car car;
+
     private ListenerRegistration listenerRegistration;
 
     public CarDetailsFragment() {
@@ -151,7 +155,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
 
     @Override
-    public void onAttach(@NonNull Activity activity) {
+    public void onAttach(@NonNull Context activity) {
         super.onAttach(activity);
         try {
             mListener = (OnCarPositionDeletedListener) activity;
@@ -204,6 +208,9 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
     }
 
     private void shareCarLocation() {
+
+        if (car == null) return;
+
         Double latitude = car.location.getLatitude();
         Double longitude = car.location.getLongitude();
 
