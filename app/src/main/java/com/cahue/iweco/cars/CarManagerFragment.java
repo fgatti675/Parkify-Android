@@ -444,6 +444,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     private void editCar(Car car, boolean newCar) {
+        if(getActivity().isFinishing()) return;
         EditCarDialog.newInstance(car, newCar).show(getFragmentManager(), "EditCarDialog");
     }
 

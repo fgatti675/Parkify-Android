@@ -775,6 +775,7 @@ public class MapsActivity extends AppCompatActivity
 
     public void checkRatingDialogShown() {
         if (RatingDialog.shouldBeShown(this)) {
+            if (isFinishing()) return;
             RatingDialog dialog = new RatingDialog();
             dialog.show(getFragmentManager(), "RatingDialog");
         }
@@ -1272,6 +1273,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     public void openDonationDialog() {
+        if (isFinishing()) return;
         DonateDialog dialog = new DonateDialog();
         dialog.show(getFragmentManager(), "DonateDialog");
     }
