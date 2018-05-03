@@ -21,17 +21,17 @@ import android.util.Log;
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
-import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
@@ -47,8 +47,6 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     private static final String TAG = GeofenceCarReceiver.class.getSimpleName();
 
     private PendingIntent mGeofencePendingIntent;
-
-    private GoogleApiClient mGeofenceApiClient;
 
     /**
      * x
@@ -142,41 +140,16 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
                 .addGeofence(geofence)
                 .build();
 
+        GeofencingClient mGeofencingClient = LocationServices.getGeofencingClient(context);
+        mGeofencingClient.removeGeofences(Arrays.asList(car.id));
 
-        mGeofenceApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
-
-                        LocationServices.GeofencingApi.removeGeofences(
-                                mGeofenceApiClient,
-                                Arrays.asList(car.id)
-                        );
-
-                        try {
-                            LocationServices.GeofencingApi.addGeofences(
-                                    mGeofenceApiClient,
-                                    geofencingRequest,
-                                    getGeofencePendingIntent(context, car)
-                            );
-                        } catch (SecurityException s) {
-                        }
-
-                        mGeofenceApiClient.disconnect();
-
-                        Log.i(TAG, "Geofence added");
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.d(TAG, "Geofence, connection suspended");
-                        mGeofenceApiClient.disconnect();
-                    }
-                })
-                .build();
-
-        mGeofenceApiClient.connect();
+        try {
+            mGeofencingClient.addGeofences(
+                    geofencingRequest,
+                    getGeofencePendingIntent(context, car)
+            );
+        } catch (SecurityException s) {
+        }
 
         if (BuildConfig.DEBUG) {
             notifyGeofenceAdded(context, car);
@@ -209,36 +182,18 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
                         notifyApproachingCar(context, location, car);
 
                     ParkingSpotSender.doPostSpotLocation(context, car.location, true, car.id);
+                    ParkingSpotSender.fetchAddressAndSave(context, car.location, new Date(), car.id, true);
                 }
 
-                mGeofenceApiClient = new GoogleApiClient.Builder(context)
-                        .addApi(LocationServices.API)
-                        .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                            @Override
-                            public void onConnected(Bundle bundle) {
+                GeofencingClient mGeofencingClient = LocationServices.getGeofencingClient(context);
 
-                                Log.d(TAG, "Geofence, onConnected");
+                // remove the geofence we just entered
+                mGeofencingClient.removeGeofences(
+                        mGeofencePendingIntent
+                );
 
-                                // remove the geofence we just entered
-                                LocationServices.GeofencingApi.removeGeofences(
-                                        mGeofenceApiClient,
-                                        mGeofencePendingIntent
-                                );
+                Log.i(TAG, "Geofence removed");
 
-                                mGeofenceApiClient.disconnect();
-
-                                Log.i(TAG, "Geofence added");
-                            }
-
-                            @Override
-                            public void onConnectionSuspended(int i) {
-                                Log.d(TAG, "Geofence, connection suspended");
-                                mGeofenceApiClient.disconnect();
-                            }
-                        })
-                        .build();
-
-                mGeofenceApiClient.connect();
             }
         });
 

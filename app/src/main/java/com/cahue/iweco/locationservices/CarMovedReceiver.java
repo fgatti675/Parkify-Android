@@ -11,17 +11,20 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.model.Car;
 import com.cahue.iweco.spots.ParkingSpotSender;
+import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * This class is in charge of uploading the location of the car to the server when BT connects
@@ -35,31 +38,14 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
     private final static String TAG = CarMovedReceiver.class.getSimpleName();
 
-    private GoogleApiClient mGeofenceApiClient;
-
     private void clearGeofence(Context context, @NonNull final String carId) {
-        mGeofenceApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
+        GeofencingClient mGeofencingClient = LocationServices.getGeofencingClient(context);
 
-                        LocationServices.GeofencingApi.removeGeofences(
-                                mGeofenceApiClient,
-                                Arrays.asList(carId)
-                        );
-                        Log.d(TAG, "Geofence removed");
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.d(TAG, "Geofence, connection suspended");
-                        mGeofenceApiClient.disconnect();
-                    }
-                })
-                .build();
-
-        mGeofenceApiClient.connect();
+        // remove the geofence we just entered
+        mGeofencingClient.removeGeofences(
+                Collections.singletonList(carId)
+        );
+        Log.d(TAG, "Geofence removed");
     }
 
     @Override
@@ -68,8 +54,8 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
         CarDatabase carDatabase = CarDatabase.getInstance();
         String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
 
+        Date startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
 
-        ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, carId);
         Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
 
         carDatabase.removeCarLocation(carId);
@@ -77,10 +63,8 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-        Bundle bundle = new Bundle();
-        bundle.putString("car", carId);
-        firebaseAnalytics.logEvent("bt_freed_spot", bundle);
+        ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, carId);
+        ParkingSpotSender.fetchAddressAndSave(context, spotLocation, startTime, carId, false);
 
     }
 }

@@ -82,7 +82,17 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
 
             @Override
             public void onError(String error) {
-                carDatabase.updateCarLocation(carId, location, null, now, "bt_event");
+                carDatabase.updateCarLocation(carId, location, null, now, "bt_event", new CarDatabase.CarUpdateListener() {
+                    @Override
+                    public void onCarUpdated(Car car) {
+                        notifyUser(context, car);
+                    }
+
+                    @Override
+                    public void onCarUpdateError() {
+
+                    }
+                });
             }
         });
 
@@ -127,13 +137,14 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
                 title = context.getString(R.string.location_stored);
             }
 
-            Notification.Builder mBuilder =
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID) : new Notification.Builder(context))
-                            .setContentIntent(pendingIntent)
-                            .setColor(context.getResources().getColor(R.color.theme_primary))
-                            .setSmallIcon(R.drawable.ic_car_white_48dp)
-                            .setContentTitle(title)
-                            .setContentText(car.address);
+            Notification.Builder mBuilder = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID) : new Notification.Builder(context))
+                    .setContentIntent(pendingIntent)
+                    .setColor(context.getResources().getColor(R.color.theme_primary))
+                    .setSmallIcon(R.drawable.ic_car_white_48dp)
+                    .setContentTitle(title);
+
+            if (car.address != null)
+                mBuilder = mBuilder.setContentText(car.address);
 
             if (PreferencesUtil.isDisplayParkedSoundEnabled(context)) {
 

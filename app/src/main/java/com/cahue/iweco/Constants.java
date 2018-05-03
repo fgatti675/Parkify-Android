@@ -22,7 +22,7 @@ public class Constants {
     public static final float PARKED_DISTANCE_THRESHOLD = 90;
     public static final float GEOFENCE_RADIUS_IN_METERS = 60;
 
-    public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 8 * 60 * 60 * 1000;
+    public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = 48 * 60 * 60 * 1000;
 
     // action telling the main activity that activity recognition has a possible spot
     public static final String ACTION_POSSIBLE_PARKED_CAR = BuildConfig.APPLICATION_ID + ".ACTION_POSSIBLE_PARKED_CAR";
