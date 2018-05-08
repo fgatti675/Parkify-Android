@@ -1,4 +1,9 @@
 const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+
+admin.initializeApp({
+    credential: admin.credential.applicationDefault()
+});
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -39,10 +44,68 @@ exports.onCarChangedLocation = functions.firestore
 
   });
 
+exports.onFreedSpot = functions.firestore
+    .document('/freed_spots/{spotId}')
+    .onCreate((snap, context) => {
+        const newParkingSpot = snap.data();
 
+        newParkingSpot['expires_at'] = new Date(newParkingSpot.time.getTime() + 15 * 60 * 1000) ;
+
+        console.log('New freed spot', context.params.pushId, newParkingSpot);
+
+        return snap.ref.firestore.collection('available_spots_live').add(newParkingSpot);
+    });
+
+
+function deleteQueryBatch(db, query, batchSize, resolve, reject) {
+    query.get()
+        .then((snapshot) => {
+          // When there are no documents left, we are done
+          if (snapshot.size === 0) {
+            return 0;
+          }
+
+          // Delete documents in a batch
+          var batch = db.batch();
+          snapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+
+          return batch.commit().then(() => {
+            return snapshot.size;
+          });
+        }).then((numDeleted) => {
+
+            console.log("Deleted stale parking spots: " + numDeleted);
+
+          if (numDeleted === 0) {
+            resolve();
+            return numDeleted;
+          }
+
+          // Recurse on the next process tick, to avoid
+          // exploding the stack.
+          process.nextTick(() => {
+            deleteQueryBatch(db, query, batchSize, resolve, reject);
+          });
+          return numDeleted;
+        })
+        .catch(reject);
+}
+
+//const ref = admin.firestore().ref();
 exports.minute_job =
-  functions.pubsub.topic('minute-tick').onPublish((event) => {
-    console.log("This job is ran every minute!");
-    return null;
-  });
+    functions.pubsub.topic('minute-tick').onPublish((event) => {
+        var db = admin.firestore();
+        var liveSpots = db.collection('available_spots_live');
+        var batchSize = 500;
+        var query = liveSpots
+            .where('expires_at', '<', new Date())
+            .limit(batchSize);
+
+        console.log("This job is ran every minute!");
+        return new Promise((resolve, reject) => {
+          deleteQueryBatch(db, query, batchSize, resolve, reject);
+        });
+    });
 
