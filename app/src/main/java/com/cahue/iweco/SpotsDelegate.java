@@ -51,7 +51,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
     /**
      * If zoom is more far than this, we don't display the markers
      */
-    private final static float MAX_ZOOM = 13F;
+    private final static float MAX_ZOOM = 5F;
     private final static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
     private static final String TAG = "SpotsDelegate";
@@ -125,7 +125,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         spotMarkersMap = new HashMap<>(MARKERS_LIMIT);
 
-        maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
+        maxZoom = BuildConfig.DEBUG ? 5 : MAX_ZOOM;
 
         directionsDelegate = new DirectionsDelegate();
     }
