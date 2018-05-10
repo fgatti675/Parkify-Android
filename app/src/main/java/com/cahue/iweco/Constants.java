@@ -13,7 +13,7 @@ public class Constants {
     /**
      * Only post locations if the car has stopped for at least a few seconds
      */
-    public static final long MINIMUM_STAY_MS = 30 * 1000;
+    public static final long MINIMUM_STAY_MS = 60 * 1000;
 
     /**
      * Distance at which we can set a geofence in the car after we parked, so that we know

@@ -1,5 +1,6 @@
 package com.cahue.iweco;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -84,7 +85,7 @@ public class ParkedCarDelegate extends AbstractMarkerDelegate implements CameraU
 
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(@NonNull Activity context) {
         super.onAttach(context);
 
         try {

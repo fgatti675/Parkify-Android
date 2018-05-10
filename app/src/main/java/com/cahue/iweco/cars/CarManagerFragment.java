@@ -1,13 +1,13 @@
 package com.cahue.iweco.cars;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -370,7 +370,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(@NonNull Activity context) {
         super.onAttach(context);
         try {
             callbacks = (Callbacks) context;

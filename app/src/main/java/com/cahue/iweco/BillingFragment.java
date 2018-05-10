@@ -22,13 +22,20 @@ import com.android.vending.billing.IInAppBillingService;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -66,6 +73,7 @@ public class BillingFragment extends Fragment {
             }
         }
     };
+    private String purchaseSku;
 
     @NonNull
     public static BillingFragment newInstance() {
@@ -79,16 +87,16 @@ public class BillingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-    }
-
-    @Override
-    public void onAttach(Context activity) {
-        super.onAttach(activity);
 
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         getActivity().bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
 
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
         if (activity instanceof OnBillingReadyListener)
             this.onBillingReadyListener = (OnBillingReadyListener) activity;
     }
@@ -96,9 +104,6 @@ public class BillingFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (mBillingServiceConn != null) {
-            getActivity().unbindService(mBillingServiceConn);
-        }
         onBillingReadyListener = null;
     }
 
@@ -106,6 +111,9 @@ public class BillingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+        if (mBillingServiceConn != null) {
+            getActivity().unbindService(mBillingServiceConn);
+        }
     }
 
     @Nullable
@@ -181,6 +189,7 @@ public class BillingFragment extends Fragment {
 
 
     public void doPurchase(String sku) {
+        purchaseSku = sku;
         try {
 
             Bundle buyIntentBundle = iInAppBillingService.getBuyIntent(3,
@@ -221,7 +230,6 @@ public class BillingFragment extends Fragment {
 
         // element purchase
         if (requestCode == REQUEST_ON_PURCHASE) {
-
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
 
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
@@ -241,13 +249,19 @@ public class BillingFragment extends Fragment {
                         bundle.putString("sku", sku);
                         firebaseAnalytics.logEvent("donation_successful", bundle);
 
+                        saveOnFirebase(sku);
+
                     } catch (JSONException e) {
                     }
 
                 } else {
                     Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_SUCCESSFUL);
+
                     Bundle bundle = new Bundle();
+                    bundle.putString("sku", purchaseSku);
                     firebaseAnalytics.logEvent("donation_successful", bundle);
+
+                    saveOnFirebase(purchaseSku);
                 }
 
                 if (isAdded())
@@ -256,6 +270,7 @@ public class BillingFragment extends Fragment {
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
                 PreferencesUtil.setAdsRemoved(getActivity(), true);
 
+
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Bundle bundle = new Bundle();
                 firebaseAnalytics.logEvent("donation_cancelled", bundle);
@@ -263,6 +278,18 @@ public class BillingFragment extends Fragment {
             }
         }
 
+    }
+
+    private void saveOnFirebase(String sku) {
+        Map<String, Object> purchase = new HashMap<>();
+        purchase.put("sku", sku);
+        purchase.put("date", FieldValue.serverTimestamp());
+
+        FirebaseFirestore.getInstance().collection("users")
+                .document(FirebaseAuth.getInstance().getUid())
+                .collection("purchases")
+                .add(purchase)
+                .addOnFailureListener(Crashlytics::logException);
     }
 
     public interface OnBillingReadyListener {

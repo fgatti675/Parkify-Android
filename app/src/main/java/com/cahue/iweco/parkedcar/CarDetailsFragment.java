@@ -155,7 +155,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
 
     @Override
-    public void onAttach(@NonNull Context activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         try {
             mListener = (OnCarPositionDeletedListener) activity;

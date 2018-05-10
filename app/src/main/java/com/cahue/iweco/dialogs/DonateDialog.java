@@ -3,7 +3,6 @@ package com.cahue.iweco.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -53,48 +52,34 @@ public class DonateDialog extends DialogFragment {
                 .setTitle(R.string.donate)
                 .setView(view)
                 .setPositiveButton("Ok",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup);
-                                int checkedRadioButton = 0;
-                                try {
-                                    checkedRadioButton = radioGroup.getCheckedRadioButtonId();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                View selectedRadioButton = radioGroup.findViewById(checkedRadioButton);
-                                String sku = (String) selectedRadioButton.getTag();
-                                billingFragment.doPurchase(sku);
+                        (dialog, whichButton) -> {
+                            RadioGroup radioGroup = view.findViewById(R.id.radiogroup);
+                            int checkedRadioButton = 0;
+                            try {
+                                checkedRadioButton = radioGroup.getCheckedRadioButtonId();
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
+                            View selectedRadioButton = radioGroup.findViewById(checkedRadioButton);
+                            String sku = (String) selectedRadioButton.getTag();
+                            billingFragment.doPurchase(sku);
                         })
                 .setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // Canceled.
-                            }
+                        (dialog, whichButton) -> {
+                            // Canceled.
                         });
 
 
         // Create the AlertDialog object and return it
         final AlertDialog dialog = builder.create();
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            }
-        });
+        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false));
 
 
-        final RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-            }
-        });
+        final RadioGroup radioGroup = view.findViewById(R.id.radiogroup);
+        radioGroup.setOnCheckedChangeListener((radioGroup1, i) -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true));
 
-        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
-        final TextView errorTextView = (TextView) view.findViewById(R.id.text);
+        final ProgressBar progressBar = view.findViewById(R.id.progress_bar);
+        final TextView errorTextView = view.findViewById(R.id.text);
 
         /**
          * AsyncTask population the donation options
@@ -102,11 +87,13 @@ public class DonateDialog extends DialogFragment {
         new AsyncTask<Void, Void, Bundle>() {
             @Override
             protected Bundle doInBackground(Void... voids) {
+                if (billingFragment == null) return null;
                 return billingFragment.queryAvailableItems();
             }
 
             @Override
             protected void onPostExecute(@NonNull Bundle skuDetails) {
+                if (skuDetails == null) return;
 
                 int response = skuDetails.getInt("RESPONSE_CODE");
 

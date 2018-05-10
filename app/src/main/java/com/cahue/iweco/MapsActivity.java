@@ -560,9 +560,7 @@ public class MapsActivity extends AppCompatActivity
                 Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "AdMob");
                 FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
                 Bundle bundle = new Bundle();
-                bundle.putString("provider", "admob");
-                bundle.putString("type", "banner");
-                firebaseAnalytics.logEvent("ad_clicked", bundle);
+                firebaseAnalytics.logEvent("admob_ad_clicked", bundle);
             }
 
             @Override
@@ -570,8 +568,6 @@ public class MapsActivity extends AppCompatActivity
                 Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "AdMob");
                 FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
                 Bundle bundle = new Bundle();
-                bundle.putString("provider", "admob");
-                bundle.putString("type", "banner");
                 firebaseAnalytics.logEvent("admob_ad_impression", bundle);
             }
 
@@ -621,9 +617,7 @@ public class MapsActivity extends AppCompatActivity
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "Facebook");
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
         Bundle bundle = new Bundle();
-        bundle.putString("provider", "facebook");
-        bundle.putString("type", "native");
-        firebaseAnalytics.logEvent("ad_clicked", bundle);
+        firebaseAnalytics.logEvent("fb_ad_clicked", bundle);
     }
 
     @Override
@@ -632,8 +626,6 @@ public class MapsActivity extends AppCompatActivity
         Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
         Bundle bundle = new Bundle();
-        bundle.putString("provider", "facebook");
-        bundle.putString("type", "native");
         firebaseAnalytics.logEvent("fb_ad_impression", bundle);
     }
 
@@ -670,18 +662,22 @@ public class MapsActivity extends AppCompatActivity
                 .addSnapshotListener((snapshot, e) -> {
                     if (snapshot == null) return;
 
+                    boolean hasCarWithBt = false;
                     for (DocumentSnapshot documentSnapshot : snapshot.getDocuments()) {
                         Car car = Car.fromFirestore(documentSnapshot);
                         if (car.location != null && car.address == null) {
                             Log.d(TAG, "Car fetched with no address");
                             updateCarLocationAddress(car);
                         }
+                        if(car.btAddress != null) hasCarWithBt = true;
                         ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
                         if (mMap != null)
                             parkedCarDelegate.setMap(mMap);
                         parkedCarDelegate.update(car, false);
                         delegates.add(parkedCarDelegate);
                     }
+
+                    firebaseAnalytics.setUserProperty("has_car_with_bt", String.valueOf(hasCarWithBt));
 
                     noCarsButton.setVisibility(snapshot.isEmpty() ? View.VISIBLE : View.GONE);
                 });
