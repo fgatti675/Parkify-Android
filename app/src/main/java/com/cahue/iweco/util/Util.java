@@ -29,7 +29,6 @@ public class Util {
         Util.DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-
     public static void showBlueToast(@NonNull Context context, int resId, int length) {
         showBlueToast(context, context.getString(resId), length);
     }
@@ -44,7 +43,7 @@ public class Util {
     public static void showBlueToast(@NonNull Context context, String string, int length) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.toast_blue, null);
-        TextView text = (TextView) layout.findViewById(R.id.text);
+        TextView text = layout.findViewById(R.id.text);
         text.setText(string);
 
         Toast toast = new Toast(context.getApplicationContext());

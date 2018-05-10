@@ -289,7 +289,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private void onGCMError(String authToken) {
         setLoading(false);
         mGoogleApiClient.disconnect();
-        Util.showBlueToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
+        if (!isFinishing())
+            Util.showBlueToast(this, R.string.gcm_error, Toast.LENGTH_SHORT);
     }
 
     @Override
@@ -450,7 +451,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
 
     private void onTokenRetrieveError() {
-        Util.showBlueToast(this, "Error Google auth", Toast.LENGTH_SHORT);
+        if (!isFinishing())
+            Util.showBlueToast(this, "Error Google auth", Toast.LENGTH_SHORT);
         setLoading(false);
         mGoogleApiClient.disconnect();
     }
@@ -464,7 +466,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
 
     private void onError() {
         AuthUtils.clearLoggedUserDetails(this);
-        Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+        if (!isFinishing())
+            Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
         setLoading(false);
     }
 
@@ -507,7 +510,8 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                             if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                                 setLoading(false);
                                 facebookPendingCredential = credential;
-                                Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
+                                if (!isFinishing())
+                                    Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithCredential:failure", task.getException());

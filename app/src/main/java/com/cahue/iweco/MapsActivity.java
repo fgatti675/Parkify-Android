@@ -429,7 +429,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onBillingReady(BillingFragment billingFragment) {
 
-        if(isFinishing()) return;
+        if (isFinishing()) return;
 
         if (PreferencesUtil.isAdsRemoved(this)) {
             firebaseAnalytics.setUserProperty("paying_user", "true");
@@ -715,7 +715,8 @@ public class MapsActivity extends AppCompatActivity
                     if (PreferencesUtil.isLongClickToastShown(this) || queryDocumentSnapshots.isEmpty())
                         return;
 
-                    Util.showBlueToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
+                    if (!isFinishing())
+                        Util.showBlueToast(this, R.string.long_click_instructions, Toast.LENGTH_LONG);
 
                     PreferencesUtil.setLongClickToastShown(this, true);
                 });
@@ -869,7 +870,8 @@ public class MapsActivity extends AppCompatActivity
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     setUpMapUserLocation();
                 } else {
-                    Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
+                    if (!isFinishing())
+                        Toast.makeText(this, R.string.permission_error, Toast.LENGTH_SHORT).show();
                 }
                 locationPermissionCurrentlyRequested = false;
             }

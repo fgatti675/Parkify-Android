@@ -192,7 +192,8 @@ public class BillingFragment extends Fragment {
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
             FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
             if (pendingIntent == null) {
-                Util.showBlueToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
+                if (isAdded())
+                    Util.showBlueToast(getActivity(), getString(R.string.purchase_account_error), Toast.LENGTH_LONG);
                 Tracking.sendEvent(Tracking.CATEGORY_DONATION_DIALOG, Tracking.ACTION_PURCHASE_ERROR);
                 Bundle bundle = new Bundle();
                 bundle.putString("sku", sku);
@@ -249,7 +250,8 @@ public class BillingFragment extends Fragment {
                     firebaseAnalytics.logEvent("donation_successful", bundle);
                 }
 
-                Util.showBlueToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
+                if (isAdded())
+                    Util.showBlueToast(getActivity(), R.string.thanks, Toast.LENGTH_LONG); // do string
 
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(Constants.INTENT_ADS_REMOVED));
                 PreferencesUtil.setAdsRemoved(getActivity(), true);

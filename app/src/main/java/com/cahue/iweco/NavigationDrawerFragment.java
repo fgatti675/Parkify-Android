@@ -429,7 +429,8 @@ public class NavigationDrawerFragment extends Fragment {
                             mDrawerLayout.closeDrawers();
 
                     } else {
-                        Util.showBlueToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
+                        if (isAdded())
+                            Util.showBlueToast(getActivity(), R.string.position_not_set, Toast.LENGTH_SHORT);
                     }
                 };
                 carViewHolder.cardView.setOnClickListener(clickListener);
