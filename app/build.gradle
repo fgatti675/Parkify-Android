@@ -9,11 +9,11 @@ android {
     buildToolsVersion "27.0.3"
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 27
         applicationId "com.whereismycar"
-        versionCode 91
-        versionName "3.11.0"
+        versionCode 93
+        versionName "3.12.1"
         buildConfigField "String", "BACKEND_URL", "\"glossy-radio.appspot.com\""
     }
 
