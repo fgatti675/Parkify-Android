@@ -5,10 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/toast_background"
     android:orientation="horizontal"
-    android:paddingBottom="@dimen/default_padding"
-    android:paddingLeft="@dimen/large_padding"
-    android:paddingRight="@dimen/large_padding"
-    android:paddingTop="@dimen/default_padding">
+    android:paddingBottom="32dp">
 
     <TextView
         android:id="@+id/text"

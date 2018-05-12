@@ -70,6 +70,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.drakeet.support.toast.ToastCompat;
+
 /**
  * A login screen that offers login via Google+
  */
@@ -467,7 +469,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     private void onError() {
         AuthUtils.clearLoggedUserDetails(this);
         if (!isFinishing())
-            Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+            ToastCompat.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
         setLoading(false);
     }
 
@@ -511,7 +513,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
                                 setLoading(false);
                                 facebookPendingCredential = credential;
                                 if (!isFinishing())
-                                    Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
+                                    ToastCompat.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithCredential:failure", task.getException());

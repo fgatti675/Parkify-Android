@@ -68,7 +68,7 @@ public class BillingFragment extends Fragment {
         public void onServiceConnected(ComponentName name, IBinder service) {
             iInAppBillingService = IInAppBillingService.Stub.asInterface(service);
 
-            if (getActivity() != null) {
+            if (getActivity() != null && !getActivity().isFinishing() && onBillingReadyListener != null) {
                 onBillingReadyListener.onBillingReady(BillingFragment.this);
             }
         }
@@ -88,6 +88,15 @@ public class BillingFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (getActivity() instanceof OnBillingReadyListener)
+            this.onBillingReadyListener = (OnBillingReadyListener) activity;
+
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         getActivity().bindService(serviceIntent, mBillingServiceConn, Context.BIND_AUTO_CREATE);
@@ -95,25 +104,19 @@ public class BillingFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (activity instanceof OnBillingReadyListener)
-            this.onBillingReadyListener = (OnBillingReadyListener) activity;
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         onBillingReadyListener = null;
+
+        if (iInAppBillingService != null) {
+            getActivity().unbindService(mBillingServiceConn);
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        if (mBillingServiceConn != null) {
-            getActivity().unbindService(mBillingServiceConn);
-        }
     }
 
     @Nullable

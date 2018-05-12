@@ -13,10 +13,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cahue.iweco.R;
+import com.crashlytics.android.Crashlytics;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import me.drakeet.support.toast.BadTokenListener;
+import me.drakeet.support.toast.ToastCompat;
 
 public class Util {
 
@@ -46,10 +50,11 @@ public class Util {
         TextView text = layout.findViewById(R.id.text);
         text.setText(string);
 
-        Toast toast = new Toast(context.getApplicationContext());
-
+        ToastCompat toast = ToastCompat.makeText(context, string, length);
+        toast.setBadTokenListener(t -> {
+            Crashlytics.log("BadTokenException avoided from Toast");
+        });
         toast.setGravity(Gravity.BOTTOM, 0, getActionBarSize(context));
-        toast.setDuration(length);
         toast.setView(layout);
         toast.show();
     }

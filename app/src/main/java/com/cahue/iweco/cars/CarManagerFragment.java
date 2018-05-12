@@ -206,7 +206,8 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         if (mBtAdapter != null) {
             mBtAdapter.cancelDiscovery();
         }
-        mGoogleApiClient.disconnect();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.disconnect();
     }
 
     /**
@@ -408,7 +409,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     private void showClearDialog(@NonNull final Car car) {
-        if(getActivity().isFinishing()) return;
+        if (getActivity().isFinishing()) return;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.delete_car_confirmation)
                 .setPositiveButton(R.string.ok, (dialog, id) -> onCarRemoved(car))
@@ -439,7 +440,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
     }
 
     private void editCar(Car car, boolean newCar) {
-        if(getActivity().isFinishing()) return;
+        if (getActivity().isFinishing()) return;
         EditCarDialog.newInstance(car, newCar).show(getFragmentManager(), "EditCarDialog");
     }
 

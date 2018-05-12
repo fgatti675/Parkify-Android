@@ -125,7 +125,7 @@ public class SpotsDelegate extends AbstractMarkerDelegate
 
         spotMarkersMap = new HashMap<>(MARKERS_LIMIT);
 
-        maxZoom = BuildConfig.DEBUG ? 5 : MAX_ZOOM;
+        maxZoom = BuildConfig.DEBUG ? 0 : MAX_ZOOM;
 
         directionsDelegate = new DirectionsDelegate();
     }
@@ -257,8 +257,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
         if (isMapReady() && isResumed() && result.moreResults) {
             maxZoom = getMap().getCameraPosition().zoom;
             Log.d(TAG, "maxZoom set to " + maxZoom);
-            if (BuildConfig.DEBUG)
-                Toast.makeText(getActivity(), "maxZoom set to " + maxZoom, Toast.LENGTH_SHORT).show();
         }
 
         Set<ParkingSpot> parkingSpots = result.spots;
@@ -292,8 +290,6 @@ public class SpotsDelegate extends AbstractMarkerDelegate
      */
     @Override
     public void onServerError(ParkingSpotsQuery query, int statusCode, String reasonPhrase) {
-        if (BuildConfig.DEBUG)
-            Toast.makeText(getActivity(), "Error: " + statusCode, Toast.LENGTH_SHORT).show();
     }
 
     public void doDraw() {
