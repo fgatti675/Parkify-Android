@@ -17,12 +17,4 @@
             android:src="@drawable/bg_parking" />
     </item>
 
-    <item>
-        <bitmap
-            android:id="@+id/Idofbg3"
-            android:gravity="fill_vertical"
-            android:src="@drawable/background" />
-    </item>
-
-
 </layer-list>
