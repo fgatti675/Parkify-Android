@@ -95,5 +95,8 @@
 
     <string name="open_the_app">Es necesario abrir la app</string>
     <string name="open_the_app_long">Estamos realizando algunos cambios bajo el capó que requieren que abras la aplicación para continuar. Prometemos que será increíble en el futuro.<working> </working></string>
+    <string name="location_channel_description">Eventos relativos al uso del GPS</string>
+    <string name="location_instructions">Parkify esta obteniendo la ubicación del vehículo</string>
+    <string name="location_in_progress">Aparcamiento</string>
 
 </resources>

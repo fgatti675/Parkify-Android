@@ -97,6 +97,9 @@
 
     <string name="open_the_app">Devi riaprire l\'app</string>
     <string name="open_the_app_long">Stiamo apportando alcune modifiche che richiedono l\'apertura dell\'app per continuare. Promettiamo che sarà fantastico in futuro.<working> </working></string>
+    <string name="location_channel_description">Eventi della posizione</string>
+    <string name="location_in_progress">Parcheggio</string>
+    <string name="location_instructions">Parkify sta ottenendo la posizione della macchina</string>
 
 
 </resources>
