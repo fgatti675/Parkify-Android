@@ -156,7 +156,7 @@ public class BillingFragment extends Fragment {
         IInAppBillingService iInAppBillingService;
         PurchasesCheckListener listener;
 
-        public CheckPurchaseAsyncTask(IInAppBillingService iInAppBillingService, PurchasesCheckListener listener) {
+        CheckPurchaseAsyncTask(IInAppBillingService iInAppBillingService, PurchasesCheckListener listener) {
             this.iInAppBillingService = iInAppBillingService;
             this.listener = listener;
         }

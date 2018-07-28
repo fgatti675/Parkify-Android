@@ -184,12 +184,13 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
             public void onCarsRetrieved(List<Car> cars) {
 
                 CarManagerFragment.this.cars = cars;
-
-                mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                        .addConnectionCallbacks(CarManagerFragment.this)
-                        .addApi(LocationServices.API)
-                        .build();
-                mGoogleApiClient.connect();
+                if (isAdded()) {
+                    mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                            .addConnectionCallbacks(CarManagerFragment.this)
+                            .addApi(LocationServices.API)
+                            .build();
+                    mGoogleApiClient.connect();
+                }
             }
 
             @Override

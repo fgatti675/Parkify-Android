@@ -150,8 +150,7 @@ public class PossibleSetCarDetailsFragment extends DetailsFragment {
                     else numColumns = 3;
                     buttonsLayout.setNumColumns(numColumns);
 
-                    if (!cars.isEmpty())
-                        buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
+                    buttonsLayout.setAdapter(new CarButtonAdapter(carSelectedListener, cars));
 
                     Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.abc_fade_in);
                     view.startAnimation(fadeInAnimation);

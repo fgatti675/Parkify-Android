@@ -348,10 +348,12 @@ public class MapsActivity extends AppCompatActivity
 
 
         nativeAdContainer = findViewById(R.id.navite_ad_container);
-        nativeAdContainer.setVisibility(View.GONE);
+        if (nativeAdContainer != null)
+            nativeAdContainer.setVisibility(View.GONE);
 
         adMobView = findViewById(R.id.adMobView);
-        adMobView.setVisibility(View.GONE);
+        if (adMobView != null)
+            adMobView.setVisibility(View.GONE);
 
         /*
          * Start activity recognition service (if enabled)
@@ -476,12 +478,16 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void hideAds() {
+        if (nativeAdContainer == null) return;
+        if (adMobView == null) return;
         nativeAdContainer.setVisibility(View.GONE);
         adMobView.setVisibility(View.GONE);
         facebookNativeAd.destroy();
     }
 
     private void setUpFacebookAd() {
+
+        if (adMobView == null) return;
 
         adMobView.setVisibility(View.GONE);
 
@@ -500,6 +506,9 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onAdLoaded(Ad ad) {
 
+        if (nativeAdContainer == null) return;
+        if (adMobView == null) return;
+
         Log.d(TAG, "onAdLoaded: ");
 
         // Downloading and setting the ad icon.
@@ -514,7 +523,7 @@ public class MapsActivity extends AppCompatActivity
         final ViewGroup adChoicesWrap = nativeAdContainer.findViewById(R.id.ad_choices_wrap);
 
         RequestQueue requestQueue = ParkifyApp.getParkifyApp().getRequestQueue();
-        if (adIcon != null) {
+        if (adIcon != null && adIcon.getUrl() != null) {
             ImageRequest adPicture = new ImageRequest(adIcon.getUrl(), response -> {
                 nativeAdIcon.setImageBitmap(response);
                 bindFacebookAdView(nativeAdCallToAction, nativeAdTitle, nativeAdBody, adChoicesWrap);
@@ -549,6 +558,9 @@ public class MapsActivity extends AppCompatActivity
 
     private void setUpAdMobBanner() {
 
+        if (nativeAdContainer == null) return;
+        if (adMobView == null) return;
+
         nativeAdContainer.setVisibility(View.GONE);
 
         adMobView.setVisibility(View.VISIBLE);
@@ -581,6 +593,9 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void bindFacebookAdView(Button nativeAdCallToAction, final TextView nativeAdTitle, final TextView nativeAdBody, ViewGroup adChoicesWrap) {
+
+        if (nativeAdContainer == null) return;
+
         nativeAdContainer.setVisibility(View.VISIBLE);
 
         facebookNativeAd.unregisterView();
@@ -669,7 +684,7 @@ public class MapsActivity extends AppCompatActivity
                             Log.d(TAG, "Car fetched with no address");
                             updateCarLocationAddress(car);
                         }
-                        if(car.btAddress != null) hasCarWithBt = true;
+                        if (car.btAddress != null) hasCarWithBt = true;
                         ParkedCarDelegate parkedCarDelegate = initParkedCarDelegate(car.id);
                         if (mMap != null)
                             parkedCarDelegate.setMap(mMap);

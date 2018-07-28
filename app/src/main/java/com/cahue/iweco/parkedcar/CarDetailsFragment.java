@@ -115,7 +115,8 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
         }
 
         carViewHolder.bind(getActivity(), car, userLocation, BluetoothAdapter.getDefaultAdapter());
-        carViewHolder.toolbar.getMenu().findItem(R.id.action_share).setVisible(true);
+        if (car.location != null)
+            carViewHolder.toolbar.getMenu().findItem(R.id.action_share).setVisible(true);
 
         updateFollowButtonState();
     }
@@ -209,7 +210,7 @@ public class CarDetailsFragment extends DetailsFragment implements Toolbar.OnMen
 
     private void shareCarLocation() {
 
-        if (car == null) return;
+        if (car == null || car.location == null) return;
 
         Double latitude = car.location.getLatitude();
         Double longitude = car.location.getLongitude();
