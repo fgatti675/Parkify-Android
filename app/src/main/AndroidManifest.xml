@@ -160,6 +160,12 @@
 
         <service android:name=".activityrecognition.ActivityRecognitionService" />
 
+        <service android:name=".locationservices.LocationUpdatesService" />
+
+        <receiver
+            android:name=".locationservices.LocationUpdatesService$StopLocationPollBroadcastReceiver"
+            android:enabled="true" />
+
         <service
             android:name=".activityrecognition.DetectedActivitiesIntentService"
             android:exported="false" />

@@ -50,14 +50,10 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
     private static final String TAG = "LUBroadcastReceiver";
     public static final int MINIMUM_ACCURACY = 25;
     public static final long MAX_DURATION = 20 * 1000;
-    private Intent intent;
     private Location location = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
-        this.intent = intent;
-
 
         if (intent != null) {
 
@@ -90,7 +86,7 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
 
                 if (location == null) {
                     Log.w(TAG, "Timed out and no location");
-                    stop(context, action);
+                    stop(context);
                 } else {
                     notifyFixLocationAndStop(context, extras, action, location);
                 }
@@ -145,12 +141,12 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
             onPreciseFixPolled(context, location, extras);
         notified = true;
 
-        stop(context, action);
+        stop(context);
 
     }
 
-    private void stop(Context context, String action) {
-        new LocationUpdatesHelper(context, action).stopLocationUpdates(intent);
+    private void stop(Context context) {
+        context.stopService(new Intent(context, LocationUpdatesService.class));
     }
 
     protected abstract void onPreciseFixPolled(Context context, Location location, Bundle extras);

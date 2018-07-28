@@ -91,6 +91,11 @@
     <string name="just_parked_channel_description">Parking event detected by Bluetooth</string>
     <string name="motion_recog_channel_description">Motion recognition events</string>
 
+    <string name="location_channel_description">Location polling events</string>
+
+    <string name="location_in_progress">Parking event</string>
+    <string name="location_instructions">Parkify is getting your location</string>
+
     <string name="motion_recognition_in_progress">Motion recognition in progress</string>
     <string name="motion_recognition_instructions">Parkify will detect when you park</string>
     <string name="stop">Stop</string>

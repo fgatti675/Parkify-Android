@@ -11,7 +11,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -20,8 +19,10 @@ import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
-import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.CarMovedReceiver;
+import com.cahue.iweco.locationservices.LocationUpdatesService;
 import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.awareness.Awareness;
@@ -300,8 +301,9 @@ public class ActivityRecognitionService extends Service {
     private void handleVehicleToFoot() {
         Log.i(TAG, "handleVehicleToFoot: ");
 
-        LocationUpdatesHelper helper = new LocationUpdatesHelper(this, PossibleParkedCarReceiver.ACTION);
-        helper.startLocationUpdates(null);
+        LocationUpdatesService.startLocationUpdate(this,
+                PossibleParkedCarReceiver.ACTION,
+                null);
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};

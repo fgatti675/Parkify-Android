@@ -13,10 +13,9 @@ public class DelayedGeofenceJob extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
-        LocationUpdatesHelper helper = new LocationUpdatesHelper(this, GeofenceCarReceiver.ACTION);
-        Bundle extras = new Bundle();
-        extras.putString(Constants.EXTRA_CAR_ID, jobParameters.getExtras().getString(Constants.EXTRA_CAR_ID));
-        helper.startLocationUpdates(extras);
+        LocationUpdatesService.startLocationUpdate(this,
+                GeofenceCarReceiver.ACTION,
+                jobParameters.getExtras().getString(Constants.EXTRA_CAR_ID));
 
         jobFinished(jobParameters, false);
         return true;

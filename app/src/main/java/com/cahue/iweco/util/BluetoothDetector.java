@@ -23,8 +23,9 @@ import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.locationservices.CarMovedReceiver;
-import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.LocationUpdatesService;
 import com.cahue.iweco.locationservices.ParkedCarReceiver;
+import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.model.Car;
 import com.google.firebase.auth.FirebaseAuth;
@@ -153,11 +154,9 @@ public class BluetoothDetector extends BroadcastReceiver {
         }
 
         // start the CarMovedReceiver
-        LocationUpdatesHelper helper = new LocationUpdatesHelper(context, CarMovedReceiver.ACTION);
-        Bundle extras = new Bundle();
-        extras.putString(Constants.EXTRA_CAR_ID, car.id);
-        helper.startLocationUpdates(extras);
-
+        LocationUpdatesService.startLocationUpdate(context,
+                CarMovedReceiver.ACTION,
+                car.id);
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 1000, 200, 1000};
@@ -177,10 +176,9 @@ public class BluetoothDetector extends BroadcastReceiver {
         Log.d("Bluetooth", "onBtDisconnectedFromCar");
 
         // we create an intent to start the location poller service, as declared in manifest
-        LocationUpdatesHelper helper = new LocationUpdatesHelper(context, ParkedCarReceiver.ACTION);
-        Bundle extras = new Bundle();
-        extras.putString(Constants.EXTRA_CAR_ID, car.id);
-        helper.startLocationUpdates(extras);
+        LocationUpdatesService.startLocationUpdate(context,
+                ParkedCarReceiver.ACTION,
+                car.id);
 
         /**
          * Start activity recognition if required

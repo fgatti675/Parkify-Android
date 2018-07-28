@@ -1,16 +1,23 @@
 package com.cahue.iweco.locationservices;
 
 import android.Manifest;
+import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.Build;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.cahue.iweco.R;
+import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.util.Tracking;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -20,11 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
+import static com.cahue.iweco.util.NotificationChannelsUtils.LOCATION_CHANNEL_ID;
 
 /**
  * Created by f.gatti.gomez on 02.07.17.
  */
-public class LocationUpdatesHelper {
+public class LocationUpdatesService extends Service {
 
     /**
      * Do nothing before this time has passed. Useful to avoid stale locations
@@ -41,7 +49,7 @@ public class LocationUpdatesHelper {
      */
     final static int SERVICE_TIMEOUT_MS = 60000;
 
-    private static final String TAG = LocationUpdatesHelper.class.getSimpleName();
+    private static final String TAG = LocationUpdatesService.class.getSimpleName();
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -60,11 +68,22 @@ public class LocationUpdatesHelper {
      */
     private static final long MAX_WAIT_TIME = UPDATE_INTERVAL * 3;
 
-    private final Context context;
-
     private PendingIntent pendingIntent;
 
     private String action;
+    private String carId;
+
+
+    public static void startLocationUpdate(@NonNull Context context, String action, String carId) {
+        Intent intent = new Intent(context, LocationUpdatesService.class);
+        intent.putExtra("EXTRA_ACTION", action);
+        intent.putExtra(EXTRA_CAR_ID, carId);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
 
     private Map<String, Class<? extends BroadcastReceiver>> receiversMap = new HashMap<String, Class<? extends BroadcastReceiver>>() {{
         put(CarMovedReceiver.ACTION, CarMovedReceiver.class);
@@ -73,31 +92,63 @@ public class LocationUpdatesHelper {
         put(GeofenceCarReceiver.ACTION, GeofenceCarReceiver.class);
     }};
 
-    private Bundle extras;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    public LocationUpdatesHelper(Context context, String action) {
-        this.context = context;
-        this.action = action;
-        fusedLocationProviderClient = new FusedLocationProviderClient(context);
+
+
+    public LocationUpdatesService() {
     }
 
-    public void startLocationUpdates(Bundle extras) {
 
-        this.extras = extras;
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+
+    @Override
+    public void onCreate() {
+
+        Log.v(TAG, "onCreate");
+
+        fusedLocationProviderClient = new FusedLocationProviderClient(this);
+
+        PendingIntent cancelActRecPendingIntent = PendingIntent.getBroadcast(
+                this,
+                74553,
+                new Intent(this, ActivityRecognitionService.StopActivityRecognitionBroadcastReceiver.class),
+                PendingIntent.FLAG_CANCEL_CURRENT);
+
+        startForeground(27513, (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, LOCATION_CHANNEL_ID) : new Notification.Builder(this))
+                .setContentTitle(getString(R.string.location_in_progress))
+                .setContentText(getString(R.string.location_instructions))
+                .setSmallIcon(R.drawable.ic_car_primary_16dp)
+                .setColor(getResources().getColor(R.color.theme_primary))
+                .addAction(R.drawable.ic_exit_to_app_24dp, getString(R.string.stop), cancelActRecPendingIntent)
+                .build());
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.i(TAG, "Starting location updates");
+
+        this.action = intent.getStringExtra("EXTRA_ACTION");
+        this.carId = intent.getStringExtra(EXTRA_CAR_ID);
 
         /**
          * Start location updates request
          */
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Tracking.sendException(TAG, "No location permissions granted", false);
-            return;
+            stopSelf(startId);
+            return START_NOT_STICKY;
         }
 
-        pendingIntent = getPendingIntent(context, getIntent());
+        pendingIntent = getPendingIntent(getLocationIntent());
 
         LocationRequest locationRequest = new LocationRequest();
 
@@ -116,26 +167,27 @@ public class LocationUpdatesHelper {
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, pendingIntent);
         } catch (SecurityException e) {
             e.printStackTrace();
+            return START_NOT_STICKY;
         }
+
+        return START_STICKY;
     }
 
-    /**
-     * Removal of location updates.
-     */
-    public void stopLocationUpdates(Intent intent) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         Log.i(TAG, "Removing location updates");
-        pendingIntent = getPendingIntent(context, intent);
-
         fusedLocationProviderClient.removeLocationUpdates(pendingIntent);
     }
 
-    private PendingIntent getPendingIntent(Context context, Intent intent) {
-        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+    private PendingIntent getPendingIntent(Intent intent) {
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
 
-    private Intent getIntent() {
-        Intent intent = new Intent(context, receiversMap.get(action));
+    private Intent getLocationIntent() {
+        Intent intent = new Intent(this, receiversMap.get(action));
         intent.setAction(action);
 
         // TODO: change to extras when this is fixed: https://issuetracker.google.com/issues/37013793
@@ -143,8 +195,8 @@ public class LocationUpdatesHelper {
         Uri.Builder builder = new Uri.Builder().scheme("parkify").path("location")
                 .appendQueryParameter("startTime", String.valueOf(new Date().getTime()));
 
-        if (extras != null && extras.containsKey(EXTRA_CAR_ID)) {
-            builder.appendQueryParameter("car", extras.getString(EXTRA_CAR_ID));
+        if (carId != null) {
+            builder.appendQueryParameter("car", String.valueOf(carId));
         }
         intent.setData(builder.build());
 
@@ -153,4 +205,16 @@ public class LocationUpdatesHelper {
 //        intent.putExtra(Constants.EXTRA_BUNDLE, extras);
         return intent;
     }
+
+    public static class StopLocationPollBroadcastReceiver extends BroadcastReceiver {
+        public StopLocationPollBroadcastReceiver() {
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "StopLocationPollBroadcastReceiver: on stop clicked");
+            context.stopService(new Intent(context, LocationUpdatesService.class));
+        }
+    }
+
 }

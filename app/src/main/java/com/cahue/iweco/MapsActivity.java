@@ -53,7 +53,8 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
 import com.cahue.iweco.locationservices.CarMovedReceiver;
-import com.cahue.iweco.locationservices.LocationUpdatesHelper;
+import com.cahue.iweco.locationservices.GeofenceCarReceiver;
+import com.cahue.iweco.locationservices.LocationUpdatesService;
 import com.cahue.iweco.locationservices.ParkedCarReceiver;
 import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
 import com.cahue.iweco.login.AuthUtils;
@@ -1602,8 +1603,10 @@ public class MapsActivity extends AppCompatActivity
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
                     // start the CarMovedReceiver
-                    LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, PossibleParkedCarReceiver.ACTION);
-                    helper.startLocationUpdates(null);
+
+                    LocationUpdatesService.startLocationUpdate(MapsActivity.this,
+                            PossibleParkedCarReceiver.ACTION,
+                            null);
                 }
 
                 @Override
@@ -1619,11 +1622,10 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
-                    // start the CarMovedReceiver
-                    LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, ParkedCarReceiver.ACTION);
-                    Bundle extras = new Bundle();
-                    extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
-                    helper.startLocationUpdates(extras);
+
+                    LocationUpdatesService.startLocationUpdate(MapsActivity.this,
+                            ParkedCarReceiver.ACTION,
+                            cars.iterator().next().id);
                 }
 
                 @Override
@@ -1639,11 +1641,9 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
-                    // start the CarMovedReceiver
-                    LocationUpdatesHelper helper = new LocationUpdatesHelper(MapsActivity.this, CarMovedReceiver.ACTION);
-                    Bundle extras = new Bundle();
-                    extras.putString(Constants.EXTRA_CAR_ID, cars.iterator().next().id);
-                    helper.startLocationUpdates(extras);
+                    LocationUpdatesService.startLocationUpdate(MapsActivity.this,
+                            CarMovedReceiver.ACTION,
+                            cars.iterator().next().id);
                 }
 
                 @Override
