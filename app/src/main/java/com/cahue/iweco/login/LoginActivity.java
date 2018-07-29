@@ -233,6 +233,7 @@ public class LoginActivity extends AppCompatActivity implements LoginAsyncTask.L
     public void goToNextActivity() {
         if (isFinishing()) return;
         boolean tutorialShown = PreferencesUtil.isTutorialShown(this);
+//        tutorialShown = false;
         Intent intent = new Intent(this, tutorialShown ? MapsActivity.class : TutorialActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

@@ -95,7 +95,7 @@ public class TutorialActivity extends AppCompatActivity
 
             int index = (Integer) view.getTag();
             Drawable currentDrawableInLayerDrawable;
-            currentDrawableInLayerDrawable = background.getDrawable(3 - index);
+            currentDrawableInLayerDrawable = background.getDrawable(TOTAL_NUMBER_PAGES - 1 - index);
 
             if (position <= -1 || position >= 1) {
                 currentDrawableInLayerDrawable.setAlpha(0);
