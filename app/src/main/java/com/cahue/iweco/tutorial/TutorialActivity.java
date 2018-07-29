@@ -225,14 +225,14 @@ public class TutorialActivity extends AppCompatActivity
 
         @Override
         public boolean isViewFromObject(@NonNull View view, Object object) {
-if (object instanceof TutorialInstructionsFragment) {
+            if (object instanceof TutorialInstructionsFragment) {
                 String type = ((TutorialInstructionsFragment) object).getType();
                 if (type.equals(TutorialInstructionsFragment.TYPE_PARKING))
-                    view.setTag(1);
+                    view.setTag(0);
                 else if (type.equals(TutorialInstructionsFragment.TYPE_SPOTS))
-                    view.setTag(2);
+                    view.setTag(1);
             } else if (object instanceof CarManagerFragment) {
-                view.setTag(3);
+                view.setTag(2);
             }
             return super.isViewFromObject(view, object);
         }
