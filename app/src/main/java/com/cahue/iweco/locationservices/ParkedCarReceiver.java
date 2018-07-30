@@ -111,6 +111,8 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
         bundle.putString("car", carId);
         firebaseAnalytics.logEvent("bt_car_parked", bundle);
 
+        Log.i(TAG, "Location polled update");
+
     }
 
 

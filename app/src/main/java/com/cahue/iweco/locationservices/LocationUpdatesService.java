@@ -112,8 +112,20 @@ public class LocationUpdatesService extends Service {
 
         Log.v(TAG, "onCreate");
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Tracking.sendException(TAG, "No location permissions granted", false);
+            stopSelf();
+            return;
+        }
+
         fusedLocationProviderClient = new FusedLocationProviderClient(this);
 
+        doStartForeground();
+
+    }
+
+    private void doStartForeground() {
         PendingIntent cancelActRecPendingIntent = PendingIntent.getBroadcast(
                 this,
                 74553,
@@ -127,27 +139,21 @@ public class LocationUpdatesService extends Service {
                 .setColor(getResources().getColor(R.color.theme_primary))
                 .addAction(R.drawable.ic_exit_to_app_24dp, getString(R.string.stop), cancelActRecPendingIntent)
                 .build());
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        doStartForeground();
 
         Log.i(TAG, "Starting location updates");
 
         this.action = intent.getStringExtra("EXTRA_ACTION");
         this.carId = intent.getStringExtra(EXTRA_CAR_ID);
 
-        /**
+        /*
          * Start location updates request
          */
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Tracking.sendException(TAG, "No location permissions granted", false);
-            stopSelf(startId);
-            return START_NOT_STICKY;
-        }
-
         pendingIntent = getPendingIntent(getLocationIntent());
 
         LocationRequest locationRequest = new LocationRequest();
