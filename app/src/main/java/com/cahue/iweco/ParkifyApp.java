@@ -12,7 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
-import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
+import com.cahue.iweco.locationservices.PossibleParkedCarService;
 import com.cahue.iweco.util.NotificationChannelsUtils;
 import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -54,7 +54,7 @@ public class ParkifyApp extends Application {
         TrafficStats.setThreadStatsTag(THREAD_ID);
 
         registerReceiver(
-                new PossibleParkedCarReceiver.NotificationBroadcastReceiver(),
+                new PossibleParkedCarService.NotificationBroadcastReceiver(),
                 new IntentFilter("com.whereismycar.DELETE_AR_NOTIFICATION")
         );
 

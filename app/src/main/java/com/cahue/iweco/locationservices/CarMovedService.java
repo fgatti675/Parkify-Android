@@ -12,19 +12,13 @@ import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.spots.ParkingSpotSender;
-import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 
 /**
  * This class is in charge of uploading the location of the car to the server when BT connects
@@ -32,11 +26,11 @@ import java.util.HashMap;
  *
  * @author Francesco
  */
-public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
+public class CarMovedService extends AbstractLocationUpdatesService {
 
     public static final String ACTION = BuildConfig.APPLICATION_ID + ".CAR_MOVED_ACTION";
 
-    private final static String TAG = CarMovedReceiver.class.getSimpleName();
+    private final static String TAG = CarMovedService.class.getSimpleName();
 
     private void clearGeofence(Context context, @NonNull final String carId) {
         GeofencingClient mGeofencingClient = LocationServices.getGeofencingClient(context);
@@ -49,22 +43,19 @@ public class CarMovedReceiver extends AbstractLocationUpdatesBroadcastReceiver {
     }
 
     @Override
-    protected void onPreciseFixPolled(Context context, final Location spotLocation, Bundle extras) {
+    protected void onPreciseFixPolled(Location location, String carId, Date startTime) {
 
         CarDatabase carDatabase = CarDatabase.getInstance();
-        String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
 
-        Date startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
-
-        Util.showBlueToast(context, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
+        Util.showBlueToast(this, R.string.thanks_free_spot, Toast.LENGTH_SHORT);
 
         carDatabase.removeCarLocation(carId);
-        clearGeofence(context, carId);
+        clearGeofence(this, carId);
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
 
-        ParkingSpotSender.doPostSpotLocation(context, spotLocation, false, carId);
-        ParkingSpotSender.fetchAddressAndSave(context, spotLocation, startTime, carId, false);
+        ParkingSpotSender.doPostSpotLocation(this, location, false, carId);
+        ParkingSpotSender.fetchAddressAndSave(this, location, startTime, carId, false);
 
     }
 }

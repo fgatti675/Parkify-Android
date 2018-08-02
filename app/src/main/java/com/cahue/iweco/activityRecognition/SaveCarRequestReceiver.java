@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.cars.database.CarDatabase;
-import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
+import com.cahue.iweco.locationservices.PossibleParkedCarService;
 import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.util.Tracking;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -30,7 +30,7 @@ public class SaveCarRequestReceiver extends BroadcastReceiver {
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
 
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
-        mNotifyMgr.cancel(PossibleParkedCarReceiver.NOTIFICATION_ID);
+        mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
 
         Log.d(TAG, "onReceive: ");
 

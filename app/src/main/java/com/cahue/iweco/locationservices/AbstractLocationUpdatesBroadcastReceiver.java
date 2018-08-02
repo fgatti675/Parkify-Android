@@ -146,7 +146,7 @@ public abstract class AbstractLocationUpdatesBroadcastReceiver extends Broadcast
     }
 
     private void stop(Context context) {
-        context.stopService(new Intent(context, LocationUpdatesService.class));
+        context.stopService(new Intent(context, AbstractLocationUpdatesService.class));
     }
 
     protected abstract void onPreciseFixPolled(Context context, Location location, Bundle extras);

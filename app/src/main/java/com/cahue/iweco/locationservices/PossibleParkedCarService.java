@@ -39,30 +39,21 @@ import static com.cahue.iweco.util.NotificationChannelsUtils.ACT_RECOG_CHANNEL_I
  *
  * @author Francesco
  */
-public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver {
+public class PossibleParkedCarService extends AbstractLocationUpdatesService {
 
     public static final String ACTION = BuildConfig.APPLICATION_ID + ".POSSIBLE_PARKED_CAR_ACTION";
 
     public static final int NOTIFICATION_ID = 875644;
 
-    private final static String TAG = PossibleParkedCarReceiver.class.getSimpleName();
+    private final static String TAG = PossibleParkedCarService.class.getSimpleName();
 
     private static final int ACCURACY_THRESHOLD_M = 50;
 
     private CarDatabase carDatabase;
 
-    private Location location;
-
-    private Date startTime;
-
 
     @Override
-    protected void onPreciseFixPolled(final Context context, Location location, Bundle extras) {
-
-//        if (location.getAccuracy() > ACCURACY_THRESHOLD_M) return;
-
-        this.location = location;
-        this.startTime = (Date) extras.getSerializable(Constants.EXTRA_START_TIME);
+    protected void  onPreciseFixPolled(Location location, String carId, Date startTime) {
 
         Log.i(TAG, "Received : " + location);
 
@@ -70,10 +61,10 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
         Log.d(TAG, "Fetching address");
         FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
-        fetchAddressDelegate.fetch(context, location, new FetchAddressDelegate.Callbacks() {
+        fetchAddressDelegate.fetch(this, location, new FetchAddressDelegate.Callbacks() {
             @Override
             public void onAddressFetched(String address) {
-                PossibleParkedCarReceiver.this.onAddressFetched(context, address);
+                PossibleParkedCarService.this.onAddressFetched(location, address, startTime);
             }
 
             @Override
@@ -84,7 +75,7 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_POSSIBLE_SPOT_DETECTED);
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Bundle bundle = new Bundle();
         bundle.putDouble("accuracy", location.getAccuracy());
         firebaseAnalytics.logEvent("ar_possible_spot_detected", bundle);
@@ -97,32 +88,32 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
      *
      * @param address
      */
-    private void onAddressFetched(Context context, String address) {
+    private void onAddressFetched(Location location, String address, Date startTime) {
 
         PossibleSpot possibleParkingSpot = new PossibleSpot(location, address, startTime, false, PossibleSpot.RECENT);
-        carDatabase.addPossibleParkingSpot(context, possibleParkingSpot);
+        carDatabase.addPossibleParkingSpot(this, possibleParkingSpot);
 
-        if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(context))
+        if (!PreferencesUtil.isMovementRecognitionNotificationEnabled(this))
             return;
 
         long[] pattern = {0, 100, 1000};
 
         // Intent to start the activity and show a just parked dialog
-        Intent intent = new Intent(context, MapsActivity.class);
+        Intent intent = new Intent(this, MapsActivity.class);
         intent.setAction(Constants.ACTION_POSSIBLE_PARKED_CAR);
         intent.putExtra(Constants.EXTRA_SPOT, possibleParkingSpot);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 345345, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
+        NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
         Notification.Builder mBuilder =
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, ACT_RECOG_CHANNEL_ID) : new Notification.Builder(context))
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, ACT_RECOG_CHANNEL_ID) : new Notification.Builder(this))
                         .setVibrate(pattern)
                         .setContentIntent(pendingIntent)
-                        .setColor(context.getResources().getColor(R.color.theme_primary))
+                        .setColor(this.getResources().getColor(R.color.theme_primary))
                         .setSmallIcon(R.drawable.ic_car_white_48dp)
-                        .setContentTitle(context.getString(R.string.ask_just_parked))
+                        .setContentTitle(this.getString(R.string.ask_just_parked))
                         .setContentText(address);
 
         carDatabase.retrieveCars(new CarDatabase.CarsRetrieveListener() {
@@ -131,10 +122,10 @@ public class PossibleParkedCarReceiver extends AbstractLocationUpdatesBroadcastR
                 int numberActions = Math.min(cars.size(), 3);
                 for (int i = 0; i < numberActions; i++) {
                     Car car = cars.get(i);
-                    Notification.Action saveAction = createCarSaveAction(context, car, possibleParkingSpot, i);
+                    Notification.Action saveAction = createCarSaveAction(PossibleParkedCarService.this, car, possibleParkingSpot, i);
                     mBuilder.addAction(saveAction);
                 }
-                mBuilder.setDeleteIntent(createDeleteIntent(context));
+                mBuilder.setDeleteIntent(createDeleteIntent(PossibleParkedCarService.this));
                 mNotifyMgr.notify(null, NOTIFICATION_ID, mBuilder.build());
 
 //                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);

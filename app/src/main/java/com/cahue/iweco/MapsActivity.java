@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -52,11 +53,11 @@ import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
-import com.cahue.iweco.locationservices.CarMovedReceiver;
-import com.cahue.iweco.locationservices.GeofenceCarReceiver;
-import com.cahue.iweco.locationservices.LocationUpdatesService;
-import com.cahue.iweco.locationservices.ParkedCarReceiver;
-import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
+import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.AbstractLocationUpdatesService;
+import com.cahue.iweco.locationservices.GeofenceCarService;
+import com.cahue.iweco.locationservices.ParkedCarService;
+import com.cahue.iweco.locationservices.PossibleParkedCarService;
 import com.cahue.iweco.login.AuthUtils;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.model.Car;
@@ -115,6 +116,7 @@ import java.util.Set;
 import bolts.AppLinks;
 
 import static android.content.Intent.ACTION_VIEW;
+import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
 
 public class MapsActivity extends AppCompatActivity
         implements
@@ -773,7 +775,7 @@ public class MapsActivity extends AppCompatActivity
                 initPossibleParkedCarDelegate(possibleSpot).activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-                mNotifyMgr.cancel(PossibleParkedCarReceiver.NOTIFICATION_ID);
+                mNotifyMgr.cancel(PossibleParkedCarService.NOTIFICATION_ID);
                 intent.setAction(null);
             } else if (intent.getAction().equals(ACTION_VIEW)) {
 
@@ -782,7 +784,7 @@ public class MapsActivity extends AppCompatActivity
                 parkedCarDelegate.activate();
 
                 NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
-                mNotifyMgr.cancel(carId, ParkedCarReceiver.NOTIFICATION_ID);
+                mNotifyMgr.cancel(carId, ParkedCarService.NOTIFICATION_ID);
                 intent.setAction(null);
             }
         }
@@ -1602,11 +1604,11 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
-                    // start the CarMovedReceiver
+                    // start the CarMovedService
 
-                    LocationUpdatesService.startLocationUpdate(MapsActivity.this,
-                            PossibleParkedCarReceiver.ACTION,
-                            null);
+                    Intent intent = new Intent(MapsActivity.this, PossibleParkedCarService.class);
+                    ContextCompat.startForegroundService(MapsActivity.this, intent);
+
                 }
 
                 @Override
@@ -1623,9 +1625,10 @@ public class MapsActivity extends AppCompatActivity
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
 
-                    LocationUpdatesService.startLocationUpdate(MapsActivity.this,
-                            ParkedCarReceiver.ACTION,
-                            cars.iterator().next().id);
+                    Intent intent = new Intent(MapsActivity.this, ParkedCarService.class);
+                    intent.putExtra(EXTRA_CAR_ID, cars.iterator().next().id);
+                    ContextCompat.startForegroundService(MapsActivity.this, intent);
+
                 }
 
                 @Override
@@ -1641,9 +1644,10 @@ public class MapsActivity extends AppCompatActivity
                 @Override
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
-                    LocationUpdatesService.startLocationUpdate(MapsActivity.this,
-                            CarMovedReceiver.ACTION,
-                            cars.iterator().next().id);
+
+                    Intent intent = new Intent(MapsActivity.this, CarMovedService.class);
+                    intent.putExtra(EXTRA_CAR_ID, cars.iterator().next().id);
+                    ContextCompat.startForegroundService(MapsActivity.this, intent);
                 }
 
                 @Override

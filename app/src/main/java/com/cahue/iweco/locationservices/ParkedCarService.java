@@ -2,7 +2,6 @@ package com.cahue.iweco.locationservices;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.media.RingtoneManager;
@@ -39,28 +38,27 @@ import static android.content.Intent.ACTION_VIEW;
  *
  * @author Francesco
  */
-public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver {
+public class ParkedCarService extends AbstractLocationUpdatesService {
 
     public static final String ACTION = BuildConfig.APPLICATION_ID + ".PARKED_CAR_ACTION";
 
     public static final int NOTIFICATION_ID = 4833;
 
-    private final static String TAG = ParkedCarReceiver.class.getSimpleName();
+    private final static String TAG = ParkedCarService.class.getSimpleName();
 
     private CarDatabase carDatabase;
 
+
     @Override
-    protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
+    protected void onPreciseFixPolled(Location location, String carId, Date startTime) {
 
         carDatabase = CarDatabase.getInstance();
-
-        String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
 
         Date now = new Date();
 
         Log.d(TAG, "Fetching address");
         FetchAddressDelegate fetchAddressDelegate = new FetchAddressDelegate();
-        fetchAddressDelegate.fetch(context, location, new FetchAddressDelegate.Callbacks() {
+        fetchAddressDelegate.fetch(this, location, new FetchAddressDelegate.Callbacks() {
             @Override
             public void onAddressFetched(String address) {
                 // Display the address string
@@ -69,7 +67,7 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
                     @Override
                     public void onCarUpdated(Car car) {
                         Log.d(TAG, "Sending car update broadcast");
-                        notifyUser(context, car);
+                        notifyUser(car);
                     }
 
                     @Override
@@ -85,7 +83,7 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
                 carDatabase.updateCarLocation(carId, location, null, now, "bt_event", new CarDatabase.CarUpdateListener() {
                     @Override
                     public void onCarUpdated(Car car) {
-                        notifyUser(context, car);
+                        notifyUser(car);
                     }
 
                     @Override
@@ -100,13 +98,13 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
          * If the location of the car is good enough we can set a geofence afterwards.
          */
         if (location.getAccuracy() < Constants.ACCURACY_THRESHOLD_M) {
-            GeofenceCarReceiver.startDelayedGeofenceService(context, carId);
+            GeofenceCarService.startDelayedGeofenceService(this, carId);
         }
 
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_PARKING);
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Bundle bundle = new Bundle();
         bundle.putString("car", carId);
         firebaseAnalytics.logEvent("bt_car_parked", bundle);
@@ -116,39 +114,39 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
     }
 
 
-    private void notifyUser(Context context, Car car) {
+    private void notifyUser(Car car) {
 
-        if (PreferencesUtil.isDisplayParkedNotificationEnabled(context)) {
+        if (PreferencesUtil.isDisplayParkedNotificationEnabled(this)) {
 
-            NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
+            NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(this);
 
             // Intent to start the activity and show a just parked dialog
-            Intent intent = new Intent(context, MapsActivity.class);
+            Intent intent = new Intent(this, MapsActivity.class);
             intent.setAction(ACTION_VIEW);
             intent.putExtra(Constants.EXTRA_CAR_ID, car.id);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 79243, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 79243, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             CharSequence title;
             if (car.name != null) {
-                Spannable sb = new SpannableString(car.name + " - " + context.getString(R.string.location_stored));
+                Spannable sb = new SpannableString(car.name + " - " + this.getString(R.string.location_stored));
                 sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, car.name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 title = sb;
             } else {
-                title = context.getString(R.string.location_stored);
+                title = this.getString(R.string.location_stored);
             }
 
-            Notification.Builder mBuilder = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(context, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID) : new Notification.Builder(context))
+            Notification.Builder mBuilder = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID) : new Notification.Builder(this))
                     .setContentIntent(pendingIntent)
-                    .setColor(context.getResources().getColor(R.color.theme_primary))
+                    .setColor(this.getResources().getColor(R.color.theme_primary))
                     .setSmallIcon(R.drawable.ic_car_white_48dp)
                     .setContentTitle(title);
 
             if (car.address != null)
                 mBuilder = mBuilder.setContentText(car.address);
 
-            if (PreferencesUtil.isDisplayParkedSoundEnabled(context)) {
+            if (PreferencesUtil.isDisplayParkedSoundEnabled(this)) {
 
                 long[] pattern = {0, 100, 200, 200};
                 mBuilder
@@ -163,9 +161,8 @@ public class ParkedCarReceiver extends AbstractLocationUpdatesBroadcastReceiver 
             mNotifyMgr.notify(car.id, NOTIFICATION_ID, mBuilder.build());
 
         } else {
-            Util.showBlueToast(context, context.getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
+            Util.showBlueToast(this, this.getString(R.string.car_location_registered, car.name), Toast.LENGTH_SHORT);
         }
 
     }
-
 }

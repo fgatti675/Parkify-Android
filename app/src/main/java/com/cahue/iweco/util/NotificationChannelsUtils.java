@@ -47,10 +47,6 @@ public class NotificationChannelsUtils {
                     NotificationManager.IMPORTANCE_MIN);
             mNotifyMgr.createNotificationChannel(channel);
 
-            /* Create or update. */
-            channel = new NotificationChannel(LOCATION_CHANNEL_ID, context.getString(R.string.location_channel_description),
-                    NotificationManager.IMPORTANCE_MIN);
-            mNotifyMgr.createNotificationChannel(channel);
         }
     }
 }

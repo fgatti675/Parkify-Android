@@ -33,18 +33,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Arrays;
 import java.util.Date;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 
 /**
  * This service is in charge of detecting if the user is far away enough after parking, and if so,
  * setting a geofence around it.
  */
-public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceiver {
+public class GeofenceCarService extends AbstractLocationUpdatesService {
 
     public static final String ACTION = BuildConfig.APPLICATION_ID + ".GEOFENCE_ACTIVATED_ACTION";
 
-    private static final String TAG = GeofenceCarReceiver.class.getSimpleName();
+    private static final String TAG = GeofenceCarService.class.getSimpleName();
 
     private PendingIntent mGeofencePendingIntent;
 
@@ -76,11 +75,9 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
     }
 
     @Override
-    protected void onPreciseFixPolled(Context context, Location location, Bundle extras) {
+    protected void onPreciseFixPolled(Location location, String carId, Date startTime) {
 
         if (location == null) return;
-
-        String carId = extras.getString(Constants.EXTRA_CAR_ID, null);
 
         DocumentReference documentReference = FirebaseFirestore.getInstance().collection("cars").document(carId);
         documentReference.get().addOnSuccessListener(documentSnapshot -> {
@@ -93,7 +90,7 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
                 String msg = "Geofence not added because accuracy is not good enough: Car " + car.location.getAccuracy() + " / User " + location.getAccuracy();
                 Log.d(TAG, msg);
                 if (BuildConfig.DEBUG) {
-                    notifyGeofenceError(context, car, msg);
+                    notifyGeofenceError(this, car, msg);
                 }
                 return;
             }
@@ -103,12 +100,12 @@ public class GeofenceCarReceiver extends AbstractLocationUpdatesBroadcastReceive
                 String msg = "GF Error: Too close to car: " + distanceTo;
                 Log.d(TAG, msg);
                 if (BuildConfig.DEBUG) {
-                    notifyGeofenceError(context, car, msg);
+                    notifyGeofenceError(this, car, msg);
                 }
                 return;
             }
 
-            addGeofence(context, car);
+            addGeofence(this, car);
 
         });
 

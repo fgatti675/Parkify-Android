@@ -12,20 +12,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
+import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
-import com.cahue.iweco.locationservices.CarMovedReceiver;
-import com.cahue.iweco.locationservices.LocationUpdatesService;
-import com.cahue.iweco.locationservices.ParkedCarReceiver;
-import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
+import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.AbstractLocationUpdatesService;
+import com.cahue.iweco.locationservices.ParkedCarService;
 import com.cahue.iweco.login.LoginActivity;
 import com.cahue.iweco.model.Car;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +36,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Calendar;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
 import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 import static com.cahue.iweco.util.NotificationChannelsUtils.JUST_PARKED_CHANNEL_ID;
 
@@ -129,7 +130,7 @@ public class BluetoothDetector extends BroadcastReceiver {
 
         /* Remove existing notification */
         NotificationManagerCompat mNotifyMgr = NotificationManagerCompat.from(context);
-        mNotifyMgr.cancel(car.id, ParkedCarReceiver.NOTIFICATION_ID);
+        mNotifyMgr.cancel(car.id, ParkedCarService.NOTIFICATION_ID);
 
         /*
          * Stop activity recognition
@@ -153,10 +154,11 @@ public class BluetoothDetector extends BroadcastReceiver {
             }
         }
 
-        // start the CarMovedReceiver
-        LocationUpdatesService.startLocationUpdate(context,
-                CarMovedReceiver.ACTION,
-                car.id);
+        // start the CarMovedService
+        Intent intent = new Intent(context, CarMovedService.class);
+        intent.putExtra(EXTRA_CAR_ID, car.id);
+        ContextCompat.startForegroundService(context, intent);
+
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 1000, 200, 1000};
@@ -176,9 +178,9 @@ public class BluetoothDetector extends BroadcastReceiver {
         Log.d("Bluetooth", "onBtDisconnectedFromCar");
 
         // we create an intent to start the location poller service, as declared in manifest
-        LocationUpdatesService.startLocationUpdate(context,
-                ParkedCarReceiver.ACTION,
-                car.id);
+        Intent intent = new Intent(context, ParkedCarService.class);
+        intent.putExtra(EXTRA_CAR_ID, car.id);
+        ContextCompat.startForegroundService(context, intent);
 
         /**
          * Start activity recognition if required

@@ -17,6 +17,7 @@
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
@@ -84,35 +85,11 @@
             android:name=".activityrecognition.ActivityRecognitionService$InVehicleReceiver"
             android:exported="true" />
 
-        <receiver
-            android:name=".locationservices.CarMovedReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="${applicationId}.CAR_MOVED_ACTION" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".locationservices.ParkedCarReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="${applicationId}.PARKED_CAR_ACTION" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".locationservices.GeofenceCarReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="${applicationId}.GEOFENCE_ACTIVATED_ACTION" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".locationservices.PossibleParkedCarReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="${applicationId}.POSSIBLE_PARKED_CAR_ACTION" />
-            </intent-filter>
-        </receiver>
 
+        <service android:name=".locationservices.CarMovedService" />
+        <service android:name=".locationservices.ParkedCarService" />
+        <service android:name=".locationservices.GeofenceCarService" />
+        <service android:name=".locationservices.PossibleParkedCarService" />
 
         <activity
             android:name=".login.LoginActivity"
@@ -160,10 +137,8 @@
 
         <service android:name=".activityrecognition.ActivityRecognitionService" />
 
-        <service android:name=".locationservices.LocationUpdatesService" />
-
         <receiver
-            android:name=".locationservices.LocationUpdatesService$StopLocationPollBroadcastReceiver"
+            android:name=".locationservices.AbstractLocationUpdatesService$StopLocationPollBroadcastReceiver"
             android:enabled="true" />
 
         <service

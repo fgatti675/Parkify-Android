@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -21,9 +22,9 @@ import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.Constants;
 import com.cahue.iweco.MapsActivity;
 import com.cahue.iweco.R;
-import com.cahue.iweco.locationservices.CarMovedReceiver;
-import com.cahue.iweco.locationservices.LocationUpdatesService;
-import com.cahue.iweco.locationservices.PossibleParkedCarReceiver;
+import com.cahue.iweco.locationservices.AbstractLocationUpdatesService;
+import com.cahue.iweco.locationservices.CarMovedService;
+import com.cahue.iweco.locationservices.PossibleParkedCarService;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.fence.AwarenessFence;
@@ -36,6 +37,7 @@ import com.google.android.gms.location.DetectedActivity;
 
 import static android.app.Notification.PRIORITY_MIN;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
 import static com.cahue.iweco.util.NotificationChannelsUtils.ACT_RECOG_CHANNEL_ID;
 import static com.cahue.iweco.util.NotificationChannelsUtils.DEBUG_CHANNEL_ID;
 import static com.google.android.gms.location.DetectedActivity.IN_VEHICLE;
@@ -301,9 +303,8 @@ public class ActivityRecognitionService extends Service {
     private void handleVehicleToFoot() {
         Log.i(TAG, "handleVehicleToFoot: ");
 
-        LocationUpdatesService.startLocationUpdate(this,
-                PossibleParkedCarReceiver.ACTION,
-                null);
+        Intent intent = new Intent(this, PossibleParkedCarService.class);
+        ContextCompat.startForegroundService(this, intent);
 
         if (BuildConfig.DEBUG) {
             long[] pattern = {0, 100, 1000};

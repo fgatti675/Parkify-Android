@@ -24,7 +24,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.maps.android.ui.IconGenerator;
 
-import static com.cahue.iweco.locationservices.PossibleParkedCarReceiver.NOTIFICATION_ID;
+import static com.cahue.iweco.locationservices.PossibleParkedCarService.NOTIFICATION_ID;
 import static com.cahue.iweco.model.PossibleSpot.NOT_SO_RECENT;
 import static com.cahue.iweco.model.PossibleSpot.RECENT;
 
