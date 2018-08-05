@@ -180,7 +180,7 @@ public class TutorialActivity extends AppCompatActivity
 
     @Override
     public void onCarEdited(@NonNull Car car, boolean newCar) {
-        ((CarManagerFragment) mSectionsPagerAdapter.getItem(3)).onCarEdited(car, newCar);
+        ((CarManagerFragment) mSectionsPagerAdapter.getItem(2)).onCarEdited(car, newCar);
     }
 
     @Override
