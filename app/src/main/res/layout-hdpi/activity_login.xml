@@ -5,26 +5,23 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="@dimen/large_padding"
+    android:stateListAnimator="@anim/abc_fade_in"
     tools:context="com.cahue.iweco.login.LoginActivity">
 
 
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
+        android:layout_width="180dp"
+        android:layout_height="100dp"
         android:layout_gravity="center_horizontal"
-        android:adjustViewBounds="false"
-        android:cropToPadding="false"
-        android:padding="@dimen/large_padding"
+        android:paddingBottom="@dimen/large_padding"
         android:src="@drawable/parkify_logo" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/large_padding"
-        android:layout_gravity="center_horizontal"
-        android:padding="@dimen/large_padding">
+        android:layout_gravity="center_horizontal">
 
 
         <RelativeLayout
