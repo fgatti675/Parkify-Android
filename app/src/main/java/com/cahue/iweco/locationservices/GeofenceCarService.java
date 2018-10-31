@@ -178,7 +178,6 @@ public class GeofenceCarService extends AbstractLocationUpdatesService {
                     if (BuildConfig.DEBUG)
                         notifyApproachingCar(context, location, car);
 
-                    ParkingSpotSender.doPostSpotLocation(context, car.location, true, car.id);
                     ParkingSpotSender.fetchAddressAndSave(context, car.location, new Date(), car.id, true);
                 }
 

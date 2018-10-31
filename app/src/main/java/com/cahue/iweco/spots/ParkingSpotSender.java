@@ -35,36 +35,6 @@ public class ParkingSpotSender {
 
     private static final String TAG = ParkingSpotSender.class.getSimpleName();
 
-    @Deprecated
-    public static void doPostSpotLocation(@NonNull Context context, Location spotLocation, boolean future, @NonNull String carId) {
-        ParkingSpot spot = new ParkingSpot(new Random().nextLong(), spotLocation, null, new Date(), future);
-
-        // Instantiate the RequestQueue.
-        RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
-
-        Log.i(TAG, "Posting parking spot ");
-
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("https")
-                .authority(BuildConfig.BACKEND_URL)
-                .appendPath("spots");
-
-        // Send a JSON spot location.
-        JSONObject parkingSpotJSON = spot.toJSON(carId);
-        Log.i(TAG, "Posting: " + parkingSpotJSON);
-        String url = builder.toString();
-        Log.d(TAG, url);
-        JsonRequest stringRequest = new Requests.JsonPostRequest(
-                context,
-                url,
-                parkingSpotJSON,
-                response -> Log.i(TAG, "Post result: " + response.toString()),
-                error -> error.printStackTrace());
-
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
-    }
-
     public static void fetchAddressAndSave(Context context, Location spotLocation, Date time, String carId, boolean future) {
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
         Bundle bundle = new Bundle();

@@ -703,9 +703,9 @@ public class MapsActivity extends AppCompatActivity
         /*
          * Add delegates
          */
-        delegates.add(initSpotsDelegate());
-
-        delegates.add(initPlacesDelegate());
+//        delegates.add(initSpotsDelegate());
+//
+//        delegates.add(initPlacesDelegate());
 
         for (PossibleSpot spot : carDatabase.retrievePossibleParkingSpots(this))
             delegates.add(initPossibleParkedCarDelegate(spot));
@@ -1664,7 +1664,7 @@ public class MapsActivity extends AppCompatActivity
                 public void onCarsRetrieved(List<Car> cars) {
                     if (cars.isEmpty()) return;
                     Car car = cars.iterator().next();
-                    ParkingSpotSender.doPostSpotLocation(MapsActivity.this, car.location, true, car.id);
+                    // TODO: about to move car
                 }
 
                 @Override

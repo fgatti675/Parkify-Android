@@ -73,21 +73,16 @@ public class CarViewHolder extends RecyclerView.ViewHolder {
         }
 
         if (car.btAddress != null && btAdapter != null && btAdapter.isEnabled()) {
-            linkedDevice.setVisibility(View.VISIBLE);
             for (BluetoothDevice device : btAdapter.getBondedDevices()) {
                 if (device.getAddress().equals(car.btAddress)) {
                     String deviceName = device.getName();
-                    if (car.name == null || !car.name.equals(deviceName)) {
+                    if (car.name == null || !car.name.equals(deviceName) || deviceName.isEmpty()) {
                         linkedDevice.setText(deviceName);
                         linkedDevice.setVisibility(View.VISIBLE);
                         break;
-                    } else {
-                        linkedDevice.setVisibility(View.GONE);
                     }
                 }
             }
-        } else {
-            linkedDevice.setVisibility(View.GONE);
         }
 
         updateDistance(context, userLastLocation, car.location);

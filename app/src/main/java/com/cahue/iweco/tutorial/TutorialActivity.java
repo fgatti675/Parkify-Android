@@ -33,7 +33,7 @@ public class TutorialActivity extends AppCompatActivity
         EditCarDialog.CarEditedListener,
         ViewPager.OnPageChangeListener {
 
-    private static final int TOTAL_NUMBER_PAGES = 3;
+    private static final int TOTAL_NUMBER_PAGES = 2;
     private static final String TAG = TutorialActivity.class.getSimpleName();
 
     /**
@@ -89,7 +89,6 @@ public class TutorialActivity extends AppCompatActivity
 
         background.getDrawable(0).setAlpha(255);
         background.getDrawable(1).setAlpha(0);
-        background.getDrawable(2).setAlpha(0);
 
         mViewPager.setPageTransformer(true, (view, position) -> {
 
@@ -148,10 +147,7 @@ public class TutorialActivity extends AppCompatActivity
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         if (position == 0) {
             previous.setAlpha(positionOffset);
-        } else if (position == TOTAL_NUMBER_PAGES - 2) {
-            next.setAlpha(1 - positionOffset);
-            ok.setAlpha(positionOffset);
-        } else if (position == TOTAL_NUMBER_PAGES - 1) {
+        }  else if (position == TOTAL_NUMBER_PAGES - 1) {
             next.setAlpha(0);
             ok.setAlpha(1);
         }
@@ -180,7 +176,7 @@ public class TutorialActivity extends AppCompatActivity
 
     @Override
     public void onCarEdited(@NonNull Car car, boolean newCar) {
-        ((CarManagerFragment) mSectionsPagerAdapter.getItem(2)).onCarEdited(car, newCar);
+        ((CarManagerFragment) mSectionsPagerAdapter.getItem(1)).onCarEdited(car, newCar);
     }
 
     @Override
@@ -209,8 +205,6 @@ public class TutorialActivity extends AppCompatActivity
                 case 0:
                     return TutorialInstructionsFragment.newInstance(R.layout.fragment_tutorial_instructions_find, TutorialInstructionsFragment.TYPE_PARKING);
                 case 1:
-                    return TutorialInstructionsFragment.newInstance(R.layout.fragment_tutorial_instructions_spots, TutorialInstructionsFragment.TYPE_SPOTS);
-                case 2:
                     if (carManagerFragment == null)
                         carManagerFragment = CarManagerFragment.newInstance();
                     return carManagerFragment;
@@ -226,13 +220,9 @@ public class TutorialActivity extends AppCompatActivity
         @Override
         public boolean isViewFromObject(@NonNull View view, Object object) {
             if (object instanceof TutorialInstructionsFragment) {
-                String type = ((TutorialInstructionsFragment) object).getType();
-                if (type.equals(TutorialInstructionsFragment.TYPE_PARKING))
-                    view.setTag(0);
-                else if (type.equals(TutorialInstructionsFragment.TYPE_SPOTS))
-                    view.setTag(1);
+                view.setTag(0);
             } else if (object instanceof CarManagerFragment) {
-                view.setTag(2);
+                view.setTag(1);
             }
             return super.isViewFromObject(view, object);
         }

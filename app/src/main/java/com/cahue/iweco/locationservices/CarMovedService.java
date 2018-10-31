@@ -54,7 +54,6 @@ public class CarMovedService extends AbstractLocationUpdatesService {
 
         Tracking.sendEvent(Tracking.CATEGORY_PARKING, Tracking.ACTION_BLUETOOTH_FREED_SPOT);
 
-        ParkingSpotSender.doPostSpotLocation(this, location, false, carId);
         ParkingSpotSender.fetchAddressAndSave(this, location, startTime, carId, false);
 
     }

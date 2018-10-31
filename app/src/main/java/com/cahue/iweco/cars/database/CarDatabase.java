@@ -8,7 +8,6 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.cahue.iweco.cars.CarsSync;
 import com.cahue.iweco.model.Car;
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.model.PossibleSpot;
@@ -21,10 +20,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.cahue.iweco.model.PossibleSpot.NOT_SO_RECENT;
 import static com.cahue.iweco.model.PossibleSpot.RECENT;
@@ -164,7 +161,6 @@ public class CarDatabase {
                     firestore.collection("cars").document(carId).get().addOnCompleteListener(o -> {
                         if (o.isSuccessful()) {
                             Car car = Car.fromFirestore(o.getResult());
-                            CarsSync.postCar(car); // TODO: to be removed
                             if (carUpdateListener != null)
                                 carUpdateListener.onCarUpdated(car);
                         } else {
