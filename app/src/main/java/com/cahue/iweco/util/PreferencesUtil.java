@@ -138,6 +138,7 @@ public class PreferencesUtil {
                 .remove(PREF_UNINSTALL_WIMC_SHOWN)
 //                .remove(PREF_TUTORIAL_SHOWN)
                 .remove(PREF_LONG_CLICK_SHOWN)
+                .remove(PREF_REMOVE_ADS)
                 .apply();
     }
 

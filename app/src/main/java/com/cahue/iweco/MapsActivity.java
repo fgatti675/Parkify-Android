@@ -472,7 +472,7 @@ public class MapsActivity extends AppCompatActivity
                 firebaseRemoteConfig.setDefaults(defaults);
 
                 Locale locale = getResources().getConfiguration().locale;
-                if (locale.toString().equals("en_US")) {
+                if (locale.toString().equals("es_ES")) {
                     setUpDadakiAd();
                 } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
                     setUpFacebookAd();
@@ -490,6 +490,10 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void setUpDadakiAd() {
+
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        firebaseAnalytics.logEvent("dadaki_banner_displayed", new Bundle());
+
         final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
         final TextView nativeAdTitle = nativeAdContainer.findViewById(R.id.native_ad_title);
         final TextView nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
@@ -510,7 +514,6 @@ public class MapsActivity extends AppCompatActivity
             } catch (ActivityNotFoundException e) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=co.dadaki&utm_source=Parkify")));
             }
-            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
             firebaseAnalytics.logEvent("ad_clicked", new Bundle());
         };
         nativeAdContainer.setOnClickListener(onClickListener);
