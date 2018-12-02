@@ -4,6 +4,7 @@ import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.FragmentTransaction;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,8 +55,6 @@ import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
 import com.cahue.iweco.dialogs.RatingDialog;
 import com.cahue.iweco.locationservices.CarMovedService;
-import com.cahue.iweco.locationservices.AbstractLocationUpdatesService;
-import com.cahue.iweco.locationservices.GeofenceCarService;
 import com.cahue.iweco.locationservices.ParkedCarService;
 import com.cahue.iweco.locationservices.PossibleParkedCarService;
 import com.cahue.iweco.login.AuthUtils;
@@ -66,7 +65,6 @@ import com.cahue.iweco.model.PossibleSpot;
 import com.cahue.iweco.parkedcar.CarDetailsFragment;
 import com.cahue.iweco.places.PlacesDelegate;
 import com.cahue.iweco.setcarlocation.LongTapLocationDelegate;
-import com.cahue.iweco.spots.ParkingSpotSender;
 import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
@@ -110,6 +108,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -465,7 +464,17 @@ public class MapsActivity extends AppCompatActivity
                 firebaseAnalytics.setUserProperty("paying_user", "false");
 
                 FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-                if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
+
+                HashMap<String, Object> defaults = new HashMap<>();
+                defaults.put("default_ad_provider", "facebook");
+                defaults.put("dadaki_ad_header", "Dadaki: Lo mejor de Amazon");
+                defaults.put("dadaki_ad_body", "La mejor selección diaria de productos de diseño de Amazon España");
+                firebaseRemoteConfig.setDefaults(defaults);
+
+                Locale locale = getResources().getConfiguration().locale;
+                if (locale.toString().equals("en_US")) {
+                    setUpDadakiAd();
+                } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
                     setUpFacebookAd();
                 } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("admob")) {
                     setUpAdMobBanner();
@@ -477,6 +486,35 @@ public class MapsActivity extends AppCompatActivity
             }
 
         });
+
+    }
+
+    private void setUpDadakiAd() {
+        final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
+        final TextView nativeAdTitle = nativeAdContainer.findViewById(R.id.native_ad_title);
+        final TextView nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
+        nativeAdBody.setSelected(true);
+        nativeAdBody.setVisibility( View.VISIBLE);
+        final Button nativeAdCallToAction = nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
+
+        nativeAdIcon.setImageResource(R.drawable.dadaki_icon);
+
+        FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        nativeAdTitle.setText(firebaseRemoteConfig.getString("dadaki_ad_header"));
+        nativeAdBody.setText(firebaseRemoteConfig.getString("dadaki_ad_body"));
+        nativeAdCallToAction.setText("Instalar");
+        nativeAdContainer.setVisibility(View.VISIBLE);
+        View.OnClickListener onClickListener = v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=co.dadaki&utm_source=Parkify")));
+            } catch (ActivityNotFoundException e) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=co.dadaki&utm_source=Parkify")));
+            }
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+            firebaseAnalytics.logEvent("ad_clicked", new Bundle());
+        };
+        nativeAdContainer.setOnClickListener(onClickListener);
+        nativeAdCallToAction.setOnClickListener(onClickListener);
 
     }
 
