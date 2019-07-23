@@ -183,7 +183,7 @@ public class TutorialActivity extends AppCompatActivity
 
         CarManagerFragment carManagerFragment;
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

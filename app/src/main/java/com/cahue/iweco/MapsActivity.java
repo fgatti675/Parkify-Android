@@ -12,6 +12,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,7 +47,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.cahue.iweco.activityrecognition.ActivityRecognitionService;
 import com.cahue.iweco.activityrecognition.PossibleParkedCarDelegate;
-import com.cahue.iweco.auth.Authenticator;
 import com.cahue.iweco.cars.CarManagerActivity;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.dialogs.DonateDialog;
@@ -65,18 +66,18 @@ import com.cahue.iweco.util.FetchAddressDelegate;
 import com.cahue.iweco.util.PreferencesUtil;
 import com.cahue.iweco.util.Tracking;
 import com.cahue.iweco.util.Util;
-import com.crashlytics.android.Crashlytics;
 import com.facebook.ads.Ad;
-import com.facebook.ads.AdChoicesView;
 import com.facebook.ads.AdError;
 import com.facebook.ads.AdIconView;
 import com.facebook.ads.NativeAdLayout;
 import com.facebook.ads.NativeAdListener;
 import com.facebook.ads.NativeBannerAd;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.formats.NativeAdOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -99,16 +100,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import bolts.AppLinks;
@@ -133,8 +133,7 @@ public class MapsActivity extends AppCompatActivity
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         DetailsViewManager,
-        BillingFragment.OnBillingReadyListener,
-        NativeAdListener {
+        BillingFragment.OnBillingReadyListener {
 
     protected static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -206,7 +205,7 @@ public class MapsActivity extends AppCompatActivity
     private DrawerLayout drawerLayout;
 
     private NativeAdLayout facebookNativeAdContainer;
-    private AdView adMobView;
+    private com.google.android.gms.ads.formats.UnifiedNativeAdView adMobView;
 
     @Nullable
     private BroadcastReceiver newPurchaseReceiver = new BroadcastReceiver() {
@@ -216,7 +215,6 @@ public class MapsActivity extends AppCompatActivity
         }
     };
 
-    private AdChoicesView adChoicesView;
     private NativeBannerAd facebookNativeAd;
 
     private RelativeLayout mainContainer;
@@ -360,51 +358,9 @@ public class MapsActivity extends AppCompatActivity
          */
         ActivityRecognitionService.startCheckingActivityRecognition(this);
 
-        if (!PreferencesUtil.isFirebaseMigrationDone(this) && !currentUser.isAnonymous())
-            firebaseMigration();
 
     }
 
-    private void firebaseMigration() {
-
-        try {
-
-            mAccountManager = AccountManager.get(this);
-            final Account[] availableAccounts = mAccountManager.getAccountsByType(getString(R.string.account_type));
-
-            if (availableAccounts.length > 0) {
-
-                Account account = availableAccounts[0];
-                String userId = mAccountManager.getUserData(account, Authenticator.USER_ID);
-                Tracking.setTrackerUserId(userId);
-                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-
-                if (firebaseUser != null) {
-                    Map<String, Object> user = new HashMap<>();
-                    user.put("email", firebaseUser.getEmail());
-                    user.put("name", firebaseUser.getDisplayName());
-                    if (firebaseUser.getPhotoUrl() != null)
-                        user.put("photo_url", firebaseUser.getPhotoUrl().toString());
-                    user.put("legacy_id", userId);
-                    db.collection("users")
-                            .document(firebaseUser.getUid())
-                            .set(user, SetOptions.merge())
-                            .addOnSuccessListener(aVoid -> {
-                                try {
-                                    Log.d(TAG, "Firebase migration completed");
-                                    PreferencesUtil.setFirebaseMigrationDone(this, true);
-                                } catch (Exception e) {
-                                    Crashlytics.logException(e);
-                                }
-                            })
-                            .addOnFailureListener(e -> Log.w(TAG, "Migration error", e));
-                }
-            }
-
-        } catch (Exception e) {
-            Crashlytics.logException(e);
-        }
-    }
 
     public void goToLogin() {
         if (!isFinishing()) {
@@ -475,7 +431,7 @@ public class MapsActivity extends AppCompatActivity
                 } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
                     setUpFacebookAd();
                 } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("admob")) {
-                    setUpAdMobBanner();
+                    setUpAdMobNative();
                 }
 
             } else {
@@ -493,9 +449,10 @@ public class MapsActivity extends AppCompatActivity
         firebaseAnalytics.logEvent("dadaki_banner_displayed", new Bundle());
 
         facebookNativeAdContainer.setVisibility(View.VISIBLE);
+        adMobView.setVisibility(View.GONE);
 
         LayoutInflater inflater = LayoutInflater.from(MapsActivity.this);
-        LinearLayout adView = (LinearLayout) inflater.inflate(R.layout.native_app_maps_facebook_ad, facebookNativeAdContainer, false);
+        LinearLayout adView = (LinearLayout) inflater.inflate(R.layout.native_app_maps_ad, facebookNativeAdContainer, false);
         facebookNativeAdContainer.addView(adView);
 
         final AdIconView facebookNativeAdIcon = adView.findViewById(R.id.facebook_native_ad_icon);
@@ -538,142 +495,185 @@ public class MapsActivity extends AppCompatActivity
     }
 
     private void setUpFacebookAd() {
-
         if (adMobView == null) return;
 
         adMobView.setVisibility(View.GONE);
 
         Log.d(TAG, "setUpFacebookAd");
         facebookNativeAd = new NativeBannerAd(MapsActivity.this, getString(R.string.facebook_maps_placement_id));
-        facebookNativeAd.setAdListener(MapsActivity.this);
+        facebookNativeAd.setAdListener(new NativeAdListener() {
+
+            /**
+             * On FB ad loaded
+             *
+             * @param ad
+             */
+            @Override
+            public void onAdLoaded(Ad ad) {
+
+                facebookNativeAd.unregisterView();
+
+                facebookNativeAdContainer.setVisibility(View.VISIBLE);
+                facebookNativeAdContainer.removeAllViews();
+                adMobView.setVisibility(View.GONE);
+
+                LayoutInflater inflater = LayoutInflater.from(MapsActivity.this);
+                LinearLayout adView = (LinearLayout) inflater.inflate(R.layout.native_app_maps_ad, facebookNativeAdContainer, false);
+                facebookNativeAdContainer.addView(adView);
+
+                final AdIconView facebookNativeAdIcon = adView.findViewById(R.id.facebook_native_ad_icon);
+                facebookNativeAdIcon.setVisibility(View.VISIBLE);
+                final ImageView nativeAdIcon = adView.findViewById(R.id.native_ad_icon);
+                nativeAdIcon.setVisibility(View.GONE);
+
+                final TextView nativeAdTitle = adView.findViewById(R.id.native_ad_title);
+                final TextView nativeAdBody = adView.findViewById(R.id.native_ad_body);
+                nativeAdBody.setSelected(true);
+                nativeAdBody.setVisibility(View.VISIBLE);
+                final Button nativeAdCallToAction = adView.findViewById(R.id.native_ad_call_to_action);
+
+                nativeAdIcon.setImageResource(R.drawable.dadaki_icon);
+
+                FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+                nativeAdTitle.setText(firebaseRemoteConfig.getString("dadaki_ad_header"));
+                nativeAdBody.setText(firebaseRemoteConfig.getString("dadaki_ad_body"));
+                nativeAdCallToAction.setText("Instalar");
+                adView.setVisibility(View.VISIBLE);
+
+                nativeAdCallToAction.setText(facebookNativeAd.getAdCallToAction());
+                nativeAdTitle.setText(facebookNativeAd.getAdvertiserName());
+                nativeAdBody.setText(facebookNativeAd.getAdBodyText());
+
+                List<View> clickableViews = new ArrayList<>();
+                clickableViews.add(facebookNativeAdIcon);
+                clickableViews.add(nativeAdTitle);
+                clickableViews.add(nativeAdBody);
+                clickableViews.add(nativeAdCallToAction);
+
+                setMapPadding();
+
+                facebookNativeAd.registerViewForInteraction(facebookNativeAdContainer, facebookNativeAdIcon, clickableViews);
+
+            }
+
+            @Override
+            public void onAdClicked(Ad ad) {
+                Log.d(TAG, "onAdClicked: ");
+                Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "Facebook");
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+                Bundle bundle = new Bundle();
+                firebaseAnalytics.logEvent("fb_ad_clicked", bundle);
+            }
+
+            @Override
+            public void onLoggingImpression(Ad ad) {
+                Log.d(TAG, "onLoggingImpression: ");
+                Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
+                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+                Bundle bundle = new Bundle();
+                firebaseAnalytics.logEvent("fb_ad_impression", bundle);
+            }
+
+
+            @Override
+            public void onMediaDownloaded(Ad ad) {
+
+            }
+
+            /**
+             * On FB ad error
+             *
+             * @param ad
+             */
+            @Override
+            public void onError(Ad ad, AdError adError) {
+                Log.d(TAG, "onAdError: " + adError.getErrorMessage());
+                setUpAdMobNative();
+            }
+        });
         facebookNativeAd.loadAd();
     }
 
 
-    /**
-     * On FB ad loaded
-     *
-     * @param ad
-     */
-    @Override
-    public void onAdLoaded(Ad ad) {
-
-        facebookNativeAd.unregisterView();
-
-        facebookNativeAdContainer.setVisibility(View.VISIBLE);
-        adMobView.setVisibility(View.GONE);
-
-        LayoutInflater inflater = LayoutInflater.from(MapsActivity.this);
-        LinearLayout adView = (LinearLayout) inflater.inflate(R.layout.native_app_maps_facebook_ad, facebookNativeAdContainer, false);
-        facebookNativeAdContainer.addView(adView);
-
-        final AdIconView facebookNativeAdIcon = adView.findViewById(R.id.facebook_native_ad_icon);
-        facebookNativeAdIcon.setVisibility(View.VISIBLE);
-        final ImageView nativeAdIcon = adView.findViewById(R.id.native_ad_icon);
-        nativeAdIcon.setVisibility(View.GONE);
-
-        final TextView nativeAdTitle = adView.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = adView.findViewById(R.id.native_ad_body);
-        nativeAdBody.setSelected(true);
-        nativeAdBody.setVisibility(View.VISIBLE);
-        final Button nativeAdCallToAction = adView.findViewById(R.id.native_ad_call_to_action);
-
-        nativeAdIcon.setImageResource(R.drawable.dadaki_icon);
-
-        FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        nativeAdTitle.setText(firebaseRemoteConfig.getString("dadaki_ad_header"));
-        nativeAdBody.setText(firebaseRemoteConfig.getString("dadaki_ad_body"));
-        nativeAdCallToAction.setText("Instalar");
-        adView.setVisibility(View.VISIBLE);
-
-        nativeAdCallToAction.setText(facebookNativeAd.getAdCallToAction());
-        nativeAdTitle.setText(facebookNativeAd.getAdvertiserName());
-        nativeAdBody.setText(facebookNativeAd.getAdBodyText());
-
-        List<View> clickableViews = new ArrayList<>();
-        clickableViews.add(facebookNativeAdIcon);
-        clickableViews.add(nativeAdTitle);
-        clickableViews.add(nativeAdBody);
-        clickableViews.add(nativeAdCallToAction);
-
-        setMapPadding();
-
-        facebookNativeAd.registerViewForInteraction(facebookNativeAdContainer, facebookNativeAdIcon, clickableViews);
-
-    }
-
-
-    @Override
-    public void onMediaDownloaded(Ad ad) {
-
-    }
-
-    /**
-     * On FB ad error
-     *
-     * @param ad
-     */
-    @Override
-    public void onError(Ad ad, AdError adError) {
-        Log.d(TAG, "onAdError: " + adError.getErrorMessage());
-        setUpAdMobBanner();
-    }
-
-
-    private void setUpAdMobBanner() {
+    private void setUpAdMobNative() {
 
         if (facebookNativeAdContainer == null) return;
         if (adMobView == null) return;
 
         facebookNativeAdContainer.setVisibility(View.GONE);
 
-        adMobView.setVisibility(View.VISIBLE);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adMobView.loadAd(adRequest);
-        adMobView.setAdListener(new com.google.android.gms.ads.AdListener() {
-            @Override
-            public void onAdClicked() {
-                Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "AdMob");
-                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-                Bundle bundle = new Bundle();
-                firebaseAnalytics.logEvent("admob_ad_clicked", bundle);
-            }
+        AdLoader adLoader = new AdLoader.Builder(MapsActivity.this, "ca-app-pub-7749631063131885/1189588351")
+                .forUnifiedNativeAd(unifiedNativeAd -> {
 
-            @Override
-            public void onAdImpression() {
-                Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "AdMob");
-                FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-                Bundle bundle = new Bundle();
-                firebaseAnalytics.logEvent("admob_ad_impression", bundle);
-            }
+                    adMobView.setNativeAd(unifiedNativeAd);
+                    adMobView.setVisibility(View.VISIBLE);
 
-            @Override
-            public void onAdFailedToLoad(int i) {
-                adMobView.setVisibility(View.GONE);
-                setUpFacebookAd();
-            }
-        });
-        setMapPadding();
+                    final AdIconView facebookNativeAdIcon = adMobView.findViewById(R.id.facebook_native_ad_icon);
+                    facebookNativeAdIcon.setVisibility(View.GONE);
+                    final ImageView nativeAdIcon = adMobView.findViewById(R.id.native_ad_icon);
+                    nativeAdIcon.setVisibility(View.VISIBLE);
+
+                    final TextView nativeAdTitle = adMobView.findViewById(R.id.native_ad_title);
+                    final TextView nativeAdBody = adMobView.findViewById(R.id.native_ad_body);
+                    nativeAdBody.setSelected(true);
+                    nativeAdBody.setVisibility(View.VISIBLE);
+                    final Button nativeAdCallToAction = adMobView.findViewById(R.id.native_ad_call_to_action);
+
+                    nativeAdTitle.setText(unifiedNativeAd.getHeadline());
+                    adMobView.setHeadlineView(nativeAdTitle);
+                    nativeAdBody.setText(unifiedNativeAd.getBody());
+                    adMobView.setBodyView(nativeAdBody);
+                    nativeAdCallToAction.setText(unifiedNativeAd.getCallToAction());
+                    adMobView.setCallToActionView(nativeAdCallToAction);
+
+                    try {
+                        if (unifiedNativeAd.getIcon() != null) {
+                            URL url = new URL(unifiedNativeAd.getIcon().getUri().toString());
+                            Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+                            nativeAdIcon.setImageBitmap(bmp);
+                        }
+
+                    } catch (java.io.IOException e) {
+                        e.printStackTrace();
+                    }
+                    adMobView.setIconView(nativeAdIcon);
+
+                    setMapPadding();
+
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(int errorCode) {
+                        Log.d(TAG, "admob onAdFailedToLoad: " + errorCode);
+                        adMobView.setVisibility(View.GONE);
+                        setUpFacebookAd();
+                    }
+
+                    @Override
+                    public void onAdClicked() {
+                        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "AdMob");
+                        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+                        Bundle bundle = new Bundle();
+                        firebaseAnalytics.logEvent("admob_ad_clicked", bundle);
+                    }
+
+                    @Override
+                    public void onAdImpression() {
+                        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "AdMob");
+                        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+                        Bundle bundle = new Bundle();
+                        firebaseAnalytics.logEvent("admob_ad_impression", bundle);
+                    }
+
+                })
+                .withNativeAdOptions(new NativeAdOptions.Builder()
+                        // Methods in the NativeAdOptions.Builder class can be
+                        // used here to specify individual options settings.
+                        .build())
+                .build();
+        adLoader.loadAds(new AdRequest.Builder().build(), 3);
+
     }
-
-    @Override
-    public void onAdClicked(Ad ad) {
-        Log.d(TAG, "onAdClicked: ");
-        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_CLICKED, "Facebook");
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-        Bundle bundle = new Bundle();
-        firebaseAnalytics.logEvent("fb_ad_clicked", bundle);
-    }
-
-    @Override
-    public void onLoggingImpression(Ad ad) {
-        Log.d(TAG, "onLoggingImpression: ");
-        Tracking.sendEvent(Tracking.CATEGORY_ADVERTISING, Tracking.ACTION_AD_IMPRESSION, "Facebook");
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-        Bundle bundle = new Bundle();
-        firebaseAnalytics.logEvent("fb_ad_impression", bundle);
-    }
-
 
     @Override
     protected void onStart() {

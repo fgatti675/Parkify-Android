@@ -9,12 +9,12 @@
     android:orientation="vertical"
     android:padding="@dimen/large_padding">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/default_padding"
-        android:text="@string/cars"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginBottom="@dimen/default_padding"-->
+        <!--android:text="@string/cars"-->
+        <!--android:textAppearance="@style/TextAppearance.AppCompat.Large" />-->
 
     <TextView
         android:id="@+id/title_dialog"

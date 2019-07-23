@@ -48,11 +48,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * This Activity appears as a dialog. It lists any paired devices and devices detected in the area after discovery. When
- * a linkedDevice is chosen by the user, the MAC address of the linkedDevice is sent back to the parent Activity in the result
- * Intent.
- */
 public class CarManagerFragment extends Fragment implements EditCarDialog.CarEditedListener, GoogleApiClient.ConnectionCallbacks {
 
     // Debugging

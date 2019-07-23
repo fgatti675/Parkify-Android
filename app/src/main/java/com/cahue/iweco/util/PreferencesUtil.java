@@ -176,14 +176,5 @@ public class PreferencesUtil {
         prefs.edit().putBoolean(PREF_PARKED_NOTIFICATION_ENABLE_SOUND, checked).apply();
     }
 
-    public static void setFirebaseMigrationDone(Context context, boolean done) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(PREF_FIREBASE_MIGRATION, done).apply();
-    }
-
-    public static boolean isFirebaseMigrationDone(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(PREF_FIREBASE_MIGRATION, false);
-    }
 
 }

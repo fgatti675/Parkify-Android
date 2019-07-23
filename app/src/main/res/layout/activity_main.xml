@@ -55,18 +55,17 @@
                     android:layout_toEndOf="@id/navigation_drawer_toggle"
                     android:orientation="vertical" />
 
-
-                <com.google.android.gms.ads.AdView
+                <com.google.android.gms.ads.formats.UnifiedNativeAdView
                     android:id="@+id/adMobView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
                     android:layout_marginStart="@dimen/small_padding"
-                    android:layout_marginEnd="@dimen/default_padding"
-                    android:visibility="gone"
-                    app:adSize='BANNER'
-                    app:adUnitId='ca-app-pub-7749631063131885/9575761178'
-                    />
+                    android:layout_toEndOf="@id/navigation_drawer_toggle"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/native_app_maps_ad" />
+
+                </com.google.android.gms.ads.formats.UnifiedNativeAdView>
 
                 <Button
                     android:id="@+id/no_cars_button"
