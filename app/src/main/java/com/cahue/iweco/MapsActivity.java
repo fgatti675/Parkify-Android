@@ -491,7 +491,7 @@ public class MapsActivity extends AppCompatActivity
 
     private void setUpDadakiAd() {
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         firebaseAnalytics.logEvent("dadaki_banner_displayed", new Bundle());
 
         final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
@@ -509,12 +509,12 @@ public class MapsActivity extends AppCompatActivity
         nativeAdCallToAction.setText("Instalar");
         nativeAdContainer.setVisibility(View.VISIBLE);
         View.OnClickListener onClickListener = v -> {
+            firebaseAnalytics.logEvent("dadaki_ad_clicked", new Bundle());
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=co.dadaki&utm_source=Parkify")));
             } catch (ActivityNotFoundException e) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=co.dadaki&utm_source=Parkify")));
             }
-            firebaseAnalytics.logEvent("ad_clicked", new Bundle());
         };
         nativeAdContainer.setOnClickListener(onClickListener);
         nativeAdCallToAction.setOnClickListener(onClickListener);
@@ -561,7 +561,7 @@ public class MapsActivity extends AppCompatActivity
         // Create native UI using the ad metadata.
         final ImageView nativeAdIcon = nativeAdContainer.findViewById(R.id.native_ad_icon);
         final TextView nativeAdTitle = nativeAdContainer.findViewById(R.id.native_ad_title);
-        final TextView nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
+        final TextViewr nativeAdBody = nativeAdContainer.findViewById(R.id.native_ad_body);
         nativeAdBody.setSelected(true);
         final Button nativeAdCallToAction = nativeAdContainer.findViewById(R.id.native_ad_call_to_action);
         final ViewGroup adChoicesWrap = nativeAdContainer.findViewById(R.id.ad_choices_wrap);

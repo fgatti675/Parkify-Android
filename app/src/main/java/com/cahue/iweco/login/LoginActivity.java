@@ -165,7 +165,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         noSingIn.setOnClickListener(v -> onLoginSkipped());
 
         findViewById(R.id.terms_of_use).setOnClickListener(v -> {
-            Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://glossy-radio.appspot.com/terms_of_use.txt"));
+            Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.iubenda.com/privacy-policy/33629887"));
             startActivity(myIntent);
         });
 
