@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,8 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import me.drakeet.support.toast.BadTokenListener;
-import me.drakeet.support.toast.ToastCompat;
 
 public class Util {
 
@@ -50,10 +48,10 @@ public class Util {
         TextView text = layout.findViewById(R.id.text);
         text.setText(string);
 
-        ToastCompat toast = ToastCompat.makeText(context, string, length);
-        toast.setBadTokenListener(t -> {
-            Crashlytics.log("BadTokenException avoided from Toast");
-        });
+        Toast toast = Toast.makeText(context, string, length);
+//        toast.setBadTokenListener(t -> {
+//            Crashlytics.log("BadTokenException avoided from Toast");
+//        });
         toast.setGravity(Gravity.BOTTOM, 0, getActionBarSize(context));
         toast.setView(layout);
         toast.show();

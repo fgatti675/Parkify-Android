@@ -2,7 +2,7 @@ package com.cahue.iweco;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 
 /**
  * Created by f.gatti.gomez on 08/07/15.

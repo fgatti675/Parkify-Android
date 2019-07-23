@@ -23,7 +23,7 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -35,7 +35,7 @@
                 android:text="@string/did_you_park"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="@color/body_text_1" />
-        </android.support.v7.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
 
         <LinearLayout
             android:layout_width="match_parent"

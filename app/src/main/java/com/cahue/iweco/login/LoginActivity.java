@@ -6,8 +6,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -49,7 +49,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.drakeet.support.toast.ToastCompat;
 
 /**
  * A login screen that offers login via Google+
@@ -310,7 +309,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void onError() {
         AuthUtils.clearLoggedUserDetails(this);
         if (!isFinishing())
-            ToastCompat.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.login_error, Toast.LENGTH_SHORT).show();
         setLoading(false);
     }
 
@@ -355,7 +354,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 setLoading(false);
                                 facebookPendingCredential = credential;
                                 if (!isFinishing())
-                                    ToastCompat.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Please use Google login instead", Toast.LENGTH_SHORT).show();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithCredential:failure", task.getException());

@@ -6,13 +6,14 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v13.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.legacy.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,12 +38,12 @@ public class TutorialActivity extends AppCompatActivity
     private static final String TAG = TutorialActivity.class.getSimpleName();
 
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * The {@link PagerAdapter} that will provide
      * fragments for each of the sections. We use a
      * {@link FragmentPagerAdapter} derivative, which will keep every
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     * {@link FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -107,18 +108,6 @@ public class TutorialActivity extends AppCompatActivity
         });
         mViewPager.setOffscreenPageLimit(TOTAL_NUMBER_PAGES - 1);
         mViewPager.addOnPageChangeListener(this);
-
-        /**
-         * If translucent bars, apply the proper margins
-         */
-        Resources resources = getResources();
-
-        RelativeLayout mainContainer = findViewById(R.id.main_container);
-        int statusBarResId = resources.getIdentifier("status_bar_height", "dimen", "android");
-        int statusBarHeight = statusBarResId > 0 ? resources.getDimensionPixelSize(statusBarResId) : 0;
-        int navBarResId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-        int navBarHeight = navBarResId > 0 ? resources.getDimensionPixelSize(navBarResId) : 0;
-        mainContainer.setPadding(0, statusBarHeight, 0, navBarHeight);
 
     }
 

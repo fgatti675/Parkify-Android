@@ -5,7 +5,7 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;

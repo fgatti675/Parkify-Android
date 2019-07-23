@@ -1,6 +1,6 @@
 package com.cahue.iweco.util;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.cahue.iweco.BuildConfig;

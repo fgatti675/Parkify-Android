@@ -1,7 +1,7 @@
 package com.cahue.iweco.places;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.Util;

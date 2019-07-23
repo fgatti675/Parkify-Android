@@ -3,8 +3,8 @@ package com.cahue.iweco.model;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.cahue.iweco.util.Util;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -18,10 +18,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by francesco on 28.11.2014.
@@ -249,7 +247,7 @@ public class Car implements Parcelable {
                 location.setAccuracy(((Double) parkedAt.get("accuracy")).floatValue());
                 car.location = location;
                 car.address = (String) parkedAt.get("address");
-                car.time = (Date) parkedAt.get("time");
+                car.time = ((com.google.firebase.Timestamp) parkedAt.get("time")).toDate();
             }
         }
 

@@ -3,10 +3,9 @@ package com.cahue.iweco.util;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
-import com.cahue.iweco.locationservices.AbstractLocationUpdatesService;
 import com.cahue.iweco.locationservices.ParkedCarService;
 import com.cahue.iweco.model.Car;
 

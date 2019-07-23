@@ -3,8 +3,8 @@ package com.cahue.iweco.model;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.cahue.iweco.R;
 import com.cahue.iweco.util.Util;

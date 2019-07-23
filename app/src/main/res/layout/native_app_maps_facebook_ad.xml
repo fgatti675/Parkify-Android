@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navite_ad_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="horizontal"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <ImageView
+        android:id="@+id/native_ad_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="fitStart"
+        tools:src="@drawable/ic_favorite_24dp" />
+
+    <com.facebook.ads.AdIconView
+        android:id="@+id/facebook_native_ad_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        tools:src="@drawable/ic_favorite_24dp"  />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/default_padding"
+                android:paddingRight="@dimen/default_padding">
+
+                <TextView
+                    android:id="@+id/native_ad_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:maxLines="2"
+                    android:textColor="@color/body_text_1_inverse"
+                    android:textStyle="bold"
+                    tools:text="Title" />
+
+                <!-- Do not switch to lines="1" or marquee breaks-->
+                <TextView
+                    android:id="@+id/native_ad_body"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:freezesText="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:visibility="gone"
+                    tools:text="Subtitle"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/ad_choices_wrap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|top"
+                android:layout_margin="@dimen/small_padding"
+                tools:background="@color/red"
+                tools:layout_height="10dp"
+                tools:layout_width="10dp" />
+
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/native_ad_call_to_action"
+            android:layout_width="wrap_content"
+            android:layout_height="64dp"
+            android:layout_marginRight="@dimen/small_padding"
+            android:lines="2"
+            android:maxWidth="120dp"
+            android:textColor="@color/white"
+            tools:text="Call to Action" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
+

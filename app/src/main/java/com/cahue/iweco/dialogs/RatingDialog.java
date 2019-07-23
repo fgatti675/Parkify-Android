@@ -1,9 +1,8 @@
 package com.cahue.iweco.dialogs;
 
-/**
+/*
  * Get some nice ratings
  */
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,7 +12,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.cahue.iweco.BuildConfig;
 import com.cahue.iweco.R;

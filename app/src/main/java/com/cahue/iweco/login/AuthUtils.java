@@ -3,7 +3,7 @@ package com.cahue.iweco.login;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Created by Francesco on 27/02/2015.

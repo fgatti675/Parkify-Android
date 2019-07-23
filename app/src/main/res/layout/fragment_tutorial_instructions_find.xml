@@ -7,7 +7,7 @@
     tools:background="@drawable/bg_parking"
     tools:context="com.cahue.iweco.tutorial.TutorialInstructionsFragment">
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -46,5 +46,5 @@
                 android:textColor="@color/body_text_1" />
 
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 </FrameLayout>

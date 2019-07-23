@@ -14,12 +14,14 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.cahue.iweco.locationservices.PossibleParkedCarService;
 import com.cahue.iweco.util.NotificationChannelsUtils;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.ads.AdSettings;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by Francesco on 14/06/2015.
@@ -41,6 +43,7 @@ public class ParkifyApp extends Application {
     public void onCreate() {
 
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         parkifyApp = this;
 

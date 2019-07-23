@@ -1,6 +1,7 @@
 package com.cahue.iweco.cars;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -12,12 +13,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -153,7 +154,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
 
         layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setOrientation(RecyclerView.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new FirstItemDecoration(getActivity()));
 
@@ -454,6 +455,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onConnected(Bundle bundle) {
         mLastUserLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -663,7 +665,7 @@ public class CarManagerFragment extends Fragment implements EditCarDialog.CarEdi
         }
 
         @Override
-        public void getItemOffsets(@NonNull android.graphics.Rect outRect, android.view.View view, @NonNull android.support.v7.widget.RecyclerView parent, android.support.v7.widget.RecyclerView.State state) {
+        public void getItemOffsets(@NonNull android.graphics.Rect outRect, android.view.View view, @NonNull RecyclerView parent, RecyclerView.State state) {
             if (parent.getChildPosition(view) == 0)
                 outRect.set(0, initialMargin, 0, 0);
         }

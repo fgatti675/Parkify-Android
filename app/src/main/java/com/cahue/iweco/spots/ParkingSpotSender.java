@@ -2,31 +2,16 @@ package com.cahue.iweco.spots;
 
 import android.content.Context;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonRequest;
-import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.ParkifyApp;
-import com.cahue.iweco.model.Car;
-import com.cahue.iweco.model.ParkingSpot;
 import com.cahue.iweco.util.FetchAddressDelegate;
-import com.cahue.iweco.util.Requests;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
-import org.json.JSONObject;
-
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Random;
 
 /**
  * Created by francesco on 27.03.2015.
