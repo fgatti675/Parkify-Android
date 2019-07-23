@@ -2,7 +2,7 @@ package com.cahue.iweco.activityrecognition;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.awareness.Awareness;

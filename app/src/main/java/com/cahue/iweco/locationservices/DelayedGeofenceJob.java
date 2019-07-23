@@ -3,8 +3,8 @@ package com.cahue.iweco.locationservices;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.content.Intent;
-import android.os.Build;
-import android.support.v4.content.ContextCompat;
+
+import androidx.core.content.ContextCompat;
 
 import com.cahue.iweco.Constants;
 

@@ -2,13 +2,12 @@ package com.cahue.iweco.locationservices;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.cahue.iweco.BuildConfig;
-import com.cahue.iweco.Constants;
 import com.cahue.iweco.R;
 import com.cahue.iweco.cars.database.CarDatabase;
 import com.cahue.iweco.spots.ParkingSpotSender;

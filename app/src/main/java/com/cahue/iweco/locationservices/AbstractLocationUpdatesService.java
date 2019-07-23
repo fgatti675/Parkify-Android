@@ -15,9 +15,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
 import com.cahue.iweco.R;
@@ -30,9 +30,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.cahue.iweco.Constants.EXTRA_CAR_ID;
 import static com.cahue.iweco.util.NotificationChannelsUtils.LOCATION_CHANNEL_ID;
