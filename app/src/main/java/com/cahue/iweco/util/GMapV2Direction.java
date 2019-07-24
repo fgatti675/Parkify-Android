@@ -1,12 +1,11 @@
 package com.cahue.iweco.util;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.cahue.iweco.ParkifyApp;
@@ -33,10 +32,11 @@ public class GMapV2Direction {
 
     @Nullable
     public Document getDocument(@NonNull LatLng start, @NonNull LatLng end, String mode) {
-        String url = "http://maps.googleapis.com/maps/api/directions/xml?"
+        String url = "https://maps.googleapis.com/maps/api/directions/xml?"
                 + "origin=" + start.latitude + "," + start.longitude
                 + "&destination=" + end.latitude + "," + end.longitude
-                + "&sensor=false&units=metric&mode=" + mode;
+                + "&sensor=false&units=metric&mode=" + mode
+                + "&key=AIzaSyDDR5c4p4yuJ2JfCqgA1BA24fTIlq6u24M";
         Log.d("url", url);
         try {
             RequestQueue queue = ParkifyApp.getParkifyApp().getRequestQueue();
@@ -44,12 +44,7 @@ public class GMapV2Direction {
             StringRequest stringRequest = new StringRequest(
                     url,
                     future,
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(@NonNull VolleyError error) {
-                            error.printStackTrace();
-                        }
-                    });
+                    Throwable::printStackTrace);
 
             // Add the request to the RequestQueue.
             queue.add(stringRequest);
@@ -96,11 +91,11 @@ public class GMapV2Direction {
     }
 
     public String getDistanceText(@NonNull Document doc) {
-    /*
-     * while (en.hasMoreElements()) { type type = (type) en.nextElement();
-     *
-     * }
-     */
+        /*
+         * while (en.hasMoreElements()) { type type = (type) en.nextElement();
+         *
+         * }
+         */
 
         try {
             NodeList nl1;
@@ -116,16 +111,16 @@ public class GMapV2Direction {
             return "-1";
         }
 
-    /*
-     * NodeList nl1; if(doc.getElementsByTagName("distance")!=null){ nl1=
-     * doc.getElementsByTagName("distance");
-     *
-     * Node node1 = nl1.item(nl1.getLength() - 1); NodeList nl2 = null; if
-     * (node1.getChildNodes() != null) { nl2 = node1.getChildNodes(); Node
-     * node2 = nl2.item(getNodeIndex(nl2, "value")); Log.d("DistanceText",
-     * node2.getTextContent()); return node2.getTextContent(); } else return
-     * "-1";} else return "-1";
-     */
+        /*
+         * NodeList nl1; if(doc.getElementsByTagName("distance")!=null){ nl1=
+         * doc.getElementsByTagName("distance");
+         *
+         * Node node1 = nl1.item(nl1.getLength() - 1); NodeList nl2 = null; if
+         * (node1.getChildNodes() != null) { nl2 = node1.getChildNodes(); Node
+         * node2 = nl2.item(getNodeIndex(nl2, "value")); Log.d("DistanceText",
+         * node2.getTextContent()); return node2.getTextContent(); } else return
+         * "-1";} else return "-1";
+         */
     }
 
     public int getDistanceValue(@NonNull Document doc) {
@@ -140,14 +135,14 @@ public class GMapV2Direction {
         } catch (Exception e) {
             return -1;
         }
-    /*
-     * NodeList nl1 = doc.getElementsByTagName("distance"); Node node1 =
-     * null; if (nl1.getLength() > 0) node1 = nl1.item(nl1.getLength() - 1);
-     * if (node1 != null) { NodeList nl2 = node1.getChildNodes(); Node node2
-     * = nl2.item(getNodeIndex(nl2, "value")); Log.i("DistanceValue",
-     * node2.getTextContent()); return
-     * Integer.parseInt(node2.getTextContent()); } else return 0;
-     */
+        /*
+         * NodeList nl1 = doc.getElementsByTagName("distance"); Node node1 =
+         * null; if (nl1.getLength() > 0) node1 = nl1.item(nl1.getLength() - 1);
+         * if (node1 != null) { NodeList nl2 = node1.getChildNodes(); Node node2
+         * = nl2.item(getNodeIndex(nl2, "value")); Log.i("DistanceValue",
+         * node2.getTextContent()); return
+         * Integer.parseInt(node2.getTextContent()); } else return 0;
+         */
     }
 
     public String getStartAddress(@NonNull Document doc) {

@@ -111,7 +111,7 @@ public class DirectionsDelegate {
             return;
         }
 
-        /**
+        /*
          * Cancel if something is going on
          */
         if (directionsAsyncTask != null && directionsAsyncTask.getStatus() != AsyncTask.Status.FINISHED) {
