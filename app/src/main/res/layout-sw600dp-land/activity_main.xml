@@ -33,7 +33,7 @@
 
         <fragment
             android:id="@+id/navigation_drawer"
-            android:name="com.cahue.iweco.NavigationDrawerFragment"
+            android:name="com.whereismycar.NavigationDrawerFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="start"
@@ -89,7 +89,7 @@
                 android:maxWidth="400dp"
                 android:visibility="invisible"
                 cahue:cardCornerRadius="@dimen/cardCornerRadius"
-                tools:context="com.cahue.iweco.spots.SpotDetailsFragment"
+                tools:context=".spots.SpotDetailsFragment"
                 tools:layout_height="120dp"
                 tools:visibility="visible" />
 

@@ -85,7 +85,7 @@
         <item name="android:textColorAlertDialogListItem">@color/body_text_1_inverse</item>
     </style>
 
-    <style name="CahueTheme.Dark.TranslucentBars.Tutorial">
+    <style name="CahueTheme.Dark.Tutorial">
         <item name="android:windowBackground">@drawable/tutorial_background</item>
     </style>
 

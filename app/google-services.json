@@ -15,16 +15,12 @@
       },
       "oauth_client": [
         {
-          "client_id": "1036335101348-pedmptqgpvbi7bmpr633o36b3f6dfmb0.apps.googleusercontent.com",
+          "client_id": "1036335101348-927u6i1gulne7g4e8jdbjnjk7407to4n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.whereismycar",
-            "certificate_hash": "52120803a0bd9d786b263613bbe58dbe6767873d"
+            "certificate_hash": "1c1bef4b942dcdadf6d057109972cc3cf22108a3"
           }
-        },
-        {
-          "client_id": "1036335101348-bgo2kipjr3p5ifsvisof8konrj27klc5.apps.googleusercontent.com",
-          "client_type": 3
         },
         {
           "client_id": "1036335101348-lk2h89u0p4nd79gtq5lcf2ca8thl0l0d.apps.googleusercontent.com",
@@ -37,22 +33,16 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "1036335101348-bgo2kipjr3p5ifsvisof8konrj27klc5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-7749631063131885~9161270854"
     }
   ],
   "configuration_version": "1"

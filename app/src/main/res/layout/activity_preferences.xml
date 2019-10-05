@@ -17,7 +17,7 @@
 
     <fragment
         android:id="@+id/car_manager_fragment"
-        class="com.cahue.iweco.PreferencesFragment"
+        class="com.whereismycar.PreferencesFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_actionbar"

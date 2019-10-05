@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     tools:background="@drawable/bg_parking"
-    tools:context="com.cahue.iweco.tutorial.TutorialInstructionsFragment">
+    tools:context=".tutorial.TutorialInstructionsFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"

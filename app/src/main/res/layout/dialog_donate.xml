@@ -9,7 +9,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="@dimen/default_padding"
+        android:paddingLeft="@dimen/default_padding"
+        android:paddingRight="@dimen/default_padding"
+        android:paddingBottom="@dimen/large_padding"
+        android:textStyle="bold"
+        android:textColor="@color/red"
         android:text="@string/donation_intro" />
 
     <RadioGroup

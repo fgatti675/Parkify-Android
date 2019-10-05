@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cahue.iweco">
+    package="com.whereismycar">
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
@@ -63,6 +63,10 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <meta-data android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="true"/>
+        <meta-data android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="true"/>
 
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
@@ -109,7 +113,7 @@
         <activity
             android:name=".tutorial.TutorialActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/CahueTheme.Dark.TranslucentBars.Tutorial" />
+            android:theme="@style/CahueTheme.Dark.Tutorial" />
 
         <activity
             android:name=".cars.CarManagerActivity"
@@ -131,18 +135,9 @@
 
         <provider
             android:name=".cars.database.CarsProvider"
-            android:authorities="com.cahue.iweco.cars"
+            android:authorities="com.whereismycar.cars"
             android:exported="true"
             android:syncable="true" />
-
-        <service android:name=".auth.ParkifyAccountService">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
 
         <service android:name=".activityrecognition.ActivityRecognitionService" />
 

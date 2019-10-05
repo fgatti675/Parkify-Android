@@ -103,7 +103,7 @@
                     android:visibility="invisible"
                     app:cardCornerRadius="@dimen/cardCornerRadius"
                     app:cardElevation="@dimen/elevation"
-                    tools:context="com.cahue.iweco.spots.SpotDetailsFragment" />
+                    tools:context=".spots.SpotDetailsFragment" />
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/my_location"
@@ -135,7 +135,7 @@
          the container. -->
     <fragment
         android:id="@+id/navigation_drawer"
-        android:name="com.cahue.iweco.NavigationDrawerFragment"
+        android:name="com.whereismycar.NavigationDrawerFragment"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"

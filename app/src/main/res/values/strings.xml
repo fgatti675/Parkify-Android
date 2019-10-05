@@ -34,7 +34,7 @@
     <string name="poll_location_debug" translatable="false">Poll location</string>
 
     <!-- Donations -->
-    <string name="donation_intro">Any donation will remove ads!</string>
+    <string name="donation_intro">Subscribing with a small yearly amount helps us maintain this app and removes ads for you!</string>
     <string name="donation_1">1 euro</string>
     <string name="donation_2">2 euros</string>
     <string name="donation_5">5 euros</string>

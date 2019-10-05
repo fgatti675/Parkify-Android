@@ -6,11 +6,12 @@
     android:orientation="vertical"
     android:padding="@dimen/large_padding"
     android:stateListAnimator="@anim/abc_fade_in"
-    tools:context="com.cahue.iweco.login.LoginActivity">
+    tools:context=".login.LoginActivity">
 
 
     <ImageView
         android:id="@+id/logo"
+        android:layout_marginTop="64dp"
         android:layout_width="180dp"
         android:layout_height="100dp"
         android:layout_gravity="center_horizontal"
@@ -52,14 +53,16 @@
                 <Button
                     android:id="@+id/facebook_login_button"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
+                    android:padding="@dimen/large_padding"
                     android:text="@string/facebook_sign_in"
                     android:theme="@style/CahueTheme.Button.Facebook" />
 
                 <Button
                     android:id="@+id/plus_sign_in_button"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
+                    android:padding="@dimen/large_padding"
                     android:text="@string/google_sign_in"
                     android:theme="@style/CahueTheme.Button.Google" />
 
