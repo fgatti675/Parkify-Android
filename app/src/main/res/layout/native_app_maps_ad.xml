@@ -20,7 +20,7 @@
         android:id="@+id/facebook_native_ad_icon"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        tools:src="@drawable/ic_favorite_24dp"  />
+        tools:src="@drawable/ic_favorite_24dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -81,15 +81,29 @@
 
         </FrameLayout>
 
-        <Button
-            android:id="@+id/native_ad_call_to_action"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
-            android:layout_marginRight="@dimen/small_padding"
-            android:lines="2"
-            android:maxWidth="120dp"
-            android:textColor="@color/white"
-            tools:text="Call to Action" />
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/native_ad_call_to_action"
+                android:layout_width="wrap_content"
+                android:layout_height="64dp"
+                android:layout_marginRight="@dimen/small_padding"
+                android:lines="2"
+                android:maxWidth="120dp"
+                android:textColor="@color/white"
+                tools:text="Call to Action" />
+
+            <FrameLayout
+                android:id="@+id/ad_choices_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:padding="2dp" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 

@@ -197,7 +197,7 @@ public class BillingFragment extends Fragment implements PurchasesUpdatedListene
                 .anyMatch(purchase -> purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED);
         Purchase.PurchasesResult oldPurchasesResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
         oldPurchasesResult.getPurchasesList().forEach(this::handlePurchase);
-        long oneYearAgo = new Date().getTime() - (365 * 24 * 60 * 60 * 1000);
+        long oneYearAgo = new Date().getTime() - (365L * 24L * 60L * 60L * 1000L);
         boolean hasOldValidPurchases = purchasesResult.getPurchasesList().stream()
                 .anyMatch(purchase -> purchase.getPurchaseTime() > oneYearAgo);
         return hasActiveSubscriptions || hasOldValidPurchases;

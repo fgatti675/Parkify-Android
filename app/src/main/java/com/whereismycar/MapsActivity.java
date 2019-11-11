@@ -33,6 +33,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -50,30 +51,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.whereismycar.activityrecognition.ActivityRecognitionService;
-import com.whereismycar.activityrecognition.PossibleParkedCarDelegate;
-import com.whereismycar.cars.CarManagerActivity;
-import com.whereismycar.cars.database.CarDatabase;
-import com.whereismycar.dialogs.DonateDialog;
-import com.whereismycar.dialogs.RatingDialog;
-import com.whereismycar.locationservices.CarMovedService;
-import com.whereismycar.locationservices.ParkedCarService;
-import com.whereismycar.locationservices.PossibleParkedCarService;
-import com.whereismycar.login.AuthUtils;
-import com.whereismycar.login.LoginActivity;
-import com.whereismycar.model.Car;
-import com.whereismycar.model.ParkingSpot;
-import com.whereismycar.model.PossibleSpot;
-import com.whereismycar.parkedcar.CarDetailsFragment;
-import com.whereismycar.places.PlacesDelegate;
-import com.whereismycar.setcarlocation.LongTapLocationDelegate;
-import com.whereismycar.util.FetchAddressDelegate;
-import com.whereismycar.util.PreferencesUtil;
-import com.whereismycar.util.Tracking;
-import com.whereismycar.util.Util;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.AdIconView;
+import com.facebook.ads.AdOptionsView;
 import com.facebook.ads.NativeAdLayout;
 import com.facebook.ads.NativeAdListener;
 import com.facebook.ads.NativeBannerAd;
@@ -106,7 +87,29 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.whereismycar.activityrecognition.ActivityRecognitionService;
+import com.whereismycar.activityrecognition.PossibleParkedCarDelegate;
+import com.whereismycar.cars.CarManagerActivity;
+import com.whereismycar.cars.database.CarDatabase;
+import com.whereismycar.dialogs.DonateDialog;
+import com.whereismycar.dialogs.RatingDialog;
+import com.whereismycar.locationservices.CarMovedService;
+import com.whereismycar.locationservices.ParkedCarService;
+import com.whereismycar.locationservices.PossibleParkedCarService;
+import com.whereismycar.login.AuthUtils;
+import com.whereismycar.login.LoginActivity;
+import com.whereismycar.model.Car;
+import com.whereismycar.model.ParkingSpot;
+import com.whereismycar.model.PossibleSpot;
+import com.whereismycar.parkedcar.CarDetailsFragment;
+import com.whereismycar.places.PlacesDelegate;
+import com.whereismycar.setcarlocation.LongTapLocationDelegate;
+import com.whereismycar.util.FetchAddressDelegate;
+import com.whereismycar.util.PreferencesUtil;
+import com.whereismycar.util.Tracking;
+import com.whereismycar.util.Util;
 
+import java.io.IOException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -258,8 +261,6 @@ public class MapsActivity extends AppCompatActivity
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         Tracking.setTrackerUserId(currentUser.getUid());
-
-
         /*
          * Create a GoogleApiClient instance
          */
@@ -442,10 +443,7 @@ public class MapsActivity extends AppCompatActivity
             defaults.put("dadaki_ad_body", "La mejor selección diaria de productos de diseño de Amazon España");
             firebaseRemoteConfig.setDefaults(defaults);
 
-            Locale locale = getResources().getConfiguration().locale;
-            if (locale.toString().equals("es_ES")) {
-                setUpDadakiAd();
-            } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
+            if (firebaseRemoteConfig.getString("default_ad_provider").equals("facebook")) {
                 setUpFacebookAd();
             } else if (firebaseRemoteConfig.getString("default_ad_provider").equals("admob")) {
                 setUpAdMobNative();
@@ -536,6 +534,17 @@ public class MapsActivity extends AppCompatActivity
                 LinearLayout adView = (LinearLayout) inflater.inflate(R.layout.native_app_maps_ad, facebookNativeAdContainer, false);
                 facebookNativeAdContainer.addView(adView);
 
+                AdOptionsView adOptionsView = new AdOptionsView(
+                        MapsActivity.this,
+                        facebookNativeAd,
+                        facebookNativeAdContainer,
+                        AdOptionsView.Orientation.HORIZONTAL,
+                        20);
+
+                FrameLayout mAdChoicesContainer = adView.findViewById(R.id.ad_choices_container);
+                mAdChoicesContainer.removeAllViews();
+                mAdChoicesContainer.addView(adOptionsView);
+
                 final AdIconView facebookNativeAdIcon = adView.findViewById(R.id.facebook_native_ad_icon);
                 facebookNativeAdIcon.setVisibility(View.VISIBLE);
                 final ImageView nativeAdIcon = adView.findViewById(R.id.ad_app_icon);
@@ -610,6 +619,12 @@ public class MapsActivity extends AppCompatActivity
 
     private void setUpAdMobNative() {
 
+        Locale locale = getResources().getConfiguration().locale;
+        if (locale.toString().equals("es_ES")) {
+            setUpDadakiAd();
+            return;
+        }
+
         if (facebookNativeAdContainer == null) return;
         if (adMobView == null) return;
 
@@ -623,6 +638,10 @@ public class MapsActivity extends AppCompatActivity
 
                     final AdIconView facebookNativeAdIcon = adMobView.findViewById(R.id.facebook_native_ad_icon);
                     facebookNativeAdIcon.setVisibility(View.GONE);
+
+                    FrameLayout mAdChoicesContainer = adMobView.findViewById(R.id.ad_choices_container);
+                    mAdChoicesContainer.removeAllViews();
+
                     final ImageView nativeAdIcon = adMobView.findViewById(R.id.ad_app_icon);
                     nativeAdIcon.setVisibility(View.VISIBLE);
 
@@ -639,27 +658,28 @@ public class MapsActivity extends AppCompatActivity
                     nativeAdCallToAction.setText(unifiedNativeAd.getCallToAction());
                     adMobView.setCallToActionView(nativeAdCallToAction);
 
-//                    if (unifiedNativeAd.getIcon() != null) {
-//                        new AsyncTask<Void, Void, Bitmap>() {
-//                            @Override
-//                            protected Bitmap doInBackground(Void[] objects) {
-//                                try {
-//                                    URL url = new URL(unifiedNativeAd.getIcon().getUri().toString());
-//                                    Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-//                                    return bmp;
-//                                } catch (java.io.IOException e) {
-//                                    e.printStackTrace();
-//                                    return null;
-//                                }
-//                            }
-//
-//                            @Override
-//                            protected void onPostExecute(Bitmap bitmap) {
-//                                super.onPostExecute(bitmap);
-//                                nativeAdIcon.setImageBitmap(bitmap);
-//                            }
-//                        };
-//                    }
+                    if (unifiedNativeAd.getIcon() != null) {
+                        AsyncTask<Void, Void, Bitmap> asyncTask = new AsyncTask<Void, Void, Bitmap>() {
+                            @Override
+                            protected Bitmap doInBackground(Void[] objects) {
+                                try {
+                                    URL url = new URL(unifiedNativeAd.getIcon().getUri().toString());
+                                    Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+                                    return bmp;
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    return null;
+                                }
+                            }
+
+                            @Override
+                            protected void onPostExecute(Bitmap bitmap) {
+                                super.onPostExecute(bitmap);
+                                nativeAdIcon.setImageBitmap(bitmap);
+                            }
+                        };
+                        asyncTask.execute();
+                    }
                     adMobView.setIconView(nativeAdIcon);
 
                     setMapPadding();
@@ -695,7 +715,7 @@ public class MapsActivity extends AppCompatActivity
                         // used here to specify individual options settings.
                         .build())
                 .build();
-        adLoader.loadAds(new AdRequest.Builder().build(), 3);
+        adLoader.loadAds(new AdRequest.Builder().addTestDevice("1A8F30F81D60C9F244F7AB1F7C359F24").build(), 3);
 
     }
 
