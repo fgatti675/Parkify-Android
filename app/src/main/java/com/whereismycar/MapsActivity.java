@@ -21,6 +21,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -475,6 +476,7 @@ public class MapsActivity extends AppCompatActivity
 
         final TextView nativeAdTitle = adView.findViewById(R.id.native_ad_title);
         final TextView nativeAdBody = adView.findViewById(R.id.native_ad_body);
+        nativeAdBody.setSingleLine(true);
         nativeAdBody.setSelected(true);
         nativeAdBody.setVisibility(View.VISIBLE);
         final Button nativeAdCallToAction = adView.findViewById(R.id.native_ad_call_to_action);
@@ -552,6 +554,7 @@ public class MapsActivity extends AppCompatActivity
 
                 final TextView nativeAdTitle = adView.findViewById(R.id.native_ad_title);
                 final TextView nativeAdBody = adView.findViewById(R.id.native_ad_body);
+                nativeAdBody.setSingleLine(true);
                 nativeAdBody.setSelected(true);
                 nativeAdBody.setVisibility(View.VISIBLE);
                 final Button nativeAdCallToAction = adView.findViewById(R.id.native_ad_call_to_action);
