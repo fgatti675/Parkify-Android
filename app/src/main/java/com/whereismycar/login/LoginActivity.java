@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
             // set default miles use
             PreferencesUtil.setUseMiles(this, Util.isImperialMetricsLocale(this));
-            loginManager.logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "user_friends", "email"));
+            loginManager.logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "email"));
             setLoading(true);
         });
 
